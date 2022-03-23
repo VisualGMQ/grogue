@@ -1,46 +1,50 @@
-import sys
+import game_template
+import tilesheet
 import pygame
 from pygame.locals import *
+import enum
+import tile
+import plant
+import creature
+import controller
+
+GameTilesheet: tilesheet.Tilesheet = None
 
 
-class Game:
-    def on_init(self):
-        pygame.init()
+class LayerEnum(enum.IntEnum):
+    Background = 0
+    Item = 1
+    Building = 2
+    Creature = 3
 
-        self._running = True
-        self._fps_ticker = pygame.time.Clock()
-        self._window = pygame.display.set_mode((1024, 720))
-        pygame.display.set_caption('Grogue prototype')
+    LayerNum = 4
 
-    def on_quit(self):
-        pygame.quit()
 
-    def on_event(self, event: pygame.event.Event):
-        if event.type == pygame.QUIT:
-            self._running = False
-            sys.exit()
+class Game(game_template.GameTemplate):
+    def __init__(self):
+        self.__layers = []
+        for i in range(0, LayerEnum.LayerNum):
+            self.__layers.append(pygame.sprite.LayeredUpdates(default_layer=i))
+
+        global GameTilesheet
+        GameTilesheet = tilesheet.Tilesheet(filename='assets/tilesheet.png',
+                                            w=8, h=8)
+        self.__layers[LayerEnum.Background].add(tile.Tile(GameTilesheet.get((2, 1))))
+        self.__layers[LayerEnum.Building].add(plant.Plant(grown_threshold=10,
+                                                          groth_tile=GameTilesheet.get((0, 2)),
+                                                          grown_tile=GameTilesheet.get((1, 2))))
+        self.__player = creature.Creature(image=GameTilesheet.get((0, 0)))
+        self.__layers[LayerEnum.Creature].add(self.__player)
+        self.__controller = controller.Controller(self.__player)
 
     def on_update(self, elapse: int):
-        pass
+        for i in range(len(self.__layers)):
+            self.__layers[i].update()
+        self.__controller.update()
 
     def on_render(self):
-        pass
-
-    def on_run(self):
-        self.on_init()
-        t = 0
-        while self._running:
-            self._window.fill((0, 0, 0, 255))
-            for event in pygame.event.get():
-                self.on_event(event)
-            elapse = pygame.time.get_ticks() - t
-            elapse = min(elapse, 30)
-            t = pygame.time.get_ticks()
-            self.on_update(elapse)
-            self.on_render()
-            pygame.display.flip()
-            self._fps_ticker.tick(60)
-        self.on_quit()
+        for i in range(len(self.__layers)):
+            self.__layers[i].draw(self._window)
 
 
 if __name__ == '__main__':

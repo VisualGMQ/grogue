@@ -1,0 +1,1 @@
+TileSize = 32
