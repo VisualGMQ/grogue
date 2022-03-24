@@ -27,6 +27,9 @@ class GameMap:
     def get_height(self) -> int:
         return self.__h
 
+    def contain(self, x: int, y: int) -> bool:
+        return x >= 0 and y >= 0 and x < self.__w and y < self.__h
+
 
 def map_generate(w: int, h: int, r: int, try_count: int) -> (GameMap, pygame.math.Vector2):
     circle_list = []
@@ -37,9 +40,13 @@ def map_generate(w: int, h: int, r: int, try_count: int) -> (GameMap, pygame.mat
         if len(circle_list) == 0:
             circle_list.append(circle)
         else:
+            can_put = True
             for c in circle_list:
-                if not geometry.is_circle_collide(c, circle):
-                    circle_list.append(circle)
+                if geometry.is_circle_collide(c, circle):
+                    can_put = False
+                    break
+            if can_put:
+                circle_list.append(circle)
 
     game_map = GameMap(w, h)
     for circle in circle_list:

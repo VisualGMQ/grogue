@@ -37,10 +37,10 @@ class Game(game_template.GameTemplate):
         global_var.GameTilesheet = tilesheet.Tilesheet(filename='assets/tilesheet.png',
                                                        w=8, h=8)
 
-        (self.__map, player_init_pos) = map.map_generate(self._window.get_width() // defs.TileSize,
-                                                         self._window.get_height() // defs.TileSize,
-                                                         10,
-                                                         20)
+        (self.__map, player_init_pos) = map.map_generate(10 * self._window.get_width() // defs.TileSize,
+                                                         10 * self._window.get_height() // defs.TileSize,
+                                                         4,
+                                                         1000)
         for x in range(self.__map.get_width()):
             for y in range(self.__map.get_height()):
                 if self.__map.get(x, y) is not None:
@@ -61,16 +61,18 @@ class Game(game_template.GameTemplate):
         for c in self.__layers[LayerEnum.Creature]:
             collide.out_of_map_range_fix(self.__map, c)
 
+        self.__camera.stare_at(self.__player.pos.x, self.__player.pos.y,
+                               self.__map.get_width(), self.__map.get_height())
 
     def on_render(self):
         for i in range(len(self.__layers)):
             for sprite in self.__layers[i]:
+                blit_pos = (sprite.rect.x - self.__camera.get_pos().x,
+                            sprite.rect.y - self.__camera.get_pos().y)
                 if pygame.Rect(0, 0,
                                self._window.get_width(),
-                               self._window.get_height()).colliderect(sprite.rect):
-                    self._window.blit(sprite.image,
-                                      (sprite.rect.x - self.__camera.get_pos().x,
-                                       sprite.rect.y - self.__camera.get_pos().y))
+                               self._window.get_height()).colliderect(pygame.Rect(blit_pos[0], blit_pos[1], defs.TileSize, defs.TileSize)):
+                    self._window.blit(sprite.image, blit_pos)
 
 
 if __name__ == '__main__':
