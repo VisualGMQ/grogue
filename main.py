@@ -7,8 +7,11 @@ import tile
 import plant
 import creature
 import controller
-
-GameTilesheet: tilesheet.Tilesheet = None
+import camera
+import global_var
+import map
+import defs
+import collide
 
 
 class LayerEnum(enum.IntEnum):
@@ -22,29 +25,52 @@ class LayerEnum(enum.IntEnum):
 
 class Game(game_template.GameTemplate):
     def __init__(self):
+        game_template.GameTemplate.__init__(self)
+
+    def on_init(self):
+        game_template.GameTemplate.on_init(self)
+
         self.__layers = []
         for i in range(0, LayerEnum.LayerNum):
-            self.__layers.append(pygame.sprite.LayeredUpdates(default_layer=i))
+            self.__layers.append(pygame.sprite.Group())
 
-        global GameTilesheet
-        GameTilesheet = tilesheet.Tilesheet(filename='assets/tilesheet.png',
-                                            w=8, h=8)
-        self.__layers[LayerEnum.Background].add(tile.Tile(GameTilesheet.get((2, 1))))
-        self.__layers[LayerEnum.Building].add(plant.Plant(grown_threshold=10,
-                                                          groth_tile=GameTilesheet.get((0, 2)),
-                                                          grown_tile=GameTilesheet.get((1, 2))))
-        self.__player = creature.Creature(image=GameTilesheet.get((0, 0)))
+        global_var.GameTilesheet = tilesheet.Tilesheet(filename='assets/tilesheet.png',
+                                                       w=8, h=8)
+
+        (self.__map, player_init_pos) = map.map_generate(self._window.get_width() // defs.TileSize,
+                                                         self._window.get_height() // defs.TileSize,
+                                                         10,
+                                                         20)
+        for x in range(self.__map.get_width()):
+            for y in range(self.__map.get_height()):
+                if self.__map.get(x, y) is not None:
+                    self.__layers[LayerEnum.Background].add(self.__map.get(x, y))
+
+        self.__player = creature.Creature(image=global_var.GameTilesheet.get((0, 0)))
+        self.__player.move(player_init_pos.x, player_init_pos.y)
         self.__layers[LayerEnum.Creature].add(self.__player)
         self.__controller = controller.Controller(self.__player)
+        self.__camera = camera.Camera()
 
     def on_update(self, elapse: int):
+        self.__controller.update()
+
         for i in range(len(self.__layers)):
             self.__layers[i].update()
-        self.__controller.update()
+
+        for c in self.__layers[LayerEnum.Creature]:
+            collide.out_of_map_range_fix(self.__map, c)
+
 
     def on_render(self):
         for i in range(len(self.__layers)):
-            self.__layers[i].draw(self._window)
+            for sprite in self.__layers[i]:
+                if pygame.Rect(0, 0,
+                               self._window.get_width(),
+                               self._window.get_height()).colliderect(sprite.rect):
+                    self._window.blit(sprite.image,
+                                      (sprite.rect.x - self.__camera.get_pos().x,
+                                       sprite.rect.y - self.__camera.get_pos().y))
 
 
 if __name__ == '__main__':

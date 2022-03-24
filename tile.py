@@ -8,14 +8,21 @@ class Tile(pygame.sprite.Sprite):
 
         self.image = pygame.transform.scale(tile, (defs.TileSize, defs.TileSize))
         self.rect = tile.get_rect()
+        self.pos = pygame.math.Vector2(0, 0)
 
-    def MoveTo(self, x: int, y: int):
-        self.rect.x = x
-        self.rect.y = y
+    def move_to(self, x: int, y: int):
+        self.pos.x = x
+        self.pos.y = y
 
-    def Move(self, x: int, y: int):
-        self.rect.x += x
-        self.rect.y += y
+        self.rect.x = self.pos.x * defs.TileSize
+        self.rect.y = self.pos.y * defs.TileSize
+
+    def move(self, x: int, y: int):
+        self.pos.x += x
+        self.pos.y += y
+
+        self.rect.x = self.pos.x * defs.TileSize
+        self.rect.y = self.pos.y * defs.TileSize
 
     def update(self, *args, **kwargs) -> None:
         pass

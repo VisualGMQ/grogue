@@ -10,10 +10,10 @@ class Controller:
 
     def update(self):
         if key.Key.is_pressed(K_a):
-            self.creature.MoveLeft()
+            self.creature.move_left()
         if key.Key.is_pressed(K_d):
-            self.creature.MoveRight()
+            self.creature.move_right()
         if key.Key.is_pressed(K_w):
-            self.creature.MoveUp()
+            self.creature.move_up()
         if key.Key.is_pressed(K_s):
-            self.creature.MoveDown()
+            self.creature.move_down()
