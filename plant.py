@@ -1,6 +1,7 @@
 import pygame
 import tile
 import food
+import defs
 
 
 FoodInfoTable = {
@@ -15,14 +16,15 @@ class Plant(tile.Tile):
         tile.Tile.__init__(self, groth_tile)
 
         self.growth_tile = groth_tile
-        self.grown_tile = grown_tile
+        self.grown_tile = pygame.transform.scale(grown_tile,
+                                                 (defs.TileSize,
+                                                  defs.TileSize))
         self.growth = 0
         self.grown_threshold = grown_threshold
 
     def grow(self, growth: int):
-        if self.growth < self.grown_threshold:
-            self.growth += growth
-        else:
+        self.growth = min(self.grown_threshold, self.growth + growth)
+        if self.growth >= self.grown_threshold:
             self.image = self.grown_tile
 
     def pick(self) -> food.Food:
@@ -31,3 +33,12 @@ class Plant(tile.Tile):
 
         berry = FoodInfoTable['berry']
         return food.Food(berry[0], berry[1])
+
+
+PlantInfoTable = {
+    'berry cluster': {
+        'threshold': 100,
+        'tile_pos': (0, 2),
+        'growth_tile_pos': (1, 2),
+    }
+}

@@ -10,6 +10,8 @@ class Creature(tile.Tile):
         self.__image = pygame.transform.scale(image, (defs.TileSize, defs.TileSize))
         self.old_pos = pygame.math.Vector2(0, 0)
 
+        self.hp = 100
+
     def move_left(self):
         self.__record_oldpos()
         self.pos.x -= 1

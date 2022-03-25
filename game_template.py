@@ -7,6 +7,7 @@ import key
 class GameTemplate:
     def on_init(self):
         pygame.init()
+        pygame.font.init()
 
         self._running = True
         self._fps_ticker = pygame.time.Clock()
@@ -14,6 +15,7 @@ class GameTemplate:
         pygame.display.set_caption('Grogue prototype')
 
     def on_quit(self):
+        pygame.font.quit()
         pygame.quit()
 
     def on_event(self, event: pygame.event.Event):

@@ -30,6 +30,9 @@ class Game(game_template.GameTemplate):
     def on_init(self):
         game_template.GameTemplate.on_init(self)
 
+        print("use font: simhei")
+        self.__font = pygame.font.SysFont('simhei', 32)
+
         self.__layers = []
         for i in range(0, LayerEnum.LayerNum):
             self.__layers.append(pygame.sprite.Group())
@@ -37,14 +40,17 @@ class Game(game_template.GameTemplate):
         global_var.GameTilesheet = tilesheet.Tilesheet(filename='assets/tilesheet.png',
                                                        w=8, h=8)
 
-        (self.__map, player_init_pos) = map.map_generate(10 * self._window.get_width() // defs.TileSize,
-                                                         10 * self._window.get_height() // defs.TileSize,
+        (self.__map, player_init_pos, buildings) = map.map_generate(2 * self._window.get_width() // defs.TileSize,
+                                                         2 * self._window.get_height() // defs.TileSize,
                                                          4,
                                                          1000)
         for x in range(self.__map.get_width()):
             for y in range(self.__map.get_height()):
                 if self.__map.get(x, y) is not None:
                     self.__layers[LayerEnum.Background].add(self.__map.get(x, y))
+
+        for building in buildings:
+            self.__layers[LayerEnum.Building].add(building)
 
         self.__player = creature.Creature(image=global_var.GameTilesheet.get((0, 0)))
         self.__player.move(player_init_pos.x, player_init_pos.y)
@@ -73,6 +79,12 @@ class Game(game_template.GameTemplate):
                                self._window.get_width(),
                                self._window.get_height()).colliderect(pygame.Rect(blit_pos[0], blit_pos[1], defs.TileSize, defs.TileSize)):
                     self._window.blit(sprite.image, blit_pos)
+
+        self.__draw_hud()
+
+    def __draw_hud(self):
+        text_surf = self.__font.render("生命值: " + str(self.__player.hp), True, (200, 0, 0, 255))
+        self._window.blit(text_surf, (0, defs.ScreenHeight - defs.TileSize))
 
 
 if __name__ == '__main__':

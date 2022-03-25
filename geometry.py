@@ -7,7 +7,7 @@ class Circle:
         self.r = r
 
     def __str__(self):
-        return "Circle(" + self.center + "," + self.r + ")"
+        return "Circle(" + str(self.center) + "," + str(self.r) + ")"
 
 
 def is_circle_collide(c1: Circle, c2: Circle) -> bool:
