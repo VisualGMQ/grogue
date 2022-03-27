@@ -12,6 +12,7 @@ import global_var
 import map
 import defs
 import collide
+import ui
 
 
 class LayerEnum(enum.IntEnum):
@@ -31,7 +32,7 @@ class Game(game_template.GameTemplate):
         game_template.GameTemplate.on_init(self)
 
         print("use font: simhei")
-        self.__font = pygame.font.SysFont('simhei', 32)
+        global_var.Font = pygame.font.SysFont('simhei', 32) 
 
         self.__layers = []
         for i in range(0, LayerEnum.LayerNum):
@@ -41,7 +42,7 @@ class Game(game_template.GameTemplate):
                                                        w=8, h=8)
 
         (self.__map, player_init_pos, buildings) = map.map_generate(2 * self._window.get_width() // defs.TileSize,
-                                                         2 * self._window.get_height() // defs.TileSize,
+                                                                    2 * self._window.get_height() // defs.TileSize,
                                                          4,
                                                          1000)
         for x in range(self.__map.get_width()):
@@ -57,6 +58,10 @@ class Game(game_template.GameTemplate):
         self.__layers[LayerEnum.Creature].add(self.__player)
         self.__controller = controller.Controller(self.__player)
         self.__camera = camera.Camera()
+
+        for i in range(1, 30):
+            self.__player.add_item(ui.ItemDisplayInfo(global_var.GameTilesheet.get((2, 2)),
+                                   "好吃的浆果，能回复饱食度"))
 
     def on_update(self, elapse: int):
         self.__controller.update()
@@ -83,8 +88,24 @@ class Game(game_template.GameTemplate):
         self.__draw_hud()
 
     def __draw_hud(self):
-        text_surf = self.__font.render("生命值: " + str(self.__player.hp), True, (200, 0, 0, 255))
-        self._window.blit(text_surf, (0, defs.ScreenHeight - defs.TileSize))
+        hp_text_surf = global_var.Font.render("生命值: " + str(self.__player.get_hp()),
+                                              True,
+                                              (200, 0, 0, 255))
+        self._window.blit(hp_text_surf, (0, defs.ScreenHeight - defs.TileSize))
+
+        nutrition_display_info = creature.get_nutrition_str(self.__player)
+        nutrition_text_surf = global_var.Font.render(nutrition_display_info[0],
+                                                     True,
+                                                     nutrition_display_info[1])
+        self._window.blit(nutrition_text_surf,
+                          (200, defs.ScreenHeight - defs.TileSize))
+
+        if global_var.ShowItems:
+            ui.ItemDisplayPanel(self._window,
+                                pygame.Rect(100, 10,
+                                            defs.ScreenWidth - 200, 200),
+                                defs.TileSize,
+                                self.__player.get_items())
 
 
 if __name__ == '__main__':

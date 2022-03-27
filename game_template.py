@@ -2,6 +2,7 @@ import sys
 import pygame
 from pygame.locals import *
 import key
+import mouse
 
 
 class GameTemplate:
@@ -26,6 +27,10 @@ class GameTemplate:
             key.Key.update(True, event.__dict__['key'])
         if event.type == pygame.KEYUP:
             key.Key.update(False, event.__dict__['key'])
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse.Mouse.update(True, event.__dict__['button'] - 1)
+        if event.type == pygame.MOUSEBUTTONUP:
+            mouse.Mouse.update(False, event.__dict__['button'] - 1)
 
     def on_update(self, elapse: int):
         pass
@@ -39,6 +44,7 @@ class GameTemplate:
         while self._running:
             self._window.fill((0, 0, 0, 255))
             key.Key.update_old_keys()
+            mouse.Mouse.update_old_status()
             for event in pygame.event.get():
                 self.on_event(event)
             elapse = pygame.time.get_ticks() - t
