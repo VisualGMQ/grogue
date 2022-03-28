@@ -1,3 +1,4 @@
+import enum
 import tilesheet
 import world_clock
 import pygame
@@ -7,6 +8,7 @@ GameTilesheet: tilesheet.Tilesheet = None
 GameWorldClock: world_clock.WorldClock = world_clock.WorldClock()
 ShowItems: bool = False
 Font: pygame.font.Font = None
+GameMapLayers: list = []
 
 
 def toggle_show_items():

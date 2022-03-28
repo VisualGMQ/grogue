@@ -3,6 +3,7 @@ import pygame
 from pygame.locals import *
 import key
 import global_var
+import defs
 
 
 class Controller:
@@ -21,3 +22,8 @@ class Controller:
                 self.creature.move_down()
         if key.Key.is_pressed(K_TAB):
             global_var.toggle_show_items()
+        if key.Key.is_pressed(K_SPACE):
+            for building in global_var.GameMapLayers[defs.LayerEnum.Building]:
+                if building.pos == self.creature.pos:
+                    if building.is_grown():
+                        self.creature.add_item(building.pick())

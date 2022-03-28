@@ -2,11 +2,7 @@ import pygame
 import tile
 import food
 import defs
-
-
-FoodInfoTable = {
-    'berry': ((2, 2), food.FoodConstitution(10, 0, 90))
-}
+import global_var
 
 
 class Plant(tile.Tile):
@@ -15,7 +11,9 @@ class Plant(tile.Tile):
                  grown_tile: pygame.Surface.subsurface):
         tile.Tile.__init__(self, groth_tile)
 
-        self.growth_tile = groth_tile
+        self.growth_tile = pygame.transform.scale(groth_tile,
+                                                  (defs.TileSize,
+                                                   defs.TileSize))
         self.grown_tile = pygame.transform.scale(grown_tile,
                                                  (defs.TileSize,
                                                   defs.TileSize))
@@ -27,12 +25,14 @@ class Plant(tile.Tile):
         if self.growth >= self.grown_threshold:
             self.image = self.grown_tile
 
+    def is_grown(self) -> bool:
+        return self.growth >= self.grown_threshold
+
     def pick(self) -> food.Food:
         self.growth = 0
         self.image = self.growth_tile
 
-        berry = FoodInfoTable['berry']
-        return food.Food(berry[0], berry[1])
+        return food.create_food('berry')
 
 
 PlantInfoTable = {

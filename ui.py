@@ -97,12 +97,6 @@ def __draw_rect_button(surface: pygame.Surface, color: pygame.Color, rect: pygam
     return event
 
 
-class ItemDisplayInfo:
-    def __init__(self, image: pygame.Surface.subsurface, description: str):
-        self.image = image
-        self.description = description
-
-
 # list all items in a panel. Return the clicked item index in list
 def ItemDisplayPanel(surface: pygame.Surface, rect: pygame.Rect, image_size: int, items: list) -> int:
     border_radius = 10
@@ -113,7 +107,6 @@ def ItemDisplayPanel(surface: pygame.Surface, rect: pygame.Rect, image_size: int
                      border_radius, border_radius, border_radius, border_radius)
     padding = 8
     x_item_num = rect.w // (image_size + padding)
-    y_item_num = rect.h // (image_size + padding)
 
     for i in range(len(items)):
         offset_x = i % x_item_num
@@ -127,11 +120,18 @@ def ItemDisplayPanel(surface: pygame.Surface, rect: pygame.Rect, image_size: int
                        pygame.Rect(offset_x + rect.x, offset_y + rect.y,
                                    image_size, image_size))
 
-        item: ItemDisplayInfo = items[i]
-        surface.blit(pygame.transform.scale(item.image, (image_size, image_size)),
+        item = items[i]
+        surface.blit(pygame.transform.scale(item.image,
+                                            (image_size, image_size)),
                      (offset_x + rect.x,
                       offset_y + rect.y))
-        
+
         if event == ButtonEvent.Hover:
-            surface.blit(global_var.Font.render(item.description, True, (255, 255, 255, 255)),
-                         (rect.x + padding, rect.y + rect.h - global_var.Font.get_height()))
+            surface.blit(global_var.Font.render(item.get_description(),
+                                                True, (255, 255, 255, 255)),
+                         (rect.x + padding,
+                          rect.y + rect.h - global_var.Font.get_height()))
+        elif event == ButtonEvent.Click:
+            return i
+
+    return None
