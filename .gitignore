@@ -1,0 +1,8 @@
+compile_commands.json
+TODO.txt
+xcode-build
+build
+__pycache__
+setup.py
+dist
+*.spec

@@ -1,0 +1,13 @@
+#pragma once
+
+#include "pch.hpp"
+#include "video.hpp"
+
+namespace grogue::core {
+
+void InitSystem(const char* title,
+                std::uint32_t w, std::uint32_t h,
+                bool resizable = false);
+void QuitSystem();
+
+}
