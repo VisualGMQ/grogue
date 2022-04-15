@@ -6,6 +6,11 @@
 #include <unordered_map>
 #include <cstddef>
 #include <chrono>
+#include <utility>
+#include <cmath>
+#include <numeric>
+#include <memory>
+#include <list>
 
 #include "SDL.h"
 #include "SDL_image.h"

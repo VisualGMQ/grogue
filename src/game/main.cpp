@@ -6,9 +6,9 @@ using namespace std;
 class Game: public grogue::core::App {
 public:
     void OnRender() override {
-        auto& renderer = grogue::core::VideoMgr::GetVideo().renderer;
-        SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
-        SDL_RenderClear(renderer);
+        auto& renderer = grogue::core::VideoMgr::GetMainVideo().renderer;
+        renderer->SetDrawColor({ 100, 100, 100, 255});
+        renderer->Clear();
     }
 
 private:
@@ -33,7 +33,8 @@ int main(int argc, char** argv) {
 
         game.OnUpdate(elapse.count());
         game.OnRender();
-        SDL_RenderPresent(grogue::core::VideoMgr::GetVideo().renderer);
+        
+        grogue::core::VideoMgr::Present();
     }
 
     grogue::core::QuitSystem();
