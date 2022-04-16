@@ -1,6 +1,5 @@
 # 未开始
 
-- [ ] Windows下编译工程
 - [ ] Texture类
 - [ ] 场景类Scence
 - [ ] ScenceMgr
@@ -18,5 +17,6 @@
 
 # 完成
 
+- [x] Windows下使用MINGW编译工程
 - [x] Vector模板
 - [x] 基本框架的搭建
