@@ -14,14 +14,22 @@ public:
 
     Renderer& operator=(const Renderer&) = delete;
 
-    void SetDrawColor(const Color&);
-    void Clear();
+    void Clear(const Color&);
     void Present();
 
-    // TODO add other functions
+    void DrawLine(const Vector<float, 2>& p1, const Vector<float, 2>& p2, const Color&);
+    void DrawRect(const Rect& rect, const Color&);
+    void FillRect(const Rect& rect, const Color&);
+    void DrawBorderRect(const Rect& rect, const Color& border, const Color& fill);
+
+    void DrawTexture(/* TODO not finish */);
+    void DrawFont(/* TODO not finish */);
+    void SetTarget(/* TODO not finish */);
 
 private:
     SDL_Renderer* renderer_;
+
+    void setColor(const Color&);
 };
 
 }

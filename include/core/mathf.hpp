@@ -189,7 +189,7 @@ struct Color final {
 *******************/
 struct Rect final {
     union {
-        SDL_FRect rect;
+        SDL_FRect sdlrect;
         struct { float x, y, w, h; };
         struct {
             Vector<float, 2> position;

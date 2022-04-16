@@ -4,6 +4,8 @@
 
 namespace grogue::core {
 
+using ID = std::uint32_t;
+
 class Window final {
 public:
     friend class Renderer;
@@ -13,6 +15,12 @@ public:
            bool resizable = false);
     Window(const Window&) = delete;
     ~Window();
+
+    void Show();
+    void Hide();
+    bool IsShown() const;
+
+    ID GetID() const;
 
     Window& operator=(const Window&) = delete;
 

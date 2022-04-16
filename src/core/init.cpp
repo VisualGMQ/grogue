@@ -5,6 +5,8 @@ namespace grogue::core {
 void InitSystem(const char* title,
                 std::uint32_t w, std::uint32_t h,
                 bool resizable) {
+    spdlog::set_level(spdlog::level::debug);
+
     SDL_Init(SDL_INIT_EVERYTHING);
     spdlog::info("SDL initialized");
 

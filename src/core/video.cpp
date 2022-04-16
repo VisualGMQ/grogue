@@ -2,11 +2,15 @@
 
 namespace grogue::core {
 
+std::optional<ID> VideoMgr::mainWindowID_ = std::nullopt;
+
 std::unordered_map<ID, VideoMgr::Video> VideoMgr::videos_;
-uint32_t VideoMgr::curId = 0;
 
 VideoMgr::Video& VideoMgr::GetMainVideo() {
-    return videos_[0];
+    if (!mainWindowID_) {
+        spdlog::error("don't have main window");
+    }
+    return videos_[mainWindowID_.value()];
 }
 
 VideoMgr::Video& VideoMgr::GetVideo(ID id) {
@@ -37,11 +41,14 @@ VideoMgr::Video& VideoMgr::CreateVideo(const char* title,
         spdlog::info("create renderer OK");
     }
 
-    auto result = videos_.emplace(curId, std::move(video));
+    if (!mainWindowID_) {
+        mainWindowID_ = video.window->GetID();
+    }
+
+    auto result = videos_.emplace(video.window->GetID(), std::move(video));
     if (!result.second) {
         spdlog::error("create Video failed!");
     }
-    curId++;
     return result.first->second;
 }
 
@@ -56,6 +63,10 @@ void VideoMgr::Quit() {
         video.second.window.reset();
         video.second.renderer.reset();
     }
+}
+
+VideoMgr::Video& VideoMgr::FindByID(ID id) {
+    return videos_[id];
 }
 
 void VideoMgr::Present() {

@@ -6,8 +6,6 @@
 
 namespace grogue::core {
 
-using ID = uint32_t;
-
 class VideoMgr {
 public:
     struct Video {
@@ -18,18 +16,19 @@ public:
 
     static void Init(const char* title,
                      std::uint32_t width, std::uint32_t height,
-                     bool resizable);
+                     bool resizable = false);
     static void Quit();
     static Video& GetMainVideo();
     static Video& GetVideo(ID id);
     static Video& CreateVideo(const char* title,
                              std::uint32_t width, std::uint32_t height,
-                             bool resizable);
+                             bool resizable = false);
+    static Video& FindByID(ID id);
     static void Present();
 
 private:
     static std::unordered_map<ID, Video> videos_;
-    static uint32_t curId;
+    static std::optional<ID> mainWindowID_;
 };
 
 }

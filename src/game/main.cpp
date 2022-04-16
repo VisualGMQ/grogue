@@ -7,8 +7,7 @@ class Game: public grogue::core::App {
 public:
     void OnRender() override {
         auto& renderer = grogue::core::VideoMgr::GetMainVideo().renderer;
-        renderer->SetDrawColor({ 100, 100, 100, 255});
-        renderer->Clear();
+        renderer->Clear({100, 100, 100, 255});
     }
 
 private:
@@ -16,6 +15,7 @@ private:
 
 int main(int argc, char** argv) {
     grogue::core::InitSystem("grogue", 1024, 720);
+    grogue::core::VideoMgr::CreateVideo("test window", 200, 100).window->Show();
 
     Game game;
 

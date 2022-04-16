@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/pch.hpp"
+#include "core/video.hpp"
 
 namespace grogue::core {
 
