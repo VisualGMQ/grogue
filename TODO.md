@@ -15,6 +15,10 @@
 
 - [ ] VideoMgr增加多余的窗口时窗口的事件机制不对（无法正常退出程序）
 
+# 需要改进
+
+- [ ] CMake在IDE中显示文件夹采用的是`add_library(INTERFACE)`的方法，有没有直接将指定文件放入文件夹的功能？
+
 # 完成
 
 - [x] Windows下使用MINGW编译工程
