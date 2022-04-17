@@ -5,94 +5,100 @@
 namespace grogue::core {
 
 template <typename T, size_t N>
-struct Vector {
-    T data[N];
+struct Vector final { T data[N]; };
 
-    template <typename... Args>
-    Vector(Args&&... args) {
-        Set(std::forward(args...));
-    }
+/******************
+ * Vector2
+******************/
+template <typename T>
+struct Vector<T, 2> {
+    union {
+        T data[2];
+        struct { T x, y; };
+        struct { T w, h; };
+    };
 
-    Vector(T value) {
-        for (auto& elem : data) {
-            data = value;
-        }
-    }
+    Vector(): x{}, y{} {}
 
-    size_t Size() const { return N; }
+    Vector(T x, T y): x(x), y(y) {}
 
-    template <typename... Args>
-    void Set(Args&&... args) {
-        Set(0, args...);
-    }
+    explicit Vector(T value): x(value), y(value) {}
 
-    template <typename U, typename... Args>
-    void Set(size_t index, U&& value, Args&&... args) {
-        data[index] = std::forward(value);
-        if (index < N) {
-            Set(index + 1, args...);
-        }
+    size_t Size() const { return 2; }
+
+    void Set(T x, T y) {
+        this->x = x;
+        this->y = y;
     }
 
     template <typename U>
-    Vector& operator=(const Vector<U, N>& o) {
-        for (size_t i = 0; i < N; i++) {
-            data[i] = static_cast<T>(o.data[i]);
-        }
-    }
-
-    template <typename U>
-    Vector& operator+=(const Vector<U, N>& o) {
-        for (size_t i = 0; i < N; i++) {
-            data[i] = static_cast<T>(data[i] / o.data[i]);
-        }
+    Vector& operator=(const Vector<U, 2>& o) {
+        x = o.x;
+        y = o.y;
         return *this;
     }
 
     template <typename U>
-    Vector& operator-=(const Vector<U, N>& o) {
-        for (size_t i = 0; i < N; i++) {
-            data[i] = static_cast<T>(data[i] / o.data[i]);
-        }
+    Vector& operator+=(const Vector<U, 2>& o) {
+        x += o.x;
+        y += o.y;
         return *this;
     }
 
     template <typename U>
-    Vector& operator*=(const Vector<U, N>& o) {
-        for (size_t i = 0; i < N; i++) {
-            data[i] = static_cast<T>(data[i] / o.data[i]);
-        }
+    Vector& operator-=(const Vector<U, 2>& o) {
+        x -= o.x;
+        y -= o.y;
         return *this;
     }
 
     template <typename U>
-    Vector& operator/=(const Vector<U, N>& o) {
-        for (size_t i = 0; i < N; i++) {
-            data[i] = static_cast<T>(data[i] / o.data[i]);
-        }
+    Vector& operator*=(const Vector<U, 2>& o) {
+        x *= o.x;
+        y *= o.y;
+        return *this;
+    }
+
+    template <typename U>
+    bool operator==(const Vector<U, 2>& o) const {
+        return x == o.x && y == o.y;
+    }
+
+    template <typename U>
+    bool operator!=(const Vector<U, 2>& o) const {
+        return !(*this == o);
+    }
+
+    template <typename U>
+    bool Equal(const Vector<U, 2>& o) const {
+        auto epsilon = std::numeric_limits<std::common_type_t<T, U>>::epsilon();
+        return std::abs(o.x - x) <= epsilon &&
+               std::abs(o.y - y) <= epsilon;
+    }
+
+    template <typename U>
+    Vector& operator/=(const Vector<U, 2>& o) {
+        x /= o.x;
+        y /= o.y;
         return *this;
     }
 
     float Len2() const {
-        return std::accumulate(std::begin(data),
-                               std::end(data),
-                               0,
-                               [](T a, T b){
-                                   return std::move(a) + b * b;
-                               });
+        return x * x + y * y;
     }
 
     float Len() const {
         return std::sqrt(Len2());
     }
 
-private:
-    void Set(size_t index) {}
+    T& operator[](size_t idx) {
+        return data[idx];
+    }
 };
 
 template <typename T, typename U, size_t N>
 auto operator+(const Vector<T, N>& v1, const Vector<U, N>& v2) {
-    Vector<decltype(v1.x + v2.x), N> ret;
+    Vector<decltype(v1.data[0] + v2.data[0]), N> ret;
     for (size_t i = 0; i < N; i++) {
         ret.data[i] = v1.data[i] + v2.data[i];
     }
@@ -100,8 +106,8 @@ auto operator+(const Vector<T, N>& v1, const Vector<U, N>& v2) {
 }
 
 template <typename T, typename U, size_t N>
-Vector<T, N> operator-(const Vector<T, N>& v1, const Vector<U, N>& v2) {
-    Vector<decltype(v1.x - v2.x), N> ret;
+auto operator-(const Vector<T, N>& v1, const Vector<U, N>& v2) {
+    Vector<decltype(v1.data[0] - v2.data[0]), N> ret;
     for (size_t i = 0; i < N; i++) {
         ret.data[i] = v1.data[i] - v2.data[i];
     }
@@ -109,8 +115,8 @@ Vector<T, N> operator-(const Vector<T, N>& v1, const Vector<U, N>& v2) {
 }
 
 template <typename T, typename U, size_t N>
-Vector<T, N> operator*(const Vector<T, N>& v1, const Vector<U, N>& v2) {
-    Vector<decltype(v1.x * v2.x), N> ret;
+auto operator*(const Vector<T, N>& v1, const Vector<U, N>& v2) {
+    Vector<decltype(v1.data[0] * v2.data[0]), N> ret;
     for (size_t i = 0; i < N; i++) {
         ret.data[i] = v1.data[i] * v2.data[i];
     }
@@ -118,60 +124,71 @@ Vector<T, N> operator*(const Vector<T, N>& v1, const Vector<U, N>& v2) {
 }
 
 template <typename T, typename U, size_t N>
-Vector<T, N> operator/(const Vector<T, N>& v1, const Vector<U, N>& v2) {
-    Vector<decltype(v1.x / v2.x), N> ret;
-    for (size_t i = 0; i < N; i++) {
-        ret.data[i] = v1.data[i] / v2.data[i];
-    }
-    return ret;
-}
-
-template <typename T, size_t N, typename U>
-auto operator*(const Vector<T, N>& v, U&& value) {
-    Vector<decltype(v.x * value), N> ret;
+auto operator*(const Vector<T, N>& v, const U& value) {
+    Vector<std::common_type_t<T, U>, N> ret;
     for (size_t i = 0; i < N; i++) {
         ret.data[i] = v.data[i] * value;
     }
     return ret;
 }
 
-template <typename T, size_t N, typename U>
+template <typename T, typename U, size_t N>
+auto operator*(const U& value, const Vector<T, N>& v) {
+    return v * value;
+}
+
+template <typename T, typename U, size_t N>
 auto operator*(U&& value, const Vector<T, N>& v) {
     return v * value;
 }
 
+template <typename T, typename U, size_t N>
+auto operator/(const Vector<T, N>& v1, const Vector<U, N>& v2) {
+    Vector<decltype(v1.data[0] / v2.data[0]), N> ret;
+    for (size_t i = 0; i < N; i++) {
+        ret.data[i] = v1.data[i] / v2.data[i];
+    }
+    return ret;
+}
+
+template <typename U, size_t N>
+struct IsVector { inline static constexpr bool value = false; };
+
+template <typename U, size_t N>
+struct IsVector<Vector<U, N>, N> { inline static constexpr bool value = true; };
+
+template<typename U, size_t N>
+inline constexpr bool IsVector_v = IsVector<U, N>::value;
+
 template <typename T, size_t N, typename U>
-auto operator/(const Vector<T, N>& v, U&& value) {
-    Vector<decltype(v.x / value), N> ret;
+auto operator/(const Vector<T, N>& v,
+               // std::enable_if_t<!IsVector_v<U, N>, U&&> value) {
+               U value) {
+    Vector<std::common_type_t<T, U>, N> ret;
     for (size_t i = 0; i < N; i++) {
         ret.data[i] = v.data[i] / value;
     }
     return ret;
 }
 
-
-/*******************
- * Vector2
-*******************/
-template <typename T>
-struct Vector<T, 2> {
-    union {
-        std::conditional_t<std::is_same_v<T, float>,
-                           SDL_FPoint,
-                           std::conditional_t<std::is_same_v<T, int>,
-                                              SDL_Point,
-                                              void>> point;
-        struct { T x, y; };
-    };
-
-    // TODO other implement
-};
-
-
 template <typename T, size_t N>
 auto Normalize(const Vector<T, N>& v) {
     float len = v.Len();
     return v / (float)len;
+}
+
+template <typename T, size_t N>
+T Dot(const Vector<T, N>& v1, const Vector<T, N>& v2) {
+    T ret{};
+    for (size_t i = 0; i < N; i++) {
+        ret += v1.data[i] * v2.data[i];
+    }
+    return ret;
+}
+
+template <typename T>
+T Cross(const Vector<T, 2>& v1, const Vector<T, 2>& v2) {
+    return v1.x * v2.y - v1.y * v2.x;
 }
 
 /*******************

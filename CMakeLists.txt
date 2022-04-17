@@ -4,9 +4,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY GROUP_BY_EXPLORER ON)
 
-project(grogue
-        VERSION 0.1.0
-        LANGUAGES CXX)
+project(
+  grogue
+  VERSION 0.1.0
+  LANGUAGES CXX
+)
 
 ################################
 # Find Depedencies
@@ -30,12 +32,12 @@ source_group("Source Files" FILES ${CORE_SRC})
 set(GROGUE_CORE_LIB_NAME core)
 add_library(${GROGUE_CORE_LIB_NAME} SHARED ${CORE_SRC} ${CORE_HEADER_FILES})
 target_link_libraries(
-    ${GROGUE_CORE_LIB_NAME}
-    PUBLIC SDL2::SDL2 SDL2::SDL2_image SDL2::SDL2_ttf
+  ${GROGUE_CORE_LIB_NAME}
+  PUBLIC SDL2::SDL2 SDL2::SDL2_image SDL2::SDL2_ttf
 )
 target_include_directories(
-    ${GROGUE_CORE_LIB_NAME}
-    PUBLIC include 3rdlib
+  ${GROGUE_CORE_LIB_NAME}
+  PUBLIC include 3rdlib
 )
 target_compile_features(${GROGUE_CORE_LIB_NAME} PUBLIC cxx_std_17)
 target_precompile_headers(${GROGUE_CORE_LIB_NAME} PUBLIC include/core/pch.hpp)
@@ -69,3 +71,9 @@ add_library(cmake INTERFACE ${CMAKE_FILES})
 file(GLOB_RECURSE 3RDLIB_FILES "3rdlib/*.hpp" "3rdlib/*.h++")
 add_library(3rdlib INTERFACE ${3RDLIB_FILES})
 
+################################
+# add test
+################################
+enable_testing()
+
+add_subdirectory(test)

@@ -11,6 +11,7 @@
 #include <numeric>
 #include <memory>
 #include <list>
+#include <type_traits>
 
 #include "SDL.h"
 #include "SDL_image.h"
