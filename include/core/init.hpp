@@ -2,6 +2,8 @@
 
 #include "pch.hpp"
 #include "video.hpp"
+#include "log.hpp"
+#include "err_code.hpp"
 
 namespace grogue::core {
 

@@ -3,6 +3,7 @@
 #include "pch.hpp"
 #include "window.hpp"
 #include "renderer.hpp"
+#include "log.hpp"
 
 namespace grogue::core {
 

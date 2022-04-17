@@ -8,7 +8,7 @@ std::unordered_map<ID, VideoMgr::Video> VideoMgr::videos_;
 
 VideoMgr::Video& VideoMgr::GetMainVideo() {
     if (!mainWindowID_) {
-        spdlog::error("don't have main window");
+        LOG_ERROR("don't have main window");
     }
     return videos_[mainWindowID_.value()];
 }
@@ -18,7 +18,7 @@ VideoMgr::Video& VideoMgr::GetVideo(ID id) {
     if (it != videos_.end()) {
         return it->second;
     } else {
-        spdlog::error("don't exists Video (ID {})", id);
+        LOG_ERROR("don't exists Video (ID {})", id);
         return videos_[id];
     }
 }
@@ -29,16 +29,16 @@ VideoMgr::Video& VideoMgr::CreateVideo(const char* title,
     Video video;
     video.window.reset(new Window(title, width, height, resizable));
     if (!video.window) {
-        spdlog::error("can't create window");
+        LOG_ERROR("can't create window");
     } else {
-        spdlog::info("create window OK");
+        LOG_INFO("create window OK");
     }
 
     video.renderer.reset(new Renderer(*video.window));
     if (!video.renderer) {
-        spdlog::error("can't create SDL renderer");
+        LOG_ERROR("can't create SDL renderer");
     } else {
-        spdlog::info("create renderer OK");
+        LOG_INFO("create renderer OK");
     }
 
     if (!mainWindowID_) {
@@ -47,7 +47,7 @@ VideoMgr::Video& VideoMgr::CreateVideo(const char* title,
 
     auto result = videos_.emplace(video.window->GetID(), std::move(video));
     if (!result.second) {
-        spdlog::error("create Video failed!");
+        LOG_ERROR("create Video failed!");
     }
     return result.first->second;
 }
