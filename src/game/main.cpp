@@ -1,6 +1,7 @@
 #include "core/init.hpp"
 #include "core/app.hpp"
 #include "core/video.hpp"
+
 using namespace std;
 
 class Game: public grogue::core::App {
@@ -33,7 +34,7 @@ int main(int argc, char** argv) {
 
         game.OnUpdate(elapse.count());
         game.OnRender();
-        
+
         grogue::core::VideoMgr::Present();
     }
 

@@ -1,12 +1,22 @@
 #include "core/renderer.hpp"
+#include "core/texture.hpp"
 
 namespace grogue::core {
 
 Renderer::Renderer(Window& window) {
     renderer_ = SDL_CreateRenderer(window.window_, -1, 0);
+    TextureManager::Instance().Load("../assets/kirby.png", "kirby", renderer_);
 }
 
+int frame = 0;
 void Renderer::Present() {
+    TextureManager::Instance().DrawFrame("kirby", 0, 0, 36, 33, 1, frame, renderer_);
+    if (frame >= 15) {
+        frame = 0;
+    }
+    else {
+        ++frame;
+    }
     SDL_RenderPresent(renderer_);
 }
 
