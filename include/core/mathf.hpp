@@ -213,6 +213,9 @@ struct Rect final {
             Vector<float, 2> size;
         };
     };
+
+    Rect(): x{}, y{}, w{}, h{} {}
+    Rect(float x, float y, float w, float h): x(x), y(y), w(w), h(h) {}
 };
 
 }

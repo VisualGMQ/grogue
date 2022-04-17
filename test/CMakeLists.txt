@@ -4,3 +4,4 @@ macro(ADD_CORE_TEST NAME)
 endmacro()
 
 ADD_CORE_TEST(mathf)
+ADD_CORE_TEST(texture)

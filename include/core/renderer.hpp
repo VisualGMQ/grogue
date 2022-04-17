@@ -8,6 +8,8 @@ namespace grogue::core {
 
 class Renderer final {
 public:
+    friend class TextureManager;
+
     Renderer(Window& window);
     Renderer(const Renderer&) = delete;
     ~Renderer();

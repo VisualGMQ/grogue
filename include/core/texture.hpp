@@ -1,14 +1,33 @@
 #pragma once
 
 #include "core/pch.hpp"
+#include "core/renderer.hpp"
+#include "core/mathf.hpp"
+#include "core/log.hpp"
 
 namespace grogue::core {
 
+enum Flip {
+    NoFlip = SDL_FLIP_NONE,
+    Vertical = SDL_FLIP_VERTICAL,
+    Horizontal = SDL_FLIP_HORIZONTAL,
+};
+
 class TextureManager {
 public:
-    bool Load(std::string file_name, std::string textureid, SDL_Renderer* renderer);
-    void Draw(std::string textureid, int x, int y, int width, int height, SDL_Renderer* renderer, SDL_RendererFlip flip = SDL_FLIP_NONE);
-    void DrawFrame(std::string textureid, int x, int y, int width, int height, int current_row, int current_frame, SDL_Renderer* renderer, SDL_RendererFlip flip = SDL_FLIP_NONE);
+    bool Load(std::string file_name,
+              std::string textureid,
+              Renderer& renderer);
+    void Draw(std::string textureid,
+              int x, int y, int width, int height,
+              Renderer& renderer,
+              Flip flip = Flip::NoFlip);
+    void DrawFrame(std::string textureid,
+                   int x, int y, int width, int height,
+                   int current_row,
+                   int current_frame,
+                   Renderer& renderer,
+                   Flip flip = Flip::NoFlip);
     void ClearFromTextureMap(std::string textureid);
 
     static TextureManager& Instance() {
