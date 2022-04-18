@@ -1,4 +1,3 @@
-#include "core/app.hpp"
 #include "core/video.hpp"
 #include "core/timer.hpp"
 #include "core/engine.hpp"

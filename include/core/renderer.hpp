@@ -1,5 +1,4 @@
 #pragma once
-
 #include "pch.hpp"
 #include "window.hpp"
 #include "mathf.hpp"
@@ -33,5 +32,6 @@ private:
 
     void setColor(const Color&);
 };
+
 
 }
