@@ -12,6 +12,7 @@
 #include <memory>
 #include <list>
 #include <type_traits>
+#include <string_view>
 
 #include "SDL.h"
 #include "SDL_image.h"

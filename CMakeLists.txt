@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY GROUP_BY_EXPLORER ON)
 
 project(
   grogue
@@ -51,6 +50,10 @@ source_group("Source Files" FILES ${GAME_SRC})
 
 add_executable(${PROJECT_NAME} ${GAME_SRC} ${GAME_HEADER_FILES})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${GROGUE_CORE_LIB_NAME})
+
+set_target_properties(${PROJECT_NAME} ${GROGUE_CORE_LIB_NAME}
+                      PROPERTIES 
+                        FOLDER "Game")
 
 ################################
 # Set other folders

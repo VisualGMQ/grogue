@@ -1,10 +1,12 @@
-#include "core/init.hpp"
+#include "core/engine.hpp"
 
 namespace grogue::core {
 
-void InitSystem(const char* title,
-                std::uint32_t w, std::uint32_t h,
-                bool resizable) {
+bool Engine::shouldQuit_ = false;
+
+void Engine::Init(const std::string& title,
+                  uint32_t w, uint32_t h,
+                  bool resizable) {
     Log::Init(LogLevel::Debug);
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -26,11 +28,15 @@ void InitSystem(const char* title,
     }
     LOG_INFO("SDL_ttf initialized");
 
-    VideoMgr::Init(title, w, h, resizable);
+    VideoMgr::Init(title.c_str(), w, h, resizable);
     LOG_INFO("VideoMgr initialized");
 }
 
-void QuitSystem() {
+void Engine::Exit() {
+    shouldQuit_ = true;
+}
+
+void Engine::cleanUp() {
     VideoMgr::Quit();
     LOG_INFO("VideoMgr quited");
 
@@ -42,6 +48,11 @@ void QuitSystem() {
 
     SDL_Quit();
     LOG_INFO("SDL quited");
+
+}
+
+bool Engine::ShouldQuit() {
+    return shouldQuit_;
 }
 
 }
