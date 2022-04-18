@@ -18,7 +18,7 @@ struct Vector<T, 2> {
         struct { T w, h; };
     };
 
-    Vector(): x{}, y{} {}
+    Vector(): x(0), y(0) {}
 
     Vector(T x, T y): x(x), y(y) {}
 
@@ -208,13 +208,9 @@ struct Rect final {
     union {
         SDL_FRect sdlrect;
         struct { float x, y, w, h; };
-        struct {
-            Vector<float, 2> position;
-            Vector<float, 2> size;
-        };
     };
 
-    Rect(): x{}, y{}, w{}, h{} {}
+    Rect(): x(0), y(0), w(0), h(0) {}
     Rect(float x, float y, float w, float h): x(x), y(y), w(w), h(h) {}
 };
 

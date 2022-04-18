@@ -9,3 +9,4 @@ dist
 3rdlib/SDL2_image/*
 3rdlib/SDL2_ttf/*
 log
+win_build.bat
