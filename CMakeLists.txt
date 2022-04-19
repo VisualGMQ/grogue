@@ -40,7 +40,7 @@ target_include_directories(
 )
 target_compile_features(${GROGUE_CORE_LIB_NAME} PUBLIC cxx_std_17)
 target_precompile_headers(${GROGUE_CORE_LIB_NAME} PUBLIC include/core/pch.hpp)
-target_compile_options(${GROGUE_CORE_LIB_NAME} PUBLIC -Wall -Wformat -Wextra -pedantic)
+# target_compile_options(${GROGUE_CORE_LIB_NAME} PUBLIC -Wall -Wformat -Wextra -pedantic)
 
 # Compile Game
 aux_source_directory(src/game GAME_SRC)
@@ -55,6 +55,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ${GROGUE_CORE_LIB_NAME})
 set_target_properties(${PROJECT_NAME} ${GROGUE_CORE_LIB_NAME}
                       PROPERTIES 
                         FOLDER "Game")
+target_precompile_headers(${PROJECT_NAME} REUSE_FROM ${GROGUE_CORE_LIB_NAME})
 
 ################################
 # Set other folders
