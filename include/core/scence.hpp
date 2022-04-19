@@ -2,6 +2,8 @@
 
 #include "pch.hpp"
 #include "log.hpp"
+#include "layer.hpp"
+#include "event_dispatcher.hpp"
 
 namespace grogue::core {
 
@@ -13,15 +15,39 @@ public:
     virtual ~Scence() = default;
 
     virtual void OnInit() {}
-    virtual void OnUpdate(uint32_t ms) {}
-    virtual void OnRender() {}
-    virtual void OnQuit() {}
-    virtual void OnEventHandle(const SDL_Event&) {}
+    virtual bool OnQuit() { return true; }
+
+    void OnUpdate();
+    void OnRender();
+    void OnEventHandle(const SDL_Event&);
 
     std::string_view Name() const { return name_; }
 
+    template <typename LayerT, typename... Args>
+    void PushBackLayer(std::string_view name, Args... args) {
+        layers_.emplace_back(new LayerT(name, std::forward<Args>(args)...));
+    }
+
+    template <typename LayerT, typename... Args>
+    void PushFrontLayer(std::string_view name, Args... args) {
+        layers_.emplace_front(new LayerT(name, std::forward<Args>(args)...));
+    }
+
+    Layer* FindLayer(std::string_view name) const {
+        auto it = std::find_if(layers_.begin(), layers_.end(),
+                               [=](const std::unique_ptr<Layer>& layer) {
+                                   return layer->GetName() == name;
+                               });
+        if (it != layers_.end()) {
+            return nullptr;
+        } else {
+            return it->get();
+        }
+    }
+
 private:
     std::string_view name_;
+    std::list<std::unique_ptr<Layer>> layers_;
 };
 
 

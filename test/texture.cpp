@@ -3,18 +3,14 @@
 #include "core/texture.hpp"
 #include "core/engine.hpp"
 
-class TestScence: public grogue::core::Scence {
+class TestLayer: public grogue::core::Layer {
 public:
-    TestScence(std::string_view name): grogue::core::Scence(name) {}
+    TestLayer(std::string_view name): grogue::core::Layer(name) {}
 
-    void OnInit() override {
-        grogue::core::TextureManager::Instance().Load("./assets/kirby.png", "kirby",
-                                        *grogue::core::VideoMgr::GetMainVideo().renderer.get());
-    }
-
-    void OnRender() override {
-        grogue::core::TextureManager::Instance().DrawFrame("kirby", 0, 0, 36, 33, 1, frame,
-                                             *grogue::core::VideoMgr::GetMainVideo().renderer.get());
+    void Render() override {
+        grogue::core::TextureManager::Instance()
+            .DrawFrame("kirby", 0, 0, 36, 33, 1, frame,
+                       *grogue::core::VideoMgr::GetMainVideo().renderer.get());
         if (frame >= 15) {
             frame = 0;
         }
@@ -27,10 +23,21 @@ private:
     int frame = 0;
 };
 
+class TestScence: public grogue::core::Scence {
+public:
+    TestScence(std::string_view name): grogue::core::Scence(name) {
+        PushBackLayer<TestLayer>("TestLayer");
+    }
+
+    void OnInit() override {
+        grogue::core::TextureManager::Instance().Load("./assets/kirby.png", "kirby",
+                                        *grogue::core::VideoMgr::GetMainVideo().renderer.get());
+    }
+};
+
 int main(int, char**) {
     grogue::core::Engine::Init("grogue", 1024, 720);
     grogue::core::Engine::RunScence<TestScence>("TestTextureScence");
 
     return 0;
 }
-

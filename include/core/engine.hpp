@@ -38,7 +38,9 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
     while (!ShouldQuit()) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
-                Exit();
+                if (scence && scence->OnQuit()) {
+                    Exit();
+                }
             }
             if (scence) {
                 scence->OnEventHandle(event);
@@ -48,7 +50,7 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
         Timer::Record();
 
         if (scence) {
-            scence->OnUpdate(Timer::GetMsBetweenFrames());
+            scence->OnUpdate();
             scence->OnRender();
         }
 

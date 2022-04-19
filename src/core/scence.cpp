@@ -8,6 +8,32 @@ Scence* ScenceMgr::oldScence_ = nullptr;
 
 Scence::Scence(std::string_view name): name_(name) {}
 
+void Scence::OnUpdate() {
+    for (auto& layer : layers_) {
+        if (layer->IsWorking()) {
+            layer->Update();
+        }
+    }
+}
+
+void Scence::OnRender() {
+    for (auto& layer : layers_) {
+        if (layer->IsWorking()) {
+            layer->Render();
+        }
+    }
+}
+
+void Scence::OnEventHandle(const SDL_Event& event) {
+    EventDispatcher dispatcher(layers_);
+
+    dispatcher.Dispatch<SDL_KEYDOWN>(event.key);
+    dispatcher.Dispatch<SDL_KEYUP>(event.key);
+    dispatcher.Dispatch<SDL_MOUSEMOTION>(event.motion);
+    dispatcher.Dispatch<SDL_MOUSEBUTTONDOWN>(event.button);
+    dispatcher.Dispatch<SDL_MOUSEBUTTONUP>(event.button);
+}
+
 void ScenceMgr::Init(Scence* scence) {
     curScence_ = scence;
     if (curScence_) {

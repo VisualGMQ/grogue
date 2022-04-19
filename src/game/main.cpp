@@ -4,13 +4,20 @@
 
 using namespace std;
 
-class MainScence: public grogue::core::Scence {
+class MainLayer final: public grogue::core::Layer {
 public:
-    MainScence(std::string_view name): Scence(name) {}
+    MainLayer(std::string_view name): grogue::core::Layer(name) {}
 
-    void OnRender() override {
+    void Render() override {
         auto& renderer = grogue::core::VideoMgr::GetMainVideo().renderer;
         renderer->Clear(grogue::core::Color(100, 100, 100, 255));
+    }
+};
+
+class MainScence: public grogue::core::Scence {
+public:
+    MainScence(std::string_view name): Scence(name) {
+        PushBackLayer<MainLayer>("main-layer");
     }
 };
 
