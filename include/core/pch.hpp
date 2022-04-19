@@ -13,10 +13,11 @@
 #include <list>
 #include <type_traits>
 #include <string_view>
+#include <fstream>
+#include <iostream>
+#include <ctime>
+#include <algorithm>
 
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
-#include "spdlog/sinks/basic_file_sink.h"

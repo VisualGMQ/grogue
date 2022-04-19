@@ -18,7 +18,7 @@ VideoMgr::Video& VideoMgr::GetVideo(ID id) {
     if (it != videos_.end()) {
         return it->second;
     } else {
-        LOG_ERROR("don't exists Video (ID {})", id);
+        LOG_ERROR("don't exists Video (ID %lu)", id);
         return videos_[id];
     }
 }

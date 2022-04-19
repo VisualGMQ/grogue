@@ -27,7 +27,7 @@ private:
     int frame = 0;
 };
 
-int main(int argc, char** argv) {
+int main(int, char**) {
     grogue::core::Engine::Init("grogue", 1024, 720);
     grogue::core::Engine::RunScence<TestScence>("TestTextureScence");
 

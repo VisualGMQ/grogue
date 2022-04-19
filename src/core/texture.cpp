@@ -9,13 +9,13 @@ bool TextureManager::Load(std::string file_name,
                           Renderer& renderer) {
     SDL_Surface* sur = IMG_Load(file_name.c_str());
     if (sur == nullptr) {
-        LOG_ERROR("{} load failed", file_name);
+        LOG_ERROR("%s load failed", file_name.c_str());
         return false;
     }
     SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer.renderer_, sur);
     SDL_FreeSurface(sur);
     if (tex == nullptr) {
-        LOG_ERROR("create {} texture failed", file_name);
+        LOG_ERROR("create %s texture failed", file_name.c_str());
         return false;
     }
     texture_map_[textureid] = tex;

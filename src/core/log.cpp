@@ -2,52 +2,82 @@
 
 namespace grogue::core {
 
-Logger Log::CreateConsoleLogger(const char* name) {
-    Logger logger(nullptr);
-    try {
-        logger.logger_ = spdlog::stdout_color_mt(name);
-    } catch (const spdlog::spdlog_ex& ex) {
-        spdlog::warn("console log init failed: {}", ex.what());
+Logger::Logger(const char* name, std::ostream& stream, LogLevel level): name_(name), stream_(stream), level_(level) {}
+
+const char* Logger::level2Str(LogLevel level) {
+    #define CASE(level) case LogLevel::level: return #level;
+    switch (level) {
+        CASE(Critical)
+        CASE(Error)
+        CASE(Info)
+        CASE(Warn)
+        CASE(Debug)
+        CASE(Trace)
+        CASE(NoLog)
     }
-    return logger;
+    #undef CASE
+    return "Unknown Level";
 }
 
-Logger Log::CreateFileLogger(const char* name, const char* filename) {
-    Logger logger(nullptr);
-    try {
-        logger.logger_ = spdlog::basic_logger_mt(name, filename);
-    } catch (const spdlog::spdlog_ex& ex) {
-        spdlog::warn("file {} log init failed: {}", filename, ex.what());
-    }
-    return logger;
-}
 
-Logger Log::GetLogger(const char* name) {
-    return Logger(spdlog::get(name));
-}
+std::unordered_map<std::string_view, std::shared_ptr<Logger>> Log::loggers_;
+std::list<std::unique_ptr<std::ostream>> Log::files_;
+LogLevel Log::initLevel_;
+
+#define LOG_INNER_ERROR(fmt, ...) printf("[Logger System Inner Error]: " fmt, ##__VA_ARGS__);
 
 void Log::Init(LogLevel level) {
-    spdlog::set_pattern("[%^%l%$][%Y-%m-%d %T][%s:%#]: %v");
-    SetAllLevel(level);
+    initLevel_ = level; 
 }
+
+void Log::Quit() {}
 
 void Log::SetAllLevel(LogLevel level) {
-    spdlog::set_level(static_cast<spdlog::level::level_enum>(level));
-}
-
-void Log::RegistLogger(const Logger& logger) {
-    try {
-        spdlog::register_logger(logger.logger_);
-    } catch (const spdlog::spdlog_ex& ex) {
-        LOG_WARN("regist log error: {}", ex.what());
+    for (auto& pair : loggers_) {
+        pair.second->SetLevel(level);
     }
 }
 
-void Log::UnregistLogger(const Logger& logger) {
-    spdlog::drop(logger.logger_->name());
+std::shared_ptr<Logger> Log::GetLogger(const char* name) {
+    auto it = loggers_.find(name);
+    if (it != loggers_.end()) {
+        return it->second;
+    } else {
+        return nullptr;
+    }
 }
 
-void Log::Quit() {
+std::shared_ptr<Logger> Log::CreateConsoleLogger(const char* name) {
+    if (IsLoggerExists(name)) {
+        return nullptr;
+    } else {
+        auto logger = std::make_shared<Logger>(name, std::cout, initLevel_);
+        loggers_[name] = logger;
+        return logger;
+    }
+}
+
+std::shared_ptr<Logger> Log::CreateFileLogger(const char* name,
+                                              const char* filename) {
+    if (IsLoggerExists(name)) {
+        return nullptr;
+    } else {
+        files_.emplace_back(new std::ofstream(filename));
+        auto& file = files_.back();
+        if (file->fail()) {
+            files_.pop_back();
+            LOG_INNER_ERROR("`%s` logger already exists\n", name);
+            return nullptr;
+        } else {
+            auto logger = std::make_shared<Logger>(name, *(file), initLevel_);
+            loggers_[name] = logger;
+            return logger;
+        }
+    }
+}
+
+bool Log::IsLoggerExists(const char* name) {
+    return loggers_.find(name) != loggers_.end();
 }
 
 }

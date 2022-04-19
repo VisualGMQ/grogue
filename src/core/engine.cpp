@@ -8,6 +8,7 @@ void Engine::Init(const std::string& title,
                   uint32_t w, uint32_t h,
                   bool resizable) {
     Log::Init(LogLevel::Debug);
+    Log::CreateConsoleLogger("console");
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         LOG_CRITICAL("SDL initialized failed");
@@ -48,7 +49,6 @@ void Engine::cleanUp() {
 
     SDL_Quit();
     LOG_INFO("SDL quited");
-
 }
 
 bool Engine::ShouldQuit() {
