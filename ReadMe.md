@@ -22,3 +22,9 @@ cmake --build build
 ```
 
 即可
+
+你也可以选择同时编译单元测试（默认不编译）:
+
+```bash
+cmake -S . -B build -G"MinGW Makefiles" -DBUILD_UNITTEST=ON
+```

@@ -36,11 +36,11 @@ target_link_libraries(
 )
 target_include_directories(
   ${GROGUE_CORE_LIB_NAME}
-  PUBLIC include 3rdlib
+  PUBLIC include
 )
 target_compile_features(${GROGUE_CORE_LIB_NAME} PUBLIC cxx_std_17)
 target_precompile_headers(${GROGUE_CORE_LIB_NAME} PUBLIC include/core/pch.hpp)
-# target_compile_options(${GROGUE_CORE_LIB_NAME} PUBLIC -Wall -Wformat -Wextra -pedantic)
+target_compile_options(${GROGUE_CORE_LIB_NAME} PUBLIC -Wall -Wformat -Wextra -pedantic)
 
 # Compile Game
 aux_source_directory(src/game GAME_SRC)
@@ -79,6 +79,10 @@ add_library(3rdlib INTERFACE ${3RDLIB_FILES})
 ################################
 # add test
 ################################
-enable_testing()
 
-add_subdirectory(test)
+option(BUILD_UNITTEST "enable build unittest" OFF)
+
+if (BUILD_UNITTEST)
+    enable_testing()
+    add_subdirectory(test)
+endif()
