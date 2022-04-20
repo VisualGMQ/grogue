@@ -28,3 +28,89 @@ cmake --build build
 ```bash
 cmake -S . -B build -G"MinGW Makefiles" -DBUILD_UNITTEST=ON
 ```
+
+# 各个模块的说明
+
+## Video和VideoMgr
+
+`Video`是一个拥有Window和Renderer的结构。其将Window和对应的Renderer绑定在一起。
+
+你可以通过VideoMgr创建Video（即创建新的窗口）。引擎初始化时默认创建一个Video。你可以额外使用
+
+```cpp
+VideoMgr::CreateVideo(title, width, height);
+```
+
+创建多于一个的窗口。
+
+## Window
+
+即对`SDL_Window`的简单封装
+
+## Renderer
+
+即对`SDL_Renderer`的简单封装
+
+## Log和Logger
+
+使用
+
+```cpp
+LOG_CRITICAL(...)
+LOG_ERROR(...)   
+LOG_WARN(...)    
+LOG_INFO(...)    
+LOG_DEBUG(...)   
+LOG_TRACE(...)   
+```
+
+宏来输出日志。这会使用所有创建并启用的`Logger`进行日志输出。
+
+通过
+
+```cpp
+Log::CreateConsoleLogger(name);
+Log::CreateFileLogger(name, filename);
+```
+
+创建并启用新的Logger。要停止Logger的输出，可以将Logger的输出日志设为`NoLog`:
+
+```cpp
+logger->SetLevel(LogLevel::NoLog);
+```
+
+## Scence和Layer
+
+Scence即场景，表示游戏中的场景（比如开始游戏的欢迎界面是一个场景，游戏本体的界面又是一个场景）。
+
+通过继承Scence可以创造属于你自己的场景。
+
+通过重载`OnInit`和`OnQuit`方法来掌控场景初始化和结束时的动作。你可以在`OnInit`中加载此场景所需的资源。
+
+
+Layer则是在场景中更细致的划分，称为层。一个场景中通常会有很多层，较为常见的是拥有一个GUI层用于绘制和响应GUI，一个游戏层用于绘制和响应游戏本身。
+
+Layer可以进行事件操控（重载`Handle`函数来实现）。返回true表示允许将事件传播到下一层。
+
+通过
+
+```cpp
+scence->PushBackLayer<LayerClass>(params...);
+scence->PushFrontLayer<LayerClass>(params...);
+```
+
+来向场景中添加层。场景初始化时是默认没有层的。
+
+## Timer
+
+Timer是静态类，用于记录相邻两帧的时间间隔。通过
+
+```cpp
+Timer::GetMsBetweenFrames();
+```
+
+得到以毫秒为单位的时间。
+
+## UTF8String
+
+即记录着UTF-8编码的字符串。主要是为了拆分很长一行string而制作的。
