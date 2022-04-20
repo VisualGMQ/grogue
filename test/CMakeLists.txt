@@ -10,3 +10,4 @@ endmacro()
 
 ADD_CORE_TEST(mathf)
 ADD_CORE_TEST(texture)
+ADD_CORE_TEST(utf8string)
