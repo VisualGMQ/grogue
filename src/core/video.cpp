@@ -2,30 +2,29 @@
 
 namespace grogue::core {
 
+Storage<ID, Video> VideoMgr::storage_;
 std::optional<ID> VideoMgr::mainWindowID_ = std::nullopt;
 
-std::unordered_map<ID, VideoMgr::Video> VideoMgr::videos_;
-
-VideoMgr::Video& VideoMgr::GetMainVideo() {
+Video* VideoMgr::GetMainVideo() {
     if (!mainWindowID_) {
         LOG_ERROR("don't have main window");
     }
-    return videos_[mainWindowID_.value()];
+    return storage_.Find(mainWindowID_.value());
 }
 
-VideoMgr::Video& VideoMgr::GetVideo(ID id) {
-    auto it = videos_.find(id);
-    if (it != videos_.end()) {
-        return it->second;
+Video* VideoMgr::GetVideo(ID id) {
+    auto video = storage_.Find(id);
+    if (video) {
+        return video;
     } else {
         LOG_ERROR("don't exists Video (ID %lu)", id);
-        return videos_[id];
+        return nullptr;
     }
 }
 
-VideoMgr::Video& VideoMgr::CreateVideo(const char* title,
-                                      std::uint32_t width, std::uint32_t height,
-                                      bool resizable) {
+Video* VideoMgr::CreateVideo(const char* title,
+                             std::uint32_t width, std::uint32_t height,
+                             bool resizable) {
     Video video;
     video.window.reset(new Window(title, width, height, resizable));
     if (!video.window) {
@@ -45,11 +44,9 @@ VideoMgr::Video& VideoMgr::CreateVideo(const char* title,
         mainWindowID_ = video.window->GetID();
     }
 
-    auto result = videos_.emplace(video.window->GetID(), std::move(video));
-    if (!result.second) {
-        LOG_ERROR("create Video failed!");
-    }
-    return result.first->second;
+    video.id = video.window->GetID();
+    return &storage_.Create(video.window->GetID(),
+                            std::move(video));
 }
 
 void VideoMgr::Init(const char* title,
@@ -59,18 +56,18 @@ void VideoMgr::Init(const char* title,
 }
 
 void VideoMgr::Quit() {
-    for (auto& video : videos_) {
+    for (auto& video : storage_) {
         video.second.window.reset();
         video.second.renderer.reset();
     }
 }
 
-VideoMgr::Video& VideoMgr::FindByID(ID id) {
-    return videos_[id];
+Video* VideoMgr::FindByID(ID id) {
+    return storage_.Find(id);
 }
 
 void VideoMgr::Present() {
-    for (auto& video : videos_) {
+    for (auto& video : storage_) {
         video.second.renderer->Present();
     }
 }

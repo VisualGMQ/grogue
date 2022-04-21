@@ -38,6 +38,17 @@ void Renderer::DrawBorderRect(const Rect& rect, const Color& border, const Color
     DrawRect(rect, border);
 }
 
+void Renderer::DrawTexture(const TextureRenderInfo& info) {
+    SDL_FPoint center = {info.anchor.x, info.anchor.y};
+    SDL_RenderCopyExF(renderer_,
+                      info.texture->texture_,
+                      &info.src.sdlrect,
+                      &info.dst.sdlrect,
+                      info.degree,
+                      &center,
+                      static_cast<SDL_RendererFlip>(info.flip));
+}
+
 void Renderer::setColor(const Color& color) {
     SDL_SetRenderDrawColor(renderer_, color.r, color.g, color.b, color.a);
 }
@@ -45,5 +56,50 @@ void Renderer::setColor(const Color& color) {
 Renderer::~Renderer() {
     SDL_DestroyRenderer(renderer_);
 }
+
+Renderer::TextureRenderInfo::TextureRenderInfo(Texture* texture): texture(texture) {
+    dst.x = dst.y = 0;
+    dst.w = texture->GetSize().w;
+    dst.h = texture->GetSize().h;
+    src.x = src.y = 0;
+    src.w = dst.w;
+    src.h = dst.h;
+    anchor.x = src.w / 2.0;
+    anchor.y = src.h / 2.0;
+}
+
+Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetSrcArea(const Recti& r) {
+    src = r;
+    return *this;
+}
+
+Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetPos(const Vec2& v) {
+    dst.x = v.x;
+    dst.y = v.y;
+    return *this;
+}
+
+
+Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetSize(const Vec2& s) {
+    dst.w = s.w;
+    dst.h = s.h;
+    return *this;
+}
+
+Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetFlip(Flip f) {
+    flip = f;
+    return *this;
+}
+
+Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetRotation(float degree) {
+    this->degree = degree;
+    return *this;
+}
+
+Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetRotatAnchor(const Vec2& a) {
+    anchor = a;
+    return *this;
+}
+
 
 }

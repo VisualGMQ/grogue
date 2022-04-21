@@ -22,6 +22,15 @@ UTF8Char::UTF8Char(char value1, char value2, char value3, char value4) {
     data_[3] = value4;
 }
 
+size_t UTF8Char::CharNum() const {
+    if ((data_[0] & 0xF0) == 0xF0) return 4;
+    else if ((data_[0] & 0xE0) == 0xE0) return 3;
+    else if ((data_[0] & 0xC0) == 0xC0) return 2;
+    else if ((data_[0] & 0x80) == 0) return 1;
+    LOG_ERROR("invalid char num in UTF8Char");
+    return -1;
+}
+
 std::ostream& operator<<(std::ostream& o, const UTF8Char& c) {
     for (auto& data : c.data_) {
         o << data;
@@ -153,6 +162,28 @@ void UTF8String::pushChars(CCharPtr& it, size_t& index, int num) {
     } else {
             LOG_ERROR("invalid number in pushChars");
     }
+}
+
+std::string UTF8String::ToString() const {
+    size_t count = 0;
+    for (size_t i = 0; i < size_; i++) {
+        count += (chars_ + i)->CharNum();
+    }
+
+    std::string result;
+    result.resize(count);
+    char* ptr = result.data();
+    const UTF8Char* u8ptr = chars_;
+    while (u8ptr - chars_ < (int)size_) {
+        size_t count = u8ptr->CharNum();
+        size_t idx = 0;
+        while (idx < count) {
+            *ptr = u8ptr->data_[idx++];
+            ptr++;
+        }
+        u8ptr++;
+    }
+    return result;
 }
 
 UTF8String::~UTF8String() {

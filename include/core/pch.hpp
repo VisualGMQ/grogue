@@ -18,6 +18,7 @@
 #include <ctime>
 #include <algorithm>
 #include <exception>
+#include <optional>
 
 #include "SDL.h"
 #include "SDL_image.h"

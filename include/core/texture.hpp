@@ -1,9 +1,9 @@
 #pragma once
 
 #include "core/pch.hpp"
-#include "core/renderer.hpp"
 #include "core/mathf.hpp"
 #include "core/log.hpp"
+#include "core/storage.hpp"
 
 namespace grogue::core {
 
@@ -13,33 +13,34 @@ enum Flip {
     Horizontal = SDL_FLIP_HORIZONTAL,
 };
 
-class TextureManager {
+class Texture final {
 public:
-    bool Load(std::string file_name,
-              std::string textureid,
-              Renderer& renderer);
-    void Draw(std::string textureid,
-              int x, int y, int width, int height,
-              Renderer& renderer,
-              Flip flip = Flip::NoFlip);
-    void DrawFrame(std::string textureid,
-                   int x, int y, int width, int height,
-                   int current_row,
-                   int current_frame,
-                   Renderer& renderer,
-                   Flip flip = Flip::NoFlip);
-    void ClearFromTextureMap(std::string textureid);
+    friend class Renderer;
 
-    static TextureManager& Instance() {
-        static TextureManager instance;
-        return instance;
-    }
+    Texture(const Texture&) = delete;
+    Texture(SDL_Surface*);
+    Texture(const char* filename);
+    ~Texture();
+
+    Texture& operator=(const Texture&) = delete;
+
+    Size GetSize() const { return size_; }
 
 private:
-    TextureManager();
-    ~TextureManager();
-    std::unordered_map<std::string, SDL_Texture*> texture_map_;
+    SDL_Texture* texture_;
+    Size size_;
+};
+
+class TextureMgr final {
+public:
+    TextureMgr() = delete;
+
+    static Texture* Load(const std::string&);
+    static Texture* Load(const std::string& filename, const std::string& name);
+    static Texture* Find(const std::string& name);
+
+private:
+    static Storage<std::string, std::unique_ptr<Texture>> storage_;
 };
 
 }
-

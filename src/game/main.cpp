@@ -1,6 +1,7 @@
 #include "core/video.hpp"
 #include "core/timer.hpp"
 #include "core/engine.hpp"
+#include "core/utf8string.hpp"
 
 using namespace std;
 
@@ -9,7 +10,7 @@ public:
     MainLayer(std::string_view name): grogue::core::Layer(name) {}
 
     void Render() override {
-        auto& renderer = grogue::core::VideoMgr::GetMainVideo().renderer;
+        auto& renderer = grogue::core::VideoMgr::GetMainVideo()->renderer;
         renderer->Clear(grogue::core::Color(100, 100, 100, 255));
     }
 };

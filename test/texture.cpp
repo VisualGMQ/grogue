@@ -7,20 +7,18 @@ class TestLayer: public grogue::core::Layer {
 public:
     TestLayer(std::string_view name): grogue::core::Layer(name) {}
 
+    void OnInit() override {
+        kriby_ = grogue::core::TextureMgr::Find("kriby");
+    }
+
     void Render() override {
-        grogue::core::TextureManager::Instance()
-            .DrawFrame("kirby", 0, 0, 36, 33, 1, frame,
-                       *grogue::core::VideoMgr::GetMainVideo().renderer.get());
-        if (frame >= 15) {
-            frame = 0;
-        }
-        else {
-            ++frame;
-        }
+        grogue::core::VideoMgr::GetMainVideo()->renderer->DrawTexture(
+            grogue::core::Renderer::TextureRenderInfo(kriby_).SetPos(grogue::core::Vec2(0, 0))
+        );
     }
 
 private:
-    int frame = 0;
+    grogue::core::Texture* kriby_;
 };
 
 class TestScence: public grogue::core::Scence {
@@ -30,8 +28,7 @@ public:
     }
 
     void OnInit() override {
-        grogue::core::TextureManager::Instance().Load("./assets/kirby.png", "kirby",
-                                        *grogue::core::VideoMgr::GetMainVideo().renderer.get());
+        grogue::core::TextureMgr::Load("./assets/kirby.png", "kriby");
     }
 };
 

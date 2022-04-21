@@ -2,7 +2,6 @@
 
 namespace grogue::core {
 
-std::unordered_map<std::string_view, std::unique_ptr<Scence>> ScenceMgr::scences_;
 Scence* ScenceMgr::curScence_ = nullptr;
 Scence* ScenceMgr::oldScence_ = nullptr;
 
@@ -34,10 +33,16 @@ void Scence::OnEventHandle(const SDL_Event& event) {
     dispatcher.Dispatch<SDL_MOUSEBUTTONUP>(event.button);
 }
 
+
+Storage<std::string_view, std::unique_ptr<Scence>> ScenceMgr::storage_;
+
 void ScenceMgr::Init(Scence* scence) {
     curScence_ = scence;
     if (curScence_) {
         curScence_->OnInit();
+        for (auto& layer : scence->layers_) {
+            layer->OnInit();
+        }
     } else {
         LOG_ERROR("first runnig scence can't be nullptr");
     }
@@ -46,6 +51,9 @@ void ScenceMgr::Init(Scence* scence) {
 void ScenceMgr::Quit() {
     if (curScence_) {
         curScence_->OnQuit();
+        for (auto& layer : curScence_->layers_) {
+            layer->OnQuit();
+        }
     }
 }
 
@@ -72,11 +80,11 @@ void ScenceMgr::CleanUpOldScence() {
 }
 
 Scence* ScenceMgr::GetScence(std::string_view name) {
-    auto it = scences_.find(name);
-    if (it != scences_.end()) {
-        return it->second.get();
-    } else {
+    auto scence = storage_.Find(name);
+    if (!scence) {
         return nullptr;
+    } else {
+        return scence->get();
     }
 }
 

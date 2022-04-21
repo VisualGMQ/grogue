@@ -2,12 +2,15 @@
 #include "pch.hpp"
 #include "window.hpp"
 #include "mathf.hpp"
+#include "texture.hpp"
+#include "storage.hpp"
 
 namespace grogue::core {
 
 class Renderer final {
 public:
     friend class TextureManager;
+    friend class Texture;
 
     Renderer(Window& window);
     Renderer(const Renderer&) = delete;
@@ -23,7 +26,28 @@ public:
     void FillRect(const Rect& rect, const Color&);
     void DrawBorderRect(const Rect& rect, const Color& border, const Color& fill);
 
-    void DrawTexture(/* TODO not finish */);
+    struct TextureRenderInfo {
+    public:
+        friend class Renderer;
+
+        TextureRenderInfo(Texture* texture);
+        TextureRenderInfo& SetSrcArea(const Recti& r);
+        TextureRenderInfo& SetPos(const Vec2& v);
+        TextureRenderInfo& SetSize(const Vec2& s);
+        TextureRenderInfo& SetFlip(Flip);
+        TextureRenderInfo& SetRotation(float);
+        TextureRenderInfo& SetRotatAnchor(const Vec2& a);
+
+    private:
+        Texture* texture;
+        Recti src;
+        Rect dst;
+        Flip flip = Flip::NoFlip;
+        float degree = 0;
+        Vec2 anchor;
+    };
+
+    void DrawTexture(const TextureRenderInfo& info);
     void DrawFont(/* TODO not finish */);
     void SetTarget(/* TODO not finish */);
 

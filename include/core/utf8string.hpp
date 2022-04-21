@@ -4,8 +4,11 @@
 
 namespace grogue::core {
 
+class UTF8String;
+
 class UTF8Char final {
 public:
+    friend class UTF8String;
     friend std::ostream& operator<<(std::ostream&, const UTF8Char&);
 
     UTF8Char();
@@ -14,6 +17,7 @@ public:
     UTF8Char(char value1, char value2);
     UTF8Char(char value1, char value2, char value3);
     UTF8Char(char value1, char value2, char value3, char value4);
+    size_t CharNum() const;
 
 private:
     char data_[4];
@@ -54,6 +58,8 @@ public:
             return operator[](idx);
         }
     }
+
+    std::string ToString() const;
 
 private:
     UTF8Char* chars_;

@@ -4,11 +4,14 @@
 #include "log.hpp"
 #include "layer.hpp"
 #include "event_dispatcher.hpp"
+#include "storage.hpp"
 
 namespace grogue::core {
 
 class Scence {
 public:
+    friend class ScenceMgr;
+
     /* use `string_view` means it won't change the string and hope you pass string-literal*/
     Scence(std::string_view name);
 
@@ -58,13 +61,12 @@ public:
 
     template <typename T, typename... Args>
     static Scence* CreateScence(std::string_view name, Args&&... args) {
-        auto it = scences_.find(name);
-        if (it != scences_.end()) {
+        if (storage_.IsExists(name)) {
             LOG_ERROR("Scence {} exists", name);
             return nullptr;
         } else {
             Scence* scence = new T(name, std::forward<Args>(args)...);
-            scences_[name] = std::unique_ptr<Scence>(scence);
+            storage_.Create(name, std::forward<Args>(args)...);
             return scence;
         }
     }
@@ -75,7 +77,7 @@ public:
     static void CleanUpOldScence();
 
 private:
-    static std::unordered_map<std::string_view, std::unique_ptr<Scence>> scences_;
+    static Storage<std::string_view, std::unique_ptr<Scence>> storage_;
     static Scence* curScence_;
     static Scence* oldScence_;
 };

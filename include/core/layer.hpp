@@ -8,8 +8,10 @@ public:
     Layer(std::string_view name);
     virtual ~Layer() = default;
 
+    virtual void OnInit() {}
     virtual void Update() {}
     virtual void Render() {}
+    virtual void OnQuit() {}
 
     template <Uint32 EventT, typename EventStructT>
     bool Handle(const EventStructT&) { return true; }

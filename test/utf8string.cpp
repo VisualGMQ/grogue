@@ -35,4 +35,5 @@ TEST_CASE("utf8string check", "[UTF8String]") {
         grogue::core::UTF8String s = s1;
         REQUIRE(s.Size() == 8);
     }
+
 }

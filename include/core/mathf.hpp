@@ -191,6 +191,12 @@ T Cross(const Vector<T, 2>& v1, const Vector<T, 2>& v2) {
     return v1.x * v2.y - v1.y * v2.x;
 }
 
+using Vec2f = Vector<float, 2>;
+using Vec2 = Vector<float, 2>;
+using Vec2i = Vector<int, 2>;
+using Size = Vector<int, 2>;
+using Sizef = Vector<float, 2>;
+
 /*******************
  * Color
 *******************/
@@ -215,6 +221,16 @@ struct Rect final {
 
     Rect(): x(0), y(0), w(0), h(0) {}
     Rect(float x, float y, float w, float h): x(x), y(y), w(w), h(h) {}
+};
+
+struct Recti final {
+    union {
+        SDL_Rect sdlrect;
+        struct { int x, y, w, h; };
+    };
+
+    Recti(): x(0), y(0), w(0), h(0) {}
+    Recti(int x, int y, int w, int h): x(x), y(y), w(w), h(h) {}
 };
 
 }
