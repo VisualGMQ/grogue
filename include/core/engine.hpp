@@ -60,6 +60,8 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
             }
         }
 
+        VideoMgr::ClearScreen();
+
         Timer::Record();
 
         if (scence) {

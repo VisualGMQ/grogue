@@ -72,4 +72,10 @@ void VideoMgr::Present() {
     }
 }
 
+void VideoMgr::ClearScreen() {
+    for (auto& video : storage_) {
+        video.second.renderer->Clear(Color(0, 0, 0));
+    }
+}
+
 }

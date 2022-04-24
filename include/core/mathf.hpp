@@ -221,6 +221,13 @@ struct Rect final {
 
     Rect(): x(0), y(0), w(0), h(0) {}
     Rect(float x, float y, float w, float h): x(x), y(y), w(w), h(h) {}
+
+    void Reset(float x, float y, float w, float h) {
+        this->x = x;
+        this->y = y;
+        this->w = w;
+        this->h = h;
+    }
 };
 
 struct Recti final {
@@ -231,6 +238,13 @@ struct Recti final {
 
     Recti(): x(0), y(0), w(0), h(0) {}
     Recti(int x, int y, int w, int h): x(x), y(y), w(w), h(h) {}
+
+    void Reset(int x, int y, int w, int h) {
+        this->x = x;
+        this->y = y;
+        this->w = w;
+        this->h = h;
+    }
 };
 
 template <typename T, size_t N>
@@ -243,6 +257,30 @@ template <typename T, size_t N>
 bool IsPointInRect(const Recti& r, const Vector<T, N>& p) {
     return p.x >= r.x && p.x <= r.x + r.w &&
            p.y >= r.y && p.y <= r.y + r.h;
+}
+
+inline Vec2 AlignLeftPos(const Rect& target, const Rect& r) {
+    return Vec2(target.x, r.y);
+}
+
+inline Vec2 AlignRightPos(const Rect& target, const Rect& r) {
+    return Vec2(target.x + target.w - r.w, r.y);
+}
+
+inline Vec2 AlignTopPos(const Rect& target, const Rect& r) {
+    return Vec2(r.x, target.y);
+}
+
+inline Vec2 AlignBottomPos(const Rect& target, const Rect& r) {
+    return Vec2(r.x, target.y + target.h - r.h);
+}
+
+inline Vec2 AlignCenterXPos(const Rect& target, const Rect& r) {
+    return Vec2(target.x + (target.w - r.w) / 2, r.y);
+}
+
+inline Vec2 AlignCenterYPos(const Rect& target, const Rect& r) {
+    return Vec2(r.x, target.y + (target.h - r.h) / 2);
 }
 
 }

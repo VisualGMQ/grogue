@@ -12,7 +12,7 @@ void Init(grogue::core::Font* font) {
 }
 
 void SetLightColorscheme() {
-    Context.colorScheme.bgColor = core::Color(10, 100, 10);
+    Context.colorScheme.bgColor = core::Color(10, 50, 10);
     Context.colorScheme.fontColor = core::Color(255, 255, 255);
     Context.colorScheme.borderColor = core::Color(200, 200, 200);
 }

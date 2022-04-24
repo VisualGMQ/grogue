@@ -26,6 +26,7 @@ public:
                              std::uint32_t width, std::uint32_t height,
                              bool resizable = false);
     static Video* FindByID(ID id);
+    static void ClearScreen();
     static void Present();
 
 private:

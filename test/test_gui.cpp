@@ -9,18 +9,41 @@ class TestGUILayer: public grogue::core::Layer {
 public:
     TestGUILayer(std::string_view name): grogue::core::Layer(name) {}
 
-    void Update() override {
-        if (grogue::core::Mouse::IsPressed(grogue::core::MouseButton::Left)) {
-            LOG_WARN("left button clicked");
-        }
-    }
-
     void Render() override {
-        bool show = true;
-        grogue::core::Rect rect(100, 100, 200, 150);
-        if (grogue::gui::Button(show, "button", &rect)) {
-            LOG_DEBUG("clicked button");
+        static bool show = true;
+
+        static grogue::gui::Align align = grogue::gui::Align::AlignCenter;
+
+        grogue::core::Rect rect(100, 150, 100, 50);
+        if (grogue::gui::Button(show, "left align", &rect)) {
+            align = grogue::gui::Align::AlignLeft;
         }
+
+        rect.Reset(300, 150, 100, 50);
+        if (grogue::gui::Button(show, "right align", &rect)) {
+            align = grogue::gui::Align::AlignRight;
+        }
+
+        rect.Reset(200, 100, 100, 50);
+        if (grogue::gui::Button(show, "top align", &rect)) {
+            align = grogue::gui::Align::AlignTop;
+        }
+
+        rect.Reset(200, 200, 100, 50);
+        if (grogue::gui::Button(show, "bottom align", &rect)) {
+            align = grogue::gui::Align::AlignBottom;
+        }
+
+        rect.Reset(200, 150, 100, 50);
+        if (grogue::gui::Button(show, "center align", &rect)) {
+            align = grogue::gui::Align::AlignCenter;
+        }
+
+        rect.Reset(500, 150, 100, 50);
+        if (grogue::gui::Button(show, "test button", &rect, align)) {
+            LOG_DEBUG("align text");
+        }
+
     }
 };
 
