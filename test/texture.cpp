@@ -1,3 +1,4 @@
+#include "core/mathf.hpp"
 #include "core/video.hpp"
 #include "core/timer.hpp"
 #include "core/texture.hpp"

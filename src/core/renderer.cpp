@@ -23,19 +23,17 @@ void Renderer::DrawLine(const Vector<float, 2>& p1, const Vector<float, 2>& p2,
     SDL_RenderDrawLineF(renderer_, p1.x, p1.y, p2.x, p2.y);
 }
 
-void Renderer::DrawRect(const Rect& rect, const Color& color) {
-    setColor(color);
-    SDL_RenderDrawRectF(renderer_, &rect.sdlrect);
-}
-
-void Renderer::FillRect(const Rect& rect, const Color& color) {
-    setColor(color);
-    SDL_RenderFillRectF(renderer_, &rect.sdlrect);
-}
-
-void Renderer::DrawBorderRect(const Rect& rect, const Color& border, const Color& fill) {
-    FillRect(rect, fill);
-    DrawRect(rect, border);
+void Renderer::DrawRect(const Rect& rect,
+                        const std::optional<Color>& fill,
+                        const std::optional<Color>& border) {
+    if (fill) {
+        setColor(fill.value());
+        SDL_RenderFillRectF(renderer_, &rect.sdlrect);
+    }
+    if (border) {
+        setColor(border.value());
+        SDL_RenderDrawRectF(renderer_, &rect.sdlrect);
+    }
 }
 
 void Renderer::DrawTexture(const TextureRenderInfo& info) {
@@ -101,5 +99,11 @@ Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetRotatAnchor(const V
     return *this;
 }
 
+std::unique_ptr<Texture> Renderer::GenerateText(Font& font, const char* text, const Color& color) {
+    auto surface = TTF_RenderUTF8_Blended(font.font_, text, color.color);
+    auto texture = std::make_unique<Texture>(surface);
+    SDL_FreeSurface(surface);
+    return texture;
+}
 
 }

@@ -42,6 +42,21 @@ target_compile_features(${GROGUE_CORE_LIB_NAME} PUBLIC cxx_std_17)
 target_precompile_headers(${GROGUE_CORE_LIB_NAME} PUBLIC include/core/pch.hpp)
 target_compile_options(${GROGUE_CORE_LIB_NAME} PUBLIC -Wall -Wformat -Wextra -pedantic)
 
+# Compile GUI
+aux_source_directory(src/gui GUI_SRC)
+file(GLOB_RECURSE GUI_HEADER_FILES "include/gui/*.hpp" "include/gui/*.h")
+
+source_group("Header Files" FILES ${GUI_HEADER_FILES})
+source_group("Source Files" FILES ${GUI_SRC})
+
+set(GROGUE_GUI_LIB_NAME gui)
+add_library(${GROGUE_GUI_LIB_NAME} SHARED ${GUI_SRC} ${GUI_HEADER_FILES})
+target_link_libraries(
+    ${GROGUE_GUI_LIB_NAME}
+    PUBLIC ${GROGUE_CORE_LIB_NAME}
+)
+target_precompile_headers(${GROGUE_GUI_LIB_NAME} REUSE_FROM ${GROGUE_CORE_LIB_NAME})
+
 # Compile Game
 aux_source_directory(src/game GAME_SRC)
 file(GLOB_RECURSE GAME_HEADER_FILES "include/game/*.hpp" "include/game/*.h")
@@ -50,11 +65,11 @@ source_group("Header Files" FILES ${GAME_HEADER_FILES})
 source_group("Source Files" FILES ${GAME_SRC})
 
 add_executable(${PROJECT_NAME} ${GAME_SRC} ${GAME_HEADER_FILES})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${GROGUE_CORE_LIB_NAME})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${GROGUE_CORE_LIB_NAME} ${GROGUE_GUI_LIB_NAME})
 
-set_target_properties(${PROJECT_NAME} ${GROGUE_CORE_LIB_NAME}
-                      PROPERTIES 
-                        FOLDER "Game")
+set_target_properties(${PROJECT_NAME} ${GROGUE_CORE_LIB_NAME} ${GROGUE_GUI_LIB_NAME}
+    PROPERTIES 
+    FOLDER "Game")
 target_precompile_headers(${PROJECT_NAME} REUSE_FROM ${GROGUE_CORE_LIB_NAME})
 
 ################################

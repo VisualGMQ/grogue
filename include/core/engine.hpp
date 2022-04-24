@@ -5,6 +5,8 @@
 #include "err_code.hpp"
 #include "timer.hpp"
 #include "video.hpp"
+#include "keyboard.hpp"
+#include "mouse.hpp"
 
 namespace grogue::core {
 
@@ -36,10 +38,19 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
         LOG_CRITICAL("Scence Create failed");
     }
     while (!ShouldQuit()) {
+        Keyboard::SwapKeyState();
+        Mouse::SwapButtonStates();
         while (SDL_PollEvent(&event)) {
+            Keyboard::AccpetEvent(event);
+            Mouse::AcceptEvent(event);
             if (event.type == SDL_QUIT) {
                 if (scence && scence->OnQuit()) {
                     Exit();
+                }
+            }
+            if (event.type == SDL_WINDOWEVENT) {
+                if (event.window.event == SDL_WINDOWEVENT_TAKE_FOCUS) {
+                    Mouse::SetFocusWindow(VideoMgr::FindByID(event.window.windowID)->window.get());
                 }
             }
             if (scence) {

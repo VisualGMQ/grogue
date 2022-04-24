@@ -4,7 +4,7 @@ namespace grogue::core {
  
 Window::Window(const char* title,
                uint32_t width, uint32_t height,
-               bool resizable) {
+               bool resizable): originSize_(width, height) {
     window_ = SDL_CreateWindow(title,
                                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                (int)width, (int)height,
@@ -18,6 +18,16 @@ void Window::Show() {
 
 void Window::Hide() {
     SDL_HideWindow(window_);
+}
+
+Size Window::GetSize() const {
+    Size size;
+    SDL_GetWindowSize(window_, &size.w, &size.h);
+    return size;
+}
+
+Size Window::GetOriginSize() const {
+    return originSize_;
 }
 
 bool Window::IsShown() const {

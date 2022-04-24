@@ -206,7 +206,7 @@ struct Color final {
         struct { uint8_t r, g, b, a; };
     };
 
-    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a): r(r), g(g), b(b), a(a) {}
+    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255): r(r), g(g), b(b), a(a) {}
     Color(): r(0), g(0), b(0), a(0) {}
 };
 

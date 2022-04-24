@@ -31,6 +31,9 @@ void Engine::Init(const std::string& title,
 
     VideoMgr::Init(title.c_str(), w, h, resizable);
     LOG_INFO("VideoMgr initialized");
+
+    Keyboard::Init();
+    Mouse::Init();
 }
 
 void Engine::Exit() {

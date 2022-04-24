@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pch.hpp"
+#include "mathf.hpp"
 
 namespace grogue::core {
 
@@ -19,6 +20,8 @@ public:
     void Show();
     void Hide();
     bool IsShown() const;
+    Size GetSize() const;
+    Size GetOriginSize() const;
 
     ID GetID() const;
 
@@ -26,6 +29,7 @@ public:
 
 private:
     SDL_Window* window_;
+    Size originSize_;
 };
 
 }

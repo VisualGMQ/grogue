@@ -4,6 +4,7 @@
 #include "mathf.hpp"
 #include "texture.hpp"
 #include "storage.hpp"
+#include "font.hpp"
 
 namespace grogue::core {
 
@@ -21,10 +22,11 @@ public:
     void Clear(const Color&);
     void Present();
 
-    void DrawLine(const Vector<float, 2>& p1, const Vector<float, 2>& p2, const Color&);
-    void DrawRect(const Rect& rect, const Color&);
-    void FillRect(const Rect& rect, const Color&);
-    void DrawBorderRect(const Rect& rect, const Color& border, const Color& fill);
+    void DrawLine(const Vector<float, 2>& p1, const Vector<float, 2>& p2,
+                  const Color&);
+    void DrawRect(const Rect& rect,
+                  const std::optional<Color>& fill,
+                  const std::optional<Color>& border);
 
     struct TextureRenderInfo {
     public:
@@ -48,8 +50,7 @@ public:
     };
 
     void DrawTexture(const TextureRenderInfo& info);
-    void DrawFont(/* TODO not finish */);
-    void SetTarget(/* TODO not finish */);
+    std::unique_ptr<Texture> GenerateText(Font& font, const char* text, const Color&);
 
 private:
     SDL_Renderer* renderer_;
