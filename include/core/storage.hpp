@@ -49,6 +49,10 @@ public:
         return datas_.find(name) != datas_.end();
     }
 
+    void Clear() {
+        datas_.clear();
+    }
+
     auto begin() {
         return datas_.begin();
     }

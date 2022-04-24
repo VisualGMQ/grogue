@@ -233,4 +233,16 @@ struct Recti final {
     Recti(int x, int y, int w, int h): x(x), y(y), w(w), h(h) {}
 };
 
+template <typename T, size_t N>
+bool IsPointInRect(const Rect& r, const Vector<T, N>& p) {
+    return p.x >= r.x && p.x <= r.x + r.w &&
+           p.y >= r.y && p.y <= r.y + r.h;
+}
+
+template <typename T, size_t N>
+bool IsPointInRect(const Recti& r, const Vector<T, N>& p) {
+    return p.x >= r.x && p.x <= r.x + r.w &&
+           p.y >= r.y && p.y <= r.y + r.h;
+}
+
 }

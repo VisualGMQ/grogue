@@ -41,6 +41,12 @@ void Engine::Exit() {
 }
 
 void Engine::cleanUp() {
+    FontMgr::Clear();
+    LOG_INFO("free all fonts");
+
+    TextureMgr::Clear();
+    LOG_INFO("free all textures");
+
     VideoMgr::Quit();
     LOG_INFO("VideoMgr quited");
 

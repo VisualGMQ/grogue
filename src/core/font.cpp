@@ -3,7 +3,10 @@
 namespace grogue::core {
 
 Font::Font(const char* filename, int pt) {
-    TTF_OpenFont(filename, pt);
+    font_ = TTF_OpenFont(filename, pt);
+    if (!font_) {
+        LOG_ERROR("font %s load failed",  filename);
+    }
 }
 
 Font::~Font() {
@@ -44,6 +47,10 @@ Font* FontMgr::Find(const std::string& name) {
     } else {
         return nullptr;
     }
+}
+
+void FontMgr::Clear() {
+    fonts_.Clear();
 }
 
 }

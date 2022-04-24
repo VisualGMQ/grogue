@@ -197,11 +197,11 @@ private:
     static LogLevel initLevel_;
 };
 
-#define LOG_CRITICAL(...)   Log::Critical(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define LOG_ERROR(...)      Log::Error(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define LOG_WARN(...)       Log::Warn(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define LOG_INFO(...)       Log::Info(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define LOG_DEBUG(...)      Log::Debug(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define LOG_TRACE(...)      Log::Trace(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define LOG_CRITICAL(...)   grogue::core::Log::Critical(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define LOG_ERROR(...)      grogue::core::Log::Error(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define LOG_WARN(...)       grogue::core::Log::Warn(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define LOG_INFO(...)       grogue::core::Log::Info(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define LOG_DEBUG(...)      grogue::core::Log::Debug(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define LOG_TRACE(...)      grogue::core::Log::Trace(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 }

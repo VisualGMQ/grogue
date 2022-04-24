@@ -32,6 +32,7 @@ public:
     static Font* Create(const std::string& filename,
                         const std::string& name, int pt);
     static Font* Find(const std::string& name);
+    static void Clear();
 
 private:
     static Storage<std::string, std::unique_ptr<Font>> fonts_;

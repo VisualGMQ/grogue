@@ -55,4 +55,8 @@ Texture* TextureMgr::Find(const std::string& name) {
     }
 }
 
+void TextureMgr::Clear() {
+    storage_.Clear();
+}
+
 }

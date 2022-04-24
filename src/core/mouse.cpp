@@ -19,8 +19,8 @@ void Mouse::SwapButtonStates() {
 }
 
 Vec2 Mouse::Position() {
-    Vector<float, 2> scale(focusedWindow_->GetSize().x / focusedWindow_->GetOriginSize().x,
-                            focusedWindow_->GetSize().y / focusedWindow_->GetOriginSize().y,);
+    Vector<float, 2> scale(static_cast<float>(focusedWindow_->GetSize().x) / focusedWindow_->GetOriginSize().x,
+                           static_cast<float>(focusedWindow_->GetSize().y) / focusedWindow_->GetOriginSize().y);
     return Mouse::pos_ * scale;
 }
 
@@ -30,6 +30,12 @@ void Mouse::AcceptEvent(const SDL_Event& e) {
         pos_.y = e.motion.y;
         offset_.x = e.motion.xrel;
         offset_.y = e.motion.yrel;
+    }
+    if (e.type == SDL_MOUSEBUTTONDOWN) {
+        buttonStates_[e.button.button - 1] = true;
+    }
+    if (e.type == SDL_MOUSEBUTTONUP) {
+        buttonStates_[e.button.button - 1] = false;
     }
 }
 

@@ -9,7 +9,7 @@ namespace grogue::core {
 
 enum class MouseButton {
     Left = SDL_BUTTON_LEFT,
-    right = SDL_BUTTON_RIGHT,
+    Right = SDL_BUTTON_RIGHT,
     Middle = SDL_BUTTON_MIDDLE,
     X1 = SDL_BUTTON_X1,
     X2 = SDL_BUTTON_X2,
@@ -23,24 +23,24 @@ public:
     /* get the real position in window */
     static inline Vec2 RealPosition() { return pos_; }
     /* get the scaled position in window(position scales with window size) */
-    static inline Vec2 Position();
+    static Vec2 Position();
     static inline bool IsPressed(MouseButton btn) {
-        return buttonStates_[static_cast<Uint8>(btn)] &&
-               !prevButtonStates_[static_cast<Uint8>(btn)];
+        return buttonStates_[static_cast<Uint8>(btn) - 1] &&
+               !prevButtonStates_[static_cast<Uint8>(btn) - 1];
     }
     static inline bool IsPressing(MouseButton btn) {
-        return buttonStates_[static_cast<Uint8>(btn)] &&
-               prevButtonStates_[static_cast<Uint8>(btn)];
+        return buttonStates_[static_cast<Uint8>(btn) - 1] &&
+               prevButtonStates_[static_cast<Uint8>(btn) - 1];
 
     }
     static inline bool IsReleased(MouseButton btn) {
-        return !buttonStates_[static_cast<Uint8>(btn)] &&
-               prevButtonStates_[static_cast<Uint8>(btn)];
+        return !buttonStates_[static_cast<Uint8>(btn) - 1] &&
+               prevButtonStates_[static_cast<Uint8>(btn) - 1];
 
     }
     static inline bool IsReleasing(MouseButton btn) {
-        return !buttonStates_[static_cast<Uint8>(btn)] &&
-               !prevButtonStates_[static_cast<Uint8>(btn)];
+        return !buttonStates_[static_cast<Uint8>(btn) - 1] &&
+               !prevButtonStates_[static_cast<Uint8>(btn) - 1];
     }
 
     static void AcceptEvent(const SDL_Event&);

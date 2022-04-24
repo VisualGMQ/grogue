@@ -40,9 +40,11 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
     while (!ShouldQuit()) {
         Keyboard::SwapKeyState();
         Mouse::SwapButtonStates();
+
         while (SDL_PollEvent(&event)) {
             Keyboard::AccpetEvent(event);
             Mouse::AcceptEvent(event);
+
             if (event.type == SDL_QUIT) {
                 if (scence && scence->OnQuit()) {
                     Exit();

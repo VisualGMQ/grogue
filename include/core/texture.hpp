@@ -38,7 +38,8 @@ public:
     static Texture* Load(const std::string&);
     static Texture* Load(const std::string& filename, const std::string& name);
     static Texture* Find(const std::string& name);
-
+    static void Clear();
+    
 private:
     static Storage<std::string, std::unique_ptr<Texture>> storage_;
 };
