@@ -25,12 +25,7 @@ void Scence::OnRender() {
 
 void Scence::OnEventHandle(const SDL_Event& event) {
     EventDispatcher dispatcher(layers_);
-
-    dispatcher.Dispatch<SDL_KEYDOWN>(event.key);
-    dispatcher.Dispatch<SDL_KEYUP>(event.key);
-    dispatcher.Dispatch<SDL_MOUSEMOTION>(event.motion);
-    dispatcher.Dispatch<SDL_MOUSEBUTTONDOWN>(event.button);
-    dispatcher.Dispatch<SDL_MOUSEBUTTONUP>(event.button);
+    dispatcher.Dispatch(event);
 }
 
 

@@ -41,7 +41,8 @@ std::ostream& operator<<(std::ostream& o, const UTF8Char& c) {
 UTF8Char::UTF8Char(const std::string& s) {
     size_t i = 0;
     while (i < s.size()) {
-        data_[i++] = s[i];
+        data_[i] = s[i];
+        i++;
     }
     while (i < 4) {
         data_[i++] = 0;

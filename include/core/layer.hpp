@@ -13,23 +13,11 @@ public:
     virtual void Render() {}
     virtual void OnQuit() {}
 
-    template <Uint32 EventT, typename EventStructT>
-    bool Handle(const EventStructT&) { return true; }
-
-    template <>
-    virtual bool Handle<SDL_KEYDOWN>(const SDL_KeyboardEvent&) { return true; }
-
-    template <>
-    virtual bool Handle<SDL_KEYUP>(const SDL_KeyboardEvent&) { return true; }
-
-    template <>
-    virtual bool Handle<SDL_MOUSEMOTION>(const SDL_MouseMotionEvent&) { return true; }
-
-    template <>
-    virtual bool Handle<SDL_MOUSEBUTTONDOWN>(const SDL_MouseButtonEvent&) { return true; }
-
-    template <>
-    virtual bool Handle<SDL_MOUSEBUTTONUP>(const SDL_MouseButtonEvent&) { return true; }
+    virtual bool OnEventKeyDown(const SDL_KeyboardEvent&) { return true; }
+    virtual bool OnEventKeyUp(const SDL_KeyboardEvent&) { return true; }
+    virtual bool OnEventMouseMotion(const SDL_MouseMotionEvent&) { return true; }
+    virtual bool OnEventMouseButtonDown(const SDL_MouseButtonEvent&) { return true; }
+    virtual bool OnEventMouseButtonUp(const SDL_MouseButtonEvent&) { return true; }
 
     std::string_view GetName() const { return name_; }
 

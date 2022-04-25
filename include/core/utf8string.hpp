@@ -52,7 +52,7 @@ public:
     UTF8String& operator=(UTF8String&& o);
 
     UTF8Char& At(size_t idx) const {
-        if (idx < 0 || idx >= size_) {
+        if (idx >= size_) {
             throw std::out_of_range("UTF8String index out of range");
         } else {
             return operator[](idx);
