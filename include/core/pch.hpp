@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <exception>
 #include <optional>
+#include <cstring>
 
 #include "SDL.h"
 #include "SDL_image.h"
