@@ -5,6 +5,7 @@
 #include "texture.hpp"
 #include "storage.hpp"
 #include "font.hpp"
+#include "image.hpp"
 
 namespace grogue::core {
 
@@ -51,6 +52,12 @@ public:
 
     void DrawTexture(const TextureRenderInfo& info);
     std::unique_ptr<Texture> GenerateText(Font& font, const char* text, const Color&);
+
+    void DrawImage(const Image&);
+
+    bool IsClipping() const;
+    Recti GetClipRect() const;
+    void SetClip(const Recti& r);
 
 private:
     SDL_Renderer* renderer_;

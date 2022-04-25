@@ -57,8 +57,12 @@ Renderer::~Renderer() {
 
 Renderer::TextureRenderInfo::TextureRenderInfo(Texture* texture): texture(texture) {
     dst.x = dst.y = 0;
-    dst.w = texture->GetSize().w;
-    dst.h = texture->GetSize().h;
+    if (texture) {
+        dst.w = texture->GetSize().w;
+        dst.h = texture->GetSize().h;
+    } else {
+        dst.w = dst.h = 0;
+    }
     src.x = src.y = 0;
     src.w = dst.w;
     src.h = dst.h;
@@ -104,6 +108,31 @@ std::unique_ptr<Texture> Renderer::GenerateText(Font& font, const char* text, co
     auto texture = std::make_unique<Texture>(surface);
     SDL_FreeSurface(surface);
     return texture;
+}
+
+void Renderer::DrawImage(const Image& image) {
+    TextureRenderInfo info(image.texture_);
+    info.SetRotation(image.GetRotation());
+    info.SetRotatAnchor(image.GetRotateAnchor());
+    info.SetPos(image.GetPos());
+    info.SetSize(image.GetSize());
+    info.SetSrcArea(image.srcRect_);
+    info.SetFlip(image.flip_);
+    DrawTexture(info);
+}
+
+bool Renderer::IsClipping() const {
+    return SDL_RenderIsClipEnabled(renderer_);
+}
+
+void Renderer::SetClip(const Recti& r) {
+    SDL_RenderSetClipRect(renderer_, &r.sdlrect);
+}
+
+Recti Renderer::GetClipRect() const {
+    Recti rect;
+    SDL_RenderGetClipRect(renderer_, &rect.sdlrect);
+    return rect;
 }
 
 }

@@ -3,6 +3,7 @@
 #include "gui/init.hpp"
 #include "core/video.hpp"
 #include "core/mouse.hpp"
+#include "core/image.hpp"
 
 namespace grogue::gui {
 
@@ -18,6 +19,6 @@ enum Align {
 };
 
 
-bool Button(bool& show, const char* text, grogue::core::Rect* = nullptr, Align = Align::AlignCenter);
+bool Button(bool& show, const char* text, grogue::core::Rect* = nullptr, Align = Align::AlignCenter, Style* style = nullptr);
 
 }

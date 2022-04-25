@@ -3,15 +3,14 @@
 #include "core/pch.hpp"
 #include "core/font.hpp"
 #include "event.hpp"
-#include "colorscheme.hpp"
+#include "style.hpp"
 
 namespace grogue::gui {
 
 struct GuiContext {
     grogue::core::Font* font;
     std::optional<grogue::core::Rect> presentRect;
-    Event event;
-    ColorScheme colorScheme;
+    Style style;
 };
 
 extern GuiContext Context;

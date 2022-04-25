@@ -6,6 +6,7 @@ namespace grogue::core {
 class Timer final {
 public:
     static std::uint32_t GetMsBetweenFrames();
+    static double GetSecondsBetweenFrames();
     static void Record();
 
 private:
