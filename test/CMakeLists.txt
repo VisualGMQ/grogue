@@ -19,6 +19,7 @@ macro(ADD_GUI_TEST NAME)
 endmacro()
 
 ADD_CORE_TEST(mathf)
-ADD_CORE_TEST(texture)
+ADD_CORE_TEST(image)
 ADD_CORE_TEST(utf8string)
 ADD_GUI_TEST(test_gui)
+ADD_GUI_TEST(animation)

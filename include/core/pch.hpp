@@ -20,6 +20,7 @@
 #include <exception>
 #include <optional>
 #include <cstring>
+#include <initializer_list>
 
 #include "SDL.h"
 #include "SDL_image.h"

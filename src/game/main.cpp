@@ -1,23 +1,42 @@
+#include "core/tilesheet.hpp"
 #include "core/video.hpp"
 #include "core/timer.hpp"
 #include "core/engine.hpp"
 #include "core/utf8string.hpp"
 #include "core/image.hpp"
+#include "core/animation.hpp"
 
 class MainLayer final: public grogue::core::Layer {
 public:
     MainLayer(std::string_view name): grogue::core::Layer(name) {}
 
+    void OnInit() override {
+        tilesheet_.reset(new grogue::core::TileSheet(grogue::core::Image::Create(*grogue::core::TextureMgr::Find("kirby")), 16, 2));
+        anim_ = grogue::core::Animation::Create(*tilesheet_, {100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100}, 0);
+        anim_.SetLoop(-1);
+        anim_.Play();
+    }
+
+    void Update() override {
+        anim_.Update();
+    }
+
     void Render() override {
         auto& renderer = grogue::core::VideoMgr::GetMainVideo()->renderer;
         renderer->Clear(grogue::core::Color(100, 100, 100, 255));
 
-        static auto image = grogue::core::Image::CreateImage("kirby", grogue::core::Recti(0, 0, 36, 36));
-        image.SetRotation(image.GetRotation() + 50 * grogue::core::Timer::GetSecondsBetweenFrames());
-        image.SetPos(grogue::core::Vec2(100, 100));
+        auto& frame = anim_.GetCurFrame();
 
-        renderer->DrawImage(image);
+        grogue::core::Transform transform;
+
+        transform.SetPos(grogue::core::Vec2(100, 100));
+
+        renderer->DrawImage(frame.image, transform);
     }
+
+private:
+    std::unique_ptr<grogue::core::TileSheet> tilesheet_;
+    grogue::core::Animation anim_;
 };
 
 class MainScence: public grogue::core::Scence {

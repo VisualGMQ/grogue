@@ -1,8 +1,8 @@
 #include "core/mathf.hpp"
 #include "core/video.hpp"
 #include "core/timer.hpp"
-#include "core/texture.hpp"
 #include "core/engine.hpp"
+#include "core/image.hpp"
 
 class TestLayer: public grogue::core::Layer {
 public:
@@ -13,8 +13,9 @@ public:
     }
 
     void Render() override {
-        grogue::core::VideoMgr::GetMainVideo()->renderer->DrawTexture(
-            grogue::core::Renderer::TextureRenderInfo(kriby_).SetPos(grogue::core::Vec2(0, 0))
+        grogue::core::VideoMgr::GetMainVideo()->renderer->DrawImage(
+            grogue::core::Image::Create("kriby"),
+            grogue::core::Transform().SetPos(grogue::core::Vec2(0, 0))
         );
     }
 

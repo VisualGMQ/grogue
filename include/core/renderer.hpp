@@ -9,6 +9,25 @@
 
 namespace grogue::core {
 
+struct Transform {
+    Transform();
+
+    Transform& SetSrcArea(const Recti& r);
+    Transform& SetPos(const Vec2& v);
+    Transform& SetScale(const Vec2& s);
+    Transform& SetFlip(Flip);
+    Transform& SetRotation(float);
+    Transform& SetRotatAnchor(const Vec2& a);
+
+    Vec2 position;
+    Vec2 scale;
+    Flip flip = Flip::NoFlip;
+    float degree = 0;
+    Vec2 anchor;
+};
+
+
+
 class Renderer final {
 public:
     friend class TextureManager;
@@ -29,31 +48,9 @@ public:
                   const std::optional<Color>& fill,
                   const std::optional<Color>& border);
 
-    struct TextureRenderInfo {
-    public:
-        friend class Renderer;
-
-        TextureRenderInfo(Texture* texture);
-        TextureRenderInfo& SetSrcArea(const Recti& r);
-        TextureRenderInfo& SetPos(const Vec2& v);
-        TextureRenderInfo& SetSize(const Vec2& s);
-        TextureRenderInfo& SetFlip(Flip);
-        TextureRenderInfo& SetRotation(float);
-        TextureRenderInfo& SetRotatAnchor(const Vec2& a);
-
-    private:
-        Texture* texture;
-        Recti src;
-        Rect dst;
-        Flip flip = Flip::NoFlip;
-        float degree = 0;
-        Vec2 anchor;
-    };
-
-    void DrawTexture(const TextureRenderInfo& info);
     std::unique_ptr<Texture> GenerateText(Font& font, const char* text, const Color&);
 
-    void DrawImage(const Image&);
+    void DrawImage(const Image&, const Transform&);
 
     bool IsClipping() const;
     Recti GetClipRect() const;

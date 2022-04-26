@@ -108,9 +108,10 @@ bool Button(bool& show, const char* text, core::Rect* rect, Align align, Style* 
         auto texture = renderer->GenerateText(*Context.font, text,
                                               colorStyle.fontColor);
 
-        core::Renderer::TextureRenderInfo info(texture.get());
-        info.SetPos(core::Vec2(textRect.x, textRect.y));
-        renderer->DrawTexture(info);
+        auto image = core::Image::Create(*texture);
+        core::Transform transform;
+        transform.SetPos(core::Vec2(textRect.x, textRect.y));
+        renderer->DrawImage(image, transform);
 
         return evt == Event::MouseDown;
     }

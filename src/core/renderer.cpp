@@ -36,17 +36,6 @@ void Renderer::DrawRect(const Rect& rect,
     }
 }
 
-void Renderer::DrawTexture(const TextureRenderInfo& info) {
-    SDL_FPoint center = {info.anchor.x, info.anchor.y};
-    SDL_RenderCopyExF(renderer_,
-                      info.texture->texture_,
-                      &info.src.sdlrect,
-                      &info.dst.sdlrect,
-                      info.degree,
-                      &center,
-                      static_cast<SDL_RendererFlip>(info.flip));
-}
-
 void Renderer::setColor(const Color& color) {
     SDL_SetRenderDrawColor(renderer_, color.r, color.g, color.b, color.a);
 }
@@ -55,50 +44,31 @@ Renderer::~Renderer() {
     SDL_DestroyRenderer(renderer_);
 }
 
-Renderer::TextureRenderInfo::TextureRenderInfo(Texture* texture): texture(texture) {
-    dst.x = dst.y = 0;
-    if (texture) {
-        dst.w = texture->GetSize().w;
-        dst.h = texture->GetSize().h;
-    } else {
-        dst.w = dst.h = 0;
-    }
-    src.x = src.y = 0;
-    src.w = dst.w;
-    src.h = dst.h;
-    anchor.x = src.w / 2.0;
-    anchor.y = src.h / 2.0;
-}
+Transform::Transform()
+    :position(0, 0), scale(1, 1), flip(Flip::NoFlip), degree(0), anchor(0.5, 0.5) {}
 
-Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetSrcArea(const Recti& r) {
-    src = r;
-    return *this;
-}
-
-Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetPos(const Vec2& v) {
-    dst.x = v.x;
-    dst.y = v.y;
+Transform& Transform::SetPos(const Vec2& v) {
+    position = v;
     return *this;
 }
 
 
-Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetSize(const Vec2& s) {
-    dst.w = s.w;
-    dst.h = s.h;
+Transform& Transform::SetScale(const Vec2& s) {
+    scale = s;
     return *this;
 }
 
-Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetFlip(Flip f) {
+Transform& Transform::SetFlip(Flip f) {
     flip = f;
     return *this;
 }
 
-Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetRotation(float degree) {
+Transform& Transform::SetRotation(float degree) {
     this->degree = degree;
     return *this;
 }
 
-Renderer::TextureRenderInfo& Renderer::TextureRenderInfo::SetRotatAnchor(const Vec2& a) {
+Transform& Transform::SetRotatAnchor(const Vec2& a) {
     anchor = a;
     return *this;
 }
@@ -110,15 +80,20 @@ std::unique_ptr<Texture> Renderer::GenerateText(Font& font, const char* text, co
     return texture;
 }
 
-void Renderer::DrawImage(const Image& image) {
-    TextureRenderInfo info(image.texture_);
-    info.SetRotation(image.GetRotation());
-    info.SetRotatAnchor(image.GetRotateAnchor());
-    info.SetPos(image.GetPos());
-    info.SetSize(image.GetSize());
-    info.SetSrcArea(image.srcRect_);
-    info.SetFlip(image.flip_);
-    DrawTexture(info);
+void Renderer::DrawImage(const Image& image, const Transform& transform) {
+    if (!image) return;
+    SDL_FPoint center = {image.srcRect_.x + image.srcRect_.w * transform.anchor.x,
+                         image.srcRect_.y + image.srcRect_.h * transform.anchor.y};
+    SDL_FRect dstRect{transform.position.x, transform.position.y,
+                      transform.scale.x * image.srcRect_.w,
+                      transform.scale.y * image.srcRect_.h};
+    SDL_RenderCopyExF(renderer_,
+                      image.texture_->texture_,
+                      &image.srcRect_.sdlrect,
+                      &dstRect,
+                      transform.degree,
+                      &center,
+                      static_cast<SDL_RendererFlip>(transform.flip));
 }
 
 bool Renderer::IsClipping() const {
