@@ -9,8 +9,7 @@ class EventDispatcher final {
 public:
     EventDispatcher(Cont& container): container_(container) {}
 
-    template <typename EventStructT>
-    void Dispatch(const EventStructT& e) {
+    void Dispatch(const SDL_Event& e) {
         for (auto& elem : container_) {
             if (e.type == SDL_KEYDOWN) {
                 if (elem->OnEventKeyDown(e.key)) break;
@@ -26,6 +25,12 @@ public:
             }
             if (e.type == SDL_MOUSEBUTTONUP) {
                 if (elem->OnEventMouseButtonUp(e.button)) break;
+            }
+            if (e.type == SDL_DROPFILE) {
+                if (elem->OnEventDropFile(e.drop)) break;
+            }
+            if (e.type == SDL_DROPTEXT) {
+                if (elem->OnEventDropFile(e.drop)) break;
             }
         }
     }

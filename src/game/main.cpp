@@ -48,7 +48,7 @@ public:
 };
 
 int main(int, char**) {
-    grogue::core::Engine::Init("grogue", 1025, 720, false);
+    grogue::core::Engine::Init("grogue", 1025, 720, true);
     grogue::core::Engine::RunScence<MainScence>("MainScence");
 
     return 0;

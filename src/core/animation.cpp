@@ -27,22 +27,19 @@ void Animation::Update() {
     if (frames_.empty()) return;
     if (IsPlaying()) {
         remainTime_ += Timer::GetMsBetweenFrames();
-    }
 
-    while (IsPlaying() && remainTime_ >= GetCurFrame().delayMs) {
-        remainTime_ += Timer::GetMsBetweenFrames();
-        if (remainTime_ > GetCurFrame().delayMs) {
+        while (remainTime_ >= GetCurFrame().delayMs) {
             remainTime_ -= GetCurFrame().delayMs;
             curFrameIdx_ ++;
-        }
-        if (curFrameIdx_ >= frames_.size()) {
-            if (loopCount_ == -1 || loopCount_ > 0) {
-                Rewind();
-                if (loopCount_ > 0) loopCount_ --;
-            } else {
-                Pause();
-                curFrameIdx_ --;
-                remainTime_ = 0;
+            if (curFrameIdx_ >= frames_.size()) {
+                if (loopCount_ == -1 || loopCount_ > 0) {
+                    Rewind();
+                    if (loopCount_ > 0) loopCount_ --;
+                } else {
+                    Pause();
+                    curFrameIdx_ --;
+                    remainTime_ = 0;
+                }
             }
         }
     }

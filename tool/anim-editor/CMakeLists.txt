@@ -1,0 +1,5 @@
+aux_source_directory(. ANIM_EDITOR_SRC)
+file(GLOB ANIM_EDITOR_HEADER_FILES "./*.hpp" "./*.h")
+add_executable(AnimEditor ${ANIM_EDITOR_SRC} ${ANIM_EDITOR_HEADER_FILES})
+target_link_libraries(AnimEditor PRIVATE core)
+target_precompile_headers(AnimEditor REUSE_FROM core)

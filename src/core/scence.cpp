@@ -45,10 +45,10 @@ void ScenceMgr::Init(Scence* scence) {
 
 void ScenceMgr::Quit() {
     if (curScence_) {
-        curScence_->OnQuit();
         for (auto& layer : curScence_->layers_) {
             layer->OnQuit();
         }
+        curScence_->OnQuit();
     }
 }
 

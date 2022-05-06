@@ -10,6 +10,7 @@ using ID = std::uint32_t;
 class Window final {
 public:
     friend class Renderer;
+    friend class Engine;
 
     Window(const char* title,
            uint32_t width, uint32_t height,

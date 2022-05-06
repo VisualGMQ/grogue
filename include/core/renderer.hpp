@@ -32,6 +32,7 @@ class Renderer final {
 public:
     friend class TextureManager;
     friend class Texture;
+    friend class Engine;
 
     Renderer(Window& window);
     Renderer(const Renderer&) = delete;
@@ -55,6 +56,9 @@ public:
     bool IsClipping() const;
     Recti GetClipRect() const;
     void SetClip(const Recti& r);
+
+    /* for imgui, don't use in other places */
+    SDL_Renderer* GetRawRenderer() const { return renderer_; }
 
 private:
     SDL_Renderer* renderer_;

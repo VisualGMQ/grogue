@@ -23,7 +23,9 @@ public:
 
 private:
     static bool shouldQuit_;
+    static Size initWindowSize_;
 
+    static void initImGui();
     static void cleanUp();
 };
 
@@ -37,6 +39,8 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
     if (!scence) {
         LOG_CRITICAL("Scence Create failed");
     }
+
+    Timer::Record();
     while (!ShouldQuit()) {
         Keyboard::SwapKeyState();
         Mouse::SwapButtonStates();
@@ -44,6 +48,7 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
         while (SDL_PollEvent(&event)) {
             Keyboard::AccpetEvent(event);
             Mouse::AcceptEvent(event);
+            ImGui_ImplSDL2_ProcessEvent(&event);
 
             if (event.type == SDL_QUIT) {
                 if (scence && scence->OnQuit()) {
@@ -64,10 +69,17 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
 
         Timer::Record();
 
+        ImGui_ImplSDL2_NewFrame();
+        ImGui_ImplSDLRenderer_NewFrame();
+        ImGui::NewFrame();
+
         if (scence) {
             scence->OnUpdate();
             scence->OnRender();
         }
+
+        ImGui::Render();
+        ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
 
         VideoMgr::Present();
     }

@@ -3,10 +3,13 @@
 namespace grogue::core {
 
 bool Engine::shouldQuit_ = false;
+Size Engine::initWindowSize_;
 
 void Engine::Init(const std::string& title,
                   uint32_t w, uint32_t h,
                   bool resizable) {
+    initWindowSize_.Set(w, h);
+
     Log::Init(LogLevel::Debug);
     Log::CreateConsoleLogger("console");
 
@@ -34,6 +37,23 @@ void Engine::Init(const std::string& title,
 
     Keyboard::Init();
     Mouse::Init();
+
+    initImGui();
+    LOG_INFO("imgui initialized");
+}
+
+void Engine::initImGui() {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableSetMousePos;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    ImGui::StyleColorsDark();
+    ImGui_ImplSDL2_InitForSDLRenderer(VideoMgr::GetMainVideo()->window->window_,
+                                      VideoMgr::GetMainVideo()->renderer->renderer_);
+    ImGui_ImplSDLRenderer_Init(VideoMgr::GetMainVideo()->renderer->renderer_);
 }
 
 void Engine::Exit() {
@@ -41,6 +61,10 @@ void Engine::Exit() {
 }
 
 void Engine::cleanUp() {
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+    LOG_INFO("imgui shutdown");
+
     FontMgr::Clear();
     LOG_INFO("free all fonts");
 

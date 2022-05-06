@@ -8,10 +8,10 @@
 namespace grogue::core  {
 
 struct Frame final {
-    Frame(Image, unsigned int ms);
+    Frame(Image, uint32_t ms);
 
     Image image;
-    unsigned int delayMs;
+    uint32_t delayMs;
 };
 
 class Animation final {
@@ -34,7 +34,7 @@ public:
 
     bool IsPlaying() const { return isPlaying_; }
     void Play() { isPlaying_ = true; }
-    void Rewind() { curFrameIdx_ = 0; }
+    void Rewind() { curFrameIdx_ = 0; remainTime_ = 0; }
     void Pause() { isPlaying_ = false; }
     void Stop() { Pause(); Rewind(); }
     size_t GetCurFrameIdx() { return curFrameIdx_; }

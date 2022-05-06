@@ -10,7 +10,7 @@ std::uint32_t Timer::GetMsBetweenFrames() {
 }
 
 double Timer::GetSecondsBetweenFrames() {
-    return GetMsBetweenFrames() / 1000.0f;
+    return GetMsBetweenFrames() * 1000.0f;
 }
 
 void Timer::Record() {

@@ -18,6 +18,7 @@ public:
     virtual bool OnEventMouseMotion(const SDL_MouseMotionEvent&) { return true; }
     virtual bool OnEventMouseButtonDown(const SDL_MouseButtonEvent&) { return true; }
     virtual bool OnEventMouseButtonUp(const SDL_MouseButtonEvent&) { return true; }
+    virtual bool OnEventDropFile(const SDL_DropEvent&) { return true; }
 
     std::string_view GetName() const { return name_; }
 

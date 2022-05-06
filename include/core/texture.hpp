@@ -26,6 +26,9 @@ public:
 
     Size GetSize() const { return size_; }
 
+    /* this funciton prepare for ImGui, you can't use it at other palce */
+    SDL_Texture* GetRawTexture() const { return texture_; }
+
 private:
     SDL_Texture* texture_;
     Size size_;

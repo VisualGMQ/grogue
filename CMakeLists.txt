@@ -6,7 +6,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 project(
   grogue
   VERSION 0.1.0
-  LANGUAGES CXX
+  LANGUAGES CXX C
 )
 
 ################################
@@ -15,6 +15,9 @@ project(
 include(cmake/FindSDL2.cmake)
 include(cmake/FindSDL2_image.cmake)
 include(cmake/FindSDL2_ttf.cmake)
+
+add_subdirectory(3rdlib/imgui)
+add_subdirectory(3rdlib/ImGuiFileDialog)
 
 ################################
 # Compile
@@ -32,30 +35,15 @@ set(GROGUE_CORE_LIB_NAME core)
 add_library(${GROGUE_CORE_LIB_NAME} SHARED ${CORE_SRC} ${CORE_HEADER_FILES})
 target_link_libraries(
   ${GROGUE_CORE_LIB_NAME}
-  PUBLIC SDL2::SDL2 SDL2::SDL2_image SDL2::SDL2_ttf
+  PUBLIC SDL2::SDL2 SDL2::SDL2_image SDL2::SDL2_ttf imgui imgui-filedialog
 )
 target_include_directories(
   ${GROGUE_CORE_LIB_NAME}
-  PUBLIC include
+  PUBLIC include 3rdlib/toml++
 )
 target_compile_features(${GROGUE_CORE_LIB_NAME} PUBLIC cxx_std_17)
 target_precompile_headers(${GROGUE_CORE_LIB_NAME} PUBLIC include/core/pch.hpp)
 target_compile_options(${GROGUE_CORE_LIB_NAME} PUBLIC -Wall -Wformat -Wextra -pedantic)
-
-# Compile GUI
-aux_source_directory(src/gui GUI_SRC)
-file(GLOB_RECURSE GUI_HEADER_FILES "include/gui/*.hpp" "include/gui/*.h")
-
-source_group("Header Files" FILES ${GUI_HEADER_FILES})
-source_group("Source Files" FILES ${GUI_SRC})
-
-set(GROGUE_GUI_LIB_NAME gui)
-add_library(${GROGUE_GUI_LIB_NAME} SHARED ${GUI_SRC} ${GUI_HEADER_FILES})
-target_link_libraries(
-    ${GROGUE_GUI_LIB_NAME}
-    PUBLIC ${GROGUE_CORE_LIB_NAME}
-)
-target_precompile_headers(${GROGUE_GUI_LIB_NAME} REUSE_FROM ${GROGUE_CORE_LIB_NAME})
 
 # Compile Game
 aux_source_directory(src/game GAME_SRC)
@@ -92,9 +80,17 @@ file(GLOB_RECURSE 3RDLIB_FILES "3rdlib/*.hpp" "3rdlib/*.h++")
 add_library(3rdlib INTERFACE ${3RDLIB_FILES})
 
 ################################
+# add tool
+################################
+option(BUILD_TOOL "enable build tool" ON)
+
+if (BUILD_TOOL)
+    add_subdirectory(tool)
+endif()
+
+################################
 # add test
 ################################
-
 option(BUILD_UNITTEST "enable build unittest" OFF)
 
 if (BUILD_UNITTEST)
