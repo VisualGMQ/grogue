@@ -54,4 +54,16 @@ private:
     Animation(const std::vector<Frame>& frames);
 };
 
+class AnimationMgr final {
+public:
+    void Add(const Animation& animation);
+
+    void Update();
+
+private:
+    std::list<Animation> animations_;
+
+    void cleanup();
+};
+
 }

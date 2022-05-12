@@ -1,0 +1,12 @@
+install(TARGETS ${GROGUE_GAME_NAME} ${GROGUE_CORE_LIB_NAME}
+    RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/install
+    LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/install
+)
+
+install(DIRECTORY assets
+    DESTINATION ${CMAKE_SOURCE_DIR}/install
+)
+
+if (WIN32)
+    # TODO install SDL libs to ${CMAKE_SOURCE_DIR}/install
+endif()

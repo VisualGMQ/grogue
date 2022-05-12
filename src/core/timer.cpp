@@ -2,8 +2,7 @@
 
 namespace grogue::core {
 
-std::uint32_t Timer::ms_ = 0; 
-std::chrono::steady_clock::time_point Timer::curTime_{};
+Timer Timer::SteadyTimer;
 
 std::uint32_t Timer::GetMsBetweenFrames() {
     return ms_;

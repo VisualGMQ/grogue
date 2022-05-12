@@ -5,13 +5,15 @@ namespace grogue::core {
 
 class Timer final {
 public:
-    static std::uint32_t GetMsBetweenFrames();
-    static double GetSecondsBetweenFrames();
-    static void Record();
+    static Timer SteadyTimer;
+
+    std::uint32_t GetMsBetweenFrames();
+    double GetSecondsBetweenFrames();
+    void Record();
 
 private:
-    static std::uint32_t ms_; 
-    static std::chrono::steady_clock::time_point curTime_;
+    std::uint32_t ms_ = 0; 
+    std::chrono::steady_clock::time_point curTime_{};
 };
 
 }

@@ -1,10 +1,15 @@
 #pragma once
 #include "pch.hpp"
+#include "animation.hpp"
 
 namespace grogue::core {
 
+class Scence;
+
 class Layer {
 public:
+    friend class Scence;
+
     Layer(std::string_view name);
     virtual ~Layer() = default;
 
@@ -26,9 +31,12 @@ public:
     void StartWorking() { isWorking_ = true; }
     void StopWorking() { isWorking_ = false; }
 
+    AnimationMgr& GetAnimMgr();
+
 private:
     bool isWorking_ = true;
     std::string_view name_;
+    Scence* scence_;
 };
 
 }

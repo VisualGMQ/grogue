@@ -5,6 +5,8 @@
 #include "layer.hpp"
 #include "event_dispatcher.hpp"
 #include "storage.hpp"
+#include "timer.hpp"
+#include "animation.hpp"
 
 namespace grogue::core {
 
@@ -29,11 +31,13 @@ public:
     template <typename LayerT, typename... Args>
     void PushBackLayer(std::string_view name, Args... args) {
         layers_.emplace_back(new LayerT(name, std::forward<Args>(args)...));
+        layers_.back()->scence_ = this;
     }
 
     template <typename LayerT, typename... Args>
     void PushFrontLayer(std::string_view name, Args... args) {
         layers_.emplace_front(new LayerT(name, std::forward<Args>(args)...));
+        layers_.front()->scence_ = this;
     }
 
     Layer* FindLayer(std::string_view name) const {
@@ -48,9 +52,12 @@ public:
         }
     }
 
+    AnimationMgr& GetAnimMgr() { return animManager_; }
+
 private:
     std::string_view name_;
     std::list<std::unique_ptr<Layer>> layers_;
+    AnimationMgr animManager_;
 };
 
 

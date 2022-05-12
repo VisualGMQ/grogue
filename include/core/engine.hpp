@@ -40,7 +40,7 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
         LOG_CRITICAL("Scence Create failed");
     }
 
-    Timer::Record();
+    Timer::SteadyTimer.Record();
     while (!ShouldQuit()) {
         Keyboard::SwapKeyState();
         Mouse::SwapButtonStates();
@@ -67,7 +67,7 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
 
         VideoMgr::ClearScreen();
 
-        Timer::Record();
+        Timer::SteadyTimer.Record();
 
         ImGui_ImplSDL2_NewFrame();
         ImGui_ImplSDLRenderer_NewFrame();

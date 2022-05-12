@@ -26,7 +26,7 @@ Animation::Animation(const std::vector<Frame>& frames): frames_(frames) {}
 void Animation::Update() {
     if (frames_.empty()) return;
     if (IsPlaying()) {
-        remainTime_ += Timer::GetMsBetweenFrames();
+        remainTime_ += Timer::SteadyTimer.GetMsBetweenFrames();
 
         while (remainTime_ >= GetCurFrame().delayMs) {
             remainTime_ -= GetCurFrame().delayMs;
@@ -42,6 +42,36 @@ void Animation::Update() {
                 }
             }
         }
+    }
+}
+
+
+void AnimationMgr::Add(const Animation& animation) {
+    animations_.push_back(animation);
+}
+
+void AnimationMgr::Update() {
+    auto prev = animations_.begin();
+    while (prev != animations_.end() && !prev->IsPlaying()) {
+        animations_.erase(prev);
+        prev = animations_.begin();
+    }
+    if (prev == animations_.end()) {
+        return;
+    }
+    prev->Update();
+    auto next = prev;
+    next ++;
+    while (next != animations_.end()) {
+        if (next->IsPlaying()) {
+            next->Update();
+        } else {
+            animations_.erase(next);
+            next = prev;
+            next ++;
+        }
+        prev ++;
+        next ++;
     }
 }
 

@@ -43,6 +43,14 @@ VideoMgr::CreateVideo(title, width, height);
 
 创建多于一个的窗口。
 
+通过
+
+```cpp
+VideoMgr::GetMainVideo()
+```
+
+获得主窗口的Video。
+
 ## Window
 
 即对`SDL_Window`的简单封装
@@ -103,13 +111,9 @@ scence->PushFrontLayer<LayerClass>(params...);
 
 ## Timer
 
-Timer是静态类，用于记录相邻两帧的时间间隔。通过
+Timer用于记录相邻两帧的时间间隔。通过成员函数`GetMsBetweenFrames()`得到以毫秒为单位的时间。
 
-```cpp
-Timer::GetMsBetweenFrames();
-```
-
-得到以毫秒为单位的时间。
+Timer存在一个单例`SteadyTimer`，用于记录每一帧之间的时间间隔。
 
 ## UTF8String
 
@@ -123,9 +127,9 @@ Timer::GetMsBetweenFrames();
 
 对`Texture`的简单封装，主要是将Texture的各种变换设置放在一起，并且指定绘制区域。
 
-## GUI
+## Tilesheet
 
-自己实现的ImGUI
+用于描述瓦片图片集的简单封装。
 
 ## Keyboard
 
