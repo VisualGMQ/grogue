@@ -42,6 +42,12 @@ public:
         return !buttonStates_[static_cast<Uint8>(btn) - 1] &&
                !prevButtonStates_[static_cast<Uint8>(btn) - 1];
     }
+    static inline bool IsPress(MouseButton btn) {
+        return IsPressing(btn) || IsPressed(btn);
+    }
+    static inline bool IsRelease(MouseButton btn) {
+        return IsReleasing(btn) || IsReleased(btn);
+    }
 
     static void AcceptEvent(const SDL_Event&);
     static void SwapButtonStates();

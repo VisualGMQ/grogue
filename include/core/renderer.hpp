@@ -47,7 +47,7 @@ public:
                   const Color&);
     void DrawRect(const Rect& rect,
                   const std::optional<Color>& fill,
-                  const std::optional<Color>& border);
+                  const std::optional<Color>& border = std::nullopt);
 
     std::unique_ptr<Texture> GenerateText(Font& font, const char* text, const Color&);
 

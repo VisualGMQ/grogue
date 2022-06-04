@@ -10,3 +10,7 @@ dist
 3rdlib/SDL2_ttf/*
 win_build.bat
 log.txt
+cache
+imgui.ini
+Session.vim
+install

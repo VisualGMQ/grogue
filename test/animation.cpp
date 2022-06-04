@@ -14,7 +14,6 @@ public:
         tilesheet_.reset(new grogue::core::TileSheet(grogue::core::Image::Create("kirby"), 16, 2));
         anim_ = grogue::core::Animation::Create(*tilesheet_, std::vector<uint32_t>(tilesheet_->GetCol(), delayTime_), 0);
         anim_.SetLoop(-1);
-        anim_.Play();
     }
 
     void Update() override {
@@ -28,10 +27,23 @@ public:
         grogue::core::Transform transform;
         transform.SetPos(grogue::core::Vec2(400, 200))
                  .SetScale(grogue::core::Vec2(2, 2));
-        grogue::core::VideoMgr::GetMainVideo()->renderer->DrawImage(image, transform);
+        grogue::core::GFX::DrawImage(image, transform);
 
-        bool open = true;
-        ImGui::ShowDemoWindow(&open);
+        static bool open = true;
+        ImGui::Begin("Operators", &open);
+            if (ImGui::Button("Play")) {
+                anim_.Play();
+            }
+            if (ImGui::Button("Stop")) {
+                anim_.Stop();
+            }
+            if (ImGui::Button("Pause")) {
+                anim_.Pause();
+            }
+            if (ImGui::Button("Rewind")) {
+                anim_.Rewind();
+            }
+        ImGui::End();
     }
 
 private:

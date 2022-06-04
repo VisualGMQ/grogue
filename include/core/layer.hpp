@@ -18,12 +18,12 @@ public:
     virtual void Render() {}
     virtual void OnQuit() {}
 
-    virtual bool OnEventKeyDown(const SDL_KeyboardEvent&) { return true; }
-    virtual bool OnEventKeyUp(const SDL_KeyboardEvent&) { return true; }
-    virtual bool OnEventMouseMotion(const SDL_MouseMotionEvent&) { return true; }
-    virtual bool OnEventMouseButtonDown(const SDL_MouseButtonEvent&) { return true; }
-    virtual bool OnEventMouseButtonUp(const SDL_MouseButtonEvent&) { return true; }
-    virtual bool OnEventDropFile(const SDL_DropEvent&) { return true; }
+    virtual bool OnKeyDown(const SDL_KeyboardEvent&) { return true; }
+    virtual bool OnKeyUp(const SDL_KeyboardEvent&) { return true; }
+    virtual bool OnMouseMotion(const SDL_MouseMotionEvent&) { return true; }
+    virtual bool OnMouseButtonDown(const SDL_MouseButtonEvent&) { return true; }
+    virtual bool OnMouseButtonUp(const SDL_MouseButtonEvent&) { return true; }
+    virtual bool OnDropFile(const SDL_DropEvent&) { return true; }
 
     std::string_view GetName() const { return name_; }
 

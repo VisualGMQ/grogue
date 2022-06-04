@@ -7,6 +7,7 @@
 #include "video.hpp"
 #include "keyboard.hpp"
 #include "mouse.hpp"
+#include "gfx.hpp"
 
 namespace grogue::core {
 

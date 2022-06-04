@@ -17,6 +17,8 @@ public:
     static inline bool IsPressed(SDL_Scancode code)   { return states_[code] && !prevStates_[code]; }
     static inline bool IsReleasing(SDL_Scancode code) { return !states_[code] && !prevStates_[code]; }
     static inline bool IsReleased(SDL_Scancode code)  { return !states_[code] && prevStates_[code]; }
+    static inline bool IsPress(SDL_Scancode code)     { return IsPressed(code) || IsPressing(code); }
+    static inline bool IsRelease(SDL_Scancode code)   { return IsReleased(code) || IsReleasing(code); }
 
 private:
     static bool states_[SDL_NUM_SCANCODES];

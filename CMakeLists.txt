@@ -9,12 +9,14 @@ project(
   LANGUAGES CXX C
 )
 
-set(GROGUE_CORE_LIB_NAME core)
+set(GROGUE_CORE_NAME core)
 set(GROGUE_GAME_NAME grogue)
+set(GROGUE_PHYSICAL_NAME physical)
 
 include(cmake/find_3rdparts.cmake)
 include(cmake/build_core.cmake)
 include(cmake/build_game.cmake)
+include(cmake/build_physical.cmake)
 include(cmake/ide_config.cmake)
 include(cmake/build_tool.cmake)
 include(cmake/build_test.cmake)

@@ -83,6 +83,12 @@ struct Vector<T, 2> {
         return *this;
     }
 
+    Vector& operator/=(float value) {
+        x /= value;
+        y /= value;
+        return *this;
+    }
+
     float Len2() const {
         return x * x + y * y;
     }
@@ -160,11 +166,10 @@ struct IsVector<Vector<U, N>, N> { inline static constexpr bool value = true; };
 template<typename U, size_t N>
 inline constexpr bool IsVector_v = IsVector<U, N>::value;
 
-template <typename T, size_t N, typename U>
+template <typename T, size_t N>
 auto operator/(const Vector<T, N>& v,
-               // std::enable_if_t<!IsVector_v<U, N>, U&&> value) {
-               U value) {
-    Vector<std::common_type_t<T, U>, N> ret;
+               float value) {
+    Vector<std::common_type_t<T, float>, N> ret;
     for (size_t i = 0; i < N; i++) {
         ret.data[i] = v.data[i] / value;
     }
@@ -221,6 +226,7 @@ struct Rect final {
 
     Rect(): x(0), y(0), w(0), h(0) {}
     Rect(float x, float y, float w, float h): x(x), y(y), w(w), h(h) {}
+    Rect(const Vec2& pos, const Size& size): x(pos.x), y(pos.y), w(size.w), h(size.h) {}
 
     void Reset(float x, float y, float w, float h) {
         this->x = x;
@@ -282,5 +288,25 @@ inline Vec2 AlignCenterXPos(const Rect& target, const Rect& r) {
 inline Vec2 AlignCenterYPos(const Rect& target, const Rect& r) {
     return Vec2(r.x, target.y + (target.h - r.h) / 2);
 }
+
+inline bool IsRectsIntersect(const core::Rect& r1,
+                             const core::Rect& r2) {
+    return !(r1.x + r1.w <= r2.x || r1.x >= r2.x + r2.w ||
+             r1.y + r1.h <= r2.y || r1.y >= r2.y + r2.h);
+}
+
+inline core::Rect RectsIntersect(const core::Rect& r1,
+                                 const core::Rect& r2) {
+    Vec2 lt(std::max(r1.x, r2.x), std::max(r1.y, r2.y)),
+         rb(std::min(r1.x + r1.w, r2.x + r2.w), std::min(r1.y + r1.h, r2.y + r2.h));
+    return core::Rect(lt.x, lt.y, rb.x - lt.x, rb.y - lt.y);
+}
+
+template <typename T>
+inline int Sign(T value) {
+    return value > 0 ? 1 : (value < 0 ? -1 : 0);
+}
+
+#define feq(v1, v2) (std::abs(v1 - v2) <= std::numeric_limits<decltype(v1)>::epsilon())
 
 }

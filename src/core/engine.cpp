@@ -35,6 +35,9 @@ void Engine::Init(const std::string& title,
     VideoMgr::Init(title.c_str(), w, h, resizable);
     LOG_INFO("VideoMgr initialized");
 
+    GFX::Init(VideoMgr::GetMainVideo()->renderer.get());
+    LOG_INFO("GFX init OK");
+
     Keyboard::Init();
     Mouse::Init();
 
@@ -70,6 +73,9 @@ void Engine::cleanUp() {
 
     TextureMgr::Clear();
     LOG_INFO("free all textures");
+
+    GFX::Shutdown();
+    LOG_INFO("GFX shutdown");
 
     VideoMgr::Quit();
     LOG_INFO("VideoMgr quited");

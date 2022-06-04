@@ -5,6 +5,7 @@
 #include "core/utf8string.hpp"
 #include "core/image.hpp"
 #include "core/animation.hpp"
+#include "core/gfx.hpp"
 
 class MainLayer final: public grogue::core::Layer {
 public:
@@ -22,8 +23,7 @@ public:
     }
 
     void Render() override {
-        auto& renderer = grogue::core::VideoMgr::GetMainVideo()->renderer;
-        renderer->Clear(grogue::core::Color(100, 100, 100, 255));
+        grogue::core::GFX::Clear(grogue::core::Color(100, 100, 100, 255));
 
         auto& frame = anim_.GetCurFrame();
 
@@ -31,7 +31,7 @@ public:
 
         transform.SetPos(grogue::core::Vec2(100, 100));
 
-        renderer->DrawImage(frame.image, transform);
+        grogue::core::GFX::DrawImage(frame.image, transform);
     }
 
 private:
