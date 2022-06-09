@@ -4,6 +4,8 @@
 #include "core/mathf.hpp"
 #include "core/log.hpp"
 #include "core/storage.hpp"
+#include "core/sington.hpp"
+#include "core/handle.hpp"
 
 namespace grogue::core {
 
@@ -19,8 +21,11 @@ public:
 
     Texture(const Texture&) = delete;
     Texture(SDL_Surface*);
-    Texture(const char* filename);
+    Texture(const std::string& filename);
     ~Texture();
+
+    void Recreate(SDL_Surface*);
+    void Recreate(const std::string& filename);
 
     Texture& operator=(const Texture&) = delete;
 
@@ -32,19 +37,47 @@ public:
 private:
     SDL_Texture* texture_;
     Size size_;
+    std::string name_;
 };
 
-class TextureMgr final {
-public:
-    TextureMgr() = delete;
+using TextureHandle = Handle<Texture>;
 
-    static Texture* Load(const std::string&);
-    static Texture* Load(const std::string& filename, const std::string& name);
-    static Texture* Find(const std::string& name);
-    static void Clear();
-    
+class TextureMgr final: public Sington<TextureMgr> {
+public:
+    static TextureHandle GetNull();
+
+    TextureHandle Load(const std::string&);
+    TextureHandle Load(const std::string& filename, const std::string& name);
+    TextureHandle GetHandleByName(std::string_view name);
+
+    Texture* GetTextureByHandle(const TextureHandle&);
+    Texture* GetTextureByName(std::string_view name);
+
+    void Destroy(const TextureHandle& handle);
+    void Clear();
+
 private:
-    static Storage<std::string, std::unique_ptr<Texture>> storage_;
+    struct Data {
+        Texture texture;
+        bool valid;
+        std::string name;
+
+        Data(SDL_Surface* surface, const std::string& name)
+            : texture(surface), valid(true), name(name) {}
+        Data(const std::string& filename, const std::string& name)
+            : texture(filename), valid(true), name(name) {}
+        void Reset(const std::string& filename, const std::string& name) {
+            texture.Recreate(filename);
+            valid = true;
+            this->name = name;
+        }
+    };
+    std::vector<Data> datas_;
+    std::vector<std::uint16_t> emptySlot_;
+
+    HandleMgr<Texture> handleMgr_;
+
+    ~TextureMgr();
 };
 
 }

@@ -86,7 +86,6 @@ public:
 private:
     static Storage<std::string_view, std::unique_ptr<Scence>> storage_;
     static Scence* curScence_;
-    static Scence* oldScence_;
 };
 
 }

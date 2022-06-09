@@ -3,7 +3,6 @@
 namespace grogue::core {
 
 Scence* ScenceMgr::curScence_ = nullptr;
-Scence* ScenceMgr::oldScence_ = nullptr;
 
 Scence::Scence(std::string_view name): name_(name) {}
 
@@ -53,7 +52,7 @@ void ScenceMgr::Quit() {
 }
 
 void ScenceMgr::SwitchScence(std::string_view name) {
-    oldScence_ = curScence_;
+    ScenceMgr::Quit();
     Scence* scence = GetScence(name);
     if (scence) {
         scence->OnInit();
@@ -65,13 +64,6 @@ void ScenceMgr::SwitchScence(std::string_view name) {
 
 Scence* ScenceMgr::GetCurrentScence() {
     return curScence_;
-}
-
-void ScenceMgr::CleanUpOldScence() {
-    if (oldScence_) {
-        oldScence_->OnQuit();
-        oldScence_ = nullptr;
-    }
 }
 
 Scence* ScenceMgr::GetScence(std::string_view name) {

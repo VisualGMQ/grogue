@@ -33,6 +33,7 @@ private:
 template <typename ScenceT, typename... Args>
 void Engine::RunScence(std::string_view name, Args&&... args) {
     ScenceMgr::Init(ScenceMgr::CreateScence<ScenceT>(name, std::forward<Args>(args)...));
+    LOG_INFO("scence %s init OK", name);
 
     SDL_Event event;
 
@@ -51,11 +52,6 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
             Mouse::AcceptEvent(event);
             ImGui_ImplSDL2_ProcessEvent(&event);
 
-            if (event.type == SDL_QUIT) {
-                if (scence && scence->OnQuit()) {
-                    Exit();
-                }
-            }
             if (event.type == SDL_WINDOWEVENT) {
                 if (event.window.event == SDL_WINDOWEVENT_TAKE_FOCUS) {
                     Mouse::SetFocusWindow(VideoMgr::FindByID(event.window.windowID)->window.get());
@@ -64,25 +60,33 @@ void Engine::RunScence(std::string_view name, Args&&... args) {
             if (scence) {
                 scence->OnEventHandle(event);
             }
+            if (event.type == SDL_QUIT) {
+                if (scence && scence->OnQuit()) {
+                    Exit();
+                }
+            }
         }
 
-        VideoMgr::ClearScreen();
 
-        Timer::SteadyTimer.Record();
+        if (!ShouldQuit()) {
+            VideoMgr::ClearScreen();
 
-        ImGui_ImplSDL2_NewFrame();
-        ImGui_ImplSDLRenderer_NewFrame();
-        ImGui::NewFrame();
+            Timer::SteadyTimer.Record();
 
-        if (scence) {
-            scence->OnUpdate();
-            scence->OnRender();
+            ImGui_ImplSDL2_NewFrame();
+            ImGui_ImplSDLRenderer_NewFrame();
+            ImGui::NewFrame();
+
+            if (scence) {
+                scence->OnUpdate();
+                scence->OnRender();
+            }
+
+            ImGui::Render();
+            ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+
+            VideoMgr::Present();
         }
-
-        ImGui::Render();
-        ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
-
-        VideoMgr::Present();
     }
     cleanUp();
 }
