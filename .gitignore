@@ -1,0 +1,5 @@
+.vscode
+build
+Release
+Debug
+resources/raw

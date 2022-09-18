@@ -1,0 +1,3 @@
+[submodule "3rdlibs/tinyengine"]
+	path = 3rdlibs/tinyengine
+	url = https://github.com/VisualGMQ/tinyengine.git
