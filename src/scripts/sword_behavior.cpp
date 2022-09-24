@@ -5,12 +5,10 @@ void SwordBehavior::OnInit() {
     auto tile = engine::TileSheetFactory::Find("tilesheet")->Get(0, 8);
 
     sprite = Parent()->GetComponent<engine::SpriteComponent>();
-    sprite->texture = tile.texture;
-    sprite->region = tile.region;
-    sprite->offset.Set(0, -16);
-    sprite->size.Set(2 * 16, 2 * 16);
+    sprite->image = tile;
+    sprite->offset.Set(0, -8);
 
-    transform->SetPosition(engine::Vec2(0, 8));
+    transform->position = engine::Vec2(0, 0);
 }
 
 void SwordBehavior::OnUpdate() {
