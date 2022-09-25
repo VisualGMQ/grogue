@@ -46,8 +46,9 @@ void WalkCommand::Execute() {
 
 PlayerController::PlayerController(engine::Entity* entity,
                                    engine::Entity* hair, engine::Entity* head, engine::Entity* body, engine::Entity* feet,
+                                   engine::Entity* weapon,
                                    float speed, int tilesheetRow)
-    : entity_(entity), hair_(hair), head_(head), body_(body), feet_(feet), speed_(speed), tilesheetRow_(tilesheetRow) {
+    : entity_(entity), hair_(hair), head_(head), body_(body), feet_(feet), weapon_(weapon), speed_(speed), tilesheetRow_(tilesheetRow) {
     auto sprite = feet_->GetComponent<engine::SpriteComponent>();
     auto tilesheet = engine::TileSheetFactory::Find("role");
     walkAnim_.reset(new engine::Animation<engine::ImageInfo, false>({
@@ -87,6 +88,12 @@ void PlayerController::Update() {
         if (isVerticalKeyPressed) {
             vel_ *= diagFactor;
         }
+    }
+
+    if (vel_.y < 0) {
+        weapon_->GetComponent<engine::Node2DComponent>()->zIndex = -1;
+    } else if (vel_.y > 0) {
+        weapon_->GetComponent<engine::Node2DComponent>()->zIndex = 1;
     }
     
     walk_->SetVelocity(vel_);

@@ -33,6 +33,7 @@ class PlayerController final {
 public:
     PlayerController(engine::Entity* entity,
                      engine::Entity* hair, engine::Entity* head, engine::Entity* body, engine::Entity* feet,
+                     engine::Entity* weapon,
                      float speed, int tilesheetRow);
     void Update();
 
@@ -42,6 +43,7 @@ private:
     engine::Entity* head_;
     engine::Entity* body_;
     engine::Entity* feet_;
+    engine::Entity* weapon_;
     float speed_;
     engine::Vec2 vel_;
     engine::Vec2 dir_;

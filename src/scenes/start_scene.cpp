@@ -26,6 +26,8 @@ void StartScene::initNodes() {
     role->SetComponent(node);
     Attach2D(role);
 
+    engine::debug::PropertyWatcher::SetWatchEntity(role);
+
     auto roleHead = world->CreateEntity<engine::SpriteComponent, engine::Node2DComponent>("role head");
     node->Attach(roleHead);
 
@@ -37,8 +39,6 @@ void StartScene::initNodes() {
 
     auto roleFeet = world->CreateEntity<engine::SpriteComponent, engine::Node2DComponent>("role feet");
     node->Attach(roleFeet);
-
-    engine::debug::PropertyWatcher::SetWatchEntity(role);
 
     auto sword = world->CreateEntity<engine::Node2DComponent, engine::SpriteComponent>("sword");
     sword->SetBehavior(std::make_unique<SwordBehavior>());
