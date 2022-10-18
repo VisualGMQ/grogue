@@ -1,0 +1,20 @@
+row = 9
+col = 2
+
+[ content ]
+
+role_head_right = [0, 0]
+role_head_down = [1, 0]
+role_head_up = [2, 0]
+
+hair1_right = [0, 1]
+hair1_down = [1, 1]
+hair1_up = [2, 1]
+
+body1_right = [3, 1]
+body1_down = [4, 1]
+body1_up = [5, 1]
+
+foot1_stand = [6, 1]
+foot1_run1 = [7, 1]
+foot1_run2 = [8, 1]

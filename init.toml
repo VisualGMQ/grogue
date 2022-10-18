@@ -1,3 +1,6 @@
-title = "Cataclysm-OnlyOne v0.1.0"
+title = "small man"
 width = 1024
 height = 720
+use_scene_tree = false
+use_console = true
+draw_collider_outline = true
