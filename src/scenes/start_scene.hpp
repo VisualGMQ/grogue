@@ -1,8 +1,8 @@
 #pragma once
 
 #include "engine/engine.hpp"
-#include "scripts/role_behavior.hpp"
-#include "scripts/sword_behavior.hpp"
+#include "others/tilesheet_loader.hpp"
+#include <filesystem>
 
 class StartScene final : public engine::Scene {
 public:
