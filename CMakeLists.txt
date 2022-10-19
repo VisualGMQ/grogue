@@ -40,6 +40,6 @@ install(
 )
 
 install(
-    FILES init.cfg
+    FILES init.toml
     DESTINATION $IF:<$<CONFIG:DEBUG>,./Debug/,./Release/>
 )
