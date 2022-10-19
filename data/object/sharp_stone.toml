@@ -1,0 +1,6 @@
+id = 2
+name = "燧石"
+description = "锋利的石头，可以用作简单切割"
+img = "" # TODO
+type = "pickup"
+features = ["cut=3"]

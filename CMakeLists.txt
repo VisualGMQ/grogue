@@ -17,12 +17,14 @@ add_subdirectory(3rdlibs/tinyengine)
 aux_source_directory(src/scenes SCENES_SRC)
 aux_source_directory(src/scripts SCRIPTS_SRC)
 aux_source_directory(src/others OTHERS_SRC)
+aux_source_directory(src/components COMPONENTS_SRC)
 
 add_executable(${GAME_NAME})
 target_sources(${GAME_NAME} PRIVATE
                 ${SCRIPTS_SRC}
                 ${SCENES_SRC}
                 ${OTHERS_SRC}
+                ${COMPONENTS_SRC}
                 src/main.cpp
 )
 target_link_libraries(${GAME_NAME} PRIVATE tinyengine)

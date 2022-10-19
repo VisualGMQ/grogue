@@ -2,7 +2,7 @@
 
 #include "engine/engine.hpp"
 #include "others/tilesheet_loader.hpp"
-#include <filesystem>
+#include "others/object_reader.hpp"
 
 class StartScene final : public engine::Scene {
 public:
@@ -12,6 +12,4 @@ public:
     void OnQuit() override;
 
 private:
-    void loadResources();
-    void initNodes();
 };

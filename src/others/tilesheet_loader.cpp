@@ -1,11 +1,5 @@
 #include "tilesheet_loader.hpp"
 
-std::string GetFilenameNoExt(const std::string& filename) {
-    auto idx = filename.find_last_of(".");
-    if (idx == filename.npos) return filename;
-    return std::string(filename.data(), idx);
-}
-
 void LoadImageResources(const std::filesystem::path& root, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) return;
     if (!std::filesystem::is_directory(path)) {
@@ -32,20 +26,6 @@ bool ExistsTileesheetConfigFile(const std::filesystem::path& tilesheet, OUT std:
     if (tilesheet.extension() == ".toml") return false;
     outConfigFilename = GetFilenameNoExt(tilesheet.string()) + ".toml";
     return std::filesystem::exists(outConfigFilename);
-}
-
-std::string RemoveRootFromPath(const std::string& root, const std::string& path) {
-    int i = 0;
-    for (; i < root.size(); i++) {
-        char c1 = root[i];
-        if (c1 == '\\') c1 = '/';
-        char c2 = path[i];
-        if (c2 == '\\') c2 = '/';
-        if (c1 != c2) {
-            break;
-        }
-    }
-    return path.substr(i + 1);
 }
 
 void LoadImage(const std::filesystem::path& root, const std::filesystem::path& filepath) {
@@ -109,11 +89,4 @@ bool IsImageFile(const std::filesystem::path& filepath) {
            extension == ".jpeg" ||
            extension == ".bmp" ||
            extension == ".xmp";
-}
-
-void CvtWindowsDelim2Unix(std::string& text) {
-    for (auto& c : text) {
-        if (c == '\\')
-            c = '/';
-    }
 }

@@ -1,0 +1,6 @@
+id = 1
+name = "圆石"
+img = "" # TODO
+description = "圆圆的坚硬石头，可以用来敲击物品"
+type = "pickup"
+features = ["beat=1"]

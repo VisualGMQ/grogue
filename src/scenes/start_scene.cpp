@@ -1,13 +1,10 @@
 #include "scenes/start_scene.hpp"
 
 void StartScene::OnInit() {
-    loadResources();
-    LoadImageResources("./resources", "./resources");
+    ObjectConfigStorage::LoadAllConfig("./data/object");
+    LoadImageResources("./resources/img", "./resources/img");
 }
 
 void StartScene::OnQuit() {
 
-}
-
-void StartScene::loadResources() {
 }
