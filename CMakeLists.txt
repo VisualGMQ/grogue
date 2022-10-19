@@ -35,15 +35,22 @@ CopyDLL(${GAME_NAME})
 # install game
 install(
     TARGETS ${GAME_NAME}
-    RUNTIME DESTINATION $IF:<$<CONFIG:DEBUG>,./Debug/,./Release/>
+    RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/install
 )
 
 install(
-    DIRECTORY resourcecs
-    DESTINATION $IF:<$<CONFIG:DEBUG>,./Debug/,./Release/>
+    DIRECTORY data
+    DESTINATION ${CMAKE_SOURCE_DIR}/install
 )
 
 install(
-    FILES init.toml
-    DESTINATION $IF:<$<CONFIG:DEBUG>,./Debug/,./Release/>
+    DIRECTORY resources
+    DESTINATION ${CMAKE_SOURCE_DIR}/install
 )
+
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    install(
+        FILES init.toml
+        DESTINATION ${CMAKE_SOURCE_DIR}/install
+    )
+endif()
