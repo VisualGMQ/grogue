@@ -1,5 +1,9 @@
 #include "tilesheet_loader.hpp"
 
+void LoadAllImageResources(const std::filesystem::path& path) {
+    LoadImageResources(path, path);
+}
+
 void LoadImageResources(const std::filesystem::path& root, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) return;
     if (!std::filesystem::is_directory(path)) {
