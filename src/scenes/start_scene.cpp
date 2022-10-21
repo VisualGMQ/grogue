@@ -1,23 +1,29 @@
 #include "scenes/start_scene.hpp"
 
 void StartScene::OnInit() {
-    ObjectConfigStorage::LoadAllConfig("./data/object");
     LoadAllImageResources("./resources/img");
+    ObjectConfigStorage::LoadAllConfig("./data/object");
 
+    engine::World::Instance()->AddSystem<TransformUpdateSystem>();
+    engine::World::Instance()->AddSystem<MapTileRenderSystem>();
+
+    initMap();
+}
+
+void StartScene::initMap() {
     GroundGenerator generator;
-    auto map = generator.Generate(100, 100);
+    auto map = generator.Generate(50, 50);
 
-    auto mapNode = engine::World::Instance()->CreateEntity("map");
-    auto node2d = engine::World::Instance()->CreateComponent<engine::Node2DComponent>();
-    mapNode->SetComponent(node2d);
-    for (int x = 0; x < map->GetSize().w; x++) {
-        for (int y = 0; y < map->GetSize().h; y++) {
-            node2d->Attach(map->Get(x, y).terrian);
-        }
-    }
-    Attach2D(mapNode);
+    MapManager::SetGroundMap(std::move(map));
+
+    auto entity = engine::World::Instance()->CreateEntity<component::MapComponent, engine::Node2DComponent>("ground-map");
+    auto mapComponent = entity->GetComponent<component::MapComponent>();
+    mapComponent->map = MapManager::GetGroundMap();
+
+    Attach2D(entity);
 }
 
 void StartScene::OnQuit() {
-
+    MapManager::ClearGroundMap();
+    MapManager::ClearDungeonMap();
 }

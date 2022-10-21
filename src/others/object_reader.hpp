@@ -1,33 +1,6 @@
 #pragma once
 
-#include "engine/engine.hpp"
-#include "object_feature.hpp"
-#include "path_helper.hpp"
-
-struct ObjectConfig {
-    enum Type {
-        Unknown = 0,
-        Block,
-        Pickable,
-
-        TypeNum,
-    };
-
-    ObjectFeature feature; 
-    ObjectID id;
-    std::string name;
-    std::string description;
-    std::string image;
-    Type type;
-
-    static Type GetTypeFromStr(std::string_view str);
-
-    void TurnOnFeature(std::string_view feature);
-
-private:
-    bool isFeatureHasProperty(std::string_view feature);
-    std::pair<std::string_view, int> parseFeature(std::string_view feature);
-};
+#include "map/object_config.hpp"
 
 class ObjectConfigReader final {
 public:
@@ -37,8 +10,8 @@ public:
 class ObjectConfigStorage final {
 public:
     static void LoadAllConfig(const std::filesystem::path& root);
-    static std::optional<std::reference_wrapper<ObjectConfig>> Find(ObjectID id);
-    static std::optional<std::reference_wrapper<ObjectConfig>> Find(const std::string& name);
+    static bool Find(ObjectID id, ObjectConfig&);
+    static bool Find(const std::string& name, ObjectConfig&);
 
 private:
     static std::unordered_map<std::string, ObjectID> idNameMap;

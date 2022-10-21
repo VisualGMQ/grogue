@@ -3,7 +3,9 @@
 #include "engine/engine.hpp"
 #include "others/tilesheet_loader.hpp"
 #include "others/object_reader.hpp"
-#include "others/map_generate.hpp"
+#include "map/map_generate.hpp"
+#include "system/maptile_render.hpp"
+#include "system/transform_update.hpp"
 
 class StartScene final : public engine::Scene {
 public:
@@ -13,4 +15,5 @@ public:
     void OnQuit() override;
 
 private:
+    void initMap();
 };

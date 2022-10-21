@@ -48,7 +48,10 @@ ObjectConfig ObjectConfigReader::Read(const std::filesystem::path& filepath) {
     auto tbl = toml::parse_file(filepath.c_str());
     config.id = tbl["id"].value<int>().value();
     config.name = tbl["name"].value<std::string>().value_or("[No Name]");
-    config.image = tbl["img"].value<std::string>().value();
+    auto imgName = tbl["img"].value<std::string>().value();
+    if (!engine::ImageFactory::Find(imgName, config.image)) {
+        Loge("object image {} not found", imgName);
+    }
     config.description = tbl["description"].value<std::string>().value_or("");
     config.type = ObjectConfig::GetTypeFromStr(tbl["type"].value<std::string>().value());
     auto features = tbl["features"].as_array();
@@ -99,16 +102,17 @@ void ObjectConfigStorage::loadConfigRecursive(const std::filesystem::path& root,
     }
 }
 
-std::optional<std::reference_wrapper<ObjectConfig>> ObjectConfigStorage::Find(ObjectID id) {
+bool ObjectConfigStorage::Find(ObjectID id, ObjectConfig& config) {
     auto it = configs.find(id);
     if (it == configs.end()) {
-        return std::nullopt;
+        return false;
     }
-    return it->second;
+    config = it->second;
+    return true;
 }
 
-std::optional<std::reference_wrapper<ObjectConfig>> ObjectConfigStorage::Find(const std::string& name) {
+bool ObjectConfigStorage::Find(const std::string& name, ObjectConfig& config) {
     auto it = idNameMap.find(name);
-    if (it == idNameMap.end()) return std::nullopt;
-    return Find(it->second);
+    if (it == idNameMap.end()) return false;
+    return Find(it->second, config);
 }

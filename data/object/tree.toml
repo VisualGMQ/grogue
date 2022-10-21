@@ -1,7 +1,7 @@
 id = 5
 name = "树"
 description = ""
-img = "" # TODO
+img = "tilesheet#wooden_stake"
 type = "block"
 features = ["beCutted=3"]
 drop = [{name = "wood", num = 3}]

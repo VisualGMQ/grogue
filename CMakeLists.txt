@@ -18,6 +18,8 @@ aux_source_directory(src/scenes SCENES_SRC)
 aux_source_directory(src/scripts SCRIPTS_SRC)
 aux_source_directory(src/others OTHERS_SRC)
 aux_source_directory(src/components COMPONENTS_SRC)
+aux_source_directory(src/system SYSTEM_SRC)
+aux_source_directory(src/map MAP_SRC)
 
 add_executable(${GAME_NAME})
 target_sources(${GAME_NAME} PRIVATE
@@ -25,6 +27,8 @@ target_sources(${GAME_NAME} PRIVATE
                 ${SCENES_SRC}
                 ${OTHERS_SRC}
                 ${COMPONENTS_SRC}
+                ${SYSTEM_SRC}
+                ${MAP_SRC}
                 src/main.cpp
 )
 target_link_libraries(${GAME_NAME} PRIVATE tinyengine)

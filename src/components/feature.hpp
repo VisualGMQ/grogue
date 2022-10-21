@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/engine.hpp"
-#include "others/object_feature.hpp"
+#include "map/object_feature.hpp"
 
 namespace component {
 

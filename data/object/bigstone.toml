@@ -1,7 +1,7 @@
 id = 3
 name = "石头"
 description = "大石头"
-img = "" # TODO
+img = "tilesheet#big_stone"
 type = "block"
 features = ["beBeated=2"]
 drop = [{name = "round_stone", num = 3},
