@@ -1,10 +1,17 @@
 #pragma once
 
-#include "map/object_config.hpp"
+#include "object_config.hpp"
+#include "components/sprite.hpp"
+#include "components/architecture.hpp"
+#include "components/pickupable.hpp"
+#include "config.hpp"
 
 class ObjectConfigReader final {
 public:
     ObjectConfig Read(const std::filesystem::path& filepath);
+    
+private:
+    static ObjectConfig::Type getObjectTypeFromStr(const std::string&);
 };
 
 class ObjectConfigStorage final {
@@ -12,6 +19,7 @@ public:
     static void LoadAllConfig(const std::filesystem::path& root);
     static bool Find(ObjectID id, ObjectConfig&);
     static bool Find(const std::string& name, ObjectConfig&);
+    static std::optional<ObjectID> ObjectName2ID(const std::string& name);
 
 private:
     static std::unordered_map<std::string, ObjectID> idNameMap;
@@ -21,4 +29,6 @@ private:
 };
 
 engine::Entity* CreateObject(ObjectID id);
+engine::Entity* CreateArchitecture(const ObjectConfig& config);
+engine::Entity* CreatePickupable(const ObjectConfig& config);
 engine::Entity* CreateObject(const std::string& name);

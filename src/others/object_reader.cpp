@@ -1,76 +1,28 @@
 #include "object_reader.hpp"
 
-static std::array<std::string_view, ObjectConfig::TypeNum> TypeMap{
-    "unknown",
-    "block",
-    "pickup",
-};
-
-ObjectConfig::Type ObjectConfig::GetTypeFromStr(std::string_view str) {
-    for (int i = 0; i < TypeMap.size(); i++) {
-        if (TypeMap[i] == str) {
-            return static_cast<ObjectConfig::Type>(i);
-        }
-    }
-    return ObjectConfig::Type::Unknown;
-}
-
-bool ObjectConfig::isFeatureHasProperty(std::string_view feature) {
-    return feature.find("=") != feature.npos;
-}
-
-std::pair<std::string_view, int> ObjectConfig::parseFeature(std::string_view feature) {
-    std::pair<std::string_view, int> result;
-    auto delimIdx = feature.find("=");
-    result.first = feature.substr(delimIdx);
-    result.second = atoi(feature.substr(delimIdx + 1).data());
-    return result;
-}
-
-#define TRY_SET_FEATURE(x) if (prop.first == #x) this->feature.x = prop.second;
-
-void ObjectConfig::TurnOnFeature(const std::string_view feature) {
-    if (isFeatureHasProperty(feature)) {
-        auto prop = parseFeature(feature);
-        TRY_SET_FEATURE(beat);
-        TRY_SET_FEATURE(cut);
-        TRY_SET_FEATURE(beCutted);
-        TRY_SET_FEATURE(beBeated);
-    } else {
-    }
-}
-
-#undef TRY_SET_FEATURE
-
-
 ObjectConfig ObjectConfigReader::Read(const std::filesystem::path& filepath) {
     ObjectConfig config;
     auto tbl = toml::parse_file(filepath.c_str());
     config.id = tbl["id"].value<int>().value();
     config.name = tbl["name"].value<std::string>().value_or("[No Name]");
-    auto imgName = tbl["img"].value<std::string>().value();
-    if (!engine::ImageFactory::Find(imgName, config.image)) {
-        Loge("object image {} not found", imgName);
+    config.imageName = tbl["img"].value<std::string>().value();
+    if (!engine::ImageFactory::Find(config.imageName, config.image)) {
+        Loge("object image {} not found", config.imageName);
     }
     config.description = tbl["description"].value<std::string>().value_or("");
-    config.type = ObjectConfig::GetTypeFromStr(tbl["type"].value<std::string>().value());
+    config.type = getObjectTypeFromStr(tbl["type"].value<std::string>().value());
     auto features = tbl["features"].as_array();
-    if (features) {
-        for (auto& feature : *features) {
-            config.TurnOnFeature(feature.value<std::string_view>().value());
-        }
-    }
-    auto drop = tbl["drop"].as_array();
-    if (drop) {
-        for (auto& elem : *drop) {
-            auto array = elem.as_table();
-            ObjectFeature::DropObject dropObject;
-            dropObject.name = array->at("name").value<std::string>().value();
-            dropObject.num = array->at("num").value<int>().value();
-            config.feature.dropObjects.push_back(dropObject);
-        }
-    }
     return config;
+}
+
+ObjectConfig::Type ObjectConfigReader::getObjectTypeFromStr(const std::string& str) {
+    if (str == "architecture") {
+        return ObjectConfig::Type::Architecture;
+    }
+    if (str == "pickup") {
+        return ObjectConfig::Type::Pickable;
+    }
+    return ObjectConfig::Type::Unknown;
 }
 
 std::unordered_map<std::string, ObjectID> ObjectConfigStorage::idNameMap;
@@ -115,4 +67,56 @@ bool ObjectConfigStorage::Find(const std::string& name, ObjectConfig& config) {
     auto it = idNameMap.find(name);
     if (it == idNameMap.end()) return false;
     return Find(it->second, config);
+}
+
+
+engine::Entity* CreateObject(ObjectID id) {
+    ObjectConfig config;
+    if (!ObjectConfigStorage::Find(id, config)) {
+        Loge("object {} config not found", config.name);
+        return nullptr;
+    }
+    switch (config.type) {
+        case ObjectConfig::Type::Architecture:
+            return CreateArchitecture(config);
+        case ObjectConfig::Type::Pickable:
+            return CreatePickupable(config);
+        default:
+            return nullptr;
+    }
+
+}
+
+std::optional<ObjectID> ObjectConfigStorage::ObjectName2ID(const std::string& name) {
+    auto it = idNameMap.find(name);
+    if (it != idNameMap.end()) {
+        return it->second;
+    }
+    return std::nullopt;
+}
+
+engine::Entity* CreateArchitecture(const ObjectConfig& config) {
+    auto entity = engine::World::Instance()->CreateEntity<component::Sprite, component::Architecture>("architecture-" + config.name);
+    auto sprite = entity->GetComponent<component::Sprite>();
+
+    sprite->image = config.image;
+    sprite->size.Set(TileSize, TileSize);
+
+    return entity;
+}
+
+engine::Entity* CreatePickupable(const ObjectConfig& config) {
+    auto entity = engine::World::Instance()->CreateEntity<component::Sprite, component::Pickupable>("architecture-" + config.name);
+    auto sprite = entity->GetComponent<component::Sprite>();
+
+    sprite->image = config.image;
+    sprite->size.Set(TileSize, TileSize);
+
+    return entity;   
+}
+
+engine::Entity* CreateObject(const std::string& name) {
+    auto id = ObjectConfigStorage::ObjectName2ID(name);
+    if (!id) return nullptr;
+    return CreateObject(id.value());
 }

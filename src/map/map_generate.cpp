@@ -50,22 +50,27 @@ Terrian GroundGenerator::createTerrian(TerrianType type) {
     return terrian;
 }
 
-ObjectConfig GroundGenerator::createObject(int x, int y, Map* map, ObjectType type) {
+engine::Entity* GroundGenerator::createObject(int x, int y, Map* map, ObjectType type) {
     auto& tile = map->Get(x, y);
     ObjectConfig config;
     if (tile.terrian.type == Terrian::Type::Solid && !tile.object) {
         auto rng = engine::Random::Instance()->Random();
         if (rng >= 0 && rng <= 0.1) {
             ObjectConfigStorage::Find("tree", config);
+            return CreateArchitecture(config);
         } else if (rng <= 0.2) {
             ObjectConfigStorage::Find("bigstone", config);
+            return CreateArchitecture(config);
         } else if (rng <= 0.3) {
             ObjectConfigStorage::Find("wood", config);
+            return CreatePickupable(config);
         } else if (rng <= 0.4) {
             ObjectConfigStorage::Find("round_stone", config);
+            return CreatePickupable(config);
         } else if (rng <= 0.5) {
             ObjectConfigStorage::Find("sharp_stone", config);
+            return CreatePickupable(config);
         }
     }
-    return config;
+    return nullptr;
 }

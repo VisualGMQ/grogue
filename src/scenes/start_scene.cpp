@@ -1,13 +1,23 @@
 #include "scenes/start_scene.hpp"
 
 void StartScene::OnInit() {
+    Localization::Init("data/localization/chinese.toml");
     LoadAllImageResources("./resources/img");
     ObjectConfigStorage::LoadAllConfig("./data/object");
 
+    engine::World::Instance()->AddSystem<ControllerUpdateSystem>();
     engine::World::Instance()->AddSystem<TransformUpdateSystem>();
     engine::World::Instance()->AddSystem<MapTileRenderSystem>();
+    engine::World::Instance()->AddSystem<MapObjectRenderSystem>();
+    engine::World::Instance()->AddSystem<SpriteRenderSystem>();
 
     initMap();
+
+    auto entity = CreateHuman("role#down", "role#up", "role#right");
+
+    GameData::Instance()->ChangeController(std::make_unique<HumanController>(entity));
+
+    Attach2D(entity);
 }
 
 void StartScene::initMap() {
@@ -24,6 +34,7 @@ void StartScene::initMap() {
 }
 
 void StartScene::OnQuit() {
+    Localization::Quit();
     MapManager::ClearGroundMap();
     MapManager::ClearDungeonMap();
 }

@@ -34,6 +34,7 @@ target_sources(${GAME_NAME} PRIVATE
 target_link_libraries(${GAME_NAME} PRIVATE tinyengine)
 target_precompile_headers(${GAME_NAME} REUSE_FROM tinyengine)
 target_include_directories(${GAME_NAME} PRIVATE src)
+target_compile_features(${GAME_NAME} PRIVATE cxx_std_17)
 CopyDLL(${GAME_NAME})
 
 # install game

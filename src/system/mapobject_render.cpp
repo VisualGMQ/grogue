@@ -1,6 +1,6 @@
-#include "maptile_render.hpp"
+#include "mapobject_render.hpp"
 
-void MapTileRenderSystem::Update(engine::Entity* entity) {
+void MapObjectRenderSystem::Update(engine::Entity* entity) {
     if (!entity) return;
 
     if (auto node = entity->GetComponent<engine::Node2DComponent>(); node) {
@@ -13,10 +13,12 @@ void MapTileRenderSystem::Update(engine::Entity* entity) {
             for (int x = 0; x < col; x++) {
                 for (int y = 0; y < row; y++) {
                     auto& tile = map->map->Get(initX + x, initY + y);
-                    if (tile.terrian.image.texture) {
-                        engine::Renderer::DrawTexture(*tile.terrian.image.texture,
-                                                      &tile.terrian.image.region,
-                                                      engine::Size(TileSize, TileSize),
+                    if (tile.object && tile.object->GetComponent<component::Sprite>()) {
+                        auto sprite = tile.object->GetComponent<component::Sprite>();
+                        if (!sprite->image.texture) continue;
+                        engine::Renderer::DrawTexture(*sprite->image.texture,
+                                                      &sprite->image.region,
+                                                      sprite->size,
                                                       engine::Transform{node->globalPosition + engine::Vec2(x * TileSize, y * TileSize) + offset, node->globalScale, node->globalRotation, engine::Vec2{0, 0}});
                     }
                 }

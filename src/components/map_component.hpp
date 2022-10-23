@@ -6,7 +6,7 @@ namespace component {
 
 class MapComponent: public engine::Component {
 public:
-    MapComponent(engine::ComponentID id): engine::Component(id) {}
+    MapComponent(engine::ComponentID id): engine::Component(id) { Reset(); }
 
     void Reset() override {
         engine::Component::Reset();

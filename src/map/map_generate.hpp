@@ -52,5 +52,5 @@ private:
     }
 
     Terrian createTerrian(TerrianType);
-    ObjectConfig createObject(int x, int y, Map* map, ObjectType);
+    engine::Entity* createObject(int x, int y, Map* map, ObjectType);
 };

@@ -6,6 +6,13 @@
 #include "map/map_generate.hpp"
 #include "system/maptile_render.hpp"
 #include "system/transform_update.hpp"
+#include "system/sprite_render.hpp"
+#include "system/mapobject_render.hpp"
+#include "others/localization.hpp"
+#include "others/human_create.hpp"
+#include "scripts/controller.hpp"
+#include "others/data.hpp"
+#include "system/controller_update.hpp"
 
 class StartScene final : public engine::Scene {
 public:

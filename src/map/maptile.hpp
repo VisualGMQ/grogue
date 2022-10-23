@@ -1,6 +1,6 @@
 #pragma once
 #include "engine/engine.hpp"
-#include "object_config.hpp"
+#include "others/object_config.hpp"
 
 struct Terrian {
     engine::Image image;
@@ -9,13 +9,13 @@ struct Terrian {
         Liquid,
         Solid,
         Void
-    }type;
+    }type = Void;
 };
 
 class MapTile {
 public:
     Terrian terrian;
-    std::optional<ObjectConfig> object;
-    bool canSee = false;
-    bool visited = false;
+    engine::Entity* object = nullptr;
+    // bool canSee = false;
+    // bool visited = false;
 };
