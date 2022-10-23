@@ -14,6 +14,8 @@
 #include "scripts/controller.hpp"
 #include "others/data.hpp"
 #include "system/controller_update.hpp"
+#include "ui/backpack_panel.hpp"
+#include "system/ui_render.hpp"
 
 class StartScene final : public engine::Scene {
 public:

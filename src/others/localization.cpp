@@ -12,7 +12,6 @@ void Localization::Init(const std::string& filename) {
     }
     auto tbl = toml::parse_file(filename);
     for (auto& elem : tbl) {
-        Logt("elem = {}", elem.first.str());
         datas_[std::string(elem.first.str())] = elem.second.value<std::string>().value();
     }
 }

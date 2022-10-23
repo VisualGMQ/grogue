@@ -1,6 +1,7 @@
 #pragma once
 
 #include "human_controller.hpp"
+#include "others/data.hpp"
 
 HumanController::HumanController(engine::Entity* entity): entity_(entity) {
     node2d_ = entity->GetComponent<engine::Node2DComponent>();
@@ -18,8 +19,9 @@ void HumanController::Pickup() {
     if (obj) {
         auto& mapObj = MapManager::GetGroundMap()->Get(obj->x, obj->y);
         if (mapObj.object) {
-            backpack_->objects.push_back(mapObj.object);
-            mapObj.object = nullptr;
+            if (backpack_->AddObject(mapObj.object)) {
+                mapObj.object = nullptr;
+            }
         }
     }
     GameData::Instance()->ClearPickableObjGridPos();
@@ -53,5 +55,9 @@ void HumanController::Update() {
     }
     if (engine::Input::IsKeyPressed(SDL_SCANCODE_J)) {
         Pickup();
+    }
+    if (engine::Input::IsKeyPressed(SDL_SCANCODE_E)) {
+        GameData::Instance()->ChangeController(GameData::Instance()->GetBackpackController());
+        GameData::Instance()->GetBackpackPanel()->SetActive(true);
     }
 }

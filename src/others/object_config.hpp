@@ -1,9 +1,10 @@
 #pragma once
 
 #include "engine/engine.hpp"
-#include "map/object_feature.hpp"
 #include "others/path_helper.hpp"
 #include "others/localization.hpp"
+
+using ObjectID = unsigned int;
 
 struct ArchitectureInfo {
     enum DestroyType {

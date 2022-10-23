@@ -4,14 +4,13 @@
 #include "components/sprite.hpp"
 #include "components/human.hpp"
 #include "components/backpack.hpp"
-#include "others/data.hpp"
 #include "map/map.hpp"
 
 class HumanController: public Controller {
 public:
     HumanController(engine::Entity* entity);
 
-    void Walk(const engine::Vec2& pos) override;
+    void Walk(const engine::Vec2& pos);
     void Pickup();
     void Update() override;
 

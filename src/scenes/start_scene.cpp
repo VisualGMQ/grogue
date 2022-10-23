@@ -4,6 +4,7 @@ void StartScene::OnInit() {
     Localization::Init("data/localization/chinese.toml");
     LoadAllImageResources("./resources/img");
     ObjectConfigStorage::LoadAllConfig("./data/object");
+    engine::FontFactory::Create("C:/windows/fonts/simhei.ttf", "simhei", 20);
 
     engine::World::Instance()->AddSystem<ControllerUpdateSystem>();
     engine::World::Instance()->AddSystem<TransformUpdateSystem>();
@@ -11,15 +12,22 @@ void StartScene::OnInit() {
     engine::World::Instance()->AddSystem<MapObjectRenderSystem>();
     engine::World::Instance()->AddSystem<SpriteRenderSystem>();
     engine::World::Instance()->AddSystem<HintArrowSystem>();
+    engine::World::Instance()->AddSystem<UIRenderSystem>();
 
     initMap();
 
-    auto entity = CreateHuman("role#down", "role#up", "role#right", 50);
+    auto player = CreateHuman("role#down", "role#up", "role#right", 50);
 
-    GameData::Instance()->ChangeController(std::make_unique<HumanController>(entity));
-    GameData::Instance()->SetPlayer(entity);
+    GameData::Instance()->InitControllers(player);
+    GameData::Instance()->SetPlayer(player);
 
-    Attach2D(entity);
+    Attach2D(player);
+
+    auto backpackEntity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::BackpackPanel>("backpack");
+    backpackEntity->SetActive(false);
+    Attach2D(backpackEntity);
+
+    GameData::Instance()->SetBackpackPanel(backpackEntity);
 }
 
 void StartScene::initMap() {

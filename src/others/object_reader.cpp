@@ -98,6 +98,8 @@ std::optional<ObjectID> ObjectConfigStorage::ObjectName2ID(const std::string& na
 engine::Entity* CreateArchitecture(const ObjectConfig& config) {
     auto entity = engine::World::Instance()->CreateEntity<component::Sprite, component::Architecture>("architecture-" + config.name);
     auto sprite = entity->GetComponent<component::Sprite>();
+    auto architecture = entity->GetComponent<component::Architecture>();
+    architecture->id = config.id;
 
     sprite->image = config.image;
     sprite->size.Set(TileSize, TileSize);
@@ -108,6 +110,9 @@ engine::Entity* CreateArchitecture(const ObjectConfig& config) {
 engine::Entity* CreatePickupable(const ObjectConfig& config) {
     auto entity = engine::World::Instance()->CreateEntity<component::Sprite, component::Pickupable>("architecture-" + config.name);
     auto sprite = entity->GetComponent<component::Sprite>();
+    auto pickupable = entity->GetComponent<component::Pickupable>();
+    pickupable->num = 1;
+    pickupable->id = config.id;
 
     sprite->image = config.image;
     sprite->size.Set(TileSize, TileSize);
