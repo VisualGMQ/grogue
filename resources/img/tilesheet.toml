@@ -83,3 +83,5 @@ shore_vertical = [1, 11]
 shore_horizontal = [2, 10]
 water1 = [2, 11]
 water2 = [3, 11]
+
+hint_arrow = [4, 10]

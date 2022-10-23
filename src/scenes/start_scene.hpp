@@ -8,6 +8,7 @@
 #include "system/transform_update.hpp"
 #include "system/sprite_render.hpp"
 #include "system/mapobject_render.hpp"
+#include "system/hint_arrow.hpp"
 #include "others/localization.hpp"
 #include "others/human_create.hpp"
 #include "scripts/controller.hpp"

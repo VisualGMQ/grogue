@@ -6,14 +6,26 @@ HumanController::HumanController(engine::Entity* entity): entity_(entity) {
     node2d_ = entity->GetComponent<engine::Node2DComponent>();
     human_ = entity->GetComponent<component::Human>();
     sprite_ = entity->GetComponent<component::Sprite>();
+    backpack_ = entity->GetComponent<component::Backpack>();
 }
 
 void HumanController::Walk(const engine::Vec2& pos) {
     node2d_->position = pos;
 }
 
-void HumanController::Update() {
+void HumanController::Pickup() {
+    auto& obj = GameData::Instance()->GetPickableObjGridPos();
+    if (obj) {
+        auto& mapObj = MapManager::GetGroundMap()->Get(obj->x, obj->y);
+        if (mapObj.object) {
+            backpack_->objects.push_back(mapObj.object);
+            mapObj.object = nullptr;
+        }
+    }
+    GameData::Instance()->ClearPickableObjGridPos();
+}
 
+void HumanController::Update() {
     constexpr int speed = 1;
     if (engine::Input::IsKeyPressing(SDL_SCANCODE_A)) {
         Walk(node2d_->position + engine::Vec2(-speed, 0));
@@ -38,5 +50,8 @@ void HumanController::Update() {
         sprite_->image = human_->down;
         node2d_->scale.Set(1, 1);
         sprite_->offset.Set(0, 0);
+    }
+    if (engine::Input::IsKeyPressed(SDL_SCANCODE_J)) {
+        Pickup();
     }
 }

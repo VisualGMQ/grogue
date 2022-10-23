@@ -10,7 +10,7 @@ public:
 
     void Reset() override { objects.clear(); }
 
-    std::vector<ObjectConfig> objects;
+    std::vector<engine::Entity*> objects;
 };
 
-} // namespace component
+}

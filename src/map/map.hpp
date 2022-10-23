@@ -2,6 +2,7 @@
 
 #include "engine/engine.hpp"
 #include "maptile.hpp"
+#include "others/config.hpp"
 
 class Map {
 public:
@@ -30,3 +31,13 @@ private:
     static std::vector<std::unique_ptr<Map>> dungeonMap_;
     static int curDungeonMapIdx_;
 };
+
+struct VisiableTileArea {
+    int initCols;
+    int initRows;
+    int endCols;
+    int endRows;
+    engine::Vec2 offset;
+};
+
+VisiableTileArea CalcVisiableTileArea(Map* map, const engine::Vec2& position);

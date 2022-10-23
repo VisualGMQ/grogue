@@ -10,12 +10,14 @@ void StartScene::OnInit() {
     engine::World::Instance()->AddSystem<MapTileRenderSystem>();
     engine::World::Instance()->AddSystem<MapObjectRenderSystem>();
     engine::World::Instance()->AddSystem<SpriteRenderSystem>();
+    engine::World::Instance()->AddSystem<HintArrowSystem>();
 
     initMap();
 
-    auto entity = CreateHuman("role#down", "role#up", "role#right");
+    auto entity = CreateHuman("role#down", "role#up", "role#right", 50);
 
     GameData::Instance()->ChangeController(std::make_unique<HumanController>(entity));
+    GameData::Instance()->SetPlayer(entity);
 
     Attach2D(entity);
 }
