@@ -1,7 +1,11 @@
 #include "human_create.hpp"
 
 engine::Entity* CreateHuman(const std::string& down, const std::string& up, const std::string& right, float pickupRange) {
-    auto entity = engine::World::Instance()->CreateEntity<component::Human, component::Sprite, component::Backpack,engine::Node2DComponent>("human");
+    auto entity = engine::World::Instance()->CreateEntity<component::Human,
+                                                          component::Sprite,
+                                                          component::Backpack,
+                                                          engine::Node2DComponent,
+                                                          component::Life>("human");
     auto human = entity->GetComponent<component::Human>();
     engine::ImageFactory::Find(down, human->down);
     engine::ImageFactory::Find(up, human->up);

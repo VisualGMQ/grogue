@@ -6,28 +6,21 @@ void StartScene::OnInit() {
     ObjectConfigStorage::LoadAllConfig("./data/object");
     engine::FontFactory::Create("C:/windows/fonts/simhei.ttf", "simhei", 20);
 
-    engine::World::Instance()->AddSystem<ControllerUpdateSystem>();
-    engine::World::Instance()->AddSystem<TransformUpdateSystem>();
-    engine::World::Instance()->AddSystem<MapTileRenderSystem>();
-    engine::World::Instance()->AddSystem<MapObjectRenderSystem>();
-    engine::World::Instance()->AddSystem<SpriteRenderSystem>();
-    engine::World::Instance()->AddSystem<HintArrowSystem>();
-    engine::World::Instance()->AddSystem<UIRenderSystem>();
-
+    attachSystems();
     initMap();
 
     auto player = CreateHuman("role#down", "role#up", "role#right", 50);
+    Attach2D(player);
 
     GameData::Instance()->InitControllers(player);
     GameData::Instance()->SetPlayer(player);
-
-    Attach2D(player);
 
     auto backpackEntity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::BackpackPanel>("backpack");
     backpackEntity->SetActive(false);
     Attach2D(backpackEntity);
 
     GameData::Instance()->SetBackpackPanel(backpackEntity);
+    MonsterManager::Add(player);
 }
 
 void StartScene::initMap() {
@@ -41,6 +34,18 @@ void StartScene::initMap() {
     mapComponent->map = MapManager::GetGroundMap();
 
     Attach2D(entity);
+}
+
+void StartScene::attachSystems() {
+    engine::World::Instance()->AddSystem<ControllerUpdateSystem>();
+    engine::World::Instance()->AddSystem<TransformUpdateSystem>();
+    engine::World::Instance()->AddSystem<SortMonstersSystem>();
+    engine::World::Instance()->AddSystem<MapTileRenderSystem>();
+    engine::World::Instance()->AddSystem<MapObjectRenderSystem>();
+    // engine::World::Instance()->AddSystem<SpriteRenderSystem>();
+    engine::World::Instance()->AddSystem<HintArrowSystem>();
+    engine::World::Instance()->AddSystem<UIRenderSystem>();
+    engine::World::Instance()->AddSystem<LifeUIRenderSystem>();
 }
 
 void StartScene::OnQuit() {

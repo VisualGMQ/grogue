@@ -1,21 +1,23 @@
 #pragma once
 
 #include "engine/engine.hpp"
-#include "others/tilesheet_loader.hpp"
-#include "others/object_reader.hpp"
 #include "map/map_generate.hpp"
 #include "system/maptile_render.hpp"
 #include "system/transform_update.hpp"
 #include "system/sprite_render.hpp"
 #include "system/mapobject_render.hpp"
 #include "system/hint_arrow.hpp"
+#include "system/controller_update.hpp"
+#include "system/ui_render.hpp"
+#include "system/sort_monster.hpp"
+#include "system/life_ui_render.hpp"
 #include "others/localization.hpp"
 #include "others/human_create.hpp"
-#include "scripts/controller.hpp"
 #include "others/data.hpp"
-#include "system/controller_update.hpp"
+#include "others/tilesheet_loader.hpp"
+#include "others/object_reader.hpp"
+#include "scripts/controller.hpp"
 #include "ui/backpack_panel.hpp"
-#include "system/ui_render.hpp"
 
 class StartScene final : public engine::Scene {
 public:
@@ -26,4 +28,5 @@ public:
 
 private:
     void initMap();
+    void attachSystems();
 };

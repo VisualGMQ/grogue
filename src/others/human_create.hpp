@@ -3,6 +3,7 @@
 #include "engine/engine.hpp"
 #include "components/human.hpp"
 #include "components/backpack.hpp"
+#include "components/life.hpp"
 #include "others/object_reader.hpp"
 #include <filesystem>
 

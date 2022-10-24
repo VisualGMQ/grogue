@@ -14,3 +14,6 @@ void GameData::InitControllers(engine::Entity* player) {
     backpackController_ = std::make_unique<BackpackController>();
     controller_ = humanController_.get();
 }
+
+std::vector<engine::Entity*> MonsterManager::monsters_;
+bool MonsterManager::shouldSort_ = true;
