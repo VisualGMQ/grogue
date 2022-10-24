@@ -2,10 +2,7 @@
 
 #include "engine/engine.hpp"
 #include "path_helper.hpp"
-
-// for c-style code, point out whether param is IN or OUT(default is IN)
-#define IN
-#define OUT
+#include "in_out.hpp"
 
 void LoadAllImageResources(const std::filesystem::path& path);
 void LoadImageResources(const std::filesystem::path& root, const std::filesystem::path& path);
