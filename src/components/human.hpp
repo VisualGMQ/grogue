@@ -9,6 +9,7 @@ public:
     Human(engine::ComponentID id): engine::Component(id) { Reset(); }
 
     void Reset() override {
+        engine::Component::Reset();
         right.texture = nullptr;
         down.texture = nullptr;
         up.texture = nullptr;

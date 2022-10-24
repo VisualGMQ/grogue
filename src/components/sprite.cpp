@@ -3,6 +3,7 @@
 namespace component {
 
 void Sprite::Reset() {
+    engine::Component::Reset();
     offset.Set(0, 0);
     size.Set(0, 0);
     anchor.Set(0, 0);

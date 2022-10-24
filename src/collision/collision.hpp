@@ -13,8 +13,13 @@ bool IsPointInRect(const engine::Vec2& p, const engine::Rect& r);
 
 struct CollisionResult {
     engine::Vec2 normal;
-    float s;
+    float s = 0;
+    float depth = 0;
 };
+
+bool IsRectIntersectRect(const engine::Rect& r1, const engine::Rect& r2);
+
+engine::Rect RectsIntersect(const engine::Rect& r1, const engine::Rect& r2);
 
 bool MinkowskiCollide(const engine::Rect& r1, const engine::Rect& r2,
                       const engine::Vec2& v1, const engine::Vec2& v2,

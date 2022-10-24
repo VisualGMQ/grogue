@@ -5,6 +5,8 @@ engine::Entity* CreateHuman(const std::string& down, const std::string& up, cons
                                                           component::Sprite,
                                                           component::Backpack,
                                                           engine::Node2DComponent,
+                                                          component::BoxCollider,
+                                                          component::RigidBody,
                                                           component::Life>("human");
     auto human = entity->GetComponent<component::Human>();
     engine::ImageFactory::Find(down, human->down);
@@ -17,6 +19,10 @@ engine::Entity* CreateHuman(const std::string& down, const std::string& up, cons
     sprite->size = sprite->image.region.size * 2;
 
     auto node = entity->GetComponent<engine::Node2DComponent>();
+
+    auto box = entity->GetComponent<component::BoxCollider>();
+    box->rect.position.Set(8, 32);
+    box->rect.size.Set(16, 12);
 
     return entity;
 }

@@ -10,6 +10,7 @@ public:
     Pickupable(engine::ComponentID id): engine::Component(id) { Reset(); }
 
     void Reset() override {
+        engine::Component::Reset();
         num = 1;
         id = -1;
     }

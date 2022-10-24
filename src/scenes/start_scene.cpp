@@ -39,6 +39,9 @@ void StartScene::initMap() {
 void StartScene::attachSystems() {
     engine::World::Instance()->AddSystem<ControllerUpdateSystem>();
     engine::World::Instance()->AddSystem<TransformUpdateSystem>();
+    engine::World::Instance()->AddSystem<CollisionSystem>();
+    engine::World::Instance()->AddSystem<PhysicalSystem>();
+    engine::World::Instance()->AddSystem<PhysicalClearSystem>();
     engine::World::Instance()->AddSystem<SortMonstersSystem>();
     engine::World::Instance()->AddSystem<MapTileRenderSystem>();
     engine::World::Instance()->AddSystem<MapObjectRenderSystem>();
@@ -46,6 +49,7 @@ void StartScene::attachSystems() {
     engine::World::Instance()->AddSystem<HintArrowSystem>();
     engine::World::Instance()->AddSystem<UIRenderSystem>();
     engine::World::Instance()->AddSystem<LifeUIRenderSystem>();
+    engine::World::Instance()->AddSystem<CollisionOutlineSystem>();
 }
 
 void StartScene::OnQuit() {

@@ -21,9 +21,28 @@ bool LineIntersectLine(const engine::Vec2& pA1, const engine::Vec2& pA2,
     return false;
 }
 
+template <typename T>
+int Sign(const T& value) {
+    return value > 0 ? 1 : (value == 0 ? 0 : -1);
+}
+
+engine::Rect RectsIntersect(const engine::Rect& r1, const engine::Rect& r2) {
+    float top = std::max(r1.position.y, r2.position.y);
+    float left = std::max(r1.position.x, r2.position.x);
+    float right = std::min(r1.position.x + r1.size.w, r2.position.x + r2.size.w);
+    float bottom = std::min(r1.position.y + r1.size.h, r2.position.y + r2.size.h);
+
+    return engine::Rect(left, top, right - left, bottom - top);
+}
+
 bool LineIntersectRect(const engine::Vec2& pStart, const engine::Vec2& pEnd, const engine::Rect& rect,
                        engine::Vec2* n, float* s) {
-    if (IsPointInRect(pStart, rect)) { return false; }
+    auto dir = pEnd - pStart;
+    if (IsPointInRect(pStart, rect)) {
+        if (s) { *s = 0; }
+        if (n) { n->Set(0, 0); }
+        return true;
+    }
 
     auto topLeft = rect.position;
     auto topRight = rect.position + engine::Vec2(rect.size.w, 0);
@@ -70,5 +89,30 @@ bool MinkowskiCollide(const engine::Rect& r1, const engine::Rect& r2,
     engine::Vec2 v = v2 - v1;
     engine::Vec2 p = r1.position + r1.size / 2.0;
 
-    return LineIntersectRect(p, p + v, rect, &result.normal, &result.s);
+    bool intersected = LineIntersectRect(p, p + v, rect, &result.normal, &result.s);
+    if (result.s == 0 && result.normal == engine::Vec2(0, 0)) {
+        auto intersectRect = RectsIntersect(r1, r2);
+        
+        if (intersectRect.size.w < intersectRect.size.h) {
+            result.depth = intersectRect.size.w;
+            result.normal.Set(1, 0);
+            if (std::abs(p.x - r2.position.x) < std::abs(p.x - (r2.position.x + r2.size.w))) {
+                result.normal.x *= -1;
+            }
+        } else if (intersectRect.size.h < intersectRect.size.w) {
+            result.depth = intersectRect.size.h;
+            result.normal.Set(0, 1);
+            if (std::abs(p.y - r2.position.y) < std::abs(p.y - (r2.position.y + r2.size.h))) {
+                result.normal.y *= -1;
+            }
+        }
+    }
+    return intersected;
+}
+
+bool IsRectIntersectRect(const engine::Rect& r1, const engine::Rect& r2) {
+    return !(r1.position.x >= r2.position.x + r2.size.w ||
+             r1.position.x + r1.size.w <= r2.position.x ||
+             r1.position.y >= r2.position.y + r2.size.h ||
+             r1.position.y + r1.size.h <= r2.position.y);
 }

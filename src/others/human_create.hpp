@@ -4,6 +4,8 @@
 #include "components/human.hpp"
 #include "components/backpack.hpp"
 #include "components/life.hpp"
+#include "components/box_collider.hpp"
+#include "components/rigidbody.hpp"
 #include "others/object_reader.hpp"
 #include <filesystem>
 

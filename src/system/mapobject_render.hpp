@@ -15,6 +15,7 @@ public:
 private:
     MonsterManager::iterator monsterIt_;
 
-    void drawMonster(int y);
+    void drawMonsterWithCheckY(int y);
+    void drawMonster(component::Sprite* sprite, engine::Node2DComponent* node);
     void drawTile(MapTile& tile, engine::Node2DComponent* node,  const VisiableTileArea& visiableArea, int x, int y);
 };

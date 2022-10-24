@@ -2,6 +2,7 @@
 
 #include "engine/engine.hpp"
 #include "map/map_generate.hpp"
+
 #include "system/maptile_render.hpp"
 #include "system/transform_update.hpp"
 #include "system/sprite_render.hpp"
@@ -11,6 +12,11 @@
 #include "system/ui_render.hpp"
 #include "system/sort_monster.hpp"
 #include "system/life_ui_render.hpp"
+#include "system/collision.hpp"
+#include "system/collision_outline.hpp"
+#include "system/physical.hpp"
+#include "system/physical_clear.hpp"
+
 #include "others/localization.hpp"
 #include "others/human_create.hpp"
 #include "others/data.hpp"

@@ -10,6 +10,7 @@ public:
     Backpack(engine::ComponentID id): engine::Component(id) { Reset(); }
 
     void Reset() override {
+        engine::Component::Reset();
         objects.clear();
         capacity = 20;
     }
