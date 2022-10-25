@@ -12,7 +12,7 @@ project(
 
 set(GAME_NAME ${PROJECT_NAME})
 
-add_subdirectory(3rdlibs/tinyengine)
+add_subdirectory(tinyengine)
 
 aux_source_directory(src/scenes SCENES_SRC)
 aux_source_directory(src/scripts SCRIPTS_SRC)

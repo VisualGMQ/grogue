@@ -1,0 +1,5 @@
+build
+.vscode
+vs-build
+.cache
+*.inc
