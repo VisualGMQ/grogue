@@ -1,17 +1,30 @@
 #include "object_reader.hpp"
 
-ObjectConfig ObjectConfigReader::Read(const std::filesystem::path& filepath) {
+std::optional<ObjectConfig> ObjectConfigReader::Read(const std::filesystem::path& filepath) {
     ObjectConfig config;
     auto tbl = toml::parse_file(filepath.c_str());
     config.id = tbl["id"].value<int>().value();
     config.name = tbl["name"].value<std::string>().value_or("[No Name]");
-    config.imageName = tbl["img"].value<std::string>().value();
-    if (!engine::ImageFactory::Find(config.imageName, config.image)) {
-        Loge("object image {} not found", config.imageName);
+    if (tbl["img"].is_array()) {
+        auto imgArr = tbl["img"].as_array();
+        config.orientatedArchImages.resize(imgArr->size());
+        for (int i = 0; i < imgArr->size(); i++) {
+            std::string imgName = imgArr->get(i)->value<std::string>().value();
+            if (!engine::ImageFactory::Find(imgName, config.orientatedArchImages[i])) {
+                Loge("object image {} not found", imgName);
+            }   
+        }
+    } else if (tbl["img"].is_string()) {
+        config.imageName = tbl["img"].value<std::string>().value();
+        if (!engine::ImageFactory::Find(config.imageName, config.image)) {
+            Loge("object image {} not found", config.imageName);
+        }
+    } else {
+        Loge("object field `img` invalid");
+        return std::nullopt;
     }
     config.description = tbl["description"].value<std::string>().value_or("");
     config.type = getObjectTypeFromStr(tbl["type"].value<std::string>().value());
-    auto features = tbl["features"].as_array();
     return config;
 }
 
@@ -47,10 +60,13 @@ void ObjectConfigStorage::loadConfigRecursive(const std::filesystem::path& root,
     } else {
         ObjectConfigReader reader;
         auto config = reader.Read(path);
-        configs[config.id] = config;
+
+        if (!config) return;
+
+        configs[config->id] = config.value();
         auto name = RemoveRootFromPath(root.string(), GetFilenameNoExt(path.string()));
         CvtWindowsDelim2Unix(name);
-        idNameMap[name] = config.id;
+        idNameMap[name] = config->id;
     }
 }
 

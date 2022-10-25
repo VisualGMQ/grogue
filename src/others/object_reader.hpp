@@ -5,11 +5,12 @@
 #include "components/architecture.hpp"
 #include "components/pickupable.hpp"
 #include "components/box_collider.hpp"
+#include "components/compose.hpp"
 #include "config.hpp"
 
 class ObjectConfigReader final {
 public:
-    ObjectConfig Read(const std::filesystem::path& filepath);
+    std::optional<ObjectConfig> Read(const std::filesystem::path& filepath);
     
 private:
     static ObjectConfig::Type getObjectTypeFromStr(const std::string&);

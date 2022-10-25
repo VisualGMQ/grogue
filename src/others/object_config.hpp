@@ -6,6 +6,11 @@
 
 using ObjectID = unsigned int;
 
+struct ComposeMaterial {
+    ObjectID id = -1;
+    int num = 0;
+};
+
 struct ArchitectureInfo {
     enum DestroyType {
         Undestroyable,
@@ -47,6 +52,7 @@ struct ObjectConfig {
     std::optional<ObjectInfo> objectInfo;
     engine::Image image;
     std::string imageName;
+    std::vector<engine::Image> orientatedArchImages;
 
     std::string GetReadableInfo() const;
     std::string GetDebugInfo() const;

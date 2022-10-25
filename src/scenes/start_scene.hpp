@@ -21,6 +21,7 @@
 #include "others/data.hpp"
 #include "others/tilesheet_loader.hpp"
 #include "others/object_reader.hpp"
+#include "others/compose_reader.hpp"
 #include "scripts/controller.hpp"
 #include "ui/backpack_panel.hpp"
 

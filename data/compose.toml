@@ -1,0 +1,2 @@
+pickaxe = [{name = "wood", num = 1}, {name="sharp_stone", num = 2}]
+wooden_wall = [{name = "wood", num = 4}]

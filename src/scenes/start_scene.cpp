@@ -4,6 +4,8 @@ void StartScene::OnInit() {
     Localization::Init("data/localization/chinese.toml");
     LoadAllImageResources("./resources/img");
     ObjectConfigStorage::LoadAllConfig("./data/object");
+    ComposeConfigStorage::LoadAllConfig("./data/compose.toml");
+    ComposeConfigStorage::OutputAllConfig();
     engine::FontFactory::Create("C:/windows/fonts/simhei.ttf", "simhei", 20);
 
     attachSystems();

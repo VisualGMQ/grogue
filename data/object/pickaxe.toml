@@ -1,0 +1,5 @@
+id = 7
+name = "石制十字镐"
+description = "可以挖掘部分方块"
+img = "tilesheet#stone_pickaxe"
+type = "pickupable"
