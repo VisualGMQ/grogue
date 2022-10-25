@@ -4,6 +4,7 @@
 #include "components/sprite.hpp"
 #include "components/architecture.hpp"
 #include "components/pickupable.hpp"
+#include "components/box_collider.hpp"
 #include "config.hpp"
 
 class ObjectConfigReader final {

@@ -3,10 +3,9 @@
 #include "engine/engine.hpp"
 #include "map/map_generate.hpp"
 
-#include "system/maptile_render.hpp"
+#include "system/map_render.hpp"
 #include "system/transform_update.hpp"
 #include "system/sprite_render.hpp"
-#include "system/mapobject_render.hpp"
 #include "system/hint_arrow.hpp"
 #include "system/controller_update.hpp"
 #include "system/ui_render.hpp"

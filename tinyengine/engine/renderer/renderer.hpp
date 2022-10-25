@@ -32,7 +32,7 @@ public:
     static void DrawLines(const std::vector<Vec2>&);
     static void DrawLineLoop(const std::vector<Vec2>&);
     static void FillRect(const Rect& rect);
-    static void DrawTexture(const Texture& texture, Rect* src, const Size& size, const Transform&);
+    static void DrawTexture(const Texture& texture, const Rect* const src, const Size& size, const Transform&);
     static void DrawText(Font* font, const std::string& text, const Vec2& pos);
 
 private:

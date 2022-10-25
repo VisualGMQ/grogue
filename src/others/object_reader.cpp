@@ -96,13 +96,16 @@ std::optional<ObjectID> ObjectConfigStorage::ObjectName2ID(const std::string& na
 }
 
 engine::Entity* CreateArchitecture(const ObjectConfig& config) {
-    auto entity = engine::World::Instance()->CreateEntity<component::Sprite, component::Architecture>("architecture-" + config.name);
+    auto entity = engine::World::Instance()->CreateEntity<component::Sprite, component::Architecture, component::BoxCollider>("architecture-" + config.name);
     auto sprite = entity->GetComponent<component::Sprite>();
     auto architecture = entity->GetComponent<component::Architecture>();
+    auto box = entity->GetComponent<component::BoxCollider>();
     architecture->id = config.id;
 
     sprite->image = config.image;
     sprite->size.Set(TileSize, TileSize);
+
+    box->rect.Set(0, 0, sprite->size.w, sprite->size.h);
 
     return entity;
 }

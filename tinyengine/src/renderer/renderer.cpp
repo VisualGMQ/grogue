@@ -59,9 +59,9 @@ void Renderer::FillRect(const Rect& rect) {
     SDL_RenderFillRectF(Video::GetRenderer(), &rect.sdl_rect);
 }
 
-void Renderer::DrawTexture(const Texture& texture, Rect* src, const Size& size, const Transform& transform) {
+void Renderer::DrawTexture(const Texture& texture, const Rect* const src, const Size& size, const Transform& transform) {
     Rect dstRect;
-    dstRect.position = transform.anchor + transform.position;
+    dstRect.position = transform.position;
     dstRect.size = size * transform.scale;
     dstRect.size.w = std::abs(dstRect.size.w);
     dstRect.size.h = std::abs(dstRect.size.h);

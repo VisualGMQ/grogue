@@ -10,8 +10,10 @@ void CollisionSystem::Update() {
             for (int x = visiableArea.initCols; x < visiableArea.endCols; x++) {
                 auto& tile = map->Get(x, y);
                 if (tile.object && tile.object->GetComponent<component::Architecture>()) {
+                    auto archBox = tile.object->GetComponent<component::BoxCollider>();
                     // FIXME add offset
-                    engine::Rect archRect(x * TileSize, y * TileSize, TileSize, TileSize);
+                    engine::Rect archRect = archBox->rect;
+                    archRect.position += engine::Vec2(x, y) * TileSize;
 
                     auto monsterIt = MonsterManager::begin();
                     while (monsterIt != MonsterManager::end()) {
