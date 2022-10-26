@@ -4,14 +4,9 @@
 
 namespace component {
 
-class BackpackPanel: public engine::Component {
+class GridPanel: public engine::Component {
 public:
-    BackpackPanel(engine::ComponentID id): engine::Component(id) {
-        Reset();
-        if (!engine::ImageFactory::Find("tilesheet#select_outline", selectOutline)) {
-            Loge("select_outline image not in tilesheet");
-        }
-    }
+    GridPanel(engine::ComponentID id): engine::Component(id) { Reset(); }
     void Reset() override;
     
 
@@ -27,8 +22,18 @@ public:
     int gridNumInCol;
     engine::Image selectOutline;
 
+    using HoverMoveCb = std::function<void(GridPanel*)>;
+    HoverMoveCb onHoverMove;
+
+    using DrawImageFunc = std::function<void(GridPanel*, const engine::Rect&, int, int)>;
+    DrawImageFunc drawImageFunc;
+
 private:
     engine::Vec2 hoverGridPos_;
+
+    void tryCallHoverMove() {
+        if (onHoverMove) onHoverMove(this);
+    }
 };
 
 }

@@ -16,8 +16,12 @@ void StartScene::OnInit() {
     GameData::Instance()->InitControllers(player);
     GameData::Instance()->SetPlayer(player);
 
-    auto backpackEntity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::BackpackPanel>("backpack");
+    auto backpackEntity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::GridPanel>("backpack");
     backpackEntity->SetActive(false);
+    auto gridPanel = backpackEntity->GetComponent<component::GridPanel>();
+    BackpackObjectDrawer backpackObjDrawer;
+    engine::ImageFactory::Find("tilesheet#select_outline", gridPanel->selectOutline);
+    gridPanel->drawImageFunc = backpackObjDrawer;
     Attach2D(backpackEntity);
 
     GameData::Instance()->SetBackpackPanel(backpackEntity);
@@ -47,7 +51,7 @@ void StartScene::attachSystems() {
     engine::World::Instance()->AddSystem<MapRenderSystem>();
     // engine::World::Instance()->AddSystem<SpriteRenderSystem>();
     engine::World::Instance()->AddSystem<HintArrowSystem>();
-    engine::World::Instance()->AddSystem<BackpackPanelRenderSystem>();
+    engine::World::Instance()->AddSystem<GridPanelRenderSystem>();
     engine::World::Instance()->AddSystem<PlayerInfoRenderSystem>();
     // engine::World::Instance()->AddSystem<CollisionOutlineSystem>();
 }
