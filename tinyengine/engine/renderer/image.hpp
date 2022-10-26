@@ -6,7 +6,7 @@ namespace engine {
 
 class Texture;
 
-struct DLLEXPORT Image final {
+struct Image final {
     Texture* texture;
     Rect region;
 

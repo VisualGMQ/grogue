@@ -19,7 +19,7 @@ private:
 
 class MapManager final {
 public:
-    static void SetGroundMap(std::unique_ptr<Map>& m) { groundMap_ = std::move(m); }
+    static void SetGroundMap(std::unique_ptr<Map>&& m) { groundMap_ = std::move(m); m = nullptr; }
     static Map* GetGroundMap() { return groundMap_.get(); }
     static bool HasDungeon() { return !dungeonMap_.empty(); }
     static Map* GetCurDungeonMap() { return dungeonMap_[curDungeonMapIdx_].get(); }

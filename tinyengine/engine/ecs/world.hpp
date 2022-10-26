@@ -3,7 +3,6 @@
 #include "engine/ecs/component.hpp"
 #include "engine/ecs/system.hpp"
 #include "engine/ecs/entity.hpp"
-#include "engine/core/dllexport.hpp"
 #include "engine/core/event.hpp"
 
 namespace engine {
@@ -11,7 +10,7 @@ namespace engine {
 class UISystem;
 class RenderSystem;
 
-class DLLEXPORT World final {
+class World final {
 public:
     static World* Instance();
     static void Init();
@@ -118,7 +117,7 @@ void World::RemoveComponent(T* component) {
         it++;
     }
     if (it != components_[id].components.end()) {
-        auto component = *it;
+        auto& component = *it;
         component->Reset();
         components_[id].componentTrashes_.push(std::move(*it));
         components_[id].components.erase(it);

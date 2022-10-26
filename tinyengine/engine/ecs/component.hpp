@@ -1,7 +1,6 @@
 #pragma once
 
 #include "engine/core/pch.hpp"
-#include "engine/core/dllexport.hpp"
 
 namespace engine {
 
@@ -9,7 +8,7 @@ class Entity;
 
 using ComponentID = unsigned int;
 
-class DLLEXPORT Component {
+class Component {
 public:
     friend class Entity;
     friend class World;
@@ -39,7 +38,7 @@ private:
 class ComponentIDHelper final {
 public:
     template <typename T>
-    DLLEXPORT static unsigned int GetID() {
+    static unsigned int GetID() {
         static_assert(std::is_base_of_v<Component, T> && !std::is_same_v<Component, T>);
         static unsigned int id = curIdx_++;
         return id;

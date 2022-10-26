@@ -14,22 +14,22 @@ class Input final {
 public:
     Input() = delete;
 
-    DLLEXPORT static void Init();
-    DLLEXPORT static void Quit();
+    static void Init();
+    static void Quit();
 
-    DLLEXPORT static bool IsKeyPressed(Key);
-    DLLEXPORT static bool IsKeyPressing(Key);
-    DLLEXPORT static bool IsKeyReleased(Key);
-    DLLEXPORT static bool IsKeyReleasing(Key);
+    static bool IsKeyPressed(Key);
+    static bool IsKeyPressing(Key);
+    static bool IsKeyReleased(Key);
+    static bool IsKeyReleasing(Key);
 
-    DLLEXPORT static bool IsButtonPressed(MouseButton);
-    DLLEXPORT static bool IsButtonPressing(MouseButton);
-    DLLEXPORT static bool IsButtonReleased(MouseButton);
-    DLLEXPORT static bool IsButtonReleasing(MouseButton);
+    static bool IsButtonPressed(MouseButton);
+    static bool IsButtonPressing(MouseButton);
+    static bool IsButtonReleased(MouseButton);
+    static bool IsButtonReleasing(MouseButton);
 
-    DLLEXPORT static Vec2 MousePoition();
-    DLLEXPORT static const Vec2& MouseRealPoition();
-    DLLEXPORT static const Vec2& MouseRelative();
+    static Vec2 MousePoition();
+    static const Vec2& MouseRealPoition();
+    static const Vec2& MouseRelative();
 
     static void UpdateStates();
     static void UpdateKeyState(Key key, bool isPress); 

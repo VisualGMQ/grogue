@@ -7,7 +7,7 @@
 
 namespace engine {
 
-class DLLEXPORT Scene {
+class Scene {
 public:
     friend class SceneMgr;
 
@@ -44,7 +44,7 @@ private:
 };
 
 
-class DLLEXPORT SceneMgr final {
+class SceneMgr final {
 public:
     static void Init();
     static void Quit();

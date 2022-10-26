@@ -9,7 +9,7 @@ namespace engine {
 using TextureID = int;
 
 /* Please make sure your image format is RGBA8888 */
-class DLLEXPORT Texture final {
+class Texture final {
 public:
     friend class TextureFactory;
     friend class Renderer;
@@ -32,7 +32,7 @@ private:
     Size size_;
 };
 
-class DLLEXPORT TextureFactory final {
+class TextureFactory final {
 public:
     static void Init();
     static void Quit();

@@ -7,7 +7,7 @@ namespace engine {
 
 using TimerID = unsigned int;
 
-class DLLEXPORT Timer final {
+class Timer final {
 public:
     struct Param {
         void* userParam;
@@ -52,9 +52,9 @@ public:
 
     static void Init() {}
     static void Quit() { timerMap_.clear(); }
-    DLLEXPORT static Timer* Create(Timer::Callback, uint32_t, void*);
-    DLLEXPORT static Timer* Find(TimerID);
-    DLLEXPORT static void Remove(TimerID);
+    static Timer* Create(Timer::Callback, uint32_t, void*);
+    static Timer* Find(TimerID);
+    static void Remove(TimerID);
 
 private:
     static std::unordered_map<SDL_TimerID, std::unique_ptr<Timer>> timerMap_;

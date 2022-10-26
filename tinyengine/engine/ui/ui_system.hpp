@@ -8,7 +8,7 @@
 
 namespace engine {
 
-class DLLEXPORT UISystem final: public EntityUpdateSystem {
+class UISystem final: public EntityUpdateSystem {
 public:
     UISystem(class World* world): EntityUpdateSystem(world) {}
 

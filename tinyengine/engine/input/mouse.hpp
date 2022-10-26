@@ -18,20 +18,20 @@ private:
     SDL_Cursor* cursor_;
 };
 
-class DLLEXPORT Mouse final {
+class Mouse final {
 public:
     Mouse() = delete;
 
-    DLLEXPORT static void Hide();
-    DLLEXPORT static void Show();
-    DLLEXPORT static bool IsShowing();
-    DLLEXPORT static void ToggleShow();
-    DLLEXPORT static void Capture(bool);
-    DLLEXPORT static void RelativeMode(bool);
-    DLLEXPORT static bool IsRelativeMode();
-    DLLEXPORT static void ToggleRelativeMode();
-    DLLEXPORT static void SetCursor(const Cursor&);
-    DLLEXPORT static void SetSystemCursor();
+    static void Hide();
+    static void Show();
+    static bool IsShowing();
+    static void ToggleShow();
+    static void Capture(bool);
+    static void RelativeMode(bool);
+    static bool IsRelativeMode();
+    static void ToggleRelativeMode();
+    static void SetCursor(const Cursor&);
+    static void SetSystemCursor();
 
 private:
     static bool isShow_;

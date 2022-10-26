@@ -1,5 +1,3 @@
-#pragma once
-
 #include "human_controller.hpp"
 #include "others/data.hpp"
 

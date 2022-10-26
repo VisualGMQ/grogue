@@ -30,22 +30,18 @@ void TextureFactory::Quit() {
 Texture* TextureFactory::Create(const std::string& filename) {
     int channel, w, h;
     SDL_Surface* surface = IMG_Load(filename.data());
-    SDL_Surface* cvtSurface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA32, 0);
-    SDL_FreeSurface(surface);
-    textures_.push_back(std::make_unique<Texture>(cvtSurface));
+    textures_.push_back(std::make_unique<Texture>(surface));
     auto& texture = textures_.back();
-    SDL_FreeSurface(cvtSurface);
+    SDL_FreeSurface(surface);
     texture->myId_ = curId_++;
     return texture.get();
 }
 
 Texture* TextureFactory::CreateFromXpm(char** xpmData) {
     SDL_Surface* surface = IMG_ReadXPMFromArray(xpmData);
-    SDL_Surface* cvtSurface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA32, 0);
-    SDL_FreeSurface(surface);
-    textures_.push_back(std::make_unique<Texture>(cvtSurface));
+    textures_.push_back(std::make_unique<Texture>(surface));
     auto& texture = textures_.back();
-    SDL_FreeSurface(cvtSurface);
+    SDL_FreeSurface(surface);
     texture->myId_ = curId_++;
     return texture.get();
 }

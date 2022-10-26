@@ -77,7 +77,6 @@ void Renderer::DrawTexture(const Texture& texture, const Rect* const src, const 
     if (transform.scale.y < 0) {
         flip |= SDL_FLIP_VERTICAL;
     }
-    SDL_RendererFlip rflip = static_cast<SDL_RendererFlip>(flip);
     SDL_RenderCopyExF(Video::GetRenderer(), texture.texture_,
                       srcRect ? &srcRect.value() : nullptr, &dstRect.sdl_rect,
                       transform.rotation, &transform.anchor.sdl_point,

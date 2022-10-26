@@ -5,7 +5,7 @@ namespace engine {
 class World;
 class Entity;
 
-class DLLEXPORT System {
+class System {
 public:
     enum Type {
         UpdateEachEntity = 1,

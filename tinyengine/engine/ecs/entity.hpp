@@ -1,15 +1,14 @@
 #pragma once
 
 #include "engine/ecs/component.hpp"
-#include "engine/ecs/world.hpp"
 #include "engine/ecs/behavior.hpp"
-#include "engine/core/dllexport.hpp"
+#include "engine/ecs/ecs.hpp"
 
 namespace engine {
 
 using EntityID = unsigned int;
 
-class DLLEXPORT Entity final {
+class Entity final {
 public:
     friend class World;
 
@@ -20,9 +19,6 @@ public:
 
     template <typename T>
     void SetComponent(T*);
-
-    template <typename T>
-    void SetComponent();
 
     template <typename T>
     T* GetComponent();
@@ -79,11 +75,6 @@ void Entity::SetComponent(T* comp) {
 }
 
 template <typename T>
-void Entity::SetComponent() {
-    SetComponent(World::Instance()->CreateComponent<T>());
-}
-
-template <typename T>
 T* Entity::GetComponent() {
     static_assert(std::is_base_of_v<Component, T> && !std::is_same_v<Component, T>);
     auto it = components_.find(ComponentIDHelper::GetID<T>());
@@ -112,7 +103,7 @@ void Entity::RemoveComponent() {
     unsigned int id = ComponentIDHelper::GetID<T>();
     auto component = components_[id];
     components_.erase(id);
-    world_->RemoveComponent(component);
+    ECS::GetRemoveFunc()(component);
 }
 
 }

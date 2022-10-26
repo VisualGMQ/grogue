@@ -23,6 +23,5 @@
 #include "SDL_image.h"
 #include "toml.hpp"
 
-#include "engine/core/dllexport.hpp"
 #include "engine/core/log.hpp"
 #include "engine/core/vmath.hpp"

@@ -1,5 +1,3 @@
-#pragma once
-
 #include "compose_reader.hpp"
 #include "object_reader.hpp"
 

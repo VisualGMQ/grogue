@@ -4,7 +4,7 @@
 
 namespace engine {
 
-class DLLEXPORT Video final {
+class Video final {
 public:
     Video() = delete;
 

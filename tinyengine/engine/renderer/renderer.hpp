@@ -16,7 +16,7 @@ struct Transform {
     Vec2 anchor;
 };
 
-class DLLEXPORT Renderer {
+class Renderer {
 public:
     Renderer() = delete;
 

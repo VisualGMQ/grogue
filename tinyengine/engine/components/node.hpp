@@ -1,6 +1,5 @@
 #pragma once
 
-#include "engine/core/dllexport.hpp"
 #include "engine/ecs/world.hpp"
 #include "engine/ecs/component.hpp"
 #include "engine/renderer/renderer.hpp"
@@ -9,7 +8,7 @@ namespace engine {
 
 void SetNodeParent(Entity* parent, Entity* child);
 
-class DLLEXPORT NodeComponent: public Component {
+class NodeComponent: public Component {
 public:
     NodeComponent(ComponentID id): Component(id) { Reset(); }
     virtual ~NodeComponent() = default;

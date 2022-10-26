@@ -1,7 +1,6 @@
 #pragma once
 
 #include "engine/core/log.hpp"
-#include "engine/core/dllexport.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -103,28 +102,28 @@ inline std::ostream& operator<<(std::ostream& o, const Vec2& p) {
     return o;
 }
 
-DLLEXPORT inline float Dot(const Vec2& lhs, const Vec2& rhs) {
+inline float Dot(const Vec2& lhs, const Vec2& rhs) {
     return lhs.x * rhs.x + lhs.y * rhs.y;
 }
 
-DLLEXPORT inline float Cross(const Vec2& lhs, const Vec2& rhs) {
+inline float Cross(const Vec2& lhs, const Vec2& rhs) {
     return lhs.x * rhs.y - lhs.y * rhs.x;
 }
 
-DLLEXPORT inline float Distance(const Vec2& v1, const Vec2& v2) {
+inline float Distance(const Vec2& v1, const Vec2& v2) {
     Vec2 dir = v1 - v2;
     return std::sqrt(dir.x * dir.x + dir.y * dir.y);
 }
 
-DLLEXPORT inline float Length2(const Vec2& v) {
+inline float Length2(const Vec2& v) {
     return Dot(v, v);
 }
 
-DLLEXPORT inline float Length(const Vec2& v) {
+inline float Length(const Vec2& v) {
     return std::sqrt(Length2(v));
 }
 
-DLLEXPORT inline auto Normalize(const Vec2& v) {
+inline auto Normalize(const Vec2& v) {
     auto len = Length(v);
     if (len == 0) return v;
     return v / Length(v);
@@ -132,7 +131,7 @@ DLLEXPORT inline auto Normalize(const Vec2& v) {
 
 using Size = Vec2;
 
-struct DLLEXPORT Rect {
+struct Rect {
     union {
         struct { Vec2 position, size; };
         SDL_FRect sdl_rect;
@@ -153,28 +152,28 @@ struct DLLEXPORT Rect {
     }
 };
 
-DLLEXPORT inline std::ostream& operator<<(std::ostream& o, const Rect& rect) {
+inline std::ostream& operator<<(std::ostream& o, const Rect& rect) {
     o << "Rect(" << rect.position << ", " << rect.size << ")";
     return o;
 }
 
 constexpr float PI = 3.14159265358;
 
-DLLEXPORT inline float Radians(float degrees) {
+inline float Radians(float degrees) {
     return degrees * PI / 180.0;
 }
 
-DLLEXPORT inline float Degrees(float radians) {
+inline float Degrees(float radians) {
     return radians * 180.0 / PI;
 }
 
 template <typename T>
-DLLEXPORT inline T Clamp(const T& value, const T& low, const T& high) {
+inline T Clamp(const T& value, const T& low, const T& high) {
     return value > high ? high : (value < low ? low : value);
 }
 
 template <typename T, typename RetT>
-DLLEXPORT RetT Lerp(const T& a, const T& b, float s) {
+RetT Lerp(const T& a, const T& b, float s) {
     return a + (b - a) * s;
 }
 

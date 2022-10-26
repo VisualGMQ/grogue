@@ -1,5 +1,3 @@
-#pragma once
-
 #include "object_config.hpp"
 
 std::string ObjectInfo::GetReadableInfo() const {

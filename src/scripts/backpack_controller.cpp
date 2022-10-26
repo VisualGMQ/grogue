@@ -1,5 +1,3 @@
-#pragma once
-
 #include "backpack_controller.hpp"
 #include "others/data.hpp"
 #include "ui/backpack_panel.hpp"

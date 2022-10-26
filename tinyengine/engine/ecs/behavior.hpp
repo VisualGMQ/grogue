@@ -9,7 +9,7 @@ namespace engine {
 class Entity;
 class BoxColliderComponent;
 
-class DLLEXPORT Behavior: public EventAcceptable {
+class Behavior: public EventAcceptable {
 public:
     friend class Entity;
 

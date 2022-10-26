@@ -3,7 +3,7 @@
 constexpr int WindowWidth = 800;
 constexpr int WindowHeight = 600;
 
-__declspec(dllexport) extern void GameInit(void);
+extern void GameInit(void);
 
 int main(int argc, char** argv) {
     engine::Logger::Init();
@@ -11,6 +11,7 @@ int main(int argc, char** argv) {
     auto& config = engine::InitConfig::Instance();
 
     engine::Random::Init(engine::Random::CPP, std::time(nullptr));
+    engine::ECS::Init();
     engine::Video::Init(config.Title(), config.WindowSize().w, config.WindowSize().h, config.Resizable());
     engine::Event::Init();
     engine::Renderer::Init(config.WindowSize().w, config.WindowSize().h);
@@ -53,6 +54,7 @@ int main(int argc, char** argv) {
     engine::Renderer::Quit();
     engine::Event::Quit();
     engine::Video::Quit();
+    engine::ECS::Quit();
     engine::Logger::Quit();
     return 0;
 }

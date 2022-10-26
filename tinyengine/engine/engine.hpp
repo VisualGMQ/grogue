@@ -13,6 +13,7 @@
 #include "engine/ecs/behavior.hpp"
 #include "engine/ecs/system.hpp"
 #include "engine/ecs/world.hpp"
+#include "engine/ecs/ecs.hpp"
 
 #include "engine/input/input.hpp"
 #include "engine/input/mouse.hpp"
