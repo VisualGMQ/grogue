@@ -5,7 +5,6 @@ void StartScene::OnInit() {
     LoadAllImageResources("./resources/img");
     ObjectConfigStorage::LoadAllConfig("./data/object");
     ComposeConfigStorage::LoadAllConfig("./data/compose.toml");
-    ComposeConfigStorage::OutputAllConfig();
     engine::FontFactory::Create("C:/windows/fonts/simhei.ttf", "simhei", 20);
 
     attachSystems();

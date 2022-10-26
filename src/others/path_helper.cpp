@@ -26,3 +26,31 @@ std::string GetFilenameNoExt(const std::string& filename) {
     if (idx == filename.npos) return filename;
     return std::string(filename.data(), idx);
 }
+
+
+bool PathWalker::isSaitisfyExtensionFilter(const std::filesystem::path& path) {
+    auto extension = path.extension();
+    for (auto& filter : filters_) {
+        if (extension == filter) 
+            return true;
+    }
+    return false;
+}
+
+PathWalker::Error PathWalker::operator()(const std::filesystem::path& path) {
+    if (!std::filesystem::exists(path)) return Error::PathNotExists;
+    doVisitRecursive(path);
+    return Error::NoError;
+}
+
+void PathWalker::doVisitRecursive(const std::filesystem::path& path) {
+    if (std::filesystem::is_directory(path)) {
+        std::filesystem::directory_iterator dirIter(path);
+        while (dirIter != std::filesystem::directory_iterator()) {
+            doVisitRecursive(*dirIter);
+            dirIter++;
+        }
+    } else {
+        if (visitFunc_ && isSaitisfyExtensionFilter(path)) visitFunc_(path);
+    }
+}

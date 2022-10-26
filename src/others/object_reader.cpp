@@ -47,56 +47,49 @@ void ObjectConfigStorage::LoadAllConfig(const std::filesystem::path& root) {
         return;
     }
     
-    loadConfigRecursive(root, root);
-}
-
-void ObjectConfigStorage::loadConfigRecursive(const std::filesystem::path& root, const std::filesystem::path& path) {
-    if (std::filesystem::is_directory(path)) {
-        std::filesystem::directory_iterator dirIter(path);
-        while (dirIter != std::filesystem::directory_iterator()) {
-            loadConfigRecursive(root, *dirIter);
-            dirIter++;
-        }
-    } else {
+    PathWalker pathWalker({".toml"}, [&](const std::filesystem::path& path) {
         ObjectConfigReader reader;
         auto config = reader.Read(path);
 
-        if (!config) return;
+        if (config) {
+            configs[config->id] = config.value();
+            auto name = RemoveRootFromPath(root.string(), GetFilenameNoExt(path.string()));
+            CvtWindowsDelim2Unix(name);
+            idNameMap[name] = config->id;
+        }
+    });
 
-        configs[config->id] = config.value();
-        auto name = RemoveRootFromPath(root.string(), GetFilenameNoExt(path.string()));
-        CvtWindowsDelim2Unix(name);
-        idNameMap[name] = config->id;
+    if (pathWalker(root) == PathWalker::Error::PathNotExists) {
+        Loge("object config path {} not exists", root);
     }
 }
 
-bool ObjectConfigStorage::Find(ObjectID id, ObjectConfig& config) {
+ObjectConfig* ObjectConfigStorage::Find(ObjectID id) {
     auto it = configs.find(id);
     if (it == configs.end()) {
-        return false;
+        return nullptr;
     }
-    config = it->second;
-    return true;
+    return &it->second;
 }
 
-bool ObjectConfigStorage::Find(const std::string& name, ObjectConfig& config) {
+ObjectConfig* ObjectConfigStorage::Find(const std::string& name) {
     auto it = idNameMap.find(name);
-    if (it == idNameMap.end()) return false;
-    return Find(it->second, config);
+    if (it == idNameMap.end()) return nullptr;
+    return Find(it->second);
 }
 
 
 engine::Entity* CreateObject(ObjectID id) {
-    ObjectConfig config;
-    if (!ObjectConfigStorage::Find(id, config)) {
-        Loge("object {} config not found", config.name);
+    auto config = ObjectConfigStorage::Find(id);
+    if (!config) {
+        Loge("object {} config not found", id);
         return nullptr;
     }
-    switch (config.type) {
+    switch (config->type) {
         case ObjectConfig::Type::Architecture:
-            return CreateArchitecture(config);
+            return CreateArchitecture(*config);
         case ObjectConfig::Type::Pickable:
-            return CreatePickupable(config);
+            return CreatePickupable(*config);
         default:
             return nullptr;
     }

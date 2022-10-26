@@ -7,6 +7,7 @@
 #include "components/box_collider.hpp"
 #include "components/compose.hpp"
 #include "config.hpp"
+#include "path_helper.hpp"
 
 class ObjectConfigReader final {
 public:
@@ -19,15 +20,13 @@ private:
 class ObjectConfigStorage final {
 public:
     static void LoadAllConfig(const std::filesystem::path& root);
-    static bool Find(ObjectID id, ObjectConfig&);
-    static bool Find(const std::string& name, ObjectConfig&);
+    static ObjectConfig* Find(ObjectID id);
+    static ObjectConfig* Find(const std::string& name);
     static std::optional<ObjectID> ObjectName2ID(const std::string& name);
 
 private:
     static std::unordered_map<std::string, ObjectID> idNameMap;
     static std::unordered_map<ObjectID, ObjectConfig> configs;
-
-    static void loadConfigRecursive(const std::filesystem::path& root, const std::filesystem::path& path);
 };
 
 engine::Entity* CreateObject(ObjectID id);

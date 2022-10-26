@@ -1,32 +1,26 @@
 #include "tilesheet_loader.hpp"
 
-void LoadAllImageResources(const std::filesystem::path& path) {
-    LoadImageResources(path, path);
-}
-
-void LoadImageResources(const std::filesystem::path& root, const std::filesystem::path& path) {
-    if (!std::filesystem::exists(path)) return;
-    if (!std::filesystem::is_directory(path)) {
-        Loge("path \"{}\" isn't directory", path);
+void LoadAllImageResources(const std::filesystem::path& root) {
+    if (!std::filesystem::is_directory(root)) {
+        Loge("\"{}\" isn't directory", root);
         return;
     }
-    std::filesystem::directory_iterator dirIter(path);
-    while (dirIter != std::filesystem::directory_iterator()) {
-        if (dirIter->is_directory()) {
-            LoadImageResources(root, dirIter->path());
-        } else if (dirIter->is_regular_file() && IsImageFile(dirIter->path())) {
-            std::filesystem::path configPath;
-            if (ExistsTileesheetConfigFile(dirIter->path(), configPath)) {
-                LoadTilesheet(root, dirIter->path(), configPath);
-            } else {
-                LoadImage(root, dirIter->path());
-            }
+
+    PathWalker pathWalker({".png", ".jpg", ".bmp", ".jpeg"}, [&](const std::filesystem::path& path){
+        std::filesystem::path configPath;
+        if (IsTileesheetConfigFileExists(path, configPath)) {
+            LoadTilesheet(root, path, configPath);
+        } else {
+            LoadImage(root, path);
         }
-        dirIter++;
+    });
+
+    if (pathWalker(root) == PathWalker::Error::PathNotExists) {
+        Loge("\"{}\" not exists", root);
     }
 }
 
-bool ExistsTileesheetConfigFile(const std::filesystem::path& tilesheet, OUT std::filesystem::path& outConfigFilename) {
+bool IsTileesheetConfigFileExists(const std::filesystem::path& tilesheet, OUT std::filesystem::path& outConfigFilename) {
     if (tilesheet.extension() == ".toml") return false;
     outConfigFilename = GetFilenameNoExt(tilesheet.string()) + ".toml";
     return std::filesystem::exists(outConfigFilename);
@@ -83,14 +77,4 @@ void LoadTilesheet(const std::filesystem::path& root,
             engine::ImageFactory::Create(texture, name, engine::Rect(tileSize.w * x, tileSize.h * y, tileSize.w, tileSize.h));
         }
     }
-}
-
-bool IsImageFile(const std::filesystem::path& filepath) {
-    if (!filepath.has_extension()) return false;
-    auto extension = filepath.extension();
-    return extension == ".png" ||
-           extension == ".jpg" ||
-           extension == ".jpeg" ||
-           extension == ".bmp" ||
-           extension == ".xmp";
 }

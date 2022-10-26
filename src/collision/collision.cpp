@@ -37,7 +37,6 @@ engine::Rect RectsIntersect(const engine::Rect& r1, const engine::Rect& r2) {
 
 bool LineIntersectRect(const engine::Vec2& pStart, const engine::Vec2& pEnd, const engine::Rect& rect,
                        engine::Vec2* n, float* s) {
-    auto dir = pEnd - pStart;
     if (IsPointInRect(pStart, rect)) {
         if (s) { *s = 0; }
         if (n) { n->Set(0, 0); }
