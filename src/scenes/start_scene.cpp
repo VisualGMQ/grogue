@@ -47,8 +47,8 @@ void StartScene::attachSystems() {
     engine::World::Instance()->AddSystem<MapRenderSystem>();
     // engine::World::Instance()->AddSystem<SpriteRenderSystem>();
     engine::World::Instance()->AddSystem<HintArrowSystem>();
-    engine::World::Instance()->AddSystem<UIRenderSystem>();
-    engine::World::Instance()->AddSystem<LifeUIRenderSystem>();
+    engine::World::Instance()->AddSystem<BackpackPanelRenderSystem>();
+    engine::World::Instance()->AddSystem<PlayerInfoRenderSystem>();
     // engine::World::Instance()->AddSystem<CollisionOutlineSystem>();
 }
 

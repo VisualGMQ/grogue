@@ -33,7 +33,7 @@ public:
     static void DrawLineLoop(const std::vector<Vec2>&);
     static void FillRect(const Rect& rect);
     static void DrawTexture(const Texture& texture, const Rect* const src, const Size& size, const Transform&);
-    static void DrawText(Font* font, const std::string& text, const Vec2& pos);
+    static void DrawText(Font* font, const std::string& text, const Vec2& pos, const engine::Color&);
 
 private:
     static Color clearColor_;

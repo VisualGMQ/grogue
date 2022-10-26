@@ -184,12 +184,18 @@ int Sign(const T& value) {
 
 struct Color {
     union {
-        struct{ int r, g, b, a; };
+        struct{ uint8_t r, g, b, a; };
         SDL_Color sdl_color;
     };
 
     Color(int r, int g, int b, int a = 255): r(r), g(g), b(b), a(a) {}
     Color(): r(0), g(0), b(0), a(255) {}
+
+    static const Color Black;
+    static const Color White;
+    static const Color Red;
+    static const Color Green;
+    static const Color Blue;
 };
 
 }

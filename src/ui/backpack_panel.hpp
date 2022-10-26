@@ -6,7 +6,12 @@ namespace component {
 
 class BackpackPanel: public engine::Component {
 public:
-    BackpackPanel(engine::ComponentID id): engine::Component(id) { Reset(); }
+    BackpackPanel(engine::ComponentID id): engine::Component(id) {
+        Reset();
+        if (!engine::ImageFactory::Find("tilesheet#select_outline", selectOutline)) {
+            Loge("select_outline image not in tilesheet");
+        }
+    }
     void Reset() override;
     
 
@@ -20,6 +25,7 @@ public:
     int gridSize;
     int gridPadding;
     int gridNumInCol;
+    engine::Image selectOutline;
 
 private:
     engine::Vec2 hoverGridPos_;

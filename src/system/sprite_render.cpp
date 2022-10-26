@@ -10,10 +10,8 @@ void SpriteRenderSystem::Update(engine::Entity* entity) {
             transform.position = sprite->offset + node->globalPosition;
             transform.rotation = sprite->rotation + node->globalRotation;
             transform.scale = node->globalScale;
-            engine::Renderer::DrawTexture(*sprite->image.texture,
-                                          &sprite->image.region,
-                                          sprite->size,
-                                          transform);
+
+            component::DrawSprite(sprite, transform);
         }
     }
 }

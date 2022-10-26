@@ -17,4 +17,6 @@ public:
     float rotation;
 };
 
+void DrawSprite(Sprite* sprite, const engine::Transform&);
+
 }

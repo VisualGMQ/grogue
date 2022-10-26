@@ -6,15 +6,19 @@ namespace component {
 
 class Life: public engine::Component {
 public:
-    Life(engine::ComponentID id): engine::Component(id) {}
+    Life(engine::ComponentID id): engine::Component(id) { Reset(); }
     void Reset() override {
         engine::Component::Reset();
-        hp = 100;
-        energy = 1000;
+        maxHp = 100;
+        hp = maxHp;
+        maxEnergy = 100;
+        energy = maxEnergy;
     }
 
-    int hp;
-    int energy;
+    float hp;
+    float maxHp;
+    float energy;
+    float maxEnergy;
 };
     
 }
