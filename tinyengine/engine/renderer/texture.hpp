@@ -30,6 +30,8 @@ private:
     SDL_Texture* texture_ = nullptr;
     TextureID myId_ = -1;
     Size size_;
+
+    int padding_;
 };
 
 class TextureFactory final {

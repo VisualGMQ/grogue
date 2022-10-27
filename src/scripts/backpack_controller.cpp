@@ -1,9 +1,8 @@
 #include "backpack_controller.hpp"
 #include "others/data.hpp"
-#include "ui/backpack_panel.hpp"
 
 void BackpackController::Update() {
-    auto backpackPanel = GameData::Instance()->GetBackpackPanel()->GetComponent<component::BackpackPanel>();
+    auto backpackPanel = GameData::Instance()->GetBackpackPanel()->GetComponent<component::GridPanel>();
     if (engine::Input::IsKeyPressed(SDL_SCANCODE_A)) {
         backpackPanel->MoveHoverLeft();
     }

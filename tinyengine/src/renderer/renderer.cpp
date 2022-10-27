@@ -83,9 +83,9 @@ void Renderer::DrawTexture(const Texture& texture, const Rect* const src, const 
                       static_cast<SDL_RendererFlip>(flip));
 }
 
-void Renderer::DrawText(Font* font, const std::string& text, const Vec2& pos) {
+void Renderer::DrawText(Font* font, const std::string& text, const Vec2& pos, const engine::Color& color) {
     if (!font) return;
-    SDL_Surface* surface = TTF_RenderUTF8_Blended(font->font_, text.c_str(), SDL_Color{255, 255, 255, 255});
+    SDL_Surface* surface = TTF_RenderUTF8_Blended(font->font_, text.c_str(), color.sdl_color);
 
     Texture texture(surface);
 

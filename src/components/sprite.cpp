@@ -11,4 +11,12 @@ void Sprite::Reset() {
     image.texture = nullptr;
 }
 
+void DrawSprite(Sprite* sprite, const engine::Transform& transform) {
+    if (!sprite || !sprite->image) return;
+    engine::Renderer::DrawTexture(*sprite->image.texture,
+                                  &sprite->image.region,
+                                  sprite->size,
+                                  transform);
+}
+
 }
