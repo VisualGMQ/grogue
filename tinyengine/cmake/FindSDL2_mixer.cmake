@@ -1,9 +1,8 @@
-set(SDL2_MIXER_ROOT "" CACHE PATH "SDL2_mixer root directory")
-set(SDL2_MIXER_LIB_DIR "${SDL2_MIXER_ROOT}/lib/x64")
-set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_ROOT}/include")
-
 if (NOT TARGET SDL2_mixer)
     if (WIN32)  # Windows, use clang or MSVC
+        set(SDL2_MIXER_ROOT "" CACHE PATH "SDL2_mixer root directory")
+        set(SDL2_MIXER_LIB_DIR "${SDL2_MIXER_ROOT}/lib/x64")
+        set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_ROOT}/include")
         add_library(SDL2::MIXER SHARED IMPORTED GLOBAL)
         set_target_properties(
             SDL2::MIXER

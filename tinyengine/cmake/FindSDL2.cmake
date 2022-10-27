@@ -1,9 +1,8 @@
-set(SDL2_ROOT "" CACHE PATH "SDL2 root directory")
-set(SDL2_INCLUDE_DIR "${SDL2_ROOT}/include")
-set(SDL2_LIB_DIR "${SDL2_ROOT}/lib/x64")
-
 if (NOT TARGET SDL2)
     if (WIN32)  # Windows, use clang or MSVC
+        set(SDL2_ROOT "" CACHE PATH "SDL2 root directory")
+        set(SDL2_INCLUDE_DIR "${SDL2_ROOT}/include")
+        set(SDL2_LIB_DIR "${SDL2_ROOT}/lib/x64")
         add_library(SDL2::SDL2 SHARED IMPORTED GLOBAL)
         set_target_properties(
             SDL2::SDL2
