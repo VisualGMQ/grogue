@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/engine.hpp"
-#include "ui/backpack_panel.hpp"
+#include "ui/grid_panel.hpp"
 #include "others/data.hpp"
 #include "components/backpack.hpp"
 
