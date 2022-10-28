@@ -4,7 +4,11 @@ namespace engine {
 
 Color Renderer::clearColor_{0, 0, 0};
 
-void Renderer::Init(int w, int h) {
+void Renderer::Init() {
+    if (auto renderer = Video::GetRenderer(); renderer) {
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    }
+
     if (TTF_Init() != 0) {
         Loge("SDL ttf init failed: {}", TTF_GetError());
     }
@@ -23,22 +27,43 @@ void Renderer::SetClearColor(const Color& color) {
 }
 
 void Renderer::Clear() {
-    SDL_RenderClear(Video::GetRenderer());
+    if (auto renderer = Video::GetRenderer(); !renderer) {
+        ReportNoRendererBug();
+    } else {
+        SDL_RenderClear(renderer);
+    }
 }
 
 void Renderer::SetDrawColor(const Color& color) {
-    SDL_SetRenderDrawColor(Video::GetRenderer(), color.r, color.g, color.b, color.a);
+    if (auto renderer = Video::GetRenderer(); !renderer) {
+        ReportNoRendererBug();
+    } else {
+        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    }
 }
 
 void Renderer::DrawRect(const Rect& rect) {
-    SDL_RenderDrawRectF(Video::GetRenderer(), &rect.sdl_rect);
+    if (auto renderer = Video::GetRenderer(); !renderer) {
+        ReportNoRendererBug();
+    } else {
+        SDL_RenderDrawRectF(renderer, &rect.sdl_rect);
+    }
 }
 
 void Renderer::DrawLine(const Vec2& p1, const Vec2& p2) {
-    SDL_RenderDrawLineF(Video::GetRenderer(), p1.x, p1.y, p2.x, p2.y);
+    if (auto renderer = Video::GetRenderer(); !renderer) {
+        ReportNoRendererBug();
+    } else {
+        SDL_RenderDrawLineF(Video::GetRenderer(), p1.x, p1.y, p2.x, p2.y);
+    }
 }
 
 void Renderer::DrawLines(const std::vector<Vec2>& points) {
+    if (!Video::GetRenderer()) {
+        ReportNoRendererBug();
+        return;
+    }
+
     std::vector<SDL_FPoint> pts(points.size());
     for (auto& pt : points) {
         pts.push_back(SDL_FPoint{pt.x, pt.y});
@@ -47,6 +72,11 @@ void Renderer::DrawLines(const std::vector<Vec2>& points) {
 }
 
 void Renderer::DrawLineLoop(const std::vector<Vec2>& points) {
+    if (!Video::GetRenderer()) {
+        ReportNoRendererBug();
+        return;
+    }
+
     std::vector<SDL_FPoint> pts(points.size());
     for (auto& pt : points) {
         pts.push_back(SDL_FPoint{pt.x, pt.y});
@@ -56,10 +86,24 @@ void Renderer::DrawLineLoop(const std::vector<Vec2>& points) {
 }
 
 void Renderer::FillRect(const Rect& rect) {
-    SDL_RenderFillRectF(Video::GetRenderer(), &rect.sdl_rect);
+    if (!Video::GetRenderer()) {
+        ReportNoRendererBug();
+        return;
+    }
+
+    if (auto renderer = Video::GetRenderer()) {
+        SDL_RenderFillRectF(Video::GetRenderer(), &rect.sdl_rect);
+    } else {
+        ReportNoRendererBug();
+    }
 }
 
 void Renderer::DrawTexture(const Texture& texture, const Rect* const src, const Size& size, const Transform& transform) {
+    if (!Video::GetRenderer()) {
+        ReportNoRendererBug();
+        return;
+    }
+
     Rect dstRect;
     dstRect.position = transform.position;
     dstRect.size = size * transform.scale;
@@ -84,6 +128,11 @@ void Renderer::DrawTexture(const Texture& texture, const Rect* const src, const 
 }
 
 void Renderer::DrawText(Font* font, const std::string& text, const Vec2& pos, const engine::Color& color) {
+    if (!Video::GetRenderer()) {
+        ReportNoRendererBug();
+        return;
+    }
+
     if (!font) return;
     SDL_Surface* surface = TTF_RenderUTF8_Blended(font->font_, text.c_str(), color.sdl_color);
 

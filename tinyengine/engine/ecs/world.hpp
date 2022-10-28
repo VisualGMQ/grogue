@@ -7,9 +7,6 @@
 
 namespace engine {
 
-class UISystem;
-class RenderSystem;
-
 class World final {
 public:
     static World* Instance();

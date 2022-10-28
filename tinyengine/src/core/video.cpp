@@ -7,37 +7,11 @@ SDL_Renderer* Video::renderer_ = nullptr;
 bool Video::shouldClose_ = false;
 Vec2 Video::initSize_;
 
-void Video::Init(std::string_view title, int w, int h, bool resizable) {
-    initSize_.Set(w, h);
-
+void Video::Init() {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         Loge("SDL init failed: {}", SDL_GetError());
         exit(1);
     }
-
-    uint32_t flags = SDL_WINDOW_SHOWN|SDL_WINDOW_ALLOW_HIGHDPI;
-    if (resizable) {
-        flags |= SDL_WINDOW_RESIZABLE;
-    }
-    window_ = SDL_CreateWindow(title.data(),
-                              SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              w, h,
-                              flags);
-
-    if (!window_) {
-        SDL_Quit();
-        Loge("window create failed");
-        exit(2);
-    }
-
-    renderer_ = SDL_CreateRenderer(window_, -1, 0);
-    if (!renderer_) {
-        SDL_DestroyWindow(window_);
-        SDL_Quit();
-        Loge("sdl renderer create failed");
-        exit(2);
-    }
-    SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
 
     shouldClose_ = false;
 }
@@ -58,6 +32,20 @@ bool Video::ShouldClose() {
 
 void Video::Close() {
     shouldClose_ = true;
+}
+
+
+void Video::RegistVideo(SDL_Window* window, SDL_Renderer* renderer) {
+    if (renderer_) {
+        SDL_DestroyRenderer(renderer_);
+    }
+    renderer_ = renderer;
+    if (window_) {
+        SDL_DestroyWindow(window_);
+    }
+    window_ = window;
+
+    initSize_ = GetWindowSize();
 }
 
 }

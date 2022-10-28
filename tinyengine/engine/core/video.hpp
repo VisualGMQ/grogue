@@ -8,7 +8,7 @@ class Video final {
 public:
     Video() = delete;
 
-    static void Init(std::string_view title, int w, int h, bool resizable);
+    static void Init();
     static void Quit();
     
     static void SwapBuffers();
@@ -17,14 +17,20 @@ public:
 
     static void* GetWindow() { return window_; }
 
-    static Vec2 GetWindowSize() {
-        int w, h;
-        SDL_GetWindowSize(window_, &w, &h);
-        return Vec2(w, h);
+    static Size GetWindowSize() {
+        if (window_) {
+            int w, h;
+            SDL_GetWindowSize(window_, &w, &h);
+            return Size(w, h);
+        } else {
+            return {};
+        }
     }
-    static const Vec2& GetInitSize() { return initSize_; }
+    static const Size& GetInitSize() { return initSize_; }
 
     static SDL_Renderer* GetRenderer() { return renderer_; }
+
+    static void RegistVideo(SDL_Window* window, SDL_Renderer* renderer);
 
 private:
     static SDL_Window* window_;

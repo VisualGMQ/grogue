@@ -3,6 +3,7 @@
 #include "engine/core/pch.hpp"
 #include "engine/core/vmath.hpp"
 #include "engine/renderer/image.hpp"
+#include "engine/renderer/bug_report.hpp"
 
 namespace engine {
 

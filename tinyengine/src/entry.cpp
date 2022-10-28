@@ -12,9 +12,9 @@ int main(int argc, char** argv) {
 
     engine::Random::Init(engine::Random::CPP, std::time(nullptr));
     engine::ECS::Init();
-    engine::Video::Init(config.Title(), config.WindowSize().w, config.WindowSize().h, config.Resizable());
+    engine::Video::Init();
     engine::Event::Init();
-    engine::Renderer::Init(config.WindowSize().w, config.WindowSize().h);
+    engine::Renderer::Init();
     engine::FontFactory::Init();
     engine::TextureFactory::Init();
     engine::UI::Init();
@@ -29,8 +29,6 @@ int main(int argc, char** argv) {
 
     engine::Renderer::SetClearColor(engine::Color(100, 100, 100, 255));
     while (!engine::Video::ShouldClose()) {
-        engine::Renderer::Clear();
-        engine::Event::HandleEvent();
         engine::World::Instance()->TryInitEntities();
         engine::World::Instance()->Update();
         engine::UI::Update();
@@ -38,8 +36,6 @@ int main(int argc, char** argv) {
         engine::Input::UpdateStates();
         engine::SceneMgr::QuitOldScene();
         engine::World::Instance()->CleanUp();
-        engine::Event::ClearState();
-        engine::Video::SwapBuffers();
     }
 
     engine::SceneMgr::Quit();

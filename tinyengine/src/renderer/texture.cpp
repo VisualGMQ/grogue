@@ -28,6 +28,11 @@ void TextureFactory::Quit() {
 }
 
 Texture* TextureFactory::Create(const std::string& filename) {
+    if (!Video::GetRenderer()) {
+        ReportNoRendererBug();
+        return nullptr;
+    }
+
     int channel, w, h;
     SDL_Surface* surface = IMG_Load(filename.data());
     textures_.push_back(std::make_unique<Texture>(surface));
@@ -38,6 +43,11 @@ Texture* TextureFactory::Create(const std::string& filename) {
 }
 
 Texture* TextureFactory::CreateFromXpm(char** xpmData) {
+    if (!Video::GetRenderer()) {
+        ReportNoRendererBug();
+        return nullptr;
+    }
+
     SDL_Surface* surface = IMG_ReadXPMFromArray(xpmData);
     textures_.push_back(std::make_unique<Texture>(surface));
     auto& texture = textures_.back();

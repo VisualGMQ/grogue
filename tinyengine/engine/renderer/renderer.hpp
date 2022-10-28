@@ -6,6 +6,7 @@
 #include "engine/renderer/texture.hpp"
 #include "engine/renderer/font.hpp"
 #include "engine/core/video.hpp"
+#include "engine/renderer/bug_report.hpp"
 
 namespace engine {
 
@@ -20,7 +21,7 @@ class Renderer {
 public:
     Renderer() = delete;
 
-    static void Init(int w, int h);
+    static void Init();
     static void Quit();
 
     static void SetClearColor(const Color&);

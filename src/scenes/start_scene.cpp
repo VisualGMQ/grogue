@@ -1,6 +1,8 @@
 #include "scenes/start_scene.hpp"
 
 void StartScene::OnInit() {
+    engine::World::Instance()->AddSystem<engine::VideoSystem>();
+
     Localization::Init("data/localization/chinese.toml");
     LoadAllImageResources("./resources/img");
     ObjectConfigStorage::LoadAllConfig("./data/object");

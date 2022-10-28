@@ -27,5 +27,6 @@
 #include "engine/sound/sound.hpp"
 
 #include "engine/components/node.hpp"
+#include "engine/systems/video_system.hpp"
 
 #include "engine/animation/animation.hpp"
