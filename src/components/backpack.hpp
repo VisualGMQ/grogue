@@ -34,6 +34,13 @@ public:
         return true;
     }
 
+    void RemoveObject(ObjectID id) {
+        auto it = std::remove_if(objects.begin(), objects.end(), [&](engine::Entity* entity){
+            return entity->GetComponent<component::Pickupable>()->id == id;
+        });
+        objects.erase(it, objects.end());
+    }
+
     std::vector<engine::Entity*> objects;
     int capacity;
 };
