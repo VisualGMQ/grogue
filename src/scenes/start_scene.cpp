@@ -15,18 +15,12 @@ void StartScene::OnInit() {
     auto player = CreateHuman("role#down", "role#up", "role#right", 50);
     Attach2D(player);
 
+    attachBackpackPanel();
+    attacheCompositePanel();
+    attacheCompositeDescriptionPanel();
+
     GameData::Instance()->InitControllers(player);
     GameData::Instance()->SetPlayer(player);
-
-    auto backpackEntity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::GridPanel>("backpack");
-    backpackEntity->SetActive(false);
-    auto gridPanel = backpackEntity->GetComponent<component::GridPanel>();
-    BackpackObjectDrawer backpackObjDrawer;
-    engine::ImageFactory::Find("tilesheet#select_outline", gridPanel->selectOutline);
-    gridPanel->drawImageFunc = backpackObjDrawer;
-    Attach2D(backpackEntity);
-
-    GameData::Instance()->SetBackpackPanel(backpackEntity);
     MonsterManager::Add(player);
 }
 
@@ -62,4 +56,44 @@ void StartScene::OnQuit() {
     Localization::Quit();
     MapManager::ClearGroundMap();
     MapManager::ClearDungeonMap();
+}
+
+void StartScene::attachBackpackPanel() {
+    auto backpackEntity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::GridPanel>("backpack");
+    backpackEntity->SetActive(false);
+    auto gridPanel = backpackEntity->GetComponent<component::GridPanel>();
+    BackpackObjectDrawer backpackObjDrawer;
+    engine::ImageFactory::Find("tilesheet#select_outline", gridPanel->selectOutline);
+    gridPanel->drawImageFunc = backpackObjDrawer;
+    Attach2D(backpackEntity);
+    GameData::Instance()->SetBackpackPanel(backpackEntity);
+}
+
+void StartScene::attacheCompositePanel() {
+    auto compositeEntity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::GridPanel>("composite-panel");
+    compositeEntity->SetActive(false);
+    auto gridPanel = compositeEntity->GetComponent<component::GridPanel>();
+    CompositeObjectDrawer drawer;
+    engine::ImageFactory::Find("tilesheet#select_outline", gridPanel->selectOutline);
+    gridPanel->drawImageFunc = drawer;
+    gridPanel->gridNumInCol = 3;
+    gridPanel->position.Set(100, 100);
+    gridPanel->capacity = ComposeConfigStorage::Size();
+    Attach2D(compositeEntity);
+    GameData::Instance()->SetCompositePanel(compositeEntity);
+}
+
+void StartScene::attacheCompositeDescriptionPanel() {
+    auto compositeDescriptionPanel = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::GridPanel>("composite-description-panel");
+    compositeDescriptionPanel->SetActive(false);
+    auto gridPanel = compositeDescriptionPanel->GetComponent<component::GridPanel>();
+    CompositeDescriptionDrawer drawer;
+    engine::ImageFactory::Find("tilesheet#select_outline", gridPanel->selectOutline);
+    gridPanel->drawImageFunc = drawer;
+    gridPanel->gridNumInCol = 3;
+    gridPanel->position.Set(600, 100);
+    gridPanel->capacity = 0;
+    gridPanel->showCursor = false;
+    Attach2D(compositeDescriptionPanel);
+    GameData::Instance()->SetCompositeDescriptionPanel(compositeDescriptionPanel);
 }

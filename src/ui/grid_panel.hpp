@@ -8,7 +8,6 @@ class GridPanel: public engine::Component {
 public:
     GridPanel(engine::ComponentID id): engine::Component(id) { Reset(); }
     void Reset() override;
-    
 
     void MoveHoverRight();
     void MoveHoverDown();
@@ -21,6 +20,8 @@ public:
     int gridPadding;
     int gridNumInCol;
     engine::Image selectOutline;
+    engine::Vec2 position;
+    bool showCursor;
 
     using HoverMoveCb = std::function<void(GridPanel*)>;
     HoverMoveCb onHoverMove;
@@ -34,6 +35,8 @@ private:
     void tryCallHoverMove() {
         if (onHoverMove) onHoverMove(this);
     }
+
+    bool isInRange(int x, int y);
 };
 
 }

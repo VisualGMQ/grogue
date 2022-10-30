@@ -12,6 +12,7 @@ GameData* GameData::Instance() {
 void GameData::InitControllers(engine::Entity* player) {
     humanController_ = std::make_unique<HumanController>(player);
     backpackController_ = std::make_unique<BackpackController>();
+    compositeController_ = std::make_unique<CompositeController>();
     controller_ = humanController_.get();
 }
 

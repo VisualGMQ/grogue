@@ -7,6 +7,7 @@ std::optional<ObjectConfig> ObjectConfigReader::Read(const std::filesystem::path
     config.name = tbl["name"].value<std::string>().value_or("[No Name]");
     if (tbl["img"].is_array()) {
         auto imgArr = tbl["img"].as_array();
+        // config.imageName = imgArr[0].value<std::string>().value();
         config.orientatedArchImages.resize(imgArr->size());
         for (int i = 0; i < imgArr->size(); i++) {
             std::string imgName = imgArr->get(i)->value<std::string>().value();
@@ -14,6 +15,7 @@ std::optional<ObjectConfig> ObjectConfigReader::Read(const std::filesystem::path
                 Loge("object image {} not found", imgName);
             }   
         }
+        config.image = config.orientatedArchImages[0];
     } else if (tbl["img"].is_string()) {
         config.imageName = tbl["img"].value<std::string>().value();
         if (!engine::ImageFactory::Find(config.imageName, config.image)) {

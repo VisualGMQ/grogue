@@ -25,6 +25,8 @@
 #include "scripts/controller.hpp"
 #include "ui/grid_panel.hpp"
 #include "ui/backpack_object_drawer.hpp"
+#include "ui/composite_object_drawer.hpp"
+#include "ui/composite_description_drawer.hpp"
 
 class StartScene final : public engine::Scene {
 public:
@@ -36,4 +38,7 @@ public:
 private:
     void initMap();
     void attachSystems();
+    void attachBackpackPanel();
+    void attacheCompositePanel();
+    void attacheCompositeDescriptionPanel();
 };

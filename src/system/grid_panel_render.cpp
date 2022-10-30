@@ -6,17 +6,24 @@ void GridPanelRenderSystem::Update(engine::Entity* entity) {
     auto gridPanel = entity->GetComponent<component::GridPanel>();
     if (!gridPanel) return;
 
-    int row = gridPanel->capacity / gridPanel->gridNumInCol;
+    int row = std::ceil(gridPanel->capacity / static_cast<float>(gridPanel->gridNumInCol));
     int width = gridPanel->gridNumInCol * gridPanel->gridSize + (gridPanel->gridNumInCol + 1) * gridPanel->gridPadding;
     int height = row * gridPanel->gridSize + (row + 1) * gridPanel->gridPadding;
     auto rect = engine::Rect((engine::Video::GetInitSize().w - width) / 2,
                             (engine::Video::GetInitSize().h - height) / 2,
                             width, height);
+    if (gridPanel->position.x != -1 || gridPanel->position.y != -1) {
+        rect.position = gridPanel->position;
+    }
 
     drawBackground(gridPanel, rect, engine::Color{100, 100, 100}, engine::Color::Black);
 
     for (int y = 0; y < row; y++) {
         for (int x = 0; x < gridPanel->gridNumInCol; x++) {
+            if (x + y * gridPanel->gridNumInCol >= gridPanel->capacity) {
+                return;
+            }
+
             engine::Rect gridRect(rect.position.x + (x + 1) * gridPanel->gridPadding + x * gridPanel->gridSize,
                                   rect.position.y + (y + 1) * gridPanel->gridPadding + y * gridPanel->gridSize,
                                   gridPanel->gridSize, gridPanel->gridSize);
@@ -27,7 +34,7 @@ void GridPanelRenderSystem::Update(engine::Entity* entity) {
                 gridPanel->drawImageFunc(gridPanel, gridRect, x, y);
             }
 
-            if (engine::Vec2(x, y) == gridPanel->GetHoverGridPos()) {
+            if (gridPanel->showCursor && engine::Vec2(x, y) == gridPanel->GetHoverGridPos()) {
                 drawSelectImage(gridPanel->selectOutline, gridRect);
             }
         }

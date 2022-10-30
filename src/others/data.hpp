@@ -3,6 +3,7 @@
 #include "scripts/human_controller.hpp"
 #include "scripts/controller.hpp"
 #include "scripts/backpack_controller.hpp"
+#include "scripts/composite_controller.hpp"
 
 class GameData final {
 public:
@@ -13,6 +14,7 @@ public:
     Controller* GetController() { return controller_; }
     HumanController* GetHumanController() { return humanController_.get(); }
     BackpackController* GetBackpackController() { return backpackController_.get(); }
+    CompositeController* GetCompositeController() { return compositeController_.get(); }
 
     void ChangeController(Controller* controller) {
         controller_ = controller;
@@ -29,12 +31,21 @@ public:
     void SetBackpackPanel(engine::Entity* backpack) { backpackPanel_ = backpack; }
     engine::Entity* GetBackpackPanel() { return backpackPanel_; }
 
+    void SetCompositePanel(engine::Entity* composite) { compositePanel_ = composite; }
+    engine::Entity* GetCompositePanel() { return compositePanel_; }
+
+    void SetCompositeDescriptionPanel(engine::Entity* composite) { compositeDescriptionPanel_ = composite; }
+    engine::Entity* GetCompositeDescriptionPanel() { return compositeDescriptionPanel_; }
+
 private:
     Controller* controller_ = nullptr;
     std::unique_ptr<HumanController> humanController_ = nullptr;
     std::unique_ptr<BackpackController> backpackController_ = nullptr;
+    std::unique_ptr<CompositeController> compositeController_ = nullptr;
     engine::Entity* player_ = nullptr;
     engine::Entity* backpackPanel_ = nullptr;
+    engine::Entity* compositePanel_ = nullptr;
+    engine::Entity* compositeDescriptionPanel_ = nullptr;
     std::optional<engine::Vec2> pickableObjGridPos_ = std::nullopt;
 
     static std::unique_ptr<GameData> instance_;

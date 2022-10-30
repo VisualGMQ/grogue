@@ -66,4 +66,9 @@ void HumanController::Update() {
         GameData::Instance()->ChangeController(GameData::Instance()->GetBackpackController());
         GameData::Instance()->GetBackpackPanel()->SetActive(true);
     }
+    if (engine::Input::IsKeyPressed(SDL_SCANCODE_TAB)) {
+        GameData::Instance()->ChangeController(GameData::Instance()->GetCompositeController());
+        GameData::Instance()->GetCompositePanel()->SetActive(true);
+        GameData::Instance()->GetCompositeDescriptionPanel()->SetActive(true);
+    }
 }

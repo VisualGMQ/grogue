@@ -1,7 +1,7 @@
 #include "compose_reader.hpp"
 #include "object_reader.hpp"
 
-std::unordered_map<ObjectID, Composite> ComposeConfigStorage::formulas_;
+ComposeConfigStorage::container ComposeConfigStorage::formulas_;
 
 void  ComposeConfigStorage::LoadAllConfig(const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {

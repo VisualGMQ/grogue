@@ -12,13 +12,25 @@ struct Composite {
 
 class ComposeConfigStorage final {
 public:
+    ComposeConfigStorage() = delete;
+    ComposeConfigStorage(const ComposeConfigStorage&) = delete;
+
+    using container = std::map<ObjectID, Composite>;
+    using iterator = container::iterator;
+    using const_iterator = container::const_iterator;
+
     static void LoadAllConfig(const std::filesystem::path& path);
     static Composite* Find(ObjectID);
     static Composite* Find(const std::string& objName);
+    static iterator begin() { return formulas_.begin(); }
+    static iterator end() { return formulas_.end(); }
+    static const_iterator cbegin() { return formulas_.cbegin(); }
+    static const_iterator cend() { return formulas_.cend(); }
+    static size_t Size() { return formulas_.size(); }
 
     // for debug
     static void OutputAllConfig();
 
 private:
-    static std::unordered_map<ObjectID, Composite> formulas_;
+    static container formulas_;
 };

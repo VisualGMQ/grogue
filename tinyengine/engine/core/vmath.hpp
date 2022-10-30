@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/core/log.hpp"
+#include "SDL.h"
 
 #include <algorithm>
 #include <iostream>
