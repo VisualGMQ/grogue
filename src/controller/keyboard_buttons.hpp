@@ -30,7 +30,7 @@ private:
 class MoveButton: public HumanActionButton {
 public:
     MoveButton(::HumanController* controller, const engine::Vec2& velocity, SDL_Scancode key): HumanActionButton(controller, key), velocity_(velocity) {}
-    bool IsTriggered() const { return engine::Input::IsKeyPressed(GetKey()); }
+    bool IsTriggered() const { return engine::Input::IsKeyPressing(GetKey()); }
     void Update() override;
 
 private: 

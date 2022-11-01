@@ -8,10 +8,10 @@ GridObjectDrawer::DrawResources CompositeDescriptionDrawer::GetObject(component:
     std::advance(it, objectIdx);
     auto& materials = it->second.materials;
 
-    int materialIdx = panel->GetHoverGridPos().x + panel->GetHoverGridPos().y * panel->gridNumInCol;
+    int materialIdx = index;
     auto& material = materials[materialIdx];
 
     auto materialConfig = ObjectConfigStorage::Find(material.id);
 
-    return {materialConfig->image, std::nullopt};
+    return {materialConfig->image, material.num};
 }

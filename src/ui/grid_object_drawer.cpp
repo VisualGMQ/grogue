@@ -4,7 +4,7 @@ void GridObjectDrawer::operator()(component::GridPanel* panel, const engine::Rec
     auto object = GetObject(panel, x + y * panel->gridNumInCol);
     if (!object.image) return;
 
-    drawObject(panel, object.image, rect.position + (rect.size - object.image.region.size) * 0.5);
+    drawObject(panel, object.image, rect.position + (rect.size - engine::Size(TileSize, TileSize)) * 0.5);
 
     if (object.number.has_value()) {
         auto font = engine::FontFactory::Find("simhei");

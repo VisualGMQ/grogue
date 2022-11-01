@@ -11,7 +11,7 @@ GameData* GameData::Instance() {
 }
 
 void GameData::InitControllers(engine::Entity* player) {
-    constexpr float speed = 10;
+    constexpr float speed = 0.1;
     humanController_ = std::make_unique<HumanController>(player);
     humanController_->SetUpBtn(std::make_unique<controller::keyboard::MoveButton>(humanController_.get(), engine::Vec2(0, -speed), SDL_SCANCODE_W));
     humanController_->SetDownBtn(std::make_unique<controller::keyboard::MoveButton>(humanController_.get(), engine::Vec2(0, speed), SDL_SCANCODE_S));
