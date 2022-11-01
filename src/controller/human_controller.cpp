@@ -9,6 +9,7 @@ void HumanController::Update() {
     velocity_.Set(0, 0);
 
     if (up_) up_->Update();
+    
     if (down_) down_->Update();
     if (left_) left_->Update();
     if (right_) right_->Update();

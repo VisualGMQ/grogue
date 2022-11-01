@@ -10,7 +10,6 @@ Design.md
 resources/old_version_img
 build
 .vscode
-vs-build
 .cache
 *.inc
 cmake-build
