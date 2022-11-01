@@ -6,6 +6,7 @@
 #include "components/box_collider.hpp"
 #include "components/rigidbody.hpp"
 #include "components/architecture.hpp"
+#include "map/map.hpp"
 
 class CollisionSystem: public engine::PerFrameSystem {
 public:

@@ -1,9 +1,12 @@
 #pragma once
 
+#include "engine/engine.hpp"
 #include "components/backpack.hpp"
 #include "grid_panel.hpp"
 #include "others/config.hpp"
 #include "others/data.hpp"
+#include "components/sprite.hpp"
+#include "ui/grid_panel.hpp"
 
 class BackpackObjectDrawer {
 public:

@@ -16,12 +16,13 @@ void StartScene::OnInit() {
     Attach2D(player);
 
     attachBackpackPanel();
-    attacheCompositePanel();
-    attacheCompositeDescriptionPanel();
+    attachCompositePanel();
+    attachCompositeDescriptionPanel();
 
-    GameData::Instance()->InitControllers(player);
     GameData::Instance()->SetPlayer(player);
     MonsterManager::Add(player);
+
+    GameData::Instance()->InitControllers(player);
 }
 
 void StartScene::initMap() {
@@ -69,7 +70,7 @@ void StartScene::attachBackpackPanel() {
     GameData::Instance()->SetBackpackPanel(backpackEntity);
 }
 
-void StartScene::attacheCompositePanel() {
+void StartScene::attachCompositePanel() {
     auto compositeEntity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::GridPanel>("composite-panel");
     compositeEntity->SetActive(false);
     auto gridPanel = compositeEntity->GetComponent<component::GridPanel>();
@@ -83,7 +84,7 @@ void StartScene::attacheCompositePanel() {
     GameData::Instance()->SetCompositePanel(compositeEntity);
 }
 
-void StartScene::attacheCompositeDescriptionPanel() {
+void StartScene::attachCompositeDescriptionPanel() {
     auto compositeDescriptionPanel = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::GridPanel>("composite-description-panel");
     compositeDescriptionPanel->SetActive(false);
     auto gridPanel = compositeDescriptionPanel->GetComponent<component::GridPanel>();

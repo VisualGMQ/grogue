@@ -3,6 +3,7 @@
 #include "others/config.hpp"
 #include "components/sprite.hpp"
 #include "components/pickupable.hpp"
+#include "components/human.hpp"
 #include "others/data.hpp"
 #include "map/map.hpp"
 

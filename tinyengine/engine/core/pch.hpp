@@ -16,6 +16,8 @@
 #include <queue>
 #include <memory>
 #include <functional>
+#include <utility>
+#include <algorithm>
 
 #include "SDL.h"
 #include "SDL_ttf.h"

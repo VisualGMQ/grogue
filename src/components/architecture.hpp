@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/engine.hpp"
+#include "others/object_config.hpp"
 
 namespace component {
 

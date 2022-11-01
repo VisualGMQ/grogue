@@ -22,7 +22,7 @@
 #include "others/tilesheet_loader.hpp"
 #include "others/object_reader.hpp"
 #include "others/compose_reader.hpp"
-#include "scripts/controller.hpp"
+#include "controller/human_controller.hpp"
 #include "ui/grid_panel.hpp"
 #include "ui/backpack_object_drawer.hpp"
 #include "ui/composite_object_drawer.hpp"
@@ -39,6 +39,6 @@ private:
     void initMap();
     void attachSystems();
     void attachBackpackPanel();
-    void attacheCompositePanel();
-    void attacheCompositeDescriptionPanel();
+    void attachCompositePanel();
+    void attachCompositeDescriptionPanel();
 };

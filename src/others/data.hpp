@@ -1,9 +1,10 @@
 #pragma once
 
-#include "scripts/human_controller.hpp"
-#include "scripts/controller.hpp"
-#include "scripts/backpack_controller.hpp"
-#include "scripts/composite_controller.hpp"
+#include "controller/controller.hpp"
+#include "controller/backpack_controller.hpp"
+#include "controller/composite_controller.hpp"
+
+class HumanController;
 
 class GameData final {
 public:
@@ -11,12 +12,12 @@ public:
 
     void InitControllers(engine::Entity* player);
 
-    Controller* GetController() { return controller_; }
+    controller::Controller* GetController() { return controller_; }
     HumanController* GetHumanController() { return humanController_.get(); }
     BackpackController* GetBackpackController() { return backpackController_.get(); }
     CompositeController* GetCompositeController() { return compositeController_.get(); }
 
-    void ChangeController(Controller* controller) {
+    void ChangeController(controller::Controller* controller) {
         controller_ = controller;
     }
 
@@ -38,7 +39,7 @@ public:
     engine::Entity* GetCompositeDescriptionPanel() { return compositeDescriptionPanel_; }
 
 private:
-    Controller* controller_ = nullptr;
+    controller::Controller* controller_ = nullptr;
     std::unique_ptr<HumanController> humanController_ = nullptr;
     std::unique_ptr<BackpackController> backpackController_ = nullptr;
     std::unique_ptr<CompositeController> compositeController_ = nullptr;
