@@ -86,3 +86,5 @@ water2 = [3, 11]
 
 hint_arrow = [4, 10]
 select_outline = [5, 10]
+
+hand_frame = [6, 10]

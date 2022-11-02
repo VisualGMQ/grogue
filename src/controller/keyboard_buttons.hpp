@@ -7,6 +7,7 @@
 #include "components/rigidbody.hpp"
 #include "components/sprite.hpp"
 #include "components/backpack.hpp"
+#include "ui/hand_frame.hpp"
 #include "ui/grid_panel.hpp"
 #include "others/compose_reader.hpp"
 #include "others/object_reader.hpp"
@@ -16,14 +17,21 @@ class BackpackController;
 
 namespace controller::keyboard {
 
-class HumanActionButton: public Button {
+class KeyboardButton: public Button {
 public:
-    HumanActionButton(::HumanController* controller, SDL_Scancode key): controller_(controller), key_(key) {}
-    ::HumanController* GetController() { return controller_; }
+    KeyboardButton(SDL_Scancode key): key_(key) {}
     SDL_Scancode GetKey() const { return key_; }
 
 private:
     SDL_Scancode key_;
+};
+
+class HumanActionButton: public KeyboardButton {
+public:
+    HumanActionButton(::HumanController* controller, SDL_Scancode key): KeyboardButton(key), controller_(controller) {}
+    ::HumanController* GetController() { return controller_; }
+
+private:
     ::HumanController* controller_;
 };
 
@@ -55,15 +63,13 @@ public:
     void Update() override;
 };
 
-class GridPanelMoveButton: public Button {
+class GridPanelMoveButton: public KeyboardButton {
 public:
-    GridPanelMoveButton(component::GridPanel* panel, SDL_Scancode key): panel_(panel), key_(key) {}
-    SDL_Scancode GetKey() const { return key_; }
+    GridPanelMoveButton(component::GridPanel* panel, SDL_Scancode key): KeyboardButton(key), panel_(panel) {}
     auto GetPanel() { return panel_; }
 
 private:
     component::GridPanel* panel_;
-    SDL_Scancode key_;
 };
 
 class GridPanelMoveLeftButton: public GridPanelMoveButton {
@@ -91,14 +97,23 @@ public:
     void Update() override;
 };
 
-class CloseBackpackButton: public Button {
+class CloseBackpackButton: public KeyboardButton {
 public:
-    CloseBackpackButton(SDL_Scancode key): key_(key) {}
+    CloseBackpackButton(SDL_Scancode key): KeyboardButton(key){}
     void Update() override;
-
-private:
-    SDL_Scancode key_;
 }; 
+
+class LeftHandSelectButton: public KeyboardButton {
+public:
+    LeftHandSelectButton(SDL_Scancode key): KeyboardButton(key) {}
+    void Update() override;
+};
+
+class RightHandSelectButton: public KeyboardButton {
+public:
+    RightHandSelectButton(SDL_Scancode key): KeyboardButton(key) {}
+    void Update() override;
+};
 
 class ComposeButton: public Button {
 public:

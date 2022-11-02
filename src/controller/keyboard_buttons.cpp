@@ -55,9 +55,29 @@ void GridPanelMoveUpButton::Update() {
 }
 
 void CloseBackpackButton::Update() {
-    if (engine::Input::IsKeyPressed(key_)) {
+    if (engine::Input::IsKeyPressed(GetKey())) {
         GameData::Instance()->GetBackpackPanel()->SetActive(false);
         GameData::Instance()->ChangeController(GameData::Instance()->GetHumanController());
+    }
+}
+
+void LeftHandSelectButton::Update() {
+    if (engine::Input::IsKeyPressed(GetKey())) {
+        auto handFrame = GameData::Instance()->GetLeftHandObjectFrame()->GetComponent<component::HandFrame>();
+        auto object = GameData::Instance()->GetBackpackHoverObject();
+        if (object) {
+            handFrame->image = object->GetComponent<component::Sprite>()->image;
+        }
+    }
+}
+
+void RightHandSelectButton::Update() {
+    if (engine::Input::IsKeyPressed(GetKey())) {
+        auto handFrame = GameData::Instance()->GetRightHandObjectFrame()->GetComponent<component::HandFrame>();
+        auto object = GameData::Instance()->GetBackpackHoverObject();
+        if (object) {
+            handFrame->image = object->GetComponent<component::Sprite>()->image;
+        }
     }
 }
 
@@ -69,9 +89,7 @@ void ComposeButton::Update() {
 }
 
 bool ComposeButton::tryComposeObject(component::GridPanel* panel) {
-    // FIXME refactory
-    auto& hoverPos = panel->GetHoverGridPos();
-    int objectIdx = hoverPos.x + hoverPos.y * panel->gridNumInCol;
+    auto objectIdx = panel->GetHoverIndex();
     auto it = ComposeConfigStorage::begin();
     std::advance(it, objectIdx);
     auto& materials = it->second.materials;
@@ -108,10 +126,10 @@ bool ComposeButton::tryComposeObject(component::GridPanel* panel) {
 
 void CloseCompositePanelButton::Update() {
   if (engine::Input::IsKeyPressed(key_)) {
-    auto controller = GameData::Instance()->GetHumanController();
-    GameData::Instance()->ChangeController(controller);
-    GameData::Instance()->GetCompositePanel()->SetActive(false);
-    GameData::Instance()->GetCompositeDescriptionPanel()->SetActive(false);
+      auto controller = GameData::Instance()->GetHumanController();
+      GameData::Instance()->ChangeController(controller);
+      GameData::Instance()->GetCompositePanel()->SetActive(false);
+      GameData::Instance()->GetCompositeDescriptionPanel()->SetActive(false);
   }
 }
 

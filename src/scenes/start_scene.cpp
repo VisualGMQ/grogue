@@ -18,6 +18,7 @@ void StartScene::OnInit() {
     attachBackpackPanel();
     attachCompositePanel();
     attachCompositeDescriptionPanel();
+    attachHandObjectUI();
 
     GameData::Instance()->SetPlayer(player);
     MonsterManager::Add(player);
@@ -50,6 +51,7 @@ void StartScene::attachSystems() {
     engine::World::Instance()->AddSystem<HintArrowSystem>();
     engine::World::Instance()->AddSystem<GridPanelRenderSystem>();
     engine::World::Instance()->AddSystem<PlayerInfoRenderSystem>();
+    engine::World::Instance()->AddSystem<HandFrameRenderSystem>();
     // engine::World::Instance()->AddSystem<CollisionOutlineSystem>();
 }
 
@@ -97,4 +99,20 @@ void StartScene::attachCompositeDescriptionPanel() {
     gridPanel->showCursor = false;
     Attach2D(compositeDescriptionPanel);
     GameData::Instance()->SetCompositeDescriptionPanel(compositeDescriptionPanel);
+}
+
+void StartScene::attachHandObjectUI() {
+    auto entity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::HandFrame>("left-hand-frame");
+    auto leftHandFrame = entity->GetComponent<component::HandFrame>();
+    leftHandFrame->position.Set(0, engine::Video::GetInitSize().h - TileSize);
+
+    Attach2D(entity);
+    GameData::Instance()->SetLeftHandObjectFrame(entity);
+
+    entity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::HandFrame>("right-hand-frame");
+    auto rightHandFrame = entity->GetComponent<component::HandFrame>();
+    rightHandFrame->position.Set(TileSize, engine::Video::GetInitSize().h - TileSize);
+
+    Attach2D(entity);
+    GameData::Instance()->SetRightHandObjectFrame(entity);
 }

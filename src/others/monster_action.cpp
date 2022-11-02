@@ -3,7 +3,7 @@
 void MonsterAction::Move(component::Sprite* sprite, engine::Node2DComponent* node2d, component::Human* human, component::RigidBody* rigid, const engine::Vec2& v) {
     if (v == engine::Vec2{0, 0}) return;
 
-    if (v.x < v.y) {
+    if (std::abs(v.x) < std::abs(v.y)) {
         if (v.y < 0) {
             sprite->image = human->up;
             node2d->scale.Set(1, 1);

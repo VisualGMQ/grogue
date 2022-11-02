@@ -14,6 +14,7 @@ public:
     void MoveHoverUp();
     void MoveHoverLeft();
     const engine::Vec2& GetHoverGridPos() const { return hoverGridPos_; }
+    int GetHoverIndex() const { return hoverGridPos_.x + hoverGridPos_.y * gridNumInCol; }
 
     int capacity;
     int gridSize;

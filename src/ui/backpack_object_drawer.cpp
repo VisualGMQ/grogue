@@ -13,6 +13,5 @@ GridObjectDrawer::DrawResources BackpackObjectDrawer::GetObject(component::GridP
 
     auto sprite = obj->GetComponent<component::Sprite>();
     auto pickupable = obj->GetComponent<component::Pickupable>();
-
     return {sprite->image, pickupable->num};
 }

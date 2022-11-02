@@ -4,14 +4,14 @@ void GridObjectDrawer::operator()(component::GridPanel* panel, const engine::Rec
     auto object = GetObject(panel, x + y * panel->gridNumInCol);
     if (!object.image) return;
 
-    drawObject(panel, object.image, rect.position + (rect.size - engine::Size(TileSize, TileSize)) * 0.5);
+    drawObject(panel, object.image, AlignCenter(engine::Size(TileSize, TileSize), rect));
 
     if (object.number.has_value()) {
         auto font = engine::FontFactory::Find("simhei");
         if (!font) return;
 
         auto strSize = font->SizeUTF8(std::to_string(object.number.value()));
-        drawObjectNum(font, object.number.value(), rect.position + rect.size - strSize, engine::Color::Blue);
+        drawObjectNum(font, object.number.value(), AlignBottomRight(strSize, rect), engine::Color::Blue);
     }
 }
 

@@ -17,9 +17,7 @@ public:
     BackpackController* GetBackpackController() { return backpackController_.get(); }
     CompositeController* GetCompositeController() { return compositeController_.get(); }
 
-    void ChangeController(controller::Controller* controller) {
-        controller_ = controller;
-    }
+    void ChangeController(controller::Controller* controller) { controller_ = controller; }
 
     void SetPlayer(engine::Entity* player) { player_ = player; }
     void ClearPlayer() { player_ = nullptr; }
@@ -38,6 +36,13 @@ public:
     void SetCompositeDescriptionPanel(engine::Entity* composite) { compositeDescriptionPanel_ = composite; }
     engine::Entity* GetCompositeDescriptionPanel() { return compositeDescriptionPanel_; }
 
+    void SetLeftHandObjectFrame(engine::Entity* frame) { leftHandObjectFrame_ = frame; }
+    void SetRightHandObjectFrame(engine::Entity* frame) { rightHandObjectFrame_ = frame; }
+    engine::Entity* GetLeftHandObjectFrame() { return leftHandObjectFrame_; }
+    engine::Entity* GetRightHandObjectFrame() { return rightHandObjectFrame_; }
+
+    engine::Entity* GetBackpackHoverObject();
+
 private:
     controller::Controller* controller_ = nullptr;
     std::unique_ptr<HumanController> humanController_ = nullptr;
@@ -47,6 +52,8 @@ private:
     engine::Entity* backpackPanel_ = nullptr;
     engine::Entity* compositePanel_ = nullptr;
     engine::Entity* compositeDescriptionPanel_ = nullptr;
+    engine::Entity* leftHandObjectFrame_ = nullptr;
+    engine::Entity* rightHandObjectFrame_ = nullptr;
     std::optional<engine::Vec2> pickableObjGridPos_ = std::nullopt;
 
     static std::unique_ptr<GameData> instance_;

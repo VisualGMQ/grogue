@@ -15,6 +15,7 @@
 #include "system/physical_clear.hpp"
 #include "system/playerinfo_render.hpp"
 #include "system/grid_panel_render.hpp"
+#include "system/hand_frame_render.hpp"
 
 #include "others/localization.hpp"
 #include "others/human_create.hpp"
@@ -22,11 +23,14 @@
 #include "others/tilesheet_loader.hpp"
 #include "others/object_reader.hpp"
 #include "others/compose_reader.hpp"
-#include "controller/human_controller.hpp"
+
 #include "ui/grid_panel.hpp"
 #include "ui/backpack_object_drawer.hpp"
 #include "ui/composite_object_drawer.hpp"
 #include "ui/composite_description_drawer.hpp"
+#include "ui/hand_frame.hpp"
+
+#include "controller/human_controller.hpp"
 
 class StartScene final : public engine::Scene {
 public:
@@ -41,4 +45,5 @@ private:
     void attachBackpackPanel();
     void attachCompositePanel();
     void attachCompositeDescriptionPanel();
+    void attachHandObjectUI();
 };

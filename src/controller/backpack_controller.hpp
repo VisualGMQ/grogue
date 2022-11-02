@@ -12,6 +12,8 @@ public:
     void SetLeftBtn(std::unique_ptr<controller::Button>&& btn) { left_ = std::move(btn); }
     void SetRightBtn(std::unique_ptr<controller::Button>&& btn) { right_ = std::move(btn); }
     void SetCloseBackpackBtn(std::unique_ptr<controller::Button>&& btn) { closeBackpack_ = std::move(btn); }
+    void SetLeftHandSelectBtn(std::unique_ptr<controller::Button>&& btn) { leftHandSelect_= std::move(btn); }
+    void SetRightHandSelectBtn(std::unique_ptr<controller::Button>&& btn) { rightHandSelect_= std::move(btn); }
 
     void Update() override;
 
@@ -21,4 +23,6 @@ private:
     std::unique_ptr<controller::Button> left_;
     std::unique_ptr<controller::Button> right_;
     std::unique_ptr<controller::Button> closeBackpack_;
+    std::unique_ptr<controller::Button> leftHandSelect_;
+    std::unique_ptr<controller::Button> rightHandSelect_;
 };

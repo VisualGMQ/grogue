@@ -11,7 +11,7 @@ GameData* GameData::Instance() {
 }
 
 void GameData::InitControllers(engine::Entity* player) {
-    constexpr float speed = 0.1;
+    constexpr float speed = 0.2;
     humanController_ = std::make_unique<HumanController>(player);
     humanController_->SetUpBtn(std::make_unique<controller::keyboard::MoveButton>(humanController_.get(), engine::Vec2(0, -speed), SDL_SCANCODE_W));
     humanController_->SetDownBtn(std::make_unique<controller::keyboard::MoveButton>(humanController_.get(), engine::Vec2(0, speed), SDL_SCANCODE_S));
@@ -28,6 +28,8 @@ void GameData::InitControllers(engine::Entity* player) {
     backpackController_->SetLeftBtn(std::make_unique<controller::keyboard::GridPanelMoveLeftButton>(backpackPanel, SDL_SCANCODE_A));
     backpackController_->SetRightBtn(std::make_unique<controller::keyboard::GridPanelMoveRightButton>(backpackPanel, SDL_SCANCODE_D));
     backpackController_->SetCloseBackpackBtn(std::make_unique<controller::keyboard::CloseBackpackButton>(SDL_SCANCODE_E));
+    backpackController_->SetLeftHandSelectBtn(std::make_unique<controller::keyboard::LeftHandSelectButton>(SDL_SCANCODE_J));
+    backpackController_->SetRightHandSelectBtn(std::make_unique<controller::keyboard::RightHandSelectButton>(SDL_SCANCODE_K));
 
     compositeController_ = std::make_unique<CompositeController>();
     auto compositePanel = Instance()->GetCompositePanel()->GetComponent<component::GridPanel>();
@@ -40,6 +42,24 @@ void GameData::InitControllers(engine::Entity* player) {
 
     controller_ = GetHumanController();
 }
+
+engine::Entity* GameData::GetBackpackHoverObject() {
+    auto player = GetPlayer();
+    if (!player) return nullptr;
+
+    auto backpack = player->GetComponent<component::Backpack>();
+    if (!backpack) return nullptr;
+
+    auto backpackPanel = GetBackpackPanel();
+    if (!backpackPanel) return nullptr;
+
+    auto index = backpackPanel->GetComponent<component::GridPanel>()->GetHoverIndex();
+
+    if (backpack->objects.size() <= index || index < 0) return nullptr;
+
+    return backpack->objects[index];
+}
+
 
 std::vector<engine::Entity*> MonsterManager::monsters_;
 bool MonsterManager::shouldSort_ = true;

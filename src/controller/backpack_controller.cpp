@@ -8,4 +8,6 @@ void BackpackController::Update() {
     if (right_) right_->Update();
     if (left_) left_->Update();
     if (closeBackpack_) closeBackpack_->Update();
+    if (leftHandSelect_) leftHandSelect_->Update();
+    if (rightHandSelect_) rightHandSelect_->Update();
 }

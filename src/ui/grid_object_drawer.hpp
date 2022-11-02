@@ -7,6 +7,7 @@
 #include "others/data.hpp"
 #include "components/sprite.hpp"
 #include "ui/grid_panel.hpp"
+#include "others/common.hpp"
 
 class GridObjectDrawer {
 public:

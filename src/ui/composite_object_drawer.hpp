@@ -5,9 +5,10 @@
 #include "others/data.hpp"
 #include "others/compose_reader.hpp"
 #include "others/object_reader.hpp"
-#include <algorithm>
+#include "others/common.hpp"
+#include "ui/grid_object_drawer.hpp"
 
-class CompositeObjectDrawer final {
+class CompositeObjectDrawer: public GridObjectDrawer {
 public:
-    void operator()(component::GridPanel*, const engine::Rect& rect, int x, int y);
+    DrawResources GetObject(component::GridPanel* panel, int index) override;
 };
