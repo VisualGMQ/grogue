@@ -15,6 +15,51 @@ void PickupButton::Update() {
     }
 }
 
+void PutButton::Update() {
+    if (engine::Input::IsKeyPressed(GetKey())) {
+        component::HandFrame* handFrame;
+        if (type_ == HandType::Left) {
+            handFrame = GameData::Instance()->GetLeftHandObjectFrame()->GetComponent<component::HandFrame>();
+        } else {
+            handFrame = GameData::Instance()->GetRightHandObjectFrame()->GetComponent<component::HandFrame>();;
+        }
+        if (!handFrame->entity) return;
+
+        auto id = handFrame->entity->GetComponent<component::Pickupable>()->id;
+        auto compositeConfig = ComposeConfigStorage::Find(id);
+        if (!compositeConfig) return;
+
+        auto objectConfig = ObjectConfigStorage::Find(compositeConfig->target);
+
+        if (objectConfig->type == ObjectConfig::Architecture) {
+            auto& gridPos = GameData::Instance()->GetPutTargetGridPos();
+
+            auto map = MapManager::GetGroundMap();
+            auto mapSize = map->GetSize();
+            if (gridPos.x < 0 || gridPos.x >= mapSize.w || gridPos.y < 0 || gridPos.y >= mapSize.h) {
+                return;
+            }
+
+            auto& mapObject = map->Get(gridPos.x, gridPos.y);
+            if (mapObject.object || mapObject.terrian.type == Terrian::Liquid) {
+                return;
+            }
+
+            mapObject.object = CreateArchitecture(*objectConfig);
+            map->UpdateArchImage(gridPos.x, gridPos.y);
+
+            auto pickupable = handFrame->entity->GetComponent<component::Pickupable>();
+            if (pickupable->num - 1 > 0) {
+                pickupable->num -= 1;
+            } else {
+                handFrame->entity = nullptr;
+                auto backpack = GameData::Instance()->GetPlayer()->GetComponent<component::Backpack>();
+                backpack->RemoveObject(id);
+            }
+        }
+    }
+}
+
 void OpenBackpackButton::Update() {
     if (engine::Input::IsKeyPressed(GetKey())) {
         GameData::Instance()->ChangeController(GameData::Instance()->GetBackpackController());
@@ -66,7 +111,7 @@ void LeftHandSelectButton::Update() {
         auto handFrame = GameData::Instance()->GetLeftHandObjectFrame()->GetComponent<component::HandFrame>();
         auto object = GameData::Instance()->GetBackpackHoverObject();
         if (object) {
-            handFrame->image = object->GetComponent<component::Sprite>()->image;
+            handFrame->entity = object;
         }
     }
 }
@@ -76,7 +121,7 @@ void RightHandSelectButton::Update() {
         auto handFrame = GameData::Instance()->GetRightHandObjectFrame()->GetComponent<component::HandFrame>();
         auto object = GameData::Instance()->GetBackpackHoverObject();
         if (object) {
-            handFrame->image = object->GetComponent<component::Sprite>()->image;
+            handFrame->entity = object;
         }
     }
 }

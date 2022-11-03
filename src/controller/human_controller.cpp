@@ -30,4 +30,6 @@ void HumanController::Update() {
     if (pickup_) pickup_->Update();
     if (openBackpackPanel_) openBackpackPanel_->Update();
     if (openCompositePanel_) openCompositePanel_->Update();
+    if (putLeft_) putLeft_->Update();
+    if (putRight_) putRight_->Update();
 }

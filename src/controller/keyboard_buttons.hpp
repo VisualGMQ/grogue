@@ -7,6 +7,7 @@
 #include "components/rigidbody.hpp"
 #include "components/sprite.hpp"
 #include "components/backpack.hpp"
+#include "components/architecture.hpp"
 #include "ui/hand_frame.hpp"
 #include "ui/grid_panel.hpp"
 #include "others/compose_reader.hpp"
@@ -49,6 +50,19 @@ class PickupButton: public HumanActionButton{
 public:
     PickupButton(::HumanController* controller, SDL_Scancode key): HumanActionButton(controller, key) {}
     void Update() override;
+};
+
+class PutButton: public HumanActionButton {
+public:
+    enum HandType {
+        Left,
+        Right,
+    };
+    PutButton(::HumanController* controller, SDL_Scancode key, HandType type): HumanActionButton(controller, key), type_(type) {}
+    void Update() override;
+
+private:
+    HandType type_;
 };
 
 class OpenBackpackButton: public HumanActionButton {

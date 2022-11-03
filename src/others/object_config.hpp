@@ -36,6 +36,20 @@ inline std::ostream& operator<<(std::ostream& o, const ObjectInfo& info) {
 }
 
 struct ObjectConfig {
+    enum OrientationIndex {
+        Up = 0,
+        Right,
+        Down,
+        Left,
+        UpRight,
+        UpDown,
+        UpLeft,
+        DownRight,
+        LeftRight,
+        DownLeft,
+        Open,
+        Close,
+    };
     enum Type {
         Unknown = 0,
         Architecture,

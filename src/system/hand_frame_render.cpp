@@ -12,10 +12,25 @@ void HandFrameRenderSystem::Update(engine::Entity* entity) {
                                   engine::Size(TileSize, TileSize),
                                   engine::Transform{rect.position});
 
-    if (handFrame && handFrame->image) {
-        engine::Renderer::DrawTexture(*handFrame->image.texture,
-                                      &handFrame->image.region,
-                                      engine::Size(TileSize, TileSize),
-                                      engine::Transform{AlignCenter(handFrame->image.region.size, rect)});
+    if (!handFrame || !handFrame->entity) {
+        return ;
     }
+
+    auto sprite = handFrame->entity->GetComponent<component::Sprite>();
+    engine::Renderer::DrawTexture(*sprite->image.texture,
+                                    &sprite->image.region,
+                                    engine::Size(TileSize, TileSize),
+                                    engine::Transform{AlignCenter(sprite->image.region.size, rect)});
+
+    auto pickupable = handFrame->entity->GetComponent<component::Pickupable>();
+    if (pickupable && pickupable->num > 0) {
+        auto font = engine::FontFactory::Find("simhei");
+        if (!font) return;
+
+        auto numStr = std::to_string(pickupable->num);
+        auto strSize = font->SizeUTF8(numStr);
+        // FIXME: text at top-left
+        engine::Renderer::DrawText(font, numStr, AlignBottomRight(strSize, rect), engine::Color::White);
+    }
+
 }

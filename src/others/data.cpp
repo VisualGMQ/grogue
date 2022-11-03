@@ -17,9 +17,15 @@ void GameData::InitControllers(engine::Entity* player) {
     humanController_->SetDownBtn(std::make_unique<controller::keyboard::MoveButton>(humanController_.get(), engine::Vec2(0, speed), SDL_SCANCODE_S));
     humanController_->SetLeftBtn(std::make_unique<controller::keyboard::MoveButton>(humanController_.get(), engine::Vec2(-speed, 0), SDL_SCANCODE_A));
     humanController_->SetRightBtn(std::make_unique<controller::keyboard::MoveButton>(humanController_.get(), engine::Vec2(speed, 0), SDL_SCANCODE_D));
-    humanController_->SetPickupBtn(std::make_unique<controller::keyboard::PickupButton>(humanController_.get(), SDL_SCANCODE_J));
+    humanController_->SetPickupBtn(std::make_unique<controller::keyboard::PickupButton>(humanController_.get(), SDL_SCANCODE_U));
     humanController_->SetOpenBackpackPanelBtn(std::make_unique<controller::keyboard::OpenBackpackButton>(humanController_.get(), SDL_SCANCODE_E));
     humanController_->SetOpenCompositePanelBtn(std::make_unique<controller::keyboard::OpenCompositePanel>(humanController_.get(), SDL_SCANCODE_TAB));
+    humanController_->SetPutLeftBtn(std::make_unique<controller::keyboard::PutButton>(humanController_.get(),
+                                                                                      SDL_SCANCODE_J,
+                                                                                      controller::keyboard::PutButton::HandType::Left));
+    humanController_->SetPutRightBtn(std::make_unique<controller::keyboard::PutButton>(humanController_.get(),
+                                                                                       SDL_SCANCODE_K,
+                                                                                       controller::keyboard::PutButton::HandType::Right));
 
     backpackController_ = std::make_unique<BackpackController>();
     auto backpackPanel = Instance()->GetBackpackPanel()->GetComponent<component::GridPanel>();

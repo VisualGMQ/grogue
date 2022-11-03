@@ -41,6 +41,9 @@ public:
     engine::Entity* GetLeftHandObjectFrame() { return leftHandObjectFrame_; }
     engine::Entity* GetRightHandObjectFrame() { return rightHandObjectFrame_; }
 
+    void SetPutTargetGridPos(const engine::Vec2& pos) { putTargetGridPos_ = pos; }
+    const engine::Vec2& GetPutTargetGridPos() const { return putTargetGridPos_; }
+
     engine::Entity* GetBackpackHoverObject();
 
 private:
@@ -55,6 +58,7 @@ private:
     engine::Entity* leftHandObjectFrame_ = nullptr;
     engine::Entity* rightHandObjectFrame_ = nullptr;
     std::optional<engine::Vec2> pickableObjGridPos_ = std::nullopt;
+    engine::Vec2 putTargetGridPos_;
 
     static std::unique_ptr<GameData> instance_;
 };

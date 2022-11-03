@@ -15,6 +15,8 @@ public:
     void SetPickupBtn(std::unique_ptr<controller::Button>&& btn) { pickup_ = std::move(btn); }
     void SetOpenBackpackPanelBtn(std::unique_ptr<controller::Button>&& btn) { openBackpackPanel_ = std::move(btn); }
     void SetOpenCompositePanelBtn(std::unique_ptr<controller::Button>&& btn) { openCompositePanel_ = std::move(btn); }
+    void SetPutLeftBtn(std::unique_ptr<controller::Button>&& btn) { putLeft_ = std::move(btn); }
+    void SetPutRightBtn(std::unique_ptr<controller::Button>&& btn) { putRight_ = std::move(btn); }
 
     engine::Vec2& GetVelocity() { return velocity_; }
 
@@ -26,6 +28,8 @@ private:
     std::unique_ptr<controller::Button> pickup_;
     std::unique_ptr<controller::Button> openBackpackPanel_;
     std::unique_ptr<controller::Button> openCompositePanel_;
+    std::unique_ptr<controller::Button> putLeft_;
+    std::unique_ptr<controller::Button> putRight_;
 
     engine::Vec2 velocity_;
 };

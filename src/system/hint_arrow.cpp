@@ -13,12 +13,14 @@ void HintArrowSystem::Update() {
     GameData::Instance()->ClearPickableObjGridPos();
     float distance = std::numeric_limits<float>::max();
 
+    auto sprite = GameData::Instance()->GetPlayer()->GetComponent<component::Sprite>();
+
     for (int x = visiableArea.initCols; x < visiableArea.endCols; x++) {
         for (int y = visiableArea.initRows; y < visiableArea.endRows; y++) {
             auto& tile = map->Get(x, y);
             if (tile.object && tile.object->GetComponent<component::Pickupable>()) {
                 engine::Vec2 objGlobalPos(x * TileSize, y * TileSize);
-                engine::Vec2 dir = objGlobalPos - playerPos;
+                engine::Vec2 dir = objGlobalPos - (playerPos + sprite->image.region.size * 0.5);
                 float tileDistance = engine::Length2(dir);
                 if (tileDistance <= pickupRangeSquare && tileDistance < distance) {
                     distance = tileDistance;

@@ -43,12 +43,14 @@ void StartScene::attachSystems() {
     engine::World::Instance()->AddSystem<ControllerUpdateSystem>();
     engine::World::Instance()->AddSystem<TransformUpdateSystem>();
     engine::World::Instance()->AddSystem<CollisionSystem>();
+    engine::World::Instance()->AddSystem<OrientationUpdateSystem>();
     engine::World::Instance()->AddSystem<PhysicalSystem>();
     engine::World::Instance()->AddSystem<PhysicalClearSystem>();
     engine::World::Instance()->AddSystem<SortMonstersSystem>();
     engine::World::Instance()->AddSystem<MapRenderSystem>();
     // engine::World::Instance()->AddSystem<SpriteRenderSystem>();
     engine::World::Instance()->AddSystem<HintArrowSystem>();
+    engine::World::Instance()->AddSystem<PutHintSystem>();
     engine::World::Instance()->AddSystem<GridPanelRenderSystem>();
     engine::World::Instance()->AddSystem<PlayerInfoRenderSystem>();
     engine::World::Instance()->AddSystem<HandFrameRenderSystem>();

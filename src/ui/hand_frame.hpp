@@ -19,11 +19,11 @@ public:
     void Reset() {
         engine::Component::Reset();
 
-        image.texture = nullptr;
+        entity = nullptr;
         position.Set(0, 0);
     }
 
-    engine::Image image;
+    engine::Entity* entity;
     engine::Vec2 position;
 
 private:

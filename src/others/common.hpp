@@ -37,3 +37,7 @@ inline engine::Vec2 AlignBottomLeft(const engine::Size& size, const engine::Rect
 inline engine::Vec2 AlignBottomRight(const engine::Size& size, const engine::Rect& dst) {
     return dst.position + dst.size - size;
 }
+
+inline bool IsInSection(float x, float y, float left, float right, float top, float bottom) {
+    return x >= left && x <= right && y >= bottom && y <= top;
+}
