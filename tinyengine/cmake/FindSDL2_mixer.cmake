@@ -14,7 +14,8 @@ if (NOT TARGET SDL2_mixer)
         add_library(SDL2_mixer INTERFACE IMPORTED GLOBAL)
         target_link_libraries(SDL2_mixer INTERFACE SDL2::MIXER)
     else()  # Linux, MacOSX
-        # TODO not finish
-        message(FATAL_ERROR "don't implement FindSDL_mixer under Unix")
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(SDL2_mixer sdl2_mixer REQUIRED IMPORTED_TARGET)
+        add_library(SDL2_mixer ALIAS PkgConfig::SDL2_mixer)
     endif()
 endif()

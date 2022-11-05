@@ -3,6 +3,7 @@
 #include "controller/controller.hpp"
 #include "controller/backpack_controller.hpp"
 #include "controller/composite_controller.hpp"
+#include "controller/human_controller.hpp"
 
 class HumanController;
 

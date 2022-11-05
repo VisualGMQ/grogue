@@ -14,7 +14,8 @@ if (NOT TARGET SDL2_ttf)
         add_library(SDL2_ttf INTERFACE IMPORTED GLOBAL)
         target_link_libraries(SDL2_ttf INTERFACE SDL2::TTF)
     else()  # Linux, MacOSX
-        # TODO not finish
-        message(FATAL_ERROR "don't implement FindSDL_ttf under Unix")
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(SDL2_ttf sdl2_ttf REQUIRED IMPORTED_TARGET)
+        add_library(SDL2_ttf ALIAS PkgConfig::SDL2_ttf)
     endif()
 endif()

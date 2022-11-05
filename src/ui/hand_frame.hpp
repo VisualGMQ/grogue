@@ -8,7 +8,7 @@ namespace component {
 
 class HandFrame: public engine::Component {
 public:
-    friend class HandFrameRenderSystem;
+    friend class ::HandFrameRenderSystem;
 
     HandFrame(engine::ComponentID id): engine::Component(id) {
         if (!engine::ImageFactory::Find("tilesheet#hand_frame", frameImage_)) {

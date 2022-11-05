@@ -26,8 +26,7 @@ public:
     template <typename T>
     const T* GetComponent() const;
 
-    template <typename T>
-    void RemoveComponent();
+    void RemoveComponent(Component* component);
 
     const std::string& Name() const { return name_; }
 
@@ -94,16 +93,6 @@ const T* Entity::GetComponent() const {
     } else {
         return static_cast<T*>(it->second);
     }
-}
-
-template <typename T>
-void Entity::RemoveComponent() {
-    static_assert(std::is_base_of_v<Component, T> && !std::is_same_v<Component, T>);
-
-    unsigned int id = ComponentIDHelper::GetID<T>();
-    auto component = components_[id];
-    components_.erase(id);
-    ECS::GetRemoveFunc()(component);
 }
 
 }

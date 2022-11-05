@@ -15,7 +15,7 @@ public:
     VideoSystem(engine::World* world): PerFrameSystem(world) {
         auto& config = InitConfig::Instance();
 
-        uint32_t flags = SDL_WINDOW_SHOWN|SDL_WINDOW_ALLOW_HIGHDPI;
+        uint32_t flags = SDL_WINDOW_SHOWN;
         if (config.Resizable()) {
             flags |= SDL_WINDOW_RESIZABLE;
         }
