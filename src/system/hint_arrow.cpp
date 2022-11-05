@@ -7,7 +7,7 @@ void HintArrowSystem::Update() {
     float pickupRangeSquare = pickupRange * pickupRange;
     if (!map) return ;
 
-    auto visiableArea = CalcVisiableTileArea(map, engine::Vec2(0, 0));
+    auto visiableArea = CalcVisiableTileArea(map, GameData::Instance()->GetCamera().GetPosition());
 
     engine::Vec2 arrowPosition;
     GameData::Instance()->ClearPickableObjGridPos();
@@ -33,7 +33,7 @@ void HintArrowSystem::Update() {
 
     if (image_.texture && GameData::Instance()->GetPickableObjGridPos()) {
         engine::Transform transform;
-        transform.position = arrowPosition;
+        transform.position = arrowPosition - GameData::Instance()->GetCamera().GetPosition();
         engine::Renderer::DrawTexture(*image_.texture, &image_.region,
                                         engine::Size(TileSize, TileSize),
                                         transform);

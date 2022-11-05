@@ -25,5 +25,6 @@ void PutHintSystem::Update() {
     GameData::Instance()->SetPutTargetGridPos(gridPos);
 
     engine::Renderer::SetDrawColor(engine::Color::Red);
-    engine::Renderer::DrawRect(engine::Rect(gridPos.x * TileSize, gridPos.y * TileSize, TileSize, TileSize));
+    auto& cameraPos = GameData::Instance()->GetCamera().GetPosition();
+    engine::Renderer::DrawRect(engine::Rect(gridPos.x * TileSize - cameraPos.x, gridPos.y * TileSize - cameraPos.y, TileSize, TileSize));
 }

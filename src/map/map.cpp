@@ -13,10 +13,11 @@ VisiableTileArea CalcVisiableTileArea(Map* map, const engine::Vec2& position) {
 
     area.initCols = std::floor(position.x / TileSize);
     area.initRows = std::floor(position.y / TileSize);
-    area.endCols = std::min(std::ceil(engine::Video::GetInitSize().w / TileSize), size.w);
-    area.endRows = std::min(std::ceil(engine::Video::GetInitSize().h / TileSize), size.h);
+    area.endCols = std::min(std::ceil(engine::Video::GetInitSize().w / TileSize) + area.initCols + 1, size.w);
+    area.endRows = std::min(std::ceil(engine::Video::GetInitSize().h / TileSize) + area.initRows + 1, size.h);
 
-    area.offset = position;
+    area.offset.Set(area.initCols * TileSize - position.x,
+                    area.initRows * TileSize - position.y);
 
     return area;
 }

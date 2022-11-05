@@ -4,6 +4,7 @@
 #include "controller/backpack_controller.hpp"
 #include "controller/composite_controller.hpp"
 #include "controller/human_controller.hpp"
+#include "others/camera.hpp"
 
 class HumanController;
 
@@ -12,6 +13,9 @@ public:
     static GameData* Instance();
 
     void InitControllers(engine::Entity* player);
+
+    void SetCamera(std::unique_ptr<Camera>&& camera) { camera_ = std::move(camera); }
+    Camera& GetCamera() { return *camera_; }
 
     controller::Controller* GetController() { return controller_; }
     HumanController* GetHumanController() { return humanController_.get(); }
@@ -60,6 +64,7 @@ private:
     engine::Entity* rightHandObjectFrame_ = nullptr;
     std::optional<engine::Vec2> pickableObjGridPos_ = std::nullopt;
     engine::Vec2 putTargetGridPos_;
+    std::unique_ptr<Camera> camera_;
 
     static std::unique_ptr<GameData> instance_;
 };

@@ -15,3 +15,4 @@ build
 cmake-build
 em-build
 compile_flags.txt
+xcode-build

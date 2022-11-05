@@ -23,6 +23,7 @@ void StartScene::OnInit() {
     GameData::Instance()->SetPlayer(player);
     MonsterManager::Add(player);
 
+    GameData::Instance()->SetCamera(std::make_unique<Camera>());
     GameData::Instance()->InitControllers(player);
 }
 
@@ -47,6 +48,7 @@ void StartScene::attachSystems() {
     engine::World::Instance()->AddSystem<PhysicalSystem>();
     engine::World::Instance()->AddSystem<PhysicalClearSystem>();
     engine::World::Instance()->AddSystem<SortMonstersSystem>();
+    engine::World::Instance()->AddSystem<CameraUpdateSystem>();
     engine::World::Instance()->AddSystem<MapRenderSystem>();
     // engine::World::Instance()->AddSystem<SpriteRenderSystem>();
     engine::World::Instance()->AddSystem<HintArrowSystem>();

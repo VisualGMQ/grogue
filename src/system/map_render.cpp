@@ -8,7 +8,7 @@ void MapRenderSystem::Update(engine::Entity* entity) {
 
     if (!node || !map) return;
 
-    auto visiableArea = CalcVisiableTileArea(map->map, engine::Vec2(0, 0));
+    auto visiableArea = CalcVisiableTileArea(map->map, GameData::Instance()->GetCamera().GetPosition());
     drawTileAndPickupableObj(visiableArea, map->map);
     drawMonsterAndArch(visiableArea, map->map);
 }
@@ -24,14 +24,19 @@ void MapRenderSystem::drawOneSprite(const component::Sprite* sprite, const engin
 void MapRenderSystem::drawTileAndPickupableObj(const VisiableTileArea& visiableArea, Map* map) {
     for (int y = visiableArea.initRows; y < visiableArea.endRows; y++) {
         for (int x = visiableArea.initCols; x < visiableArea.endCols; x++) {
+            if (!map->IsInMap(x, y)) continue;
+            
             auto& tile = map->Get(x, y);
+            auto transform = engine::Transform{engine::Vec2(x - visiableArea.initCols,
+                                                            y - visiableArea.initRows) *
+                                               TileSize + visiableArea.offset};
             if (tile.terrian.image) {
-                drawOneTile(tile.terrian.image, {engine::Vec2(x, y) * TileSize});
+                drawOneTile(tile.terrian.image, transform);
             }
             if (tile.object && tile.object->GetComponent<component::Pickupable>()) {
                 auto sprite = tile.object->GetComponent<component::Sprite>();
                 if (sprite) {
-                    drawOneSprite(sprite, {engine::Vec2(x, y) * TileSize});
+                    drawOneSprite(sprite, transform);
                 }
             }
         }
@@ -53,7 +58,9 @@ void MapRenderSystem::drawMonsterAndArch(const VisiableTileArea& visiableArea, M
         }
         while (monsterIt != MonsterManager::end() && monsterBottom &&
                monsterBottom.value() >= y * TileSize && monsterBottom.value() <= (y + 1) * TileSize) {
-            drawOneSprite(monsterSprite, {monsterNode->globalPosition, monsterNode->globalScale, monsterNode->globalRotation});
+            drawOneSprite(monsterSprite, {monsterNode->globalPosition - engine::Size(TileSize * visiableArea.initCols, TileSize * visiableArea.initRows) + visiableArea.offset,
+                                          monsterNode->globalScale,
+                                          monsterNode->globalRotation});
 
             monsterIt ++;
             getNextMonsterInfo(monsterIt, monsterNode, monsterSprite);
@@ -63,7 +70,7 @@ void MapRenderSystem::drawMonsterAndArch(const VisiableTileArea& visiableArea, M
             if (tile.object && tile.object->GetComponent<component::Architecture>()) {
                 auto sprite = tile.object->GetComponent<component::Sprite>();
                 if (sprite) {
-                    drawOneSprite(sprite, {engine::Vec2(x, y) * TileSize});
+                    drawOneSprite(sprite, {engine::Vec2(x - visiableArea.initCols, y - visiableArea.initRows) * TileSize + visiableArea.offset});
                 }
             }
         }

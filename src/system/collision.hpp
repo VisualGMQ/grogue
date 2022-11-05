@@ -13,4 +13,10 @@ public:
     CollisionSystem(engine::World* world): engine::PerFrameSystem(world) {}
 
     void Update() override;
+
+private:
+    void moveMonsterIntoMap(Map* map, engine::Node2DComponent* node2d, const engine::Rect& globalColliBox, const engine::Rect& localColliBox, const engine::Size& imgSize);
+    void collideMonsterWithMapTile(const engine::Rect& archRect, engine::Node2DComponent* monsterNode, component::RigidBody* monsterRigid, engine::Rect& box);
+
+    void collideMonsterAndMap(Map*);
 };

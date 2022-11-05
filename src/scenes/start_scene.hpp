@@ -18,6 +18,7 @@
 #include "system/hand_frame_render.hpp"
 #include "system/orientation.hpp"
 #include "system/put_hint.hpp"
+#include "system/camera_update.hpp"
 
 #include "others/localization.hpp"
 #include "others/human_create.hpp"
