@@ -6,6 +6,8 @@
 #include <tuple>
 #include <variant>
 
+namespace engine {
+
 class ResultError: public std::runtime_error {
 public:
     ResultError(const char* err): std::runtime_error(err) {}
@@ -90,3 +92,5 @@ private:
 } while(0)
 
 #define PROPAGATING(result, value) do {if (result.IsErr()) return result; else value = result.Unwrap(); } while(0)
+
+}
