@@ -9,7 +9,7 @@ namespace engine {
 
 class World final {
 public:
-    static World* Instance();
+    static World& Instance();
     static void Init();
     static void Quit();
 
@@ -42,7 +42,7 @@ public:
     void CleanUp();
 
     template <typename T, typename... Args>
-    System* AddSystem(Args&&... args);
+    void AddSystem(Args&&... args);
 
     void AddSystem(std::unique_ptr<System>&& system) {
         systems_.push_back(std::move(system));
@@ -122,9 +122,8 @@ void World::RemoveComponent(T* component) {
 }
 
 template <typename T, typename... Args>
-System* World::AddSystem(Args&&... args) {
+void World::AddSystem(Args&&... args) {
     systems_.push_back(std::make_unique<T>(this, std::forward<Args>(args)...));
-    return systems_.back().get();
 }
 
 template <typename T, typename... Args>

@@ -3,10 +3,10 @@
 namespace engine {
 
 void SetNodeParent(Entity* parent, Entity* child) {
-    if (auto node = child->GetComponent<NodeComponent>(); node) {
-        node->SetParentNode(parent);
-    } else if (auto node = child->GetComponent<Node2DComponent>(); node) {
-        node->SetParentNode(parent);
+    if (auto node = child->GetComponent<NodeComponent>(); node.IsOk()) {
+        node.Unwrap()->SetParentNode(parent);
+    } else if (auto node = child->GetComponent<Node2DComponent>(); node.IsOk()) {
+        node.Unwrap()->SetParentNode(parent);
     } else {
         Loge("entity {} don't has any node component", child->Name());
     }

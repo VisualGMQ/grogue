@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <iostream>
 #include <string_view>
@@ -29,8 +31,8 @@ class Ok<void> {
 template <typename T>
 class Result {
 public:
-    Result(const Ok<T>& ok): data_(ok), type_(Type::Ok) {}
-    Result(const Err& err): data_(err), type_(Type::Err) {}
+    Result(Ok<T> ok): data_(ok), type_(Type::Ok) {}
+    Result(Err err): data_(err), type_(Type::Err) {}
 
     bool IsOk() const { return type_ == Type::Ok; }
     bool IsErr() const { return type_ == Type::Err; }
@@ -91,6 +93,6 @@ private:
     } \
 } while(0)
 
-#define PROPAGATING(result, value) do {if (result.IsErr()) return result; else value = result.Unwrap(); } while(0)
+#define PROPAGATING(result, value) do {if (result.IsErr()) return engine::Err{}; else value = result.Unwrap(); } while(0)
 
 }

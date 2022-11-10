@@ -16,7 +16,7 @@ public:
     virtual void Reset() override {
         Component::Reset();
         for (auto& child : children) {
-            World::Instance()->DestroyEntity(child);
+            World::Instance().DestroyEntity(child);
         }
         children.clear();
         parentNode_ = nullptr;

@@ -10,10 +10,10 @@ Scene::Scene(const std::string& name): name_(name) {
 }
 
 void Scene::beforeInit() {
-    auto world = World::Instance();
-    root_ = world->CreateEntity<NodeComponent>(name_ + " root");
-    node2d_ = world->CreateEntity<NodeComponent, Node2DRoot>(name_ + " 2d root");
-    nodeUI_ = world->CreateEntity<NodeComponent, NodeUIRoot>(name_ + " ui root");
+    auto& world = World::Instance();
+    root_ = world.CreateEntity<NodeComponent>(name_ + " root");
+    node2d_ = world.CreateEntity<NodeComponent, Node2DRoot>(name_ + " 2d root");
+    nodeUI_ = world.CreateEntity<NodeComponent, NodeUIRoot>(name_ + " ui root");
 
     Attach(node2d_);
     Attach(nodeUI_);
@@ -21,7 +21,7 @@ void Scene::beforeInit() {
 
 void Scene::beforeQuit() {
     if (root_) {
-        World::Instance()->DestroyEntity(root_);
+        World::Instance().DestroyEntity(root_);
         root_ = nullptr;
     }
 }
@@ -36,18 +36,20 @@ void SceneMgr::Quit() {
 
 void Scene::Attach(Entity* entity) {
     auto node = root_->GetComponent<NodeComponent>();
-    node->children.push_back(entity);
+    if (node.IsErr()) return;
+
+    node.Unwrap()->children.push_back(entity);
 }
 
 void Scene::Attach2D(Entity* entity) {
     if (!entity) return;
-    node2d_->GetComponent<NodeComponent>()->Attach(entity);
+    node2d_->GetComponent<NodeComponent>().Except("scene node2d don't has NodeComponent")->Attach(entity);
     SetNodeParent(node2d_, entity);
 }
 
 void Scene::AttachUI(Entity* entity) {
     if (!entity) return;
-    nodeUI_->GetComponent<NodeComponent>()->Attach(entity);
+    nodeUI_->GetComponent<NodeComponent>().Except("scene nodeUI_ don't has NodeComponent")->Attach(entity);
     SetNodeParent(nodeUI_, entity);
 }
 
@@ -80,16 +82,16 @@ void SceneMgr::QuitOldScene() {
     Entity* entity = entityQueue.front();
     entityQueue.pop();
     while (!entityQueue.empty()) {
-        if (auto node = entity->GetComponent<NodeComponent>(); node != nullptr && !node->children.empty()) {
-            for (auto& entity : node->children) {
+        if (auto node = entity->GetComponent<NodeComponent>(); node.IsOk() && !node.Unwrap()->children.empty()) {
+            for (auto& entity : node.Unwrap()->children) {
                 entityQueue.push(entity);
             }
         }
-        World::Instance()->DestroyEntity(entity);
+        World::Instance().DestroyEntity(entity);
         entity = entityQueue.front();
         entityQueue.pop();
     }
-    World::Instance()->DestroyEntity(entity);
+    World::Instance().DestroyEntity(entity);
 }
 
 Entity* doFindEntity(Entity* entity, const std::string& name) {
@@ -97,14 +99,14 @@ Entity* doFindEntity(Entity* entity, const std::string& name) {
     if (entity->Name() == name) {
         return entity;
     }
-    if (auto node = entity->GetComponent<NodeComponent>(); node) {
-        for (auto& child : node->children) {
+    if (auto node = entity->GetComponent<NodeComponent>(); node.IsOk()) {
+        for (auto& child : node.Unwrap()->children) {
             auto result = doFindEntity(child, name);
             if (result) return result;
         }
     }
-    if (auto node = entity->GetComponent<Node2DComponent>(); node) {
-        for (auto& child : node->children) {
+    if (auto node = entity->GetComponent<Node2DComponent>(); node.IsOk()) {
+        for (auto& child : node.Unwrap()->children) {
             auto result = doFindEntity(child, name);
             if (result) return result;
         }
@@ -122,13 +124,13 @@ void doFindEntities(Entity* entity, const std::string& name, std::vector<Entity*
     if (entity->Name() == name) {
         result.push_back(entity);
     }
-    if (auto node = entity->GetComponent<NodeComponent>(); node) {
-        for (auto& child : node->children) {
+    if (auto node = entity->GetComponent<NodeComponent>(); node.IsOk()) {
+        for (auto& child : node.Unwrap()->children) {
             doFindEntities(child, name, result);
         }
     }
-    if (auto node = entity->GetComponent<Node2DComponent>(); node) {
-        for (auto& child : node->children) {
+    if (auto node = entity->GetComponent<Node2DComponent>(); node.IsOk()) {
+        for (auto& child : node.Unwrap()->children) {
             doFindEntities(child, name, result);
         }
     }

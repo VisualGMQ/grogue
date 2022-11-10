@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/core/result.hpp"
 #include "engine/ecs/component.hpp"
 #include "engine/ecs/behavior.hpp"
 #include "engine/ecs/ecs.hpp"
@@ -21,10 +22,10 @@ public:
     void SetComponent(T*);
 
     template <typename T>
-    T* GetComponent();
+    Result<T*> GetComponent();
 
     template <typename T>
-    const T* GetComponent() const;
+    Result<const T*> GetComponent() const;
 
     void RemoveComponent(Component* component);
 
@@ -74,24 +75,24 @@ void Entity::SetComponent(T* comp) {
 }
 
 template <typename T>
-T* Entity::GetComponent() {
+Result<T*> Entity::GetComponent() {
     static_assert(std::is_base_of_v<Component, T> && !std::is_same_v<Component, T>);
     auto it = components_.find(ComponentIDHelper::GetID<T>());
     if (it == components_.end()) {
-        return nullptr;
+        return Err{};
     } else {
-        return static_cast<T*>(it->second);
+        return Ok(static_cast<T*>(it->second));
     }
 }
 
 template <typename T>
-const T* Entity::GetComponent() const {
+Result<const T*> Entity::GetComponent() const {
     static_assert(std::is_base_of_v<Component, T> && !std::is_same_v<Component, T>);
     auto it = components_.find(ComponentIDHelper::GetID<T>());
     if (it == components_.end()) {
-        return nullptr;
+        return Err;
     } else {
-        return static_cast<T*>(it->second);
+        return Ok(static_cast<T*>(it->second));
     }
 }
 

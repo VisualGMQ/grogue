@@ -29,13 +29,13 @@ int main(int argc, char** argv) {
 
     engine::Renderer::SetClearColor(engine::Color(100, 100, 100, 255));
     while (!engine::Video::ShouldClose()) {
-        engine::World::Instance()->TryInitEntities();
-        engine::World::Instance()->Update();
+        engine::World::Instance().TryInitEntities();
+        engine::World::Instance().Update();
         engine::UI::Update();
         engine::Timer::UpdateElapse();
         engine::Input::UpdateStates();
         engine::SceneMgr::QuitOldScene();
-        engine::World::Instance()->CleanUp();
+        engine::World::Instance().CleanUp();
     }
 
     engine::SceneMgr::Quit();

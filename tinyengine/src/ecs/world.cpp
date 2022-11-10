@@ -16,11 +16,11 @@ World::World() {
 World::~World() {
 }
 
-World* World::Instance() {
+World& World::Instance() {
     if (!instance_) {
         instance_ = std::make_unique<World>();
     }
-    return instance_.get();
+    return *instance_;
 }
 
 void World::Init() {
@@ -92,8 +92,9 @@ void World::TryInitEntities() {
     auto scene = SceneMgr::CurrentScene();
     if (!scene) return;
     auto node = scene->GetRootEntity()->GetComponent<NodeComponent>();
+    if (node.IsErr()) return;
 
-    for (auto& entity : node->children) {
+    for (auto& entity : node.Unwrap()->children) {
         initEntity(entity);
     }
 }
@@ -106,13 +107,13 @@ void World::initEntity(Entity* entity) {
         }
     }
 
-    if (auto node = entity->GetComponent<NodeComponent>(); node != nullptr) {
-        for (auto& ent : node->children) {
+    if (auto node = entity->GetComponent<NodeComponent>(); node.IsOk()) {
+        for (auto& ent : node.Unwrap()->children) {
             initEntity(ent);
         }
     }
-    if (auto node = entity->GetComponent<Node2DComponent>(); node != nullptr) {
-        for (auto& ent : node->children) {
+    if (auto node = entity->GetComponent<Node2DComponent>(); node.IsOk()) {
+        for (auto& ent : node.Unwrap()->children) {
             initEntity(ent);
         }
     }
@@ -163,13 +164,13 @@ void World::walkThroughNodeTree(engine::Entity* entity, std::function<void(Entit
         func(entity);
     }
 
-    if (auto node = entity->GetComponent<NodeComponent>(); node != nullptr) {
-        for (auto& ent : node->children) {
+    if (auto node = entity->GetComponent<NodeComponent>(); node.IsOk()) {
+        for (auto& ent : node.Unwrap()->children) {
             walkThroughNodeTree(ent, func);
         }
     }
-    if (auto node = entity->GetComponent<Node2DComponent>(); node != nullptr) {
-        for (auto& ent : node->children) {
+    if (auto node = entity->GetComponent<Node2DComponent>(); node.IsOk()) {
+        for (auto& ent : node.Unwrap()->children) {
             walkThroughNodeTree(ent, func);
         }
     }
