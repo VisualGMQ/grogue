@@ -10,7 +10,7 @@ class HumanController;
 
 class GameData final {
 public:
-    static GameData* Instance();
+    static GameData& Instance();
 
     void InitControllers(engine::Entity* player);
 
@@ -26,30 +26,50 @@ public:
 
     void SetPlayer(engine::Entity* player) { player_ = player; }
     void ClearPlayer() { player_ = nullptr; }
-    engine::Entity* GetPlayer() { return player_; }
+    engine::Result<engine::Entity*> GetPlayer() {
+        if (player_) return engine::Ok(player_);
+        return engine::Err{};
+    }
 
     void SetPickableObjGridPos(const engine::Vec2& gridPos) { pickableObjGridPos_ = gridPos; }
     void ClearPickableObjGridPos() { pickableObjGridPos_ = std::nullopt; }
     const std::optional<engine::Vec2>& GetPickableObjGridPos() const { return pickableObjGridPos_; }
 
     void SetBackpackPanel(engine::Entity* backpack) { backpackPanel_ = backpack; }
-    engine::Entity* GetBackpackPanel() { return backpackPanel_; }
+    engine::Result<engine::Entity*> GetBackpackPanel() {
+        if (backpackPanel_) return engine::Ok(backpackPanel_);
+        return engine::Err{};
+    }
 
     void SetCompositePanel(engine::Entity* composite) { compositePanel_ = composite; }
-    engine::Entity* GetCompositePanel() { return compositePanel_; }
+    engine::Result<engine::Entity*> GetCompositePanel() {
+        if (compositePanel_) return engine::Ok(compositePanel_);
+        return engine::Err{};
+    }
 
     void SetCompositeDescriptionPanel(engine::Entity* composite) { compositeDescriptionPanel_ = composite; }
-    engine::Entity* GetCompositeDescriptionPanel() { return compositeDescriptionPanel_; }
+    engine::Result<engine::Entity*> GetCompositeDescriptionPanel() {
+        if (compositeDescriptionPanel_) return engine::Ok(compositeDescriptionPanel_);
+        return engine::Err{};
+    }
 
     void SetLeftHandObjectFrame(engine::Entity* frame) { leftHandObjectFrame_ = frame; }
     void SetRightHandObjectFrame(engine::Entity* frame) { rightHandObjectFrame_ = frame; }
-    engine::Entity* GetLeftHandObjectFrame() { return leftHandObjectFrame_; }
-    engine::Entity* GetRightHandObjectFrame() { return rightHandObjectFrame_; }
+    engine::Result<engine::Entity*> GetLeftHandObjectFrame() {
+        if (leftHandObjectFrame_) return engine::Ok(leftHandObjectFrame_);
+        return engine::Err{};
+    }
+    engine::Result<engine::Entity*> GetRightHandObjectFrame() {
+        if (rightHandObjectFrame_) return engine::Ok(rightHandObjectFrame_);
+        return engine::Err{};
+    }
 
     void SetPutTargetGridPos(const engine::Vec2& pos) { putTargetGridPos_ = pos; }
-    const engine::Vec2& GetPutTargetGridPos() const { return putTargetGridPos_; }
+    const engine::Vec2& GetPutTargetGridPos() const {
+        return putTargetGridPos_;
+    }
 
-    engine::Entity* GetBackpackHoverObject();
+    engine::Result<engine::Entity*> GetBackpackHoverObject();
 
 private:
     controller::Controller* controller_ = nullptr;
@@ -95,10 +115,12 @@ public:
         if (!shouldSort_) return;
 
         std::sort(monsters_.begin(), monsters_.end(),
-        [](const engine::Entity* e1, const engine::Entity* e2){
+        [](const engine::Entity* e1, const engine::Entity* e2) {
                 auto node1 = e1->GetComponent<engine::Node2DComponent>();
                 auto node2 = e2->GetComponent<engine::Node2DComponent>();
-                return node1->position.y < node2->position.y;
+
+                if (node1.IsErr() || node2.IsErr()) return false;
+                return node1.Unwrap()->position.y < node2.Unwrap()->position.y;
             });
 
         shouldSort_ = false;

@@ -2,7 +2,7 @@
 
 
 void ControllerUpdateSystem::Update() {
-    auto controller = GameData::Instance()->GetController();
+    auto controller = GameData::Instance().GetController();
     if (controller) {
         controller->Update();
     }

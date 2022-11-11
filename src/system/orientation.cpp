@@ -3,10 +3,10 @@
 void OrientationUpdateSystem::Update(engine::Entity* entity) {
     if (!entity) { return; }
 
-    auto rigid = entity->GetComponent<component::RigidBody>();
-    auto human = entity->GetComponent<component::Human>();
-
-    if (!human || !rigid) { return; }
+    component::RigidBody* rigid;
+    component::Human* human;
+    MATCH_INTO_VAR_OR_RETURN_VOID(entity->GetComponent<component::RigidBody>(), rigid);
+    MATCH_INTO_VAR_OR_RETURN_VOID(entity->GetComponent<component::Human>(), human);
 
     if (rigid->velocity == engine::Vec2(0, 0)) {
         return;
@@ -25,8 +25,10 @@ void OrientationUpdateSystem::Update(engine::Entity* entity) {
         human->orientation = static_cast<component::Human::Orientation>(human->orientation | component::Human::Orientation::Up);
     }
 
-    auto sprite = entity->GetComponent<component::Sprite>();
-    auto node2d = entity->GetComponent<engine::Node2DComponent>();
+    component::Sprite* sprite;
+    engine::Node2DComponent* node2d;
+    MATCH_INTO_VAR_OR_RETURN_VOID(entity->GetComponent<component::Sprite>(), sprite);
+    MATCH_INTO_VAR_OR_RETURN_VOID(entity->GetComponent<engine::Node2DComponent>(), node2d);
 
     if (human->orientation & component::Human::Orientation::Up) {
         node2d->scale.x = 1;

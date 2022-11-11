@@ -15,28 +15,33 @@ public:
         capacity = 20;
     }
 
-    bool AddObject(engine::Entity* entity) {
-        if (!entity) return false;
+    engine::Result<void> AddObject(engine::Entity* entity) {
+        if (!entity) return engine::Err{};
 
-        if (objects.size() >= capacity) return false;
+        if (objects.size() >= capacity) return engine::Err{};
 
-        auto pickupable1 = entity->GetComponent<component::Pickupable>();
+        component::Pickupable* pickupable1;
+        PROPAGATING(entity->GetComponent<component::Pickupable>(), pickupable1);
 
         for (auto& obj : objects) {
-            auto pickupable2 = obj->GetComponent<component::Pickupable>();
+            component::Pickupable* pickupable2;
+            PROPAGATING(obj->GetComponent<component::Pickupable>(), pickupable2);
+
             if (pickupable2->id == pickupable1->id) {
                 pickupable2->num += pickupable1->num;
-                engine::World::Instance()->DestroyEntity(entity);
-                return true;
+                engine::World::Instance().DestroyEntity(entity);
+                return engine::Ok<void>{};
             }
         }
         objects.push_back(entity);
-        return true;
+        return engine::Ok<void>{};
     }
 
     void RemoveObject(ObjectID id) {
         auto it = std::remove_if(objects.begin(), objects.end(), [&](engine::Entity* entity){
-            return entity->GetComponent<component::Pickupable>()->id == id;
+            auto pickup = entity->GetComponent<component::Pickupable>();
+            if (pickup.IsErr()) return false;
+            return pickup.Unwrap()->id == id;
         });
         objects.erase(it, objects.end());
     }

@@ -1,9 +1,10 @@
 #include "playerinfo_render.hpp"
 
 void PlayerInfoRenderSystem::Update() {
-    if (!GameData::Instance()->GetPlayer()) return;
+    if (GameData::Instance().GetPlayer().IsErr()) return;
 
-    auto life = GameData::Instance()->GetPlayer()->GetComponent<component::Life>();
+    component::Life* life;
+    MATCH_INTO_VAR_OR_RETURN_VOID(GameData::Instance().GetPlayer().Except("player don't exists")->GetComponent<component::Life>(), life);
 
     engine::Rect barRect(10, 10, 200, 10);
     drawBar(barRect, life->hp / life->maxHp, engine::Color{150, 0, 0}, engine::Color{255, 0, 0}, engine::Color{0, 0, 0});

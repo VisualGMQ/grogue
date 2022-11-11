@@ -3,12 +3,13 @@
 void MapRenderSystem::Update(engine::Entity* entity) {
     if (!entity) return;
 
-    auto node = entity->GetComponent<engine::Node2DComponent>();
-    auto map = entity->GetComponent<component::MapComponent>();
+    auto mapResult = entity->GetComponent<component::MapComponent>();
 
-    if (!node || !map) return;
+    if (mapResult.IsErr()) return;
 
-    auto visiableArea = CalcVisiableTileArea(map->map, GameData::Instance()->GetCamera().GetPosition());
+    auto& map = mapResult.Unwrap();
+
+    auto visiableArea = CalcVisiableTileArea(map->map, GameData::Instance().GetCamera().GetPosition());
     drawTileAndPickupableObj(visiableArea, map->map);
     drawMonsterAndArch(visiableArea, map->map);
 }
@@ -33,10 +34,10 @@ void MapRenderSystem::drawTileAndPickupableObj(const VisiableTileArea& visiableA
             if (tile.terrian.image) {
                 drawOneTile(tile.terrian.image, transform);
             }
-            if (tile.object && tile.object->GetComponent<component::Pickupable>()) {
+            if (tile.object && tile.object->GetComponent<component::Pickupable>().IsOk()) {
                 auto sprite = tile.object->GetComponent<component::Sprite>();
-                if (sprite) {
-                    drawOneSprite(sprite, transform);
+                if (sprite.IsOk()) {
+                    drawOneSprite(sprite.Unwrap(), transform);
                 }
             }
         }
@@ -67,10 +68,10 @@ void MapRenderSystem::drawMonsterAndArch(const VisiableTileArea& visiableArea, M
         }
         for (int x = visiableArea.initCols; x < visiableArea.endCols; x++) {
             auto& tile = map->Get(x, y);
-            if (tile.object && tile.object->GetComponent<component::Architecture>()) {
+            if (tile.object && tile.object->GetComponent<component::Architecture>().IsOk()) {
                 auto sprite = tile.object->GetComponent<component::Sprite>();
-                if (sprite) {
-                    drawOneSprite(sprite, {engine::Vec2(x - visiableArea.initCols, y - visiableArea.initRows) * TileSize + visiableArea.offset});
+                if (sprite.IsOk()) {
+                    drawOneSprite(sprite.Unwrap(), {engine::Vec2(x - visiableArea.initCols, y - visiableArea.initRows) * TileSize + visiableArea.offset});
                 }
             }
         }
@@ -79,7 +80,7 @@ void MapRenderSystem::drawMonsterAndArch(const VisiableTileArea& visiableArea, M
 
 void MapRenderSystem::getNextMonsterInfo(MonsterManager::iterator& it, Node2DPtr& node, SpritePtr& sprite) {
     if (it != MonsterManager::end()) {
-        node = (*it)->GetComponent<engine::Node2DComponent>();
-        sprite = (*it)->GetComponent<component::Sprite>();
+        node = (*it)->GetComponent<engine::Node2DComponent>().Unwrap();
+        sprite = (*it)->GetComponent<component::Sprite>().Unwrap();
     }
 }

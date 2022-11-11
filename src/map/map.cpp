@@ -60,7 +60,9 @@ void Map::UpdateArchImage(int x, int y) {
             adjacentRight = true;
         }
 
-        auto sprite = obj->GetComponent<component::Sprite>();
+        component::Sprite* sprite;
+        MATCH_INTO_VAR_OR_RETURN_VOID(obj->GetComponent<component::Sprite>(), sprite);
+
         auto objConfig = ObjectConfigStorage::Find(id.value());
 
         if (adjacentLeft) {
@@ -99,8 +101,8 @@ void Map::UpdateArchImage(int x, int y) {
 std::optional<ObjectID> Map::GetArchObjectID(int x, int y) {
     auto& tile = Get(x, y);
     if (tile.object) {
-        auto arch = tile.object->GetComponent<component::Architecture>();
-        if (!arch) return std::nullopt;
+        component::Architecture* arch;
+        MATCH_INTO_VAR_OR_RETURN(tile.object->GetComponent<component::Architecture>(), arch, std::nullopt);
 
         return arch->id;
     }

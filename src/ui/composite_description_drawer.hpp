@@ -6,5 +6,5 @@
 
 class CompositeDescriptionDrawer: public GridObjectDrawer {
 public:
-    DrawResources GetObject(component::GridPanel*, int index) override;
+    engine::Result<DrawResources> GetObject(component::GridPanel*, int index) override;
 };

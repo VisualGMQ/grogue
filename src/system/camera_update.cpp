@@ -1,14 +1,18 @@
 #include "camera_update.hpp"
 
 void CameraUpdateSystem::Update() {
-    auto& camera = GameData::Instance()->GetCamera();
+    auto& camera = GameData::Instance().GetCamera();
     engine::Rect cameraRect;
     cameraRect.size = engine::Video::GetInitSize();
-    auto player = GameData::Instance()->GetPlayer();
+    engine::Entity* player;
+    MATCH_INTO_VAR_OR_RETURN_VOID(GameData::Instance().GetPlayer(), player);
 
-    if (!player) return;
-    auto node2d = player->GetComponent<engine::Node2DComponent>();
-    auto box = player->GetComponent<component::BoxCollider>();
+    engine::Node2DComponent* node2d;
+    MATCH_INTO_VAR_OR_RETURN_VOID(player->GetComponent<engine::Node2DComponent>(), node2d);
+
+    component::BoxCollider* box;
+    MATCH_INTO_VAR_OR_RETURN_VOID(player->GetComponent<component::BoxCollider>(), box);
+
     auto centerPos = node2d->globalPosition + box->rect.position + box->rect.size * 0.5;
     auto& canvaSize = engine::Video::GetInitSize();
     cameraRect.position = centerPos - canvaSize * 0.5;

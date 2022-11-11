@@ -4,14 +4,16 @@
 void SpriteRenderSystem::Update(engine::Entity* entity) {
     if (!entity) return;
 
-    if (auto node = entity->GetComponent<engine::Node2DComponent>(); node) {
-        if (auto sprite = entity->GetComponent<component::Sprite>(); sprite && sprite->image) {
-            engine::Transform transform;
-            transform.position = sprite->offset + node->globalPosition;
-            transform.rotation = sprite->rotation + node->globalRotation;
-            transform.scale = node->globalScale;
+    engine::Node2DComponent* node;
+    MATCH_INTO_VAR_OR_RETURN_VOID(entity->GetComponent<engine::Node2DComponent>(), node);
 
-            component::DrawSprite(sprite, transform);
-        }
-    }
+    component::Sprite* sprite;
+    MATCH_INTO_VAR_OR_RETURN_VOID(entity->GetComponent<component::Sprite>(), sprite);
+
+    engine::Transform transform;
+    transform.position = sprite->offset + node->globalPosition;
+    transform.rotation = sprite->rotation + node->globalRotation;
+    transform.scale = node->globalScale;
+
+    component::DrawSprite(sprite, transform);
 }

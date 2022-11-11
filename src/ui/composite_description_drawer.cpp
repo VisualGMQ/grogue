@@ -1,7 +1,8 @@
 #include "composite_description_drawer.hpp"
 
-GridObjectDrawer::DrawResources CompositeDescriptionDrawer::GetObject(component::GridPanel* panel, int index) {
-    auto objectIdx = GameData::Instance()->GetCompositePanel()->GetComponent<component::GridPanel>()->GetHoverIndex();
+engine::Result<GridObjectDrawer::DrawResources> CompositeDescriptionDrawer::GetObject(component::GridPanel* panel, int index) {
+    auto objectIdx = GameData::Instance().GetCompositePanel().Except("composite panel don't exists")
+                                        ->GetComponent<component::GridPanel>().Except("composite panel don't has GridPanel component")->GetHoverIndex();
     auto it = ComposeConfigStorage::begin();
     std::advance(it, objectIdx);
     auto& materials = it->second.materials;
@@ -11,5 +12,5 @@ GridObjectDrawer::DrawResources CompositeDescriptionDrawer::GetObject(component:
 
     auto materialConfig = ObjectConfigStorage::Find(material.id);
 
-    return {materialConfig->image, material.num};
+    return engine::Ok<DrawResources>(DrawResources{materialConfig->image, material.num});
 }

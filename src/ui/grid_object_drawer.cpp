@@ -1,7 +1,9 @@
 #include "grid_object_drawer.hpp"
 
 void GridObjectDrawer::operator()(component::GridPanel* panel, const engine::Rect& rect, int x, int y) {
-    auto object = GetObject(panel, x + y * panel->gridNumInCol);
+    DrawResources object;
+    MATCH_INTO_VAR_OR_RETURN_VOID(GetObject(panel, x + y * panel->gridNumInCol), object);
+
     if (!object.image) return;
 
     drawObject(panel, object.image, AlignCenter(engine::Size(TileSize, TileSize), rect));

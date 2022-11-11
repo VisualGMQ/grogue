@@ -3,11 +3,11 @@
 
 std::unique_ptr<GameData> GameData::instance_ = nullptr;
 
-GameData* GameData::Instance() {
+GameData& GameData::Instance() {
     if (!instance_) {
         instance_ = std::make_unique<GameData>();
     }
-    return instance_.get();
+    return *instance_;
 }
 
 void GameData::InitControllers(engine::Entity* player) {
@@ -28,7 +28,7 @@ void GameData::InitControllers(engine::Entity* player) {
                                                                                        controller::keyboard::PutButton::HandType::Right));
 
     backpackController_ = std::make_unique<BackpackController>();
-    auto backpackPanel = Instance()->GetBackpackPanel()->GetComponent<component::GridPanel>();
+    auto backpackPanel = Instance().GetBackpackPanel().Except("backpack panel not exists")->GetComponent<component::GridPanel>().Except("backpack panel don't has grid panel component");
     backpackController_->SetUpBtn(std::make_unique<controller::keyboard::GridPanelMoveUpButton>(backpackPanel, SDL_SCANCODE_W));
     backpackController_->SetDownBtn(std::make_unique<controller::keyboard::GridPanelMoveDownButton>(backpackPanel, SDL_SCANCODE_S));
     backpackController_->SetLeftBtn(std::make_unique<controller::keyboard::GridPanelMoveLeftButton>(backpackPanel, SDL_SCANCODE_A));
@@ -38,7 +38,7 @@ void GameData::InitControllers(engine::Entity* player) {
     backpackController_->SetRightHandSelectBtn(std::make_unique<controller::keyboard::RightHandSelectButton>(SDL_SCANCODE_K));
 
     compositeController_ = std::make_unique<CompositeController>();
-    auto compositePanel = Instance()->GetCompositePanel()->GetComponent<component::GridPanel>();
+    auto compositePanel = Instance().GetCompositePanel().Except("composite panel not exists")->GetComponent<component::GridPanel>().Except("composite panel don't has grid panel component");
     compositeController_->SetUpBtn(std::make_unique<controller::keyboard::GridPanelMoveUpButton>(compositePanel, SDL_SCANCODE_W));
     compositeController_->SetDownBtn(std::make_unique<controller::keyboard::GridPanelMoveDownButton>(compositePanel, SDL_SCANCODE_S));
     compositeController_->SetLeftBtn(std::make_unique<controller::keyboard::GridPanelMoveLeftButton>(compositePanel, SDL_SCANCODE_A));
@@ -49,21 +49,23 @@ void GameData::InitControllers(engine::Entity* player) {
     controller_ = GetHumanController();
 }
 
-engine::Entity* GameData::GetBackpackHoverObject() {
-    auto player = GetPlayer();
-    if (!player) return nullptr;
+engine::Result<engine::Entity*> GameData::GetBackpackHoverObject() {
+    engine::Entity* player;
+    PROPAGATING(GetPlayer(), player);
 
-    auto backpack = player->GetComponent<component::Backpack>();
-    if (!backpack) return nullptr;
+    component::Backpack* backpack;
+    PROPAGATING(player->GetComponent<component::Backpack>(), backpack);
 
-    auto backpackPanel = GetBackpackPanel();
-    if (!backpackPanel) return nullptr;
+    engine::Entity* backpackPanel;
+    PROPAGATING(GetBackpackPanel(), backpackPanel);
 
-    auto index = backpackPanel->GetComponent<component::GridPanel>()->GetHoverIndex();
+    component::GridPanel* gridPanel;
+    PROPAGATING(backpackPanel->GetComponent<component::GridPanel>(), gridPanel);
+    auto index = gridPanel->GetHoverIndex();
 
-    if (backpack->objects.size() <= index || index < 0) return nullptr;
+    if (backpack->objects.size() <= index || index < 0) return engine::Err{};
 
-    return backpack->objects[index];
+    return engine::Ok(backpack->objects[index]);
 }
 
 

@@ -107,10 +107,10 @@ std::optional<ObjectID> ObjectConfigStorage::ObjectName2ID(const std::string& na
 }
 
 engine::Entity* CreateArchitecture(const ObjectConfig& config) {
-    auto entity = engine::World::Instance()->CreateEntity<component::Sprite, component::Architecture, component::BoxCollider>("architecture-" + config.name);
-    auto sprite = entity->GetComponent<component::Sprite>();
-    auto architecture = entity->GetComponent<component::Architecture>();
-    auto box = entity->GetComponent<component::BoxCollider>();
+    auto entity = engine::World::Instance().CreateEntity<component::Sprite, component::Architecture, component::BoxCollider>("architecture-" + config.name);
+    auto sprite = entity->GetComponent<component::Sprite>().Unwrap();
+    auto architecture = entity->GetComponent<component::Architecture>().Unwrap();
+    auto box = entity->GetComponent<component::BoxCollider>().Unwrap();
     architecture->id = config.id;
 
     sprite->image = config.image;
@@ -122,9 +122,9 @@ engine::Entity* CreateArchitecture(const ObjectConfig& config) {
 }
 
 engine::Entity* CreatePickupable(const ObjectConfig& config) {
-    auto entity = engine::World::Instance()->CreateEntity<component::Sprite, component::Pickupable>("architecture-" + config.name);
-    auto sprite = entity->GetComponent<component::Sprite>();
-    auto pickupable = entity->GetComponent<component::Pickupable>();
+    auto entity = engine::World::Instance().CreateEntity<component::Sprite, component::Pickupable>("architecture-" + config.name);
+    auto sprite = entity->GetComponent<component::Sprite>().Unwrap();
+    auto pickupable = entity->GetComponent<component::Pickupable>().Unwrap();
     pickupable->num = 1;
     pickupable->id = config.id;
 

@@ -12,8 +12,8 @@ void CompositeController::Update() {
   if (closePanel_) closePanel_->Update();
 
   auto compositePanel = GameData::Instance()
-                        ->GetCompositePanel()
-                        ->GetComponent<component::GridPanel>();
+                        .GetCompositePanel().Except("composite panel don't exists")
+                        ->GetComponent<component::GridPanel>().Except("composite panel don't has GridPanel component");
   changeDescriptionPanelCapacity(compositePanel);
 }
 
@@ -24,6 +24,7 @@ void CompositeController::changeDescriptionPanelCapacity(component::GridPanel* p
     auto it = ComposeConfigStorage::begin();
     std::advance(it, objectIdx);
     auto& materials = it->second.materials;
-    auto compositeDescriptionPanel = GameData::Instance()->GetCompositeDescriptionPanel()->GetComponent<component::GridPanel>();
+    auto compositeDescriptionPanel = GameData::Instance().GetCompositeDescriptionPanel().Except("description panel don't exists")
+                                                        ->GetComponent<component::GridPanel>().Except("description panel don't has GridPanel component");
     compositeDescriptionPanel->capacity = materials.size();
 }

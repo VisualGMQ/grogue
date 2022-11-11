@@ -3,8 +3,8 @@
 void GridPanelRenderSystem::Update(engine::Entity* entity) {
     if (!entity) return;
 
-    auto gridPanel = entity->GetComponent<component::GridPanel>();
-    if (!gridPanel) return;
+    component::GridPanel* gridPanel;
+    MATCH_INTO_VAR_OR_RETURN_VOID(entity->GetComponent<component::GridPanel>(), gridPanel);
 
     int row = std::ceil(gridPanel->capacity / static_cast<float>(gridPanel->gridNumInCol));
     int width = gridPanel->gridNumInCol * gridPanel->gridSize + (gridPanel->gridNumInCol + 1) * gridPanel->gridPadding;

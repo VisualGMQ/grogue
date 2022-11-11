@@ -1,7 +1,7 @@
 #include "scenes/start_scene.hpp"
 
 void StartScene::OnInit() {
-    engine::World::Instance()->AddSystem<engine::VideoSystem>();
+    engine::World::Instance().AddSystem<engine::VideoSystem>();
 
     Localization::Init("data/localization/chinese.toml");
     LoadAllImageResources("./resources/img");
@@ -20,11 +20,11 @@ void StartScene::OnInit() {
     attachCompositeDescriptionPanel();
     attachHandObjectUI();
 
-    GameData::Instance()->SetPlayer(player);
+    GameData::Instance().SetPlayer(player);
     MonsterManager::Add(player);
 
-    GameData::Instance()->SetCamera(std::make_unique<Camera>());
-    GameData::Instance()->InitControllers(player);
+    GameData::Instance().SetCamera(std::make_unique<Camera>());
+    GameData::Instance().InitControllers(player);
 }
 
 void StartScene::initMap() {
@@ -33,30 +33,30 @@ void StartScene::initMap() {
 
     MapManager::SetGroundMap(std::move(map));
 
-    auto entity = engine::World::Instance()->CreateEntity<component::MapComponent, engine::Node2DComponent>("ground-map");
-    auto mapComponent = entity->GetComponent<component::MapComponent>();
+    auto entity = engine::World::Instance().CreateEntity<component::MapComponent, engine::Node2DComponent>("ground-map");
+    auto mapComponent = entity->GetComponent<component::MapComponent>().Unwrap();
     mapComponent->map = MapManager::GetGroundMap();
 
     Attach2D(entity);
 }
 
 void StartScene::attachSystems() {
-    engine::World::Instance()->AddSystem<ControllerUpdateSystem>();
-    engine::World::Instance()->AddSystem<TransformUpdateSystem>();
-    engine::World::Instance()->AddSystem<CollisionSystem>();
-    engine::World::Instance()->AddSystem<OrientationUpdateSystem>();
-    engine::World::Instance()->AddSystem<PhysicalSystem>();
-    engine::World::Instance()->AddSystem<PhysicalClearSystem>();
-    engine::World::Instance()->AddSystem<SortMonstersSystem>();
-    engine::World::Instance()->AddSystem<CameraUpdateSystem>();
-    engine::World::Instance()->AddSystem<MapRenderSystem>();
-    // engine::World::Instance()->AddSystem<SpriteRenderSystem>();
-    engine::World::Instance()->AddSystem<HintArrowSystem>();
-    engine::World::Instance()->AddSystem<PutHintSystem>();
-    engine::World::Instance()->AddSystem<GridPanelRenderSystem>();
-    engine::World::Instance()->AddSystem<PlayerInfoRenderSystem>();
-    engine::World::Instance()->AddSystem<HandFrameRenderSystem>();
-    // engine::World::Instance()->AddSystem<CollisionOutlineSystem>();
+    engine::World::Instance().AddSystem<ControllerUpdateSystem>();
+    engine::World::Instance().AddSystem<TransformUpdateSystem>();
+    engine::World::Instance().AddSystem<CollisionSystem>();
+    engine::World::Instance().AddSystem<OrientationUpdateSystem>();
+    engine::World::Instance().AddSystem<PhysicalSystem>();
+    engine::World::Instance().AddSystem<PhysicalClearSystem>();
+    engine::World::Instance().AddSystem<SortMonstersSystem>();
+    engine::World::Instance().AddSystem<CameraUpdateSystem>();
+    engine::World::Instance().AddSystem<MapRenderSystem>();
+    // engine::World::Instance().AddSystem<SpriteRenderSystem>();
+    engine::World::Instance().AddSystem<HintArrowSystem>();
+    engine::World::Instance().AddSystem<PutHintSystem>();
+    engine::World::Instance().AddSystem<GridPanelRenderSystem>();
+    engine::World::Instance().AddSystem<PlayerInfoRenderSystem>();
+    engine::World::Instance().AddSystem<HandFrameRenderSystem>();
+    // engine::World::Instance().AddSystem<CollisionOutlineSystem>();
 }
 
 void StartScene::OnQuit() {
@@ -66,20 +66,20 @@ void StartScene::OnQuit() {
 }
 
 void StartScene::attachBackpackPanel() {
-    auto backpackEntity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::GridPanel>("backpack");
+    auto backpackEntity = engine::World::Instance().CreateEntity<engine::NodeComponent, component::GridPanel>("backpack");
     backpackEntity->SetActive(false);
-    auto gridPanel = backpackEntity->GetComponent<component::GridPanel>();
+    auto gridPanel = backpackEntity->GetComponent<component::GridPanel>().Unwrap();
     BackpackObjectDrawer backpackObjDrawer;
     engine::ImageFactory::Find("tilesheet#select_outline", gridPanel->selectOutline);
     gridPanel->drawImageFunc = backpackObjDrawer;
     Attach2D(backpackEntity);
-    GameData::Instance()->SetBackpackPanel(backpackEntity);
+    GameData::Instance().SetBackpackPanel(backpackEntity);
 }
 
 void StartScene::attachCompositePanel() {
-    auto compositeEntity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::GridPanel>("composite-panel");
+    auto compositeEntity = engine::World::Instance().CreateEntity<engine::NodeComponent, component::GridPanel>("composite-panel");
     compositeEntity->SetActive(false);
-    auto gridPanel = compositeEntity->GetComponent<component::GridPanel>();
+    auto gridPanel = compositeEntity->GetComponent<component::GridPanel>().Unwrap();
     CompositeObjectDrawer drawer;
     engine::ImageFactory::Find("tilesheet#select_outline", gridPanel->selectOutline);
     gridPanel->drawImageFunc = drawer;
@@ -87,13 +87,13 @@ void StartScene::attachCompositePanel() {
     gridPanel->position.Set(100, 100);
     gridPanel->capacity = ComposeConfigStorage::Size();
     Attach2D(compositeEntity);
-    GameData::Instance()->SetCompositePanel(compositeEntity);
+    GameData::Instance().SetCompositePanel(compositeEntity);
 }
 
 void StartScene::attachCompositeDescriptionPanel() {
-    auto compositeDescriptionPanel = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::GridPanel>("composite-description-panel");
+    auto compositeDescriptionPanel = engine::World::Instance().CreateEntity<engine::NodeComponent, component::GridPanel>("composite-description-panel");
     compositeDescriptionPanel->SetActive(false);
-    auto gridPanel = compositeDescriptionPanel->GetComponent<component::GridPanel>();
+    auto gridPanel = compositeDescriptionPanel->GetComponent<component::GridPanel>().Unwrap();
     CompositeDescriptionDrawer drawer;
     engine::ImageFactory::Find("tilesheet#select_outline", gridPanel->selectOutline);
     gridPanel->drawImageFunc = drawer;
@@ -102,21 +102,21 @@ void StartScene::attachCompositeDescriptionPanel() {
     gridPanel->capacity = 0;
     gridPanel->showCursor = false;
     Attach2D(compositeDescriptionPanel);
-    GameData::Instance()->SetCompositeDescriptionPanel(compositeDescriptionPanel);
+    GameData::Instance().SetCompositeDescriptionPanel(compositeDescriptionPanel);
 }
 
 void StartScene::attachHandObjectUI() {
-    auto entity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::HandFrame>("left-hand-frame");
-    auto leftHandFrame = entity->GetComponent<component::HandFrame>();
+    auto entity = engine::World::Instance().CreateEntity<engine::NodeComponent, component::HandFrame>("left-hand-frame");
+    auto leftHandFrame = entity->GetComponent<component::HandFrame>().Unwrap();
     leftHandFrame->position.Set(0, engine::Video::GetInitSize().h - TileSize);
 
     Attach2D(entity);
-    GameData::Instance()->SetLeftHandObjectFrame(entity);
+    GameData::Instance().SetLeftHandObjectFrame(entity);
 
-    entity = engine::World::Instance()->CreateEntity<engine::NodeComponent, component::HandFrame>("right-hand-frame");
-    auto rightHandFrame = entity->GetComponent<component::HandFrame>();
+    entity = engine::World::Instance().CreateEntity<engine::NodeComponent, component::HandFrame>("right-hand-frame");
+    auto rightHandFrame = entity->GetComponent<component::HandFrame>().Unwrap();
     rightHandFrame->position.Set(TileSize, engine::Video::GetInitSize().h - TileSize);
 
     Attach2D(entity);
-    GameData::Instance()->SetRightHandObjectFrame(entity);
+    GameData::Instance().SetRightHandObjectFrame(entity);
 }

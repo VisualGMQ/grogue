@@ -90,9 +90,9 @@ Result<const T*> Entity::GetComponent() const {
     static_assert(std::is_base_of_v<Component, T> && !std::is_same_v<Component, T>);
     auto it = components_.find(ComponentIDHelper::GetID<T>());
     if (it == components_.end()) {
-        return Err;
+        return Err{};
     } else {
-        return Ok(static_cast<T*>(it->second));
+        return Ok(static_cast<const T*>(it->second));
     }
 }
 

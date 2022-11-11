@@ -1,16 +1,16 @@
 #include "composite_object_drawer.hpp"
 
-GridObjectDrawer::DrawResources CompositeObjectDrawer::GetObject(component::GridPanel* panel, int index) {
+engine::Result<GridObjectDrawer::DrawResources> CompositeObjectDrawer::GetObject(component::GridPanel* panel, int index) {
     if (index >= panel->capacity || index >= ComposeConfigStorage::Size()) {
-        return {};
+        return engine::Err{};
     }
     auto it = ComposeConfigStorage::begin();
     std::advance(it, index);
     auto config = ObjectConfigStorage::Find(it->first);
     if (!config) {
         Loge("composite object {} not found", it->first);
-        return {};
+        return engine::Err{};
     }
 
-    return {config->image, std::nullopt};
+    return engine::Result<GridObjectDrawer::DrawResources>(GridObjectDrawer::DrawResources{config->image, std::nullopt});
 }

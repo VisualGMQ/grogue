@@ -19,7 +19,7 @@ public:
         std::optional<int> number;
     };
 
-    virtual DrawResources GetObject(component::GridPanel* panel, int index) = 0;
+    virtual engine::Result<DrawResources> GetObject(component::GridPanel* panel, int index) = 0;
 
 private:
     void drawObject(component::GridPanel*, const engine::Image&, const engine::Vec2& pos);
