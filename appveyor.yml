@@ -4,6 +4,6 @@ pull_requests:
 image: Visual Studio 2022
 build_script:
 - ps: >-
-    cmake -S . -B cmake-build -G"Visual Studio 17 2022"
+    cmake -S . -B cmake-build -G"Visual Studio 17 2022" -DFETCH_SDL=ON
 
     cmake --build cmake-build

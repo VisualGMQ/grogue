@@ -7,6 +7,6 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: apt install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev
+      - run: apt install libsdl2-dev libsdl2_image-dev libsdl2_ttf-dev libsdl2_mixer-dev
       - run: cmake -S . -B cmake-build
       - run: cmake --build cmake-build
