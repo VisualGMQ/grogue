@@ -1,0 +1,12 @@
+name: build-under-ubuntu
+run-name: build-ubuntu
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: apt install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev
+      - run: cmake -S . -B cmake-build
+      - run: cmake --build cmake-build

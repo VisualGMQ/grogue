@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# fetch SDL under Windows
+
+if (WIN32)
+    include(cmake/fetch_sdl.cmake)
+    option(FETCH_SDL "fetch SDL2 SDL2_image SDL2_ttf SDL2_mixer from web" FALSE)
+    if (FETCH_SDL)
+        FetchSDL()
+    endif()
+endif()
+
+# begin project
+
 project(
     grogue
     VERSION 0.1.0

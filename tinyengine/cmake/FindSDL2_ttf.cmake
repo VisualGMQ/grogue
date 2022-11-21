@@ -1,6 +1,8 @@
 if (NOT TARGET SDL2_ttf)
     if (WIN32)  # Windows, use clang or MSVC
-        set(SDL2_TTF_ROOT "" CACHE PATH "SDL2_ttf root directory")
+        if (NOT SDL2_TTF_ROOT)
+            set(SDL2_TTF_ROOT "" CACHE PATH "SDL2_ttf root directory")
+        endif()
         set(SDL2_TTF_LIB_DIR "${SDL2_TTF_ROOT}/lib/x64")
         set(SDL2_TTF_INCLUDE_DIR "${SDL2_TTF_ROOT}/include")
         add_library(SDL2::TTF SHARED IMPORTED GLOBAL)
