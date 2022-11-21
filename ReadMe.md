@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/dri0av5hvheh7o9r?svg=true)](https://ci.appveyor.com/project/VisualGMQ/grogue-32xuj)
+
 # 目前进展：
 
 人物移动：
