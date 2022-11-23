@@ -1,4 +1,5 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/dri0av5hvheh7o9r?svg=true)](https://ci.appveyor.com/project/VisualGMQ/grogue-32xuj)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/VisualGMQ/grogue/build-under-ubuntu?label=build%20use%20clang&logo=ubuntu)
+![AppVeyor](https://img.shields.io/appveyor/build/VisualGMQ/grogue-32xuj?label=windows%20vs2022%20build&logo=appveyor)
 
 # 目前进展：
 
