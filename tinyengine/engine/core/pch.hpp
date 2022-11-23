@@ -18,6 +18,7 @@
 #include <functional>
 #include <utility>
 #include <algorithm>
+#include <ctime>
 
 #include "SDL.h"
 #include "SDL_ttf.h"
