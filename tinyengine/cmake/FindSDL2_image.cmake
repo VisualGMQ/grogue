@@ -17,7 +17,7 @@ if (NOT TARGET SDL2_image)
         target_link_libraries(SDL2_image INTERFACE SDL2::IMAGE)
     else()  # Linux, MacOSX
         find_package(PkgConfig REQUIRED)
-        pkg_check_modules(SDL2_image sdl2_image REQUIRED IMPORTED_TARGET)
+        pkg_check_modules(SDL2_image SDL2_image REQUIRED IMPORTED_TARGET)
         add_library(SDL2_image ALIAS PkgConfig::SDL2_image)
     endif()
 endif()

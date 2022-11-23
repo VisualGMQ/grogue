@@ -17,7 +17,7 @@ if (NOT TARGET SDL2_mixer)
         target_link_libraries(SDL2_mixer INTERFACE SDL2::MIXER)
     else()  # Linux, MacOSX
         find_package(PkgConfig REQUIRED)
-        pkg_check_modules(SDL2_mixer sdl2_mixer REQUIRED IMPORTED_TARGET)
+        pkg_check_modules(SDL2_mixer SDL2_mixer REQUIRED IMPORTED_TARGET)
         add_library(SDL2_mixer ALIAS PkgConfig::SDL2_mixer)
     endif()
 endif()

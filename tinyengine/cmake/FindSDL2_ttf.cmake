@@ -17,7 +17,7 @@ if (NOT TARGET SDL2_ttf)
         target_link_libraries(SDL2_ttf INTERFACE SDL2::TTF)
     else()  # Linux, MacOSX
         find_package(PkgConfig REQUIRED)
-        pkg_check_modules(SDL2_ttf sdl2_ttf REQUIRED IMPORTED_TARGET)
+        pkg_check_modules(SDL2_ttf SDL2_ttf REQUIRED IMPORTED_TARGET)
         add_library(SDL2_ttf ALIAS PkgConfig::SDL2_ttf)
     endif()
 endif()
