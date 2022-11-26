@@ -2,7 +2,7 @@ name: build-under-ubuntu
 run-name: build-ubuntu
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  build-project-under-ubuntu:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
