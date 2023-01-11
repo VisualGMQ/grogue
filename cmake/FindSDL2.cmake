@@ -8,7 +8,7 @@ if (NOT TARGET SDL2)
             endif()
             set(SDL2_INCLUDE_DIR "${SDL2_ROOT}/include")
             set(SDL2_LIB_DIR "${SDL2_ROOT}/lib/x64")
-            set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/lib/x64" CACHE PATH "SDL2.dll directory")
+            set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/lib/x64" CACHE PATH "SDL2.dll directory" FORCE)
             add_library(SDL2::SDL2 SHARED IMPORTED GLOBAL)
             set_target_properties(
                 SDL2::SDL2
@@ -35,7 +35,7 @@ if (NOT TARGET SDL2)
             endif()
             set(SDL2_INCLUDE_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/include")
             set(SDL2_STATIC_LIB_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/lib")
-            set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2.dll directory")
+            set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2.dll directory" FORCE)
             add_library(SDL2::SDL2 SHARED IMPORTED GLOBAL)
             set_target_properties(
                 SDL2::SDL2
@@ -54,8 +54,8 @@ if (NOT TARGET SDL2)
             )
             add_library(SDL2 INTERFACE IMPORTED GLOBAL)
             target_link_libraries(SDL2 INTERFACE SDL2::SDL2 SDL2::SDL2main)
-
         endif()
+        mark_as_advanced(SDL2_DYNAMIC_LIB_DIR)
     else()  # Linux, MacOSX
         find_package(SDL2 QUIET)
         if (SDL2_FOUND)

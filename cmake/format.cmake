@@ -1,0 +1,13 @@
+macro(DoFormats FILES)
+    find_program(CLANG_FORMAT NAMES clang-format)
+    set(CLANG_FORMAT_ARGS "-i")
+    if (CLANG_FORMAT)
+        message(STATUS "formatting codes...")
+        foreach(FILE IN LISTS ${FILES})
+            execute_process(COMMAND ${CLANG_FORMAT} ${FILE} ${CLANG_FORMAT_ARGS}
+                            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+        endforeach()
+    else()
+        message(WARN "you don't has clang-format so we can't auto format codes, we recommand you install it.")
+    endif()
+endmacro()

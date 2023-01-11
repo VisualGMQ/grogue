@@ -26,6 +26,11 @@ include(cmake/FindSDL2_image.cmake)
 include(cmake/FindSDL2_mixer.cmake)
 include(cmake/FindSDL2_ttf.cmake)
 
+# some useful utiilities
+include(cmake/copydll.cmake)
+include(cmake/cppcheck.cmake)
+include(cmake/format.cmake)
+
 # build game
 
 set(GAME_NAME ${PROJECT_NAME})
@@ -38,9 +43,16 @@ target_sources(${GAME_NAME} PRIVATE
                 src/main.cpp
 )
 
-include(cmake/copydll.cmake)
-
 target_link_libraries(${GAME_NAME} PRIVATE SDL2 SDL2_image SDL2_ttf SDL2_mixer)
 target_include_directories(${GAME_NAME} PRIVATE src)
 target_compile_features(${GAME_NAME} PRIVATE cxx_std_17)
 CopyDLL(${GAME_NAME})
+
+# auto format
+
+file(GLOB_RECURSE FILES
+     ${CMAKE_SOURCE_DIR}/include/**.hpp
+     ${CMAKE_SOURCE_DIR}/src/**.cpp
+     ${CMAKE_SOURCE_DIR}/include/**.c
+     ${CMAKE_SOURCE_DIR}/src/**.h)
+DoFormats(FILES)

@@ -8,7 +8,7 @@ if (NOT TARGET SDL2_image)
             endif()
             set(SDL2_IMAGE_LIB_DIR "${SDL2_IMAGE_ROOT}/lib/x64")
             set(SDL2_IMAGE_INCLUDE_DIR "${SDL2_IMAGE_ROOT}/include")
-            set(SDL2_IMAGE_DYNAMIC_LIB_DIR "${SDL2_IMAGE_ROOT}/lib/x64" CACHE PATH "SDL2_image directory")
+            set(SDL2_IMAGE_DYNAMIC_LIB_DIR "${SDL2_IMAGE_ROOT}/lib/x64" CACHE PATH "SDL2_image directory" FORCE)
             add_library(SDL2::IMAGE SHARED IMPORTED GLOBAL)
             set_target_properties(
                 SDL2::IMAGE
@@ -26,7 +26,7 @@ if (NOT TARGET SDL2_image)
                 set(SDL2_IMAGE_ROOT "" CACHE PATH "SDL2_image root directory")
             endif()
             set(SDL2_IMAGE_STATIC_LIB_DIR "${SDL2_IMAGE_ROOT}/x86_64-w64-mingw32/lib")
-            set(SDL2_IMAGE_DYNAMIC_LIB_DIR "${SDL2_IMAGE_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2_image directory")
+            set(SDL2_IMAGE_DYNAMIC_LIB_DIR "${SDL2_IMAGE_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2_image directory" FORCE)
             set(SDL2_IMAGE_INCLUDE_DIR "${SDL2_IMAGE_ROOT}/x86_64-w64-mingw32/include/SDL2")
             add_library(SDL2::IMAGE SHARED IMPORTED GLOBAL)
             set_target_properties(
@@ -40,6 +40,7 @@ if (NOT TARGET SDL2_image)
             target_link_libraries(SDL2_image INTERFACE SDL2::IMAGE)
 
         endif()
+        mark_as_advanced(SDL2_IMAGE_DYNAMIC_LIB_DIR)
     else()  # Linux, MacOSX
         find_package(PkgConfig REQUIRED)
         pkg_check_modules(SDL2_image SDL2_image REQUIRED IMPORTED_TARGET)
