@@ -1,8 +1,0 @@
-row = 1
-col = 3
-
-[ content ]
-
-down = [0, 0]
-right = [1, 0]
-up = [2, 0]

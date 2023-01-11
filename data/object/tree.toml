@@ -1,7 +1,0 @@
-id = 5
-name = "树"
-description = ""
-img = "tilesheet#wooden_stake"
-type = "architecture"
-features = ["beCutted=3"]
-drop = [{name = "wood", num = 3}]

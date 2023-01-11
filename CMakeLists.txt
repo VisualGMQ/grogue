@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # fetch SDL under Windows
-
+# for Appveyor CI/CD
 if (WIN32)
     include(cmake/fetch_sdl.cmake)
     option(FETCH_SDL "fetch SDL2 SDL2_image SDL2_ttf SDL2_mixer from web" FALSE)
@@ -20,58 +20,27 @@ project(
     LANGUAGES CXX C
 )
 
+# find SDL
+include(cmake/FindSDL2.cmake)
+include(cmake/FindSDL2_image.cmake)
+include(cmake/FindSDL2_mixer.cmake)
+include(cmake/FindSDL2_ttf.cmake)
+
 # build game
 
 set(GAME_NAME ${PROJECT_NAME})
 
-add_subdirectory(tinyengine)
-
-aux_source_directory(src/scenes SCENES_SRC)
-aux_source_directory(src/others OTHERS_SRC)
-aux_source_directory(src/components COMPONENTS_SRC)
-aux_source_directory(src/system SYSTEM_SRC)
-aux_source_directory(src/map MAP_SRC)
-aux_source_directory(src/ui UI_SRC)
-aux_source_directory(src/collision COLLISION_SRC)
-aux_source_directory(src/controller CONTROLLER_SRC)
+aux_source_directory(src/core CORE_SRC)
 
 add_executable(${GAME_NAME})
 target_sources(${GAME_NAME} PRIVATE
-                ${SCENES_SRC}
-                ${OTHERS_SRC}
-                ${COMPONENTS_SRC}
-                ${SYSTEM_SRC}
-                ${MAP_SRC}
-                ${UI_SRC}
-                ${COLLISION_SRC}
-                ${CONTROLLER_SRC}
+                ${CORE_SRC}
                 src/main.cpp
 )
-target_link_libraries(${GAME_NAME} PRIVATE tinyengine)
-target_precompile_headers(${GAME_NAME} REUSE_FROM tinyengine)
+
+include(cmake/copydll.cmake)
+
+target_link_libraries(${GAME_NAME} PRIVATE SDL2 SDL2_image SDL2_ttf SDL2_mixer)
 target_include_directories(${GAME_NAME} PRIVATE src)
 target_compile_features(${GAME_NAME} PRIVATE cxx_std_17)
 CopyDLL(${GAME_NAME})
-
-# install game
-install(
-    TARGETS ${GAME_NAME}
-    RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/install
-)
-
-install(
-    DIRECTORY data
-    DESTINATION ${CMAKE_SOURCE_DIR}/install
-)
-
-install(
-    DIRECTORY resources
-    DESTINATION ${CMAKE_SOURCE_DIR}/install
-)
-
-if (CMAKE_BUILD_TYPE MATCHES "Debug")
-    install(
-        FILES init.toml
-        DESTINATION ${CMAKE_SOURCE_DIR}/install
-    )
-endif()

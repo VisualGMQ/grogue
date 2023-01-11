@@ -1,8 +1,0 @@
-id = 3
-name = "石头"
-description = "大石头"
-img = "tilesheet#big_stone"
-type = "architecture"
-features = ["beBeated=2"]
-drop = [{name = "round_stone", num = 3},
-        {name = "sharp_stone", num = 1}]

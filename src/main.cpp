@@ -1,6 +1,5 @@
-#include "scenes/start_scene.hpp"
+#include <iostream>
 
-SCENE_CONFIG() {
-    LOAD_SCENE(StartScene);
-    ENTER_SCENE(StartScene);
+int main() {
+    return 0;
 }
