@@ -69,9 +69,13 @@ function(FetchSDL_MINGW)
 endfunction(FetchSDL_MINGW)
 
 function(FetchSDL)
-    if (MSVC)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC" OR
+        (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND
+         CMAKE_CXX_COMPILER_FRONTEND_VARIANT MATCHES "MSVC")) # use MSVC
         FetchSDL_MSVC()
-    elseif (MINGW)
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR
+            (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND
+             CMAKE_CXX_COMPILER_FRONTEND_VARIANT MATCHES "GNU")) # use MINGW
         FetchSDL_MINGW()
     endif()
 endfunction()

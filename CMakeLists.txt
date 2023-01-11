@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# begin project
+
+project(
+    grogue
+    VERSION 0.1.0
+    LANGUAGES CXX C
+)
+
 # fetch SDL under Windows
 # for Appveyor CI/CD
 if (WIN32)
@@ -11,14 +19,6 @@ if (WIN32)
         FetchSDL()
     endif()
 endif()
-
-# begin project
-
-project(
-    grogue
-    VERSION 0.1.0
-    LANGUAGES CXX C
-)
 
 # find SDL
 include(cmake/FindSDL2.cmake)
