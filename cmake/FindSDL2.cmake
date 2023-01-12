@@ -7,8 +7,16 @@ if (NOT TARGET SDL2)
                 set(SDL2_ROOT "" CACHE PATH "SDL2 root directory")
             endif()
             set(SDL2_INCLUDE_DIR "${SDL2_ROOT}/include")
-            set(SDL2_LIB_DIR "${SDL2_ROOT}/lib/x64")
-            set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/lib/x64" CACHE PATH "SDL2.dll directory" FORCE)
+            set(SDL2_LIB_DIR "${SDL2_ROOT}/lib")
+
+            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+                set(SDL2_LIB_DIR "${SDL2_ROOT}/lib/x64")
+                set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/lib/x64" CACHE PATH "SDL2.dll directory" FORCE)
+            else()
+                set(SDL2_LIB_DIR "${SDL2_ROOT}/lib/x86")
+                set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/lib/x86" CACHE PATH "SDL2.dll directory" FROCE)
+            endif()
+
             add_library(SDL2::SDL2 SHARED IMPORTED GLOBAL)
             set_target_properties(
                 SDL2::SDL2
@@ -33,9 +41,19 @@ if (NOT TARGET SDL2)
             if (NOT SDL2_ROOT)
                 set(SDL2_ROOT "" CACHE PATH "SDL2 root directory")
             endif()
-            set(SDL2_INCLUDE_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/include")
-            set(SDL2_STATIC_LIB_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/lib")
-            set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2.dll directory" FORCE)
+            set(SDL2_INCLUDE_DIR "")
+            set(SDL2_STATIC_LIB_DIR "")
+
+            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+                set(SDL2_INCLUDE_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/include")
+                set(SDL2_STATIC_LIB_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/lib")
+                set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2.dll directory" FORCE)
+            else()
+                set(SDL2_INCLUDE_DIR "${SDL2_ROOT}/i686-w64-mingw32/include")
+                set(SDL2_STATIC_LIB_DIR "${SDL2_ROOT}/i686-w64-mingw32/lib")
+                set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/i686-w64-mingw32/bin" CACHE PATH "SDL2.dll directory" FORCE)
+            endif()
+
             add_library(SDL2::SDL2 SHARED IMPORTED GLOBAL)
             set_target_properties(
                 SDL2::SDL2

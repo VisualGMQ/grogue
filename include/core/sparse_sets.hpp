@@ -2,10 +2,10 @@
 
 #include <array>
 #include <cassert>
+#include <limits>
 #include <memory>
 #include <type_traits>
 #include <vector>
-#include <limits>
 
 template <typename T, size_t PageSize,
           typename = std::enable_if<std::is_integral_v<T>>>

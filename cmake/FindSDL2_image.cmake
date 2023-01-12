@@ -25,9 +25,19 @@ if (NOT TARGET SDL2_image)
             if (NOT SDL2_IMAGE_ROOT)
                 set(SDL2_IMAGE_ROOT "" CACHE PATH "SDL2_image root directory")
             endif()
-            set(SDL2_IMAGE_STATIC_LIB_DIR "${SDL2_IMAGE_ROOT}/x86_64-w64-mingw32/lib")
-            set(SDL2_IMAGE_DYNAMIC_LIB_DIR "${SDL2_IMAGE_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2_image directory" FORCE)
-            set(SDL2_IMAGE_INCLUDE_DIR "${SDL2_IMAGE_ROOT}/x86_64-w64-mingw32/include/SDL2")
+            set(SDL2_IMAGE_STATIC_LIB_DIR "")
+            set(SDL2_IMAGE_INCLUDE_DIR "")
+
+            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+                set(SDL2_IMAGE_INCLUDE_DIR "${SDL2_IMAGE_ROOT}/x86_64-w64-mingw32/include")
+                set(SDL2_IMAGE_STATIC_LIB_DIR "${SDL2_IMAGE_ROOT}/x86_64-w64-mingw32/lib")
+                set(SDL2_IMAGE_DYNAMIC_LIB_DIR "${SDL2_IMAGE_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2_image directory" FORCE)
+            else()
+                set(SDL2_IMAGE_INCLUDE_DIR "${SDL2_IMAGE_ROOT}/i686-w64-mingw32/include")
+                set(SDL2_IMAGE_STATIC_LIB_DIR "${SDL2_IMAGE_ROOT}/i686-w64-mingw32/lib")
+                set(SDL2_IMAGE_DYNAMIC_LIB_DIR "${SDL2_IMAGE_ROOT}/i686-w64-mingw32/bin" CACHE PATH "SDL2_image directory" FORCE)
+            endif()
+
             add_library(SDL2::IMAGE SHARED IMPORTED GLOBAL)
             set_target_properties(
                 SDL2::IMAGE

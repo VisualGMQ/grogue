@@ -25,9 +25,19 @@ if (NOT TARGET SDL2_mixer)
             if (NOT SDL2_MIXER_ROOT)
                 set(SDL2_MIXER_ROOT "" CACHE PATH "SDL2_mixer root directory")
             endif()
-            set(SDL2_MIXER_STATIC_LIB_DIR "${SDL2_MIXER_ROOT}/x86_64-w64-mingw32/lib")
-            set(SDL2_MIXER_DYNAMIC_LIB_DIR "${SDL2_MIXER_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2_mixer directory" FORCE)
-            set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_ROOT}/x86_64-w64-mingw32/include/SDL2")
+            set(SDL2_MIXER_STATIC_LIB_DIR "")
+            set(SDL2_MIXER_INCLUDE_DIR "")
+
+            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+                set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_ROOT}/x86_64-w64-mingw32/include")
+                set(SDL2_MIXER_STATIC_LIB_DIR "${SDL2_MIXER_ROOT}/x86_64-w64-mingw32/lib")
+                set(SDL2_MIXER_DYNAMIC_LIB_DIR "${SDL2_MIXER_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2_mixer directory" FORCE)
+            else()
+                set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_ROOT}/i686-w64-mingw32/include")
+                set(SDL2_MIXER_STATIC_LIB_DIR "${SDL2_MIXER_ROOT}/i686-w64-mingw32/lib")
+                set(SDL2_MIXER_DYNAMIC_LIB_DIR "${SDL2_MIXER_ROOT}/i686-w64-mingw32/bin" CACHE PATH "SDL2_mixer directory" FORCE)
+            endif()
+
             add_library(SDL2::MIXER SHARED IMPORTED GLOBAL)
             set_target_properties(
                 SDL2::MIXER
