@@ -20,7 +20,7 @@ enum Level {
 };
 
 class Logger final {
-   public:
+public:
     Logger(std::ostream &o) : stream_(o), level_(All) {}
 
     template <typename... Args>
@@ -66,7 +66,7 @@ class Logger final {
 
     void SetLevel(Level level) { level_ = level; }
 
-   private:
+private:
     std::ostream &stream_;
     Level level_;
 
@@ -111,7 +111,7 @@ class Logger final {
 };
 
 class LoggerMgr final {
-   public:
+public:
     static LoggerMgr &Instance() {
         static std::unique_ptr<LoggerMgr> instance;
         if (!instance) {
@@ -137,7 +137,7 @@ class LoggerMgr final {
 
     Logger &GetDefault() { return *defaultLogger_; }
 
-   private:
+private:
     std::vector<std::ofstream> files_;
     std::map<std::string, Logger> loggers_;
     std::unique_ptr<Logger> defaultLogger_;

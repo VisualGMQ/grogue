@@ -20,29 +20,29 @@ struct Component {};
 
 template <typename Category>
 class IndexGetter final {
-   public:
+public:
     template <typename T>
     static uint32_t Get() {
         static uint32_t id = curIdx_++;
         return id;
     }
 
-   private:
+private:
     inline static uint32_t curIdx_ = 0;
 };
 
 template <typename T, typename = std::enable_if<std::is_integral_v<T>>>
 struct IDGenerator final {
-   public:
+public:
     static T Gen() { return curId_++; }
 
-   private:
+private:
     inline static T curId_ = {};
 };
 
 template <typename T>
 class EventStaging final {
-   public:
+public:
     static void Set(const T &t) { event_ = t; }
     static void Set(T &&t) { event_ = std::move(t); }
 
@@ -52,13 +52,13 @@ class EventStaging final {
 
     static void Clear() { event_ = std::nullopt; }
 
-   private:
+private:
     inline static std::optional<T> event_ = std::nullopt;
 };
 
 template <typename T>
 class EventReader final {
-   public:
+public:
     bool Has() const { return EventStaging<T>::Has(); }
 
     T Read() { return EventStaging<T>::Get(); }
@@ -69,7 +69,7 @@ class EventReader final {
 class World;
 
 class Events final {
-   public:
+public:
     friend class World;
 
     template <typename T>
@@ -81,7 +81,7 @@ class Events final {
     template <typename T>
     auto Writer();
 
-   private:
+private:
     std::vector<void (*)(void)> removeEventFuncs_;
     std::vector<std::function<void(void)>> addEventFuncs_;
 
@@ -102,11 +102,11 @@ class Events final {
 
 template <typename T>
 class EventWriter final {
-   public:
+public:
     EventWriter(Events &e) : events_(e) {}
     void Write(const T &t);
 
-   private:
+private:
     Events &events_;
 };
 
@@ -135,8 +135,15 @@ class Queryer;
 using UpdateSystem = void (*)(Commands &, Queryer, Resources, Events &);
 using StartupSystem = void (*)(Commands &);
 
+class Plugins {
+public:
+    virtual ~Plugins() = default;
+
+    virtual void Build(World *world) = 0;
+};
+
 class World final {
-   public:
+public:
     friend class Commands;
     friend class Resources;
     friend class Queryer;
@@ -161,6 +168,10 @@ class World final {
     template <typename T>
     World &SetResource(T &&resource);
 
+    void AddPlugins(std::unique_ptr<Plugins> &&plugins) {
+        pluginsList_.push_back(std::move(plugins));
+    }
+
     void Startup();
     void Update();
     void Shutdown() {
@@ -169,7 +180,7 @@ class World final {
         componentMap_.clear();
     }
 
-   private:
+private:
     struct Pool final {
         std::vector<void *> instances;
         std::vector<void *> cache;
@@ -220,6 +231,7 @@ class World final {
     using ComponentMap = std::unordered_map<ComponentID, ComponentInfo>;
     ComponentMap componentMap_;
     std::unordered_map<Entity, ComponentContainer> entities_;
+    std::vector<std::unique_ptr<Plugins>> pluginsList_;
 
     struct ResourceInfo {
         void *resource = nullptr;
@@ -239,7 +251,7 @@ class World final {
 };
 
 class Commands final {
-   public:
+public:
     Commands(World &world) : world_(world) {}
 
     template <typename... ComponentTypes>
@@ -311,7 +323,7 @@ class Commands final {
         }
     }
 
-   private:
+private:
     World &world_;
 
     using DestroyFunc = void (*)(void *);
@@ -397,7 +409,7 @@ class Commands final {
 };
 
 class Resources final {
-   public:
+public:
     Resources(World &world) : world_(world) {}
 
     template <typename T>
@@ -413,12 +425,12 @@ class Resources final {
         return *((T *)world_.resources_[index].resource);
     }
 
-   private:
+private:
     World &world_;
 };
 
 class Queryer final {
-   public:
+public:
     Queryer(World &world) : world_(world) {}
 
     template <typename... Components>
@@ -442,7 +454,7 @@ class Queryer final {
         return *((T *)world_.entities_[entity][index]);
     }
 
-   private:
+private:
     World &world_;
 
     template <typename T, typename... Remains>
@@ -478,6 +490,10 @@ class Queryer final {
 
 inline void World::Startup() {
     std::vector<Commands> commandList;
+
+    for (auto &plugins : pluginsList_) {
+        plugins->Build(this);
+    }
 
     for (auto sys : startupSystems_) {
         Commands commands{*this};

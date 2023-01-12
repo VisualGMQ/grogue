@@ -22,7 +22,7 @@ class bad_expected_access<void> : public std::exception {
 
 template <typename E>
 class bad_expected_access : bad_expected_access<void> {
-   public:
+public:
     bad_expected_access(const E &error) : error_(error) {}
 
     const E &error() const &noexcept { return error_; }
@@ -30,13 +30,13 @@ class bad_expected_access : bad_expected_access<void> {
     const E &&error() const &&noexcept { return std::move(error_); }
     E &&error() &&noexcept { return std::move(error_); }
 
-   private:
+private:
     E error_;
 };
 
 template <typename E>
 class unexpected final {
-   public:
+public:
     constexpr unexpected(const unexpected &) = default;
     constexpr unexpected(unexpected &&) = default;
 
@@ -77,13 +77,13 @@ class unexpected final {
         return o.error() == error();
     }
 
-   private:
+private:
     E error_;
 };
 
 template <typename T, typename E>
 class expected {
-   public:
+public:
     using value_type = std::enable_if_t<std::is_destructible_v<T> &&
                                             std::is_copy_constructible_v<T> &&
                                             std::is_move_constructible_v<T>,
@@ -176,13 +176,13 @@ class expected {
         return *this;
     }
 
-   private:
+private:
     std::variant<value_type, error_type> data_;
 };
 
 template <typename E>
 class expected<void, E> {
-   public:
+public:
     using value_type = void;
     using error_type = E;
 
@@ -238,7 +238,7 @@ class expected<void, E> {
         error_ = std::move(error.error());
     }
 
-   private:
+private:
     std::optional<error_type> error_;
 };
 

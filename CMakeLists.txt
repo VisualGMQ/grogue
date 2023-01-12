@@ -36,15 +36,17 @@ include(cmake/format.cmake)
 set(GAME_NAME ${PROJECT_NAME})
 
 aux_source_directory(src/core CORE_SRC)
+aux_source_directory(src/app  APP_SRC)
+aux_source_directory(src/game GAME_SRC)
 
 add_executable(${GAME_NAME})
 target_sources(${GAME_NAME} PRIVATE
                 ${CORE_SRC}
-                src/main.cpp
+                ${APP_SRC}
+                ${GAME_SRC}
 )
-
+target_include_directories(${GAME_NAME} PRIVATE include)
 target_link_libraries(${GAME_NAME} PRIVATE SDL2 SDL2_image SDL2_ttf SDL2_mixer)
-target_include_directories(${GAME_NAME} PRIVATE src)
 target_compile_features(${GAME_NAME} PRIVATE cxx_std_17)
 CopyDLL(${GAME_NAME})
 
