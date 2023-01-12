@@ -1,6 +1,6 @@
 name: build-under-ubuntu
 run-name: build-ubuntu
-on: [push]
+on: [push, pull_request]
 jobs:
   build-project-under-ubuntu:
     runs-on: ubuntu-latest
