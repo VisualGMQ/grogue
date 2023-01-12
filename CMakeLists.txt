@@ -30,6 +30,7 @@ include(cmake/FindSDL2_ttf.cmake)
 include(cmake/copydll.cmake)
 include(cmake/cppcheck.cmake)
 include(cmake/format.cmake)
+AttachCppCheck()
 
 # build game
 
