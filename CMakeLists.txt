@@ -32,7 +32,6 @@ include(cmake/FindSDL2_ttf.cmake)
 # some useful utiilities
 include(cmake/copydll.cmake)
 include(cmake/cppcheck.cmake)
-include(cmake/format.cmake)
 AttachCppCheck()
 
 # build game
@@ -55,10 +54,7 @@ target_compile_features(${GAME_NAME} PRIVATE cxx_std_17)
 CopyDLL(${GAME_NAME})
 
 # auto format
-
-file(GLOB_RECURSE FILES
-     ${CMAKE_SOURCE_DIR}/include/**.hpp
-     ${CMAKE_SOURCE_DIR}/src/**.cpp
-     ${CMAKE_SOURCE_DIR}/include/**.c
-     ${CMAKE_SOURCE_DIR}/src/**.h)
-DoFormats(FILES)
+add_custom_command(TARGET ${GAME_NAME} PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -P cmake/format.cmake
+                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                   COMMENT "start format")
