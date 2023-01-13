@@ -1,5 +1,8 @@
 # Grogue
 
+[![Build status](https://ci.appveyor.com/api/projects/status/dri0av5hvheh7o9r?svg=true)](https://ci.appveyor.com/project/VisualGMQ/grogue-32xuj)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/VisualGMQ/grogue/build.yml?label=Ubuntu%20Clang%2B%2B&logo=Ubuntu)
+
 此工程重写中。
 
 ## 如何编译
