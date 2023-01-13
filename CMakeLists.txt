@@ -54,6 +54,7 @@ target_compile_features(${GAME_NAME} PRIVATE cxx_std_17)
 CopyDLL(${GAME_NAME})
 
 # auto format
+option(AUTO_FORMAT "should auto-format before build using clang-format?" ON)
 add_custom_command(TARGET ${GAME_NAME} PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -P cmake/format.cmake
                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
