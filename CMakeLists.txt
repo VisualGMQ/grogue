@@ -55,7 +55,10 @@ CopyDLL(${GAME_NAME})
 
 # auto format
 option(AUTO_FORMAT "should auto-format before build using clang-format?" ON)
-add_custom_command(TARGET ${GAME_NAME} PRE_BUILD
-                   COMMAND ${CMAKE_COMMAND} -P cmake/format.cmake
-                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                   COMMENT "start format")
+if (AUTO_FORMAT)
+    message("enable auto format")
+    add_custom_command(TARGET ${GAME_NAME} PRE_BUILD
+                    COMMAND ${CMAKE_COMMAND} -P cmake/format.cmake
+                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                    COMMENT "start format")
+endif()
