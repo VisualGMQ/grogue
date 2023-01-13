@@ -20,6 +20,8 @@ if (WIN32)
     endif()
 endif()
 
+include(cmake/utility.cmake)
+
 # find SDL
 include(cmake/FindSDL2.cmake)
 include(cmake/FindSDL2_image.cmake)
