@@ -55,10 +55,18 @@ CopyDLL(${GAME_NAME})
 
 # auto format
 option(AUTO_FORMAT "should auto-format before build using clang-format?" ON)
+mark_as_advanced(FORCE AUTO_FORMAT)
 if (AUTO_FORMAT)
     message("enable auto format")
     add_custom_command(TARGET ${GAME_NAME} PRE_BUILD
                     COMMAND ${CMAKE_COMMAND} -P cmake/format.cmake
                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                     COMMENT "start format")
+endif()
+
+# unittest
+option(ENABLE_TEST "enable build unit test" ON)
+if (ENABLE_TEST)
+    enable_testing()
+    add_subdirectory(test)
 endif()
