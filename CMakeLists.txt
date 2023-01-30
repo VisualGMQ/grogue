@@ -37,20 +37,21 @@ AttachCppCheck()
 # build game
 
 set(GAME_NAME ${PROJECT_NAME})
+set(LOWLEVEL_NAME lowlevel)
 
 aux_source_directory(src/core CORE_SRC)
 aux_source_directory(src/app  APP_SRC)
+
+add_library(${LOWLEVEL_NAME} STATIC ${CORE_SRC} ${APP_SRC})
+target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
+target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer)
+target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
+
 aux_source_directory(src/game GAME_SRC)
 
 add_executable(${GAME_NAME})
-target_sources(${GAME_NAME} PRIVATE
-                ${CORE_SRC}
-                ${APP_SRC}
-                ${GAME_SRC}
-)
-target_include_directories(${GAME_NAME} PRIVATE include)
-target_link_libraries(${GAME_NAME} PRIVATE SDL2 SDL2_image SDL2_ttf SDL2_mixer)
-target_compile_features(${GAME_NAME} PRIVATE cxx_std_17)
+target_sources(${GAME_NAME} PRIVATE ${GAME_SRC})
+target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
 CopyDLL(${GAME_NAME})
 
 # auto format
