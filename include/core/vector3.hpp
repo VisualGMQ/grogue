@@ -57,7 +57,7 @@ public:
     Vector3 operator*(float k) { return Vector3(k * x, k * y, k * z); }
 
     Vector3 operator/(float k) {
-        assert(std::numeric_limits<float>::epsilon() < abs(k));
+        assert(std::numeric_limits<float>::epsilon() < std::abs(k));
         float a = 1.0f / k;
         return Vector3(a * x, a * y, a * z);
     }
@@ -124,7 +124,7 @@ inline float Distance(const Vector3& v1, const Vector3& v2) {
     float dx = v1.x - v2.x;
     float dy = v1.y - v2.y;
     float dz = v1.z - v2.z;
-    return sqrt(dx * dx + dy * dy + dz * dz);
+    return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 inline float LengthSquare(const Vector3& v) {
