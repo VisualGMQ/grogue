@@ -1,4 +1,4 @@
-name: build-under-ubuntu
+name: build-and-test-under-ubuntu
 run-name: build-ubuntu
 on: [push, pull_request]
 jobs:
@@ -11,3 +11,4 @@ jobs:
       - run: sudo apt install libsdl2{,-image,-mixer,-ttf}-dev clang
       - run: cmake -S . -B cmake-build -DCMAKE_CXX_COMPILER=clang++ -DAUTO_FORMAT=OFF
       - run: cmake --build cmake-build
+      - run: ctest -j8 -C Debug -T test --output-on-failure 
