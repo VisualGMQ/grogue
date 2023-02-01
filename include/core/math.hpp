@@ -30,7 +30,6 @@ public:
     static const Vector3 ZAxis;
 
     Vector3() {}
-    Vector3(const Vector3& v) : x(v.x), y(v.y), z(v.z) {}
     Vector3(float vx, float vy, float vz) : x(vx), y(vy), z(vz) {}
     ~Vector3() {}
 

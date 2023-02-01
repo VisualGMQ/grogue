@@ -1,4 +1,4 @@
-#include "core/vector3.hpp"
+#include "core/math.hpp"
 
 namespace math {
 

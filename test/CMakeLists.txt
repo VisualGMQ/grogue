@@ -8,4 +8,4 @@ endmacro()
 
 # add your test here:
 AddTest(example example.cpp)
-AddTest(vector3 vector3.cpp)
+AddTest(math math.cpp)

@@ -47,6 +47,11 @@ target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
 target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer)
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
 
+# link math library under Unix
+if (UNIX)
+    target_link_libraries(${LOWLEVEL_NAME} PUBLIC m)
+endif()
+
 aux_source_directory(src/game GAME_SRC)
 
 add_executable(${GAME_NAME})
