@@ -43,6 +43,6 @@ TEST_CASE("Vector3 for vector 3D representation and calculate") {
         REQUIRE(math::Cross(v, d) == e);
         REQUIRE(math::Cross(d, v) == f);
         REQUIRE(math::LengthSquare(c) == 12);
-        REQUIRE(math::Length(c) == std::sqrtf(12));
+        REQUIRE(math::Length(c) == sqrtf(12));
     }
 }
