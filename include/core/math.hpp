@@ -19,7 +19,9 @@ inline bool FloatEq(float value1, float value2) {
 
 // forward declarations
 class Vector3;
+class Vector2;
 float Length(const Vector3& v);
+float Length(const Vector2& v);
 
 class Vector3 {
 public:
@@ -106,7 +108,7 @@ inline Vector3 operator*(float k, const Vector3& v) {
 }
 
 inline std::ostream& operator<<(std::ostream& stream, const Vector3& v) {
-    stream << "Vector3[" << v.x << ", " << v.y << ", " << v.z << "]";
+    stream << "[" << v.x << ", " << v.y << ", " << v.z << "]";
     return stream;
 }
 
@@ -131,6 +133,112 @@ inline float LengthSquare(const Vector3& v) {
 }
 
 inline float Length(const Vector3& v) {
+    return std::sqrt(LengthSquare(v));
+}
+
+class Vector2 {
+public:
+    float x, y;
+    static const Vector2 Zero;
+    static const Vector2 XAxis;
+    static const Vector2 YAxis;
+
+    Vector2() {}
+    Vector2(float vx, float vy) : x(vx), y(vy) {}
+    ~Vector2() {}
+
+    bool operator==(const Vector2& v) const {
+        return FloatEq(x, v.x) && FloatEq(y, v.y);
+    }
+
+    bool operator!=(const Vector2& v) const {
+        return !(*this == v);
+    }
+
+    Vector2 operator-() const {
+        return Vector2(-x, -y);
+    }  // Vector negation
+
+    Vector2 operator+(const Vector2& v) {
+        return Vector2(x + v.x, y + v.y);
+    }
+
+    Vector2 operator-(const Vector2& v) {
+        return Vector2(x - v.x, y - v.y);
+    }
+
+    Vector2 operator*(float k) { return Vector2(k * x, k * y); }
+
+    Vector2 operator/(float k) {
+        assert(std::numeric_limits<float>::epsilon() < std::abs(k));
+        float a = 1.0f / k;
+        return Vector2(a * x, a * y);
+    }
+
+    Vector2 operator+=(const Vector2& v) {
+        x += v.x;
+        y += v.y;
+        return *this;
+    }
+
+    Vector2 operator-=(const Vector2& v) {
+        x -= v.x;
+        y -= v.y;
+        return *this;
+    }
+
+    Vector2 operator*=(float k) {
+        x *= k;
+        y *= k;
+        return *this;
+    }
+
+    Vector2 operator/=(float k) {
+        assert(!FloatEq(k, 0.0f));
+        float a = 1.0f / k;
+        x *= a;
+        y *= a;
+        return *this;
+    }
+
+    Vector2 operator*(const Vector2& v) {
+        return {v.x * x, v.y * y};
+    }
+
+    void Normalize() {
+        float a = 1.0f / Length(*this);
+        *this *= a;
+    }
+};
+
+inline Vector2 operator*(float k, const Vector2& v) {
+    return Vector2(k * v.x, k * v.y);
+}
+
+inline std::ostream& operator<<(std::ostream& stream, const Vector2& v) {
+    stream << "[" << v.x << ", " << v.y << "]";
+    return stream;
+}
+
+inline float Cross(const Vector2& v1, const Vector2& v2) {
+    return v1.x * v2.y - v1.y * v2.x;
+}
+
+inline float Dot(const Vector2& v1, const Vector2& v2) {
+    return v1.x * v2.x + v1.y * v2.y;
+}
+
+inline float Distance(const Vector2& v1, const Vector2& v2) {
+    float dx = v1.x - v2.x;
+    float dy = v1.y - v2.y;
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+inline float LengthSquare(const Vector2& v) {
+    return Dot(v, v);
+}
+
+inline float Length(const Vector2& v) {
     return std::sqrt(LengthSquare(v));
 }
 
