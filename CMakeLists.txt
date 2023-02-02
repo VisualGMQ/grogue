@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-cmake_policy(SET CMP0135 NEW)
-
-# begin project
 
 project(
     grogue
@@ -47,9 +44,16 @@ target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
 target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer)
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
 
-# link math library under Unix
+# judge platform
 if (UNIX)
-    target_link_libraries(${LOWLEVEL_NAME} PUBLIC m)
+    target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_UNIX)
+elseif (WIN32)
+    target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_WIN32)
+    target_link_libraries(${LOWLEVEL_NAME} PUBLIC DbgHelp.Lib)
+elseif (APPLE)
+    target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_APPLE)
+else()
+    target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_UNKNOWN)
 endif()
 
 aux_source_directory(src/game GAME_SRC)

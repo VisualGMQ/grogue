@@ -3,7 +3,7 @@
 #include <stack>
 
 using HandleInnerDataType = uint32_t;
-constexpr uint32_t ValidBitMask = 1 << 31;
+constexpr uint32_t HandleValidBitMask = 1 << 31;
 
 template <typename Tag>
 class HandleIDGenerator {
@@ -15,9 +15,9 @@ public:
 
     HandleInnerDataType Generate() {
         auto id = curID_;
-        assert(curID_ != ValidBitMask - 1);
+        assert(curID_ != HandleValidBitMask - 1);
         curID_++;
-        id |= ValidBitMask;
+        id |= HandleValidBitMask;
         return id;
     }
 
@@ -33,11 +33,11 @@ public:
     }
 
     void Close() {
-        handle_ &= ValidBitMask - 1;
+        handle_ &= HandleValidBitMask - 1;
     }
 
     bool IsValid() const {
-        return handle_ & ValidBitMask;
+        return handle_ & HandleValidBitMask;
     }
 
     operator bool() const {
