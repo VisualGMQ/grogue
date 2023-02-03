@@ -22,8 +22,8 @@ public:
 
     ~LuaScript();
 
-    auto RunCmd(const std::string& cmd);
-    auto Execute();
+    sol::protected_function_result RunCmd(const std::string& cmd);
+    sol::protected_function_result Execute();
 
     auto operator[](const std::string& field) const;
 
