@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
-#include "core/math.hpp"
-
 #include "catch.hpp"
+
+#include "core/math.hpp"
 
 TEST_CASE("Vector3 for vector 3D representation and calculate") {
     math::Vector3 v(1, 1, 1);
