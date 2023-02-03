@@ -10,7 +10,7 @@ template <typename T>
 class Singlton<T, false> {
 public:
     static T& Instance() {
-        static auto instance;
+        static T instance;
         return instance;
     }
 };

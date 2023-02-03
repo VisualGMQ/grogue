@@ -9,3 +9,4 @@ endmacro()
 # add your test here:
 AddTest(example example.cpp)
 AddTest(math math.cpp)
+AddTest(handle handle.cpp)
