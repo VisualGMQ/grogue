@@ -11,3 +11,8 @@ AddTest(example example.cpp)
 AddTest(math math.cpp)
 AddTest(handle handle.cpp)
 AddTest(lua lua.cpp)
+
+
+set(TEST_RESOURCE_DIR ${CMAKE_SOURCE_DIR}/test/resources/)
+configure_file(${CMAKE_SOURCE_DIR}/test/test_helper.inc
+               ${CMAKE_SOURCE_DIR}/test/test_helper.hpp)
