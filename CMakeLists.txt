@@ -31,6 +31,9 @@ include(cmake/copydll.cmake)
 include(cmake/cppcheck.cmake)
 AttachCppCheck()
 
+# compile 3rdlibs
+add_subdirectory(3rdlibs/lua)
+
 # build game
 
 set(GAME_NAME ${PROJECT_NAME})
@@ -41,7 +44,7 @@ aux_source_directory(src/app  APP_SRC)
 
 add_library(${LOWLEVEL_NAME} STATIC ${CORE_SRC} ${APP_SRC})
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
-target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer)
+target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua)
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
 
 # judge platform
