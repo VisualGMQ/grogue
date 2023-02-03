@@ -3,4 +3,3 @@
 .vscode
 *.inc
 cmake-build
-test/*.inc

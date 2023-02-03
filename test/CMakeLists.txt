@@ -1,6 +1,6 @@
 macro(AddTest name files)
     add_executable(${name}_test ${files})    
-    target_include_directories(${name}_test PRIVATE ./)
+    target_include_directories(${name}_test PRIVATE ./ ${CMAKE_BINARY_DIR})
     target_link_libraries(${name}_test PRIVATE ${LOWLEVEL_NAME})
     add_test(NAME ${name}
              COMMAND $<TARGET_FILE:${name}_test>)
@@ -15,4 +15,4 @@ AddTest(lua lua.cpp)
 
 set(TEST_RESOURCE_DIR ${CMAKE_SOURCE_DIR}/test/resources/)
 configure_file(${CMAKE_SOURCE_DIR}/test/test_helper.inc
-               ${CMAKE_SOURCE_DIR}/test/test_helper.hpp)
+               ${CMAKE_BINARY_DIR}/test_helper.hpp)

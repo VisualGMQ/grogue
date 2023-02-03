@@ -2,38 +2,10 @@
 
 namespace lua {
 
-LuaScript::LuaScript(LuaScriptHandle handle, const std::string& filename)
-    : LuaScript(handle) {
-    filename_ = filename;
-}
-
-LuaScript::LuaScript(LuaScriptHandle handle) : handle_(handle) {
-    lua_.open_libraries(sol::lib::base);
-}
-
-LuaScript::LuaScript() : handle_(LuaScriptHandle::Null()) {}
-
 LuaScript::~LuaScript() {
     LuaManager::Instance().Destroy(handle_);
 }
 
-sol::protected_function_result LuaScript::RunCmd(const std::string& cmd) {
-    return lua_.script(cmd);
-}
-
-sol::protected_function_result LuaScript::Execute() {
-    if (filename_.empty()) {
-        LOGW("try to execute a no-file LuaScript");
-        return sol::protected_function_result{};
-    } else {
-        auto loadResult = lua_.load_file(filename_);
-        return loadResult();
-    }
-}
-
-auto LuaScript::operator[](const std::string& field) const {
-    return lua_[field];
-}
 
 LuaScriptHandle LuaManager::Load(const std::string& filename) {
     auto handle = LuaScriptHandle::Create();
