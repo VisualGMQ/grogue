@@ -3,7 +3,7 @@
 namespace lua {
 
 LuaScript::~LuaScript() {
-    LuaManager::Instance().Destroy(handle_);
+    LuaScriptHandle::Destroy(handle_);
 }
 
 
