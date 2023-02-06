@@ -29,5 +29,11 @@ public:
     void Clear();
 
 private:
-    SDL_Renderer* renderer_;
+    SDL_Renderer* renderer_ = nullptr;
+
+    // use Copy-And-Swap-Idiom:
+    // https://stackoverflow.com/questions/3279543/what-is-the-copy-and-swap-idiom
+    friend void swap(Renderer& lhs, Renderer& rhs) noexcept {
+        std::swap(lhs.renderer_, rhs.renderer_);
+    }
 };

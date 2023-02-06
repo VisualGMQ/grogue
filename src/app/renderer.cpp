@@ -12,12 +12,14 @@ Renderer::~Renderer() {
 }
 
 Renderer::Renderer(Renderer&& renderer) {
-    *this = std::move(renderer);
+    swap(*this, renderer);
 }
 
 Renderer& Renderer::operator=(Renderer&& o) {
-    renderer_ = std::move(o.renderer_);
-    o.renderer_ = nullptr;
+    if (&o != this) {
+        swap(*this, o);
+        o.renderer_ = nullptr;
+    }
     return *this;
 }
 

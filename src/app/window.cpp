@@ -13,12 +13,14 @@ math::Vector2 Window::GetSize() const {
 }
 
 Window::Window(Window&& window) {
-    *this = std::move(window);
+    swap(window, *this);
 }
 
 Window& Window::operator=(Window&& window) {
-    window_ = window.window_;
-    window.window_ = nullptr;
+    if (&window != this) {
+        swap(window, *this);
+        window.window_ = nullptr;
+    }
     return *this;
 }
 

@@ -19,5 +19,9 @@ public:
     math::Vector2 GetSize() const;
 
 private:
-    SDL_Window* window_;
+    SDL_Window* window_ = nullptr;
+
+    friend void swap(Window& lhs, Window& rhs) noexcept {
+        std::swap(lhs.window_, rhs.window_);
+    }
 };
