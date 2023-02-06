@@ -22,20 +22,23 @@ public:
     sol::state lua;
 
     ~LuaScript();
+
     LuaScript() : handle_(LuaScriptHandle::Null()) {}
 
 private:
     LuaScriptHandle handle_;
 
-    LuaScript(LuaScriptHandle handle): handle_(handle) {
+    LuaScript(LuaScriptHandle handle) : handle_(handle) {
         lua.open_libraries(sol::lib::base);
     }
-    LuaScript(LuaScriptHandle handle, const std::string& filename): LuaScript(handle) {
+
+    LuaScript(LuaScriptHandle handle, const std::string& filename)
+        : LuaScript(handle) {
         lua.script_file(filename);
     }
 };
 
-class LuaManager final : public Singlton<LuaManager, false> {
+class LuaManager final {
 public:
     LuaScriptHandle Load(const std::string& filename);
     LuaScriptHandle Create();
@@ -44,7 +47,9 @@ public:
     LuaScript& Get(LuaScriptHandle);
 
 private:
-    std::unordered_map<LuaScriptHandle, std::unique_ptr<LuaScript>, LuaScriptHandle::Hash, LuaScriptHandle::HashEq> datas_;
+    std::unordered_map<LuaScriptHandle, std::unique_ptr<LuaScript>,
+                       LuaScriptHandle::Hash, LuaScriptHandle::HashEq>
+        datas_;
 };
 
 }  // namespace lua

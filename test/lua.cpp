@@ -7,17 +7,19 @@
 #include <iostream>
 
 TEST_CASE("lua") {
+    auto manager = lua::LuaManager();
+
     SECTION("execute lua command") {
-        auto script = lua::LuaManager::Instance().CreateSolitary();
+        auto script = manager.CreateSolitary();
         REQUIRE(script.lua.script("return 123").get<int>() == 123);
         REQUIRE(script.lua.script("return \"hello\"").get<std::string>() ==
                 "hello");
     }
 
     SECTION("execute lua") {
-        auto handle = lua::LuaManager::Instance().Load(
+        auto handle = manager.Load(
             TestHelper::Instance().GetResourcePath() + "test.lua");
-        auto& script = lua::LuaManager::Instance().Get(handle);
+        auto& script = manager.Get(handle);
         REQUIRE(script.lua.get<int>("GlobalNumber") == 123);
         auto table = script.lua.get<sol::table>("GlobalTable");
         REQUIRE(table.get<int>("Number") == 1);

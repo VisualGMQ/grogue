@@ -1,8 +1,7 @@
-#include <iostream>
-#include "core/assert.hpp"
+#include "app/app.hpp"
 
-int main() {
-    std::cout << "hello world" << std::endl;
-    Assert(true, "123");
+int main(int argc, char** argv) {
+    App app;
+    app.Run();
     return 0;
 }

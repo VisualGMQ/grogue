@@ -140,6 +140,7 @@ public:
     virtual ~Plugins() = default;
 
     virtual void Build(World *world) = 0;
+    virtual void Quit(World *world) = 0;
 };
 
 class World final {
@@ -168,6 +169,9 @@ public:
     template <typename T>
     World &SetResource(T &&resource);
 
+    template <typename T>
+    T* GetResource();
+
     void AddPlugins(std::unique_ptr<Plugins> &&plugins) {
         pluginsList_.push_back(std::move(plugins));
     }
@@ -178,6 +182,9 @@ public:
         entities_.clear();
         resources_.clear();
         componentMap_.clear();
+        for (auto& plugin : pluginsList_) {
+            plugin->Quit(this);
+        }
     }
 
 private:
@@ -283,13 +290,12 @@ public:
         if (auto it = world_.resources_.find(index);
             it != world_.resources_.end()) {
             assertm("resource already exists", it->second.resource);
-            it->second.resource = new T(std::forward<T>(resource));
+            it->second.resource = new T(std::move(std::forward<T>(resource)));
         } else {
             auto newIt = world_.resources_.emplace(
                 index,
                 World::ResourceInfo([](void *elem) { delete (T *)elem; }));
-            newIt.first->second.resource = new T;
-            *(T *)(newIt.first->second.resource) = std::forward<T>(resource);
+            newIt.first->second.resource = new T(std::move(std::forward<T>(resource)));
         }
 
         return *this;
@@ -529,6 +535,16 @@ World &World::SetResource(T &&resource) {
     commands.SetResource(std::forward<T>(resource));
 
     return *this;
+}
+
+template <typename T>
+T* World::GetResource() {
+    Resources resources(*this);
+    if (!resources.Has<T>()) {
+        return nullptr;
+    } else {
+        return &resources.Get<T>();
+    }
 }
 
 }  // namespace ecs
