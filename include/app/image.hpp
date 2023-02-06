@@ -5,6 +5,7 @@
 #include "app/handle.hpp"
 #include "app/renderer.hpp"
 #include "core/assert.hpp"
+#include "app/renderer.hpp"
 #include <string>
 
 class Image;
