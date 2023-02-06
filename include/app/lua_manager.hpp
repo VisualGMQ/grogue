@@ -19,22 +19,20 @@ using LuaScriptHandle = Handle<LuaScript>;
 class LuaScript final {
 public:
     friend class LuaManager;
+    sol::state lua;
 
     ~LuaScript();
-
-    sol::protected_function_result RunCmd(const std::string& cmd);
-    sol::protected_function_result Execute();
-
-    auto operator[](const std::string& field) const;
+    LuaScript() : handle_(LuaScriptHandle::Null()) {}
 
 private:
-    sol::state lua_;
-    std::string filename_;
     LuaScriptHandle handle_;
 
-    LuaScript(LuaScriptHandle handle, const std::string& filename);
-    LuaScript(LuaScriptHandle handle);
-    LuaScript();
+    LuaScript(LuaScriptHandle handle): handle_(handle) {
+        lua.open_libraries(sol::lib::base);
+    }
+    LuaScript(LuaScriptHandle handle, const std::string& filename): LuaScript(handle) {
+        lua.script_file(filename);
+    }
 };
 
 class LuaManager final : public Singlton<LuaManager, false> {
