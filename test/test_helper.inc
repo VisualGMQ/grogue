@@ -3,7 +3,7 @@
 #include <string>
 #include "core/singlton.hpp"
 
-#define TEST_RESOURCE_DIR "D:/Codes/grogue/test/resources/"
+#cmakedefine TEST_RESOURCE_DIR "@TEST_RESOURCE_DIR@"
 
 class TestHelper final: public Singlton<TestHelper, false> {
 public:

@@ -1,6 +1,4 @@
 .cache
 .vscode
 .vscode
-*.inc
 cmake-build
-test/*.inc
