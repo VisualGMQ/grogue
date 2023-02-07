@@ -8,53 +8,68 @@ if (NOT TARGET SDL2)
         IsX64Compiler(is_x64_compiler)
         if (${is_msvc_backend}) # use MSVC
             if(${is_x64_compiler})
-                set(LIB_DIR "${SDL2_ROOT}/lib/x64")
+                set(SDL_LIB_DIR "${SDL2_ROOT}/lib/x64")
                 set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/lib/x64" CACHE PATH "SDL2.dll directory" FORCE)
             else()
-                set(LIB_DIR "${SDL2_ROOT}/lib/x86")
+                set(SDL_LIB_DIR "${SDL2_ROOT}/lib/x86")
                 set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/lib/x86" CACHE PATH "SDL2.dll directory" FROCE)
             endif()
-            set(LIB_PATH "${LIB_DIR}/SDL2.lib")
+            set(LIB_PATH "${SDL_LIB_DIR}/SDL2.lib")
             set(DYNAMIC_LIB_PATH "${SDL2_DYNAMIC_LIB_DIR}/SDL2.dll")
-            set(MAIN_LIB_PATH "${LIB_DIR}/SDL2main.lib")
-            set(INCLUDE_DIR "${SDL2_ROOT}/include")
+            set(MAIN_LIB_PATH "${SDL_LIB_DIR}/SDL2main.lib")
+            set(SDL_INCLUDE_DIR "${SDL2_ROOT}/include")
+
+            mark_as_advanced(SDL2_DYNAMIC_LIB_DIR)
+            add_library(SDL2::SDL2 SHARED IMPORTED GLOBAL)
+            set_target_properties(
+                SDL2::SDL2
+                PROPERTIES
+                    IMPORTED_LOCATION ${DYNAMIC_LIB_PATH}
+                    IMPORTED_IMPLIB ${LIB_PATH}
+                    INTERFACE_INCLUDE_DIRECTORIES ${SDL_INCLUDE_DIR}
+            )
+            add_library(SDL2::SDL2main SHARED IMPORTED GLOBAL)
+            set_target_properties(
+                SDL2::SDL2main
+                PROPERTIES
+                    IMPORTED_LOCATION ${DYNAMIC_LIB_PATH}
+                    IMPORTED_IMPLIB ${MAIN_LIB_PATH}
+                    INTERFACE_INCLUDE_DIRECTORIES ${SDL_INCLUDE_DIR}
+                    IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+            )
+            add_library(SDL2 INTERFACE IMPORTED GLOBAL)
+            target_link_libraries(SDL2 INTERFACE SDL2::SDL2main SDL2::SDL2)
         elseif (${is_mingw_backend}) # use MINGW
             if(${is_x64_compiler})
-                set(INCLUDE_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/include/SDL2")
-                set(LIB_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/lib")
+                set(SDL_INCLUDE_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/include/SDL2")
+                set(SDL_LIB_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/lib")
                 set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/x86_64-w64-mingw32/bin" CACHE PATH "SDL2.dll directory" FORCE)
             else()
-                set(INCLUDE_DIR "${SDL2_ROOT}/i686-w64-mingw32/include/SDL2")
-                set(LIB_DIR "${SDL2_ROOT}/i686-w64-mingw32/lib")
+                set(SDL_INCLUDE_DIR "${SDL2_ROOT}/i686-w64-mingw32/include/SDL2")
+                set(SDL_LIB_DIR "${SDL2_ROOT}/i686-w64-mingw32/lib")
                 set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/i686-w64-mingw32/bin" CACHE PATH "SDL2.dll directory" FORCE)
             endif()
 
-            set(LIB_PATH "${LIB_DIR}/libSDL2.a")
+            set(LIB_PATH "${SDL_LIB_DIR}/libSDL2.a")
             set(DYNAMIC_LIB_PATH "${SDL2_DYNAMIC_LIB_DIR}/SDL2.dll")
-            set(MAIN_LIB_PATH "${LIB_DIR}/libSDL2main.a")
+            set(MAIN_LIB_PATH "${SDL_LIB_DIR}/libSDL2main.a")
+            set(mingw_specify_libs "-L${SDL_LIB_DIR} -lmingw32 -lSDL2main -lSDL2 -mwindows")
+
+            mark_as_advanced(SDL2_DYNAMIC_LIB_DIR)
+            add_library(SDL2 SHARED IMPORTED GLOBAL)
+            set_target_properties(
+                SDL2
+                PROPERTIES
+                    IMPORTED_LOCATION ${DYNAMIC_LIB_PATH}
+                    IMPORTED_IMPLIB ${LIB_PATH}
+                    INTERFACE_INCLUDE_DIRECTORIES ${SDL_INCLUDE_DIR}
+                    INTERFACE_LINK_LIBRARIES "${mingw_specify_libs}"
+                    INTERFACE_LINK_DIRECTORIES ${SDL_LIB_DIR}
+                    IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+            )
         else()
             message(FATAL_ERROR "your compiler don't support, please use MSVC, Clang++ or MinGW")
         endif()
-
-        mark_as_advanced(SDL2_DYNAMIC_LIB_DIR)
-        add_library(SDL2::SDL2 SHARED IMPORTED GLOBAL)
-        set_target_properties(
-            SDL2::SDL2
-            PROPERTIES
-                IMPORTED_LOCATION ${DYNAMIC_LIB_PATH}
-                IMPORTED_IMPLIB ${LIB_PATH}
-                INTERFACE_INCLUDE_DIRECTORIES ${INCLUDE_DIR}
-        )
-        add_library(SDL2::SDL2main SHARED IMPORTED GLOBAL)
-        set_target_properties(
-            SDL2::SDL2main
-            PROPERTIES
-                IMPORTED_LOCATION ${DYNAMIC_LIB_PATH}
-                IMPORTED_IMPLIB ${MAIN_LIB_PATH}
-                INTERFACE_INCLUDE_DIRECTORIES ${INCLUDE_DIR}
-        )
-        add_library(SDL2 INTERFACE IMPORTED GLOBAL)
-        target_link_libraries(SDL2 INTERFACE SDL2::SDL2 SDL2::SDL2main)
     else()  # Linux, MacOSX
         find_package(SDL2 QUIET)
         if (SDL2_FOUND)
