@@ -3,9 +3,9 @@
 #include "SDL.h"
 #include "app/window.hpp"
 #include "core/assert.hpp"
-#include "app/image.hpp"
 #include "core/math.hpp"
 
+class Image;
 struct Color {
     int r, g, b, a;
 

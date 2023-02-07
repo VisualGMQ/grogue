@@ -4,10 +4,10 @@
 #include <cassert>
 
 template <typename T, bool ExplicitInit>
-class Singlton;
+class Singleton;
 
 template <typename T>
-class Singlton<T, false> {
+class Singleton<T, false> {
 public:
     static T& Instance() {
         static T instance;
@@ -16,7 +16,7 @@ public:
 };
 
 template <typename T>
-class Singlton<T, true> {
+class Singleton<T, true> {
 public:
     static T& Instance() {
         assert(instance_ == nullptr);
