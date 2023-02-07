@@ -5,7 +5,7 @@
 #include "core/assert.hpp"
 #include "app/renderer.hpp"
 #include "app/fwd.hpp"
-#include "core/singlton.hpp"
+#include "core/singleton.hpp"
 #include "app/manager.hpp"
 #include <string>
 #include <unordered_map>
