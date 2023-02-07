@@ -96,7 +96,7 @@ public:
     Handle& operator=(const Handle& o) = default;
 
 private:
-    HandleInnerIDType handle_;
+    HandleInnerIDType handle_ = Null();
 
     Handle(HandleInnerIDType handle) : handle_(handle) {}
 };

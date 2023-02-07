@@ -1,6 +1,8 @@
 #include "app/app.hpp"
 
-void StartupSystem(ecs::Commands& cmd) {
+void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
+    auto& renderer = resources.Get<Renderer>();
+    cmd.SetResource<ImageHandle>(renderer.LoadImage("resources/img/role.png"));
 }
 
 void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer, ecs::Resources resources, ecs::Events&) {
@@ -30,7 +32,6 @@ void DefaultPlugins::Build(ecs::World* world) {
           .SetResource(lua::LuaManager())
           .SetResource(Renderer{*world->GetResource<Window>()})
           .SetResource(SDL_Event{})
-          .SetResource(world->GetResource<Renderer>()->LoadImage("resources/img/role.png"))
           .AddSystem(UpdateSystem)
           .AddStartupSystem(StartupSystem);
 }

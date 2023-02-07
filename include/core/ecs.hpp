@@ -133,7 +133,7 @@ class Resources;
 class Queryer;
 
 using UpdateSystem = void (*)(Commands &, Queryer, Resources, Events &);
-using StartupSystem = void (*)(Commands &);
+using StartupSystem = void (*)(Commands &, Resources);
 
 class Plugins {
 public:
@@ -503,7 +503,7 @@ inline void World::Startup() {
 
     for (auto sys : startupSystems_) {
         Commands commands{*this};
-        sys(commands);
+        sys(commands, Resources{*this});
         commandList.push_back(commands);
     }
 
