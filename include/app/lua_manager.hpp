@@ -4,6 +4,7 @@
 
 #include "app/handle.hpp"
 #include "core/singleton.hpp"
+#include "app/manager.hpp"
 
 #define SOL_ALL_SAFETIES_ON 1
 #include "sol/sol.hpp"
@@ -38,18 +39,11 @@ private:
     }
 };
 
-class LuaManager final {
+class LuaManager final : public Manager<LuaScript> {
 public:
     LuaScriptHandle Load(const std::string& filename);
     LuaScriptHandle Create();
     LuaScript CreateSolitary();
-    void Destroy(LuaScriptHandle);
-    LuaScript& Get(LuaScriptHandle);
-
-private:
-    std::unordered_map<LuaScriptHandle, std::unique_ptr<LuaScript>,
-                       LuaScriptHandle::Hash, LuaScriptHandle::HashEq>
-        datas_;
 };
 
 }  // namespace lua

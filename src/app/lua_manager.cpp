@@ -9,8 +9,8 @@ LuaScript::~LuaScript() {
 
 LuaScriptHandle LuaManager::Load(const std::string& filename) {
     auto handle = LuaScriptHandle::Create();
-    datas_[handle] =
-        std::unique_ptr<LuaScript>(new LuaScript{handle, filename});
+    auto item = std::unique_ptr<LuaScript>(new LuaScript{handle, filename});
+    storeNewItem(handle, item);
     return handle;
 }
 
@@ -20,16 +20,9 @@ LuaScript LuaManager::CreateSolitary() {
 
 LuaScriptHandle LuaManager::Create() {
     auto handle = LuaScriptHandle::Create();
-    datas_[handle] = std::unique_ptr<LuaScript>(new LuaScript{handle});
+    auto item = std::unique_ptr<LuaScript>(new LuaScript{handle});
+    storeNewItem(handle, item);
     return handle;
-}
-
-void LuaManager::Destroy(LuaScriptHandle handle) {
-    datas_.erase(handle);
-}
-
-LuaScript& LuaManager::Get(LuaScriptHandle handle) {
-    return *datas_[handle];
 }
 
 }  // namespace lua

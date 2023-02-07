@@ -7,6 +7,7 @@
 #include "app/lua_manager.hpp"
 #include "app/window.hpp"
 #include "app/renderer.hpp"
+#include "app/image.hpp"
 #include "core/ecs.hpp"
 #include "core/log.hpp"
 

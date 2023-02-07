@@ -1,15 +1,38 @@
 #include "app/app.hpp"
 
+void StartupSystem(ecs::Commands& cmd) {
+}
+
+void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer, ecs::Resources resources, ecs::Events&) {
+    if (resources.Has<Renderer>()) {
+        auto& renderer = resources.Get<Renderer>();
+        renderer.SetDrawColor(Color{0, 255, 0});
+        renderer.DrawLine({100, 200}, {400, 500});
+        renderer.SetDrawColor(Color{255, 255, 0});
+        renderer.DrawRect(math::Rect{100, 200, 400, 500});
+
+        auto& handle = resources.Get<ImageHandle>();
+        auto img = renderer.GetImage(handle);
+        renderer.DrawImage(
+            *img,
+            {0, 0, static_cast<float>(img->W()), static_cast<float>(img->H())},
+            {0, 0, static_cast<float>(img->W()), static_cast<float>(img->H())});
+    }
+}
+
 void DefaultPlugins::Build(ecs::World* world) {
     SDL_Init(SDL_INIT_EVERYTHING);
     TTF_Init();
     Mix_Init(MIX_INIT_OGG|MIX_INIT_MP3);
     IMG_Init(IMG_INIT_JPG|IMG_INIT_PNG);
 
-    world->SetResource(Window("Grogue", 1024, 720));
-    world->SetResource(lua::LuaManager());
-    world->SetResource(Renderer{*world->GetResource<Window>()});
-    world->SetResource(SDL_Event{});
+    world->SetResource(Window("Grogue", 1024, 720))
+          .SetResource(lua::LuaManager())
+          .SetResource(Renderer{*world->GetResource<Window>()})
+          .SetResource(SDL_Event{})
+          .SetResource(world->GetResource<Renderer>()->LoadImage("resources/img/role.png"))
+          .AddSystem(UpdateSystem)
+          .AddStartupSystem(StartupSystem);
 }
 
 void DefaultPlugins::Quit(ecs::World* world) {
