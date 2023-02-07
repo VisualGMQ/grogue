@@ -6,6 +6,7 @@
 #include "core/math.hpp"
 #include "app/fwd.hpp"
 
+class Image;
 struct Color {
     int r, g, b, a;
 

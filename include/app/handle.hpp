@@ -3,7 +3,7 @@
 #include <stack>
 #include <unordered_map>
 #include "core/sparse_sets.hpp"
-#include "core/singlton.hpp"
+#include "core/singleton.hpp"
 
 using HandleInnerIDType = uint32_t;
 
@@ -22,7 +22,7 @@ private:
 };
 
 template <typename HandleIDGeneratorType>
-class HandleIDManagerBase final : public Singlton<HandleIDManagerBase<HandleIDGeneratorType>, false> {
+class HandleIDManagerBase final : public Singleton<HandleIDManagerBase<HandleIDGeneratorType>, false> {
 public:
     auto Generate() {
         auto id = generator_.Generate();

@@ -3,7 +3,7 @@
 #include <string>
 
 #include "app/handle.hpp"
-#include "core/singlton.hpp"
+#include "core/singleton.hpp"
 #include "app/manager.hpp"
 
 #define SOL_ALL_SAFETIES_ON 1

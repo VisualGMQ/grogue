@@ -39,7 +39,7 @@ private:
     }
 };
 
-class ImageManager final : public Singlton<ImageManager, false>, public Manager<Image> {
+class ImageManager final : public Singleton<ImageManager, false>, public Manager<Image> {
 public:
     ImageHandle Load(Renderer&, const std::string& filename);
 };

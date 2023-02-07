@@ -1,5 +1,3 @@
-#pragma once
-
 #include "app/image.hpp"
 
 Image::Image(Renderer& renderer, const std::string& filename)
