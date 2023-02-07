@@ -242,4 +242,8 @@ inline float Length(const Vector2& v) {
     return std::sqrt(LengthSquare(v));
 }
 
+struct Rect {
+    float x, y, w, h; 
+};
+
 }  // namespace math

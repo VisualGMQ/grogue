@@ -1,4 +1,5 @@
 #include "app/renderer.hpp"
+#include "app/image.hpp"
 
 Renderer::Renderer(Window& window) {
     renderer_ = SDL_CreateRenderer(window.window_, -1, 0);
@@ -33,4 +34,37 @@ void Renderer::Present() {
 
 void Renderer::Clear() {
     SDL_RenderClear(renderer_);
+}
+
+ImageHandle Renderer::LoadImage(const std::string& filename) {
+    return ImageManager::Instance().Load(*this, filename);
+}
+
+void Renderer::DestroyImage(ImageHandle handle) {
+    ImageManager::Instance().Destroy(handle);
+}
+
+void Renderer::DrawLine(const math::Vector2& p1, const math::Vector2& p2) {
+    SDL_RenderDrawLineF(renderer_, p1.x, p1.y, p2.x, p2.y);
+}
+
+void Renderer::DrawRect(const math::Rect& rect) {
+    SDL_FRect r = {rect.x, rect.y, rect.w, rect.h};
+    SDL_RenderDrawRectF(renderer_, &r);
+}
+
+void Renderer::DrawImage(Image& image, const math::Rect& src, const math::Rect& des) {
+    SDL_Rect srcRect = {static_cast<int>(src.x), static_cast<int>(src.y),
+                        static_cast<int>(src.w), static_cast<int>(src.h)};
+    SDL_FRect desRect = {des.x, des.y,
+                         des.w, des.h};
+    SDL_RenderCopyF(renderer_, image.texture_, &srcRect, &desRect);
+}
+
+Image* Renderer::GetImage(ImageHandle& handle) {
+    if (ImageManager::Instance().Has(handle)) {
+        return &ImageManager::Instance().Get(handle);
+    } else {
+        return nullptr;
+    }
 }
