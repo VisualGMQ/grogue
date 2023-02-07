@@ -5,3 +5,7 @@
 class Image;
 using ImageHandle = Handle<Image>;
 
+template <typename T>
+struct DuplicateEvent {
+    std::vector<T> event;
+};

@@ -8,8 +8,10 @@
 #include "app/window.hpp"
 #include "app/renderer.hpp"
 #include "app/image.hpp"
+#include "app/input.hpp"
 #include "core/ecs.hpp"
 #include "core/log.hpp"
+#include "app/fwd.hpp"
 
 class DefaultPlugins : public ecs::Plugins {
 public:
@@ -17,13 +19,13 @@ public:
     void Quit(ecs::World* world) override;
 };
 
-class App final {
+class App {
 public:
-    ecs::World& GetWorld() { return world_; }
+    App();
 
+    ecs::World& GetWorld() { return world_; }
     void Run();
 
 private:
     ecs::World world_;
-    bool shouldClose_ = false;
 };

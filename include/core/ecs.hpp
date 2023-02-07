@@ -61,7 +61,7 @@ class EventReader final {
 public:
     bool Has() const { return EventStaging<T>::Has(); }
 
-    T Read() { return EventStaging<T>::Get(); }
+    T& Read() { return EventStaging<T>::Get(); }
 
     void Clear() { EventStaging<T>::Clear(); }
 };
@@ -172,8 +172,9 @@ public:
     template <typename T>
     T* GetResource();
 
-    void AddPlugins(std::unique_ptr<Plugins> &&plugins) {
+    World& AddPlugins(std::unique_ptr<Plugins> &&plugins) {
         pluginsList_.push_back(std::move(plugins));
+        return *this;
     }
 
     void Startup();
