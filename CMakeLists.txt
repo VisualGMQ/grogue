@@ -21,10 +21,10 @@ endif()
 include(cmake/utility.cmake)
 
 # find SDL
-include(cmake/FindSDL2.cmake)
 include(cmake/FindSDL2_image.cmake)
 include(cmake/FindSDL2_mixer.cmake)
 include(cmake/FindSDL2_ttf.cmake)
+include(cmake/FindSDL2.cmake)
 
 # some useful utiilities
 include(cmake/copydll.cmake)
@@ -44,7 +44,17 @@ aux_source_directory(src/app  APP_SRC)
 
 add_library(${LOWLEVEL_NAME} STATIC ${CORE_SRC} ${APP_SRC})
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
-target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua)
+
+# MinGW support, very ugly, must fix it
+IsMinGWBackend(is_mingw_backend)
+if (${is_mingw_backend})
+    target_link_libraries(${LOWLEVEL_NAME} PUBLIC "-lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer" lua)
+    target_link_directories(${LOWLEVEL_NAME} PUBLIC ${SDL_LIB_DIR} ${SDL_IMAGE_LIB_DIR} ${SDL_TTF_LIB_DIR} ${SDL_MIXER_LIB_DIR})
+    target_include_directories(${LOWLEVEL_NAME} PUBLIC ${SDL_INCLUDE_DIR} ${SDL_IMAGE_INCLUDE_DIR} ${SDL_TTF_INCLUDE_DIR} ${SDL_MIXER_INCLUDE_DIR})
+else()
+    target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua)
+endif()
+
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
 
 # judge platform
@@ -64,6 +74,7 @@ aux_source_directory(src/game GAME_SRC)
 add_executable(${GAME_NAME})
 target_sources(${GAME_NAME} PRIVATE ${GAME_SRC})
 target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
+
 CopyDLL(${GAME_NAME})
 
 # auto format
