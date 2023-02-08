@@ -4,18 +4,20 @@
 #include "SDL_image.h"
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
-#include "app/lua_manager.hpp"
-#include "app/window.hpp"
-#include "app/renderer.hpp"
+#include "app/font.hpp"
+#include "app/fwd.hpp"
 #include "app/image.hpp"
 #include "app/input.hpp"
+#include "app/lua.hpp"
+#include "app/renderer.hpp"
+#include "app/window.hpp"
 #include "core/ecs.hpp"
 #include "core/log.hpp"
-#include "app/fwd.hpp"
 
 class ExitTrigger final {
 public:
     bool ShouldExit() const { return shouldExit_; }
+
     void Exit() { shouldExit_ = true; }
 
     static void DetectExitSystem(ecs::Commands& cmd, ecs::Queryer queryer,
@@ -34,15 +36,16 @@ public:
 class App {
 public:
     ecs::World& GetWorld() { return world_; }
+
     void Run();
 
 private:
     ecs::World world_;
 };
 
-#define RUN_APP(clazz) \
-int main(int argc, char** argv) { \
-    clazz app; \
-    app.Run(); \
-    return 0; \
-}
+#define RUN_APP(clazz)                \
+    int main(int argc, char** argv) { \
+        clazz app;                    \
+        app.Run();                    \
+        return 0;                     \
+    }

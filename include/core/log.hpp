@@ -165,11 +165,4 @@ private:
     logger::LoggerMgr::Instance().GetDefault().FatalError( \
         __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
 
-#define t(...) Trace(__FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
-#define d(...) Debug(__FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
-#define i(...) Info(__FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
-#define w(...) Warning(__FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
-#define e(...) Error(__FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
-#define f(...) FatalError(__FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
-
 }  // namespace logger

@@ -13,8 +13,8 @@
 class Image final {
 public:
     friend class Renderer;
+    friend class ImageManager;
 
-    Image(Renderer& renderer, const std::string& filename);
     Image(const Image&) = delete;
     Image(Image&&);
     ~Image();
@@ -30,6 +30,8 @@ private:
     SDL_Texture* texture_ = nullptr;
     int w_ = 0;
     int h_ = 0;
+
+    Image(ImageHandle handle, Renderer& renderer, const std::string& filename);
 
     friend void swap(Image& lhs, Image& rhs) {
         std::swap(lhs.handle_, rhs.handle_);

@@ -18,8 +18,10 @@ public:
     }
 
 protected:
-    void storeNewItem(Handle<T> handle, std::unique_ptr<T>& item) {
-        datas_[handle] = std::move(item);
+    void storeNewItem(Handle<T> handle, std::unique_ptr<T>&& item) {
+        if (HandleIDManager<T>::Instance().Has(handle)) {
+            datas_[handle] = std::move(item);
+        }
     }
 
 private:

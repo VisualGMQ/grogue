@@ -53,10 +53,10 @@ void DefaultPlugins::Build(ecs::World* world) {
     world->SetResource(Window("Grogue", 1024, 720))
         .SetResource(lua::LuaManager())
         .SetResource(Renderer{*world->GetResource<Window>()})
-        .SetResource(SDL_Event{})
         .SetResource(Keyboard{})
         .SetResource(Mouse{})
         .SetResource(ExitTrigger{})
+        .SetResource(FontManager{})
         .AddSystem(EventUpdateSystem)
         .AddSystem(Keyboard::UpdateSystem)
         .AddSystem(Mouse::UpdateSystem);
@@ -82,7 +82,6 @@ void App::Run() {
 
     auto& exit = resources.Get<ExitTrigger>();
     while (!exit.ShouldExit()) {
-        auto& event = *world_.GetResource<SDL_Event>();
         auto renderer = world_.GetResource<Renderer>();
 
         renderer->SetDrawColor(Color(50, 50, 50));

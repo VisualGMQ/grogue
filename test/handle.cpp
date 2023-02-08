@@ -20,7 +20,7 @@ TEST_CASE("handle test") {
         REQUIRE(h2);
         REQUIRE(h1);
 
-        h1.Close();
+        TestHandle::Destroy(h1);
         REQUIRE_FALSE(h1);
         REQUIRE_FALSE(h2);
     }

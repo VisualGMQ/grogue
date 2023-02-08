@@ -73,10 +73,6 @@ public:
         HandleIDManager<Tag>::Instance().Remove(handle.handle_);
     }
 
-    void Close() {
-        HandleIDManager<Tag>::Instance().Remove(handle_);
-    }
-
     bool IsValid() const {
         return HandleIDManager<Tag>::Instance().Has(handle_);
     }

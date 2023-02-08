@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "app/lua_manager.hpp"
+#include "app/lua.hpp"
 #include "test_helper.hpp"
 
 #include <iostream>

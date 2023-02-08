@@ -1,11 +1,11 @@
 #include "app/image.hpp"
 
-Image::Image(Renderer& renderer, const std::string& filename)
-    : handle_(ImageHandle::Create()) {
+Image::Image(ImageHandle handle, Renderer& renderer, const std::string& filename)
+    : handle_(handle) {
     texture_ = IMG_LoadTexture(renderer.renderer_, filename.c_str());
     if (!texture_) {
-        Assert(texture_ != nullptr,
-               "texture " + filename + " load failed: " + IMG_GetError());
+        LOGE("texture " + filename + " load failed: " + IMG_GetError());
+        ImageHandle::Destroy(handle_);
     } else {
         SDL_QueryTexture(texture_, nullptr, nullptr, &w_, &h_);
     }
@@ -23,13 +23,13 @@ Image& Image::operator=(Image&& img) {
 }
 
 Image::~Image() {
+    ImageHandle::Destroy(handle_);
     SDL_DestroyTexture(texture_);
 }
 
 
 ImageHandle ImageManager::Load(Renderer& renderer, const std::string& filename) {
     ImageHandle handle = ImageHandle::Create();
-    auto item = std::unique_ptr<Image>(new Image(renderer, filename));
-    storeNewItem(handle, item);
+    storeNewItem(handle, std::unique_ptr<Image>(new Image(handle, renderer, filename)));
     return handle;
 }

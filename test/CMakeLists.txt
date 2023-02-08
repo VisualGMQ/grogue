@@ -6,7 +6,7 @@ macro(AddTest name files)
              COMMAND $<TARGET_FILE:${name}_test>)
 endmacro()
 
-# use this macro to add your cli test
+# use this macro to add your test
 macro(AddSimpleTest name files)
     AddTest(${name} ${files})
     set_property(TEST ${name} PROPERTY LABELS NoInteractive)

@@ -22,9 +22,13 @@ public:
     friend class LuaManager;
     sol::state lua;
 
+    LuaScript() : handle_(LuaScriptHandle::Null()) {}
+    LuaScript(const LuaScript&) = delete;
+    LuaScript(LuaScript&&);
     ~LuaScript();
 
-    LuaScript() : handle_(LuaScriptHandle::Null()) {}
+    LuaScript& operator=(const LuaScript&) = delete;
+    LuaScript& operator=(LuaScript&&);
 
 private:
     LuaScriptHandle handle_;
@@ -36,6 +40,11 @@ private:
     LuaScript(LuaScriptHandle handle, const std::string& filename)
         : LuaScript(handle) {
         lua.script_file(filename);
+    }
+
+    friend void swap(LuaScript& lhs, LuaScript& rhs) {
+        std::swap(lhs.handle_, rhs.handle_);
+        std::swap(lhs.lua, rhs.lua);
     }
 };
 
