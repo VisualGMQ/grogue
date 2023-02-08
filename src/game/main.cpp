@@ -30,6 +30,8 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
             {mouse.Position().x, mouse.Position().y,
              static_cast<float>(img->W()), static_cast<float>(img->H())});
     }
+
+    LOGT(resources.Get<Timer>().Elapse());
 }
 
 class GameApp final : public App {

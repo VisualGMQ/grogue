@@ -10,6 +10,7 @@
 #include "app/input.hpp"
 #include "app/lua.hpp"
 #include "app/renderer.hpp"
+#include "app/timer.hpp"
 #include "app/window.hpp"
 #include "core/ecs.hpp"
 #include "core/log.hpp"

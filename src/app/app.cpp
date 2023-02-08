@@ -57,9 +57,11 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(Mouse{})
         .SetResource(ExitTrigger{})
         .SetResource(FontManager{})
+        .SetResource(Timer{})
         .AddSystem(EventUpdateSystem)
         .AddSystem(Keyboard::UpdateSystem)
-        .AddSystem(Mouse::UpdateSystem);
+        .AddSystem(Mouse::UpdateSystem)
+        .AddSystem(Timer::UpdateSystem);
 }
 
 void DefaultPlugins::Quit(ecs::World* world) {
