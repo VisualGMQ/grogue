@@ -172,8 +172,10 @@ public:
     template <typename T>
     T* GetResource();
 
-    World& AddPlugins(std::unique_ptr<Plugins> &&plugins) {
-        pluginsList_.push_back(std::move(plugins));
+    template <typename T, typename... Args>
+    World& AddPlugins(Args&&... args) {
+        static_assert(std::is_base_of_v<Plugins, T>);
+        pluginsList_.push_back(std::make_unique<T>(std::forward<Args>(args)...));
         return *this;
     }
 

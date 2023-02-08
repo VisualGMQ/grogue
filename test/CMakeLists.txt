@@ -6,13 +6,28 @@ macro(AddTest name files)
              COMMAND $<TARGET_FILE:${name}_test>)
 endmacro()
 
-# add your test here:
-AddTest(example example.cpp)
-AddTest(math math.cpp)
-AddTest(handle handle.cpp)
-AddTest(lua lua.cpp)
+# use this macro to add your cli test
+macro(AddSimpleTest name files)
+    AddTest(${name} ${files})
+    set_target_properties(${name}_test PROPERTIES LABELS "NoInteractive")
+endmacro()
+
+# use this macro to add your interactive test
+macro(AddInteractiveTest name files)
+    AddTest(${name} ${files})
+    set_target_properties(${name}_test PROPERTIES LABELS "Interactive")
+endmacro()
 
 
 set(TEST_RESOURCE_DIR ${CMAKE_SOURCE_DIR}/test/resources/)
 configure_file(${CMAKE_SOURCE_DIR}/test/test_helper.inc
                ${CMAKE_BINARY_DIR}/test_helper.hpp)
+
+# add your test here:
+AddSimpleTest(example example.cpp)
+AddSimpleTest(math math.cpp)
+AddSimpleTest(handle handle.cpp)
+AddSimpleTest(lua lua.cpp)
+AddInteractiveTest(input input.cpp)
+
+CopyDLL(example_test)

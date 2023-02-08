@@ -12,20 +12,28 @@ void Keyboard::UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources resourc
     }
 
     auto& keyboard = resources.Get<Keyboard>();
-    auto reader = events.Reader<SDL_KeyboardEvent>();
+    auto reader = events.Reader<KeyboardEvents>();
+
+    for (auto& btn : keyboard.buttons_) {
+        btn.lastState = btn.isPress;
+    }
 
     if (reader.Has()) {
-        auto& event = reader.Read();
-        auto& btn = keyboard.buttons_[event.keysym.scancode];
-        btn.lastState = btn.isPress;
-        if (reader.Has()) {
-            for (auto& btn : keyboard.buttons_) {
-                btn.isPress = false;
-            }
+        auto& eventList = reader.Read();
+        for (auto& event : eventList.events) {
+            keyboard.updateOneKey(event);
         }
-        if (event.type == SDL_KEYDOWN) {
-            btn.isPress = true;
-        }
+    }
+}
+
+void Keyboard::updateOneKey(const SDL_KeyboardEvent& event) {
+    auto& btn = buttons_[event.keysym.scancode];
+    btn.lastState = btn.isPress;
+    if (event.type == SDL_KEYDOWN) {
+        btn.isPress = true;
+    }
+    if (event.type == SDL_KEYUP) {
+        btn.isPress = false;
     }
 }
 
@@ -42,17 +50,27 @@ void Mouse::UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources resources,
         mouse.position_.y = motion.y;
     }
 
-    auto btnReader = events.Reader<SDL_MouseButtonEvent>();
+    auto reader = events.Reader<MouseBtnEvents>();
 
-    if (btnReader.Has()) {
-        auto& button = btnReader.Read();
-        auto& btn = mouse.buttons_[button.button - 1];
+    for (auto& btn : mouse.buttons_) {
         btn.lastState = btn.isPress;
-        for (auto& btn : mouse.buttons_) {
-            btn.isPress = false;
+    }
+
+    if (reader.Has()) {
+        auto& eventList = reader.Read();
+        for (auto& event : eventList.events) {
+            mouse.updateOneBtn(event);
         }
-        if (button.type == SDL_MOUSEBUTTONDOWN) {
-            btn.isPress = true;
-        }
+    }
+}
+
+void Mouse::updateOneBtn(const SDL_MouseButtonEvent& event) {
+    auto& btn = buttons_[event.button - 1];
+    btn.lastState = btn.isPress;
+    if (event.type == SDL_MOUSEBUTTONDOWN) {
+        btn.isPress = true;
+    }
+    if (event.type == SDL_MOUSEBUTTONUP) {
+        btn.isPress = false;
     }
 }

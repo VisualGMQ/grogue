@@ -36,14 +36,12 @@ class GameApp final : public App {
 public:
     GameApp() {
         auto& world = GetWorld();
-        world.AddStartupSystem(StartupSystem)
+        world.AddPlugins<DefaultPlugins>()
+             .AddStartupSystem(StartupSystem)
              .AddSystem(UpdateSystem)
-             .AddSystem(InputHandle);
+             .AddSystem(InputHandle)
+             .AddSystem(ExitTrigger::DetectExitSystem);
     }
 };
 
-int main(int argc, char** argv) {
-    GameApp app;
-    app.Run();
-    return 0;
-}
+RUN_APP(GameApp)

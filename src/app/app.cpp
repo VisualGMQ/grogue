@@ -1,33 +1,46 @@
 #include "app/app.hpp"
 
-// FIXME  ugly global variable, fix it later
-bool ShouldClose = false;
-
-void ExitEventHandle(ecs::Commands& cmd, ecs::Queryer queryer,
-                     ecs::Resources resources, ecs::Events& events) {
+void ExitTrigger::DetectExitSystem(ecs::Commands& cmd, ecs::Queryer queryer,
+                                   ecs::Resources resources,
+                                   ecs::Events& events) {
+    if (!resources.Has<ExitTrigger>()) {
+        return;
+    }
     auto reader = events.Reader<SDL_QuitEvent>();
+    auto& trigger = resources.Get<ExitTrigger>();
     if (reader.Has()) {
-        ShouldClose = true;
+        trigger.Exit();
     }
 }
 
 void EventUpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
                        ecs::Resources resources, ecs::Events& events) {
     SDL_Event event;
+
+    KeyboardEvents keyboard;
+    MouseBtnEvents mouse;
+
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             events.Writer<SDL_QuitEvent>().Write(event.quit);
         }
         if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
-            events.Writer<SDL_KeyboardEvent>().Write(event.key);
+            keyboard.events.push_back(event.key);
         }
         if (event.type == SDL_MOUSEMOTION) {
             events.Writer<SDL_MouseMotionEvent>().Write(event.motion);
         }
         if (event.type == SDL_MOUSEBUTTONDOWN ||
             event.type == SDL_MOUSEBUTTONUP) {
-            events.Writer<SDL_MouseButtonEvent>().Write(event.button);
+            mouse.events.push_back(event.button);
         }
+    }
+
+    if (keyboard) {
+        events.Writer<KeyboardEvents>().Write(keyboard);
+    }
+    if (mouse) {
+        events.Writer<MouseBtnEvents>().Write(mouse);
     }
 }
 
@@ -43,6 +56,7 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(SDL_Event{})
         .SetResource(Keyboard{})
         .SetResource(Mouse{})
+        .SetResource(ExitTrigger{})
         .AddSystem(EventUpdateSystem)
         .AddSystem(Keyboard::UpdateSystem)
         .AddSystem(Mouse::UpdateSystem);
@@ -55,16 +69,19 @@ void DefaultPlugins::Quit(ecs::World* world) {
     SDL_Quit();
 }
 
-App::App() {
-    world_.AddPlugins(std::unique_ptr<DefaultPlugins>(new DefaultPlugins));
-}
-
 void App::Run() {
-    world_.AddSystem(ExitEventHandle);
     world_.Startup();
     world_.Update();
 
-    while (!ShouldClose) {
+    ecs::Resources resources(world_);
+    if (!resources.Has<ExitTrigger>()) {
+        LOGF("You don't have ExitTrigger resource! Please add DefaultPlugin to "
+             "your ECS");
+        return;
+    }
+
+    auto& exit = resources.Get<ExitTrigger>();
+    while (!exit.ShouldExit()) {
         auto& event = *world_.GetResource<SDL_Event>();
         auto renderer = world_.GetResource<Renderer>();
 

@@ -13,6 +13,18 @@
 #include "core/log.hpp"
 #include "app/fwd.hpp"
 
+class ExitTrigger final {
+public:
+    bool ShouldExit() const { return shouldExit_; }
+    void Exit() { shouldExit_ = true; }
+
+    static void DetectExitSystem(ecs::Commands& cmd, ecs::Queryer queryer,
+                                 ecs::Resources resources, ecs::Events& events);
+
+private:
+    bool shouldExit_ = false;
+};
+
 class DefaultPlugins : public ecs::Plugins {
 public:
     void Build(ecs::World* world) override;
@@ -21,11 +33,16 @@ public:
 
 class App {
 public:
-    App();
-
     ecs::World& GetWorld() { return world_; }
     void Run();
 
 private:
     ecs::World world_;
 };
+
+#define RUN_APP(clazz) \
+int main(int argc, char** argv) { \
+    clazz app; \
+    app.Run(); \
+    return 0; \
+}

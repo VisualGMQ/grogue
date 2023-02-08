@@ -3,6 +3,7 @@
 #include "SDL.h"
 #include "core/math.hpp"
 #include "core/ecs.hpp"
+#include "app/fwd.hpp"
 
 template <typename T>
 struct Button {
@@ -25,6 +26,8 @@ public:
 
 private:
     Button<SDL_Scancode> buttons_[SDL_NUM_SCANCODES];
+
+    void updateOneKey(const SDL_KeyboardEvent& event);
 };
 
 class Mouse {
@@ -41,4 +44,6 @@ private:
     Button<uint8_t> buttons_[3] = {Button<uint8_t>{SDL_BUTTON_LEFT},
                                    Button<uint8_t>{SDL_BUTTON_MIDDLE},
                                    Button<uint8_t>{SDL_BUTTON_RIGHT}};
+    
+    void updateOneBtn(const SDL_MouseButtonEvent&);
 };
