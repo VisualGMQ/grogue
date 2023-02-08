@@ -9,13 +9,13 @@ endmacro()
 # use this macro to add your cli test
 macro(AddSimpleTest name files)
     AddTest(${name} ${files})
-    set_target_properties(${name}_test PROPERTIES LABELS "NoInteractive")
+    set_property(TEST ${name} PROPERTY LABELS NoInteractive)
 endmacro()
 
 # use this macro to add your interactive test
 macro(AddInteractiveTest name files)
     AddTest(${name} ${files})
-    set_target_properties(${name}_test PROPERTIES LABELS "Interactive")
+    set_property(TEST ${name} PROPERTY LABELS Interactive)
 endmacro()
 
 
