@@ -61,7 +61,7 @@ class EventReader final {
 public:
     bool Has() const { return EventStaging<T>::Has(); }
 
-    T& Read() { return EventStaging<T>::Get(); }
+    const T& Read() { return EventStaging<T>::Get(); }
 
     void Clear() { EventStaging<T>::Clear(); }
 };
