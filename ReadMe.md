@@ -5,6 +5,8 @@
 
 此工程重写中。
 
+更多内容，请看[Wiki部分](https://github.com/VisualGMQ/grogue/wiki)
+
 ## 如何编译
 
 使用CMake进行编译，编译需要依赖库`SDL`,`SDL_ttf`,`SDL_image`,`SDL_mixer`
