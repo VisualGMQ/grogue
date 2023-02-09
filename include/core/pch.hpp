@@ -5,13 +5,13 @@
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
 
-#include "assert.hpp"
-#include "debugbreak.hpp"
-#include "ecs.hpp"
-#include "log.hpp"
+#include "core/assert.hpp"
+#include "core/debugbreak.hpp"
+#include "core/ecs.hpp"
+#include "core/log.hpp"
 #include "sol/sol.hpp"
-#include "sparse_sets.hpp"
-#include "magic_enum.hpp"
+#include "core/sparse_sets.hpp"
+#include "core/magic_enum.hpp"
 #include "core/singleton.hpp"
 #include <array>
 #include <cmath>

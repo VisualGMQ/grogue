@@ -6,6 +6,8 @@
 #include "app/renderer.hpp"
 #include "app/timer.hpp"
 #include "app/window.hpp"
+#include "app/tilesheet.hpp"
+#include "app/image.hpp"
 #include "core/pch.hpp"
 
 class ExitTrigger final {

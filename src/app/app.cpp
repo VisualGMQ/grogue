@@ -53,17 +53,22 @@ void DefaultPlugins::Build(ecs::World* world) {
     world->SetResource(Window("Grogue", 1024, 720))
         .SetResource(AssetsManager{})
         .SetResource(BGMPlayer{world->GetResource<AssetsManager>()->BGM()})
-        .SetResource(Renderer{*world->GetResource<Window>(), world->GetResource<AssetsManager>()->Font()})
+        .SetResource(Renderer{*world->GetResource<Window>(),
+                              world->GetResource<AssetsManager>()->Font()})
         .SetResource(Keyboard{})
         .SetResource(Mouse{})
         .SetResource(ExitTrigger{})
         .SetResource(Timer{})
+        .SetResource(
+            TileSheetManager{world->GetResource<AssetsManager>()->Image()})
         .AddSystem(EventUpdateSystem)
         .AddSystem(Keyboard::UpdateSystem)
         .AddSystem(Mouse::UpdateSystem)
         .AddSystem(Timer::UpdateSystem);
-    world->GetResource<AssetsManager>()->image_ = std::unique_ptr<ImageManager>(new ImageManager(*world->GetResource<Renderer>()));
-    world->GetResource<Renderer>()->imageManager_ = &world->GetResource<AssetsManager>()->Image();
+    world->GetResource<AssetsManager>()->image_ = std::unique_ptr<ImageManager>(
+        new ImageManager(*world->GetResource<Renderer>()));
+    world->GetResource<Renderer>()->imageManager_ =
+        &world->GetResource<AssetsManager>()->Image();
 }
 
 void DefaultPlugins::Quit(ecs::World* world) {

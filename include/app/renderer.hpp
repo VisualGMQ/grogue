@@ -2,6 +2,7 @@
 
 #include "app/font.hpp"
 #include "app/fwd.hpp"
+#include "app/image_view.hpp"
 #include "app/window.hpp"
 #include "core/math.hpp"
 #include "core/pch.hpp"
@@ -12,6 +13,8 @@ class ImageManager;
 
 struct Color {
     unsigned char r, g, b, a;
+
+    Color() : r(0), g(0), b(0), a(255) {}
 
     Color(unsigned char r, unsigned char g, unsigned char b,
           unsigned char a = 255)
@@ -32,12 +35,12 @@ public:
     Renderer& operator=(Renderer&&);
 
     void SetDrawColor(const Color&);
+    Color GetDrawColor();
 
     void DrawLine(const math::Vector2&, const math::Vector2&);
     void DrawRect(const math::Rect&);
-    void DrawImage(ImageHandle&, const math::Rect& src, const Transform&);
-    void DrawText(FontHandle, const std::string& text, const math::Vector2& pos,
-                  const Color&);
+    void DrawText(FontHandle, const std::string& text, const Transform&);
+    void DrawImage(ImageView&, const Transform&);
 
     void Present();
     void Clear();
@@ -54,4 +57,9 @@ private:
         std::swap(lhs.fontManager_, rhs.fontManager_);
         std::swap(lhs.imageManager_, rhs.imageManager_);
     }
+
+    void drawImageByHandle(ImageHandle&, const math::Rect& src, const Transform&);
+
+    void drawTexture(SDL_Texture* texture, int rawW, int rawH,
+                     const math::Rect& src, const Transform&);
 };

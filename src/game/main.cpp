@@ -9,7 +9,8 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& renderer = resources.Get<Renderer>();
     auto& assets = resources.Get<AssetsManager>();
     cmd.SetResource<ImageHandle>(assets.Image().Load("resources/img/role.png"))
-       .SetResource<Context>(Context{assets.Font().Load("resources/font/SimHei.ttf", 20)});
+        .SetResource<Context>(
+            Context{assets.Font().Load("resources/font/SimHei.ttf", 20)});
 }
 
 void InputHandle(ecs::Commands& cmd, ecs::Queryer queryer,
@@ -34,12 +35,14 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
         Transform transform;
         transform.SetPos(mouse.Position());
 
-        renderer.DrawImage(handle, {0, 0, -1, -1}, transform);
+        ImageView view(handle, {0, 0, -1, -1});
+
+        renderer.DrawImage(view, transform);
     }
 }
 
-void ShowDebugInfoSystem(ecs::Commands&, ecs::Queryer,
-                         ecs::Resources resources, ecs::Events&) {
+void ShowDebugInfoSystem(ecs::Commands&, ecs::Queryer, ecs::Resources resources,
+                         ecs::Events&) {
     auto& context = resources.Get<Context>();
     auto& renderer = resources.Get<Renderer>();
     auto& timer = resources.Get<Timer>();
@@ -50,7 +53,13 @@ void ShowDebugInfoSystem(ecs::Commands&, ecs::Queryer,
     }
 
     if (context.showDebugInfo) {
-        renderer.DrawText(context.font, "fps: " + std::to_string(static_cast<uint32_t>(1000.0 / timer.Elapse())), {0, 0}, {255, 255, 255});
+        renderer.SetDrawColor({255, 255, 255});
+        Transform transform;
+        transform.SetPos({0, 0});
+        renderer.DrawText(context.font,
+                          "fps: " + std::to_string(static_cast<uint32_t>(
+                                        1000.0 / timer.Elapse())),
+                          transform);
     }
 }
 
