@@ -1,3 +1,5 @@
+#pragma once
+ 
 #include "core/pch.hpp"
 #include "app/handle.hpp"
 #include "app/fwd.hpp"
