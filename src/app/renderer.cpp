@@ -36,14 +36,6 @@ void Renderer::Clear() {
     SDL_RenderClear(renderer_);
 }
 
-ImageHandle Renderer::LoadImage(const std::string& filename) {
-    return ImageManager::Instance().Load(*this, filename);
-}
-
-void Renderer::DestroyImage(ImageHandle handle) {
-    ImageManager::Instance().Destroy(handle);
-}
-
 void Renderer::DrawLine(const math::Vector2& p1, const math::Vector2& p2) {
     SDL_RenderDrawLineF(renderer_, p1.x, p1.y, p2.x, p2.y);
 }
@@ -62,7 +54,7 @@ void Renderer::DrawImage(Image& image, const math::Rect& src, const math::Rect& 
 }
 
 void Renderer::DrawText(FontHandle handle, const std::string& text, const math::Vector2& pos, const Color& color) {
-    if (fontManager_ && fontManager_->Has(handle)) {
+    if (fontManager_->Has(handle)) {
         auto surface =
             TTF_RenderUTF8_Blended(fontManager_->Get(handle).font_, text.c_str(),
                                    {color.r, color.g, color.b, color.a});
@@ -72,13 +64,5 @@ void Renderer::DrawText(FontHandle handle, const std::string& text, const math::
         SDL_RenderCopy(renderer_, texture, nullptr, &dst);
         SDL_FreeSurface(surface);
         SDL_DestroyTexture(texture);
-    }
-}
-
-Image* Renderer::GetImage(ImageHandle& handle) {
-    if (ImageManager::Instance().Has(handle)) {
-        return &ImageManager::Instance().Get(handle);
-    } else {
-        return nullptr;
     }
 }

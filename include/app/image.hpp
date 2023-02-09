@@ -1,9 +1,8 @@
 #include "core/pch.hpp"
 #include "app/handle.hpp"
-#include "app/renderer.hpp"
-#include "app/renderer.hpp"
 #include "app/fwd.hpp"
 #include "app/manager.hpp"
+#include "app/renderer.hpp"
 
 class Image final {
 public:
@@ -36,7 +35,11 @@ private:
     }
 };
 
-class ImageManager final : public Singleton<ImageManager, false>, public Manager<Image> {
+class ImageManager final : public Manager<Image> {
 public:
-    ImageHandle Load(Renderer&, const std::string& filename);
+    ImageManager(Renderer&);
+    ImageHandle Load(const std::string& filename);
+
+private:
+    Renderer* renderer_;
 };

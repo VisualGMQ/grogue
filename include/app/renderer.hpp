@@ -25,9 +25,6 @@ public:
     Renderer(Renderer&&);
     ~Renderer();
 
-    ImageHandle LoadImage(const std::string& filename);
-    void DestroyImage(ImageHandle);
-
     Renderer& operator=(const Renderer&) = delete;
     Renderer& operator=(Renderer&&);
 
@@ -36,8 +33,8 @@ public:
     void DrawLine(const math::Vector2&, const math::Vector2&);
     void DrawRect(const math::Rect&);
     void DrawImage(Image&, const math::Rect& src, const math::Rect& des);
-    void DrawText(FontHandle, const std::string& text, const math::Vector2& pos, const Color&);
-    Image* GetImage(ImageHandle&);
+    void DrawText(FontHandle, const std::string& text, const math::Vector2& pos,
+                  const Color&);
 
     void Present();
     void Clear();

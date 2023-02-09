@@ -1,15 +1,12 @@
 #pragma once
 
-#include "core/pch.hpp"
-#include "app/font.hpp"
+#include "app/assets.hpp"
 #include "app/fwd.hpp"
-#include "app/image.hpp"
 #include "app/input.hpp"
-#include "app/lua.hpp"
 #include "app/renderer.hpp"
 #include "app/timer.hpp"
 #include "app/window.hpp"
-#include "app/sound.hpp"
+#include "core/pch.hpp"
 
 class ExitTrigger final {
 public:

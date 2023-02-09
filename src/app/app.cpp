@@ -51,11 +51,9 @@ void DefaultPlugins::Build(ecs::World* world) {
     IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
 
     world->SetResource(Window("Grogue", 1024, 720))
-        .SetResource(FontManager{})
-        .SetResource(BGMManager{})
-        .SetResource(BGMPlayer{*world->GetResource<BGMManager>()})
-        .SetResource(lua::LuaManager())
-        .SetResource(Renderer{*world->GetResource<Window>(), *world->GetResource<FontManager>()})
+        .SetResource(AssetsManager{})
+        .SetResource(BGMPlayer{world->GetResource<AssetsManager>()->BGM()})
+        .SetResource(Renderer{*world->GetResource<Window>(), world->GetResource<AssetsManager>()->Font()})
         .SetResource(Keyboard{})
         .SetResource(Mouse{})
         .SetResource(ExitTrigger{})
@@ -64,6 +62,7 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(Keyboard::UpdateSystem)
         .AddSystem(Mouse::UpdateSystem)
         .AddSystem(Timer::UpdateSystem);
+    world->GetResource<AssetsManager>()->image_ = std::unique_ptr<ImageManager>(new ImageManager(*world->GetResource<Renderer>()));
 }
 
 void DefaultPlugins::Quit(ecs::World* world) {
