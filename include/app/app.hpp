@@ -9,6 +9,7 @@
 #include "app/renderer.hpp"
 #include "app/timer.hpp"
 #include "app/window.hpp"
+#include "app/sound.hpp"
 
 class ExitTrigger final {
 public:

@@ -58,6 +58,8 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(ExitTrigger{})
         .SetResource(FontManager{})
         .SetResource(Timer{})
+        .SetResource(BGMManager{})
+        .SetResource(BGMPlayer{*world->GetResource<BGMManager>()})
         .AddSystem(EventUpdateSystem)
         .AddSystem(Keyboard::UpdateSystem)
         .AddSystem(Mouse::UpdateSystem)
