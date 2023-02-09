@@ -63,6 +63,7 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(Mouse::UpdateSystem)
         .AddSystem(Timer::UpdateSystem);
     world->GetResource<AssetsManager>()->image_ = std::unique_ptr<ImageManager>(new ImageManager(*world->GetResource<Renderer>()));
+    world->GetResource<Renderer>()->imageManager_ = &world->GetResource<AssetsManager>()->Image();
 }
 
 void DefaultPlugins::Quit(ecs::World* world) {

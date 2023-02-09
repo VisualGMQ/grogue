@@ -7,6 +7,8 @@
 
 #define GROGUE_MATH_FLOAT_COMPARE_USE_EPSILON
 
+constexpr double PI = 3.1415926535897932384626;
+
 namespace math {
 
 inline bool FloatEq(float value1, float value2) {
@@ -23,6 +25,14 @@ class Vector2;
 float Length(const Vector3& v);
 float Length(const Vector2& v);
 
+inline float Rad2Deg(float radians) {
+    return radians * 180.0 / PI;
+}
+
+inline float Deg2Rad(float degree) {
+    return degree * PI / 180.0;
+}
+
 class Vector3 {
 public:
     float x, y, z;
@@ -32,16 +42,16 @@ public:
     static const Vector3 ZAxis;
 
     Vector3() {}
+
     Vector3(float vx, float vy, float vz) : x(vx), y(vy), z(vz) {}
+
     ~Vector3() {}
 
     bool operator==(const Vector3& v) const {
         return FloatEq(x, v.x) && FloatEq(y, v.y) && FloatEq(z, v.z);
     }
 
-    bool operator!=(const Vector3& v) const {
-        return !(*this == v);
-    }
+    bool operator!=(const Vector3& v) const { return !(*this == v); }
 
     Vector3 operator-() const {
         return Vector3(-x, -y, -z);
@@ -63,28 +73,28 @@ public:
         return Vector3(a * x, a * y, a * z);
     }
 
-    Vector3 operator+=(const Vector3& v) {
+    Vector3& operator+=(const Vector3& v) {
         x += v.x;
         y += v.y;
         z += v.z;
         return *this;
     }
 
-    Vector3 operator-=(const Vector3& v) {
+    Vector3& operator-=(const Vector3& v) {
         x -= v.x;
         y -= v.y;
         z -= v.z;
         return *this;
     }
 
-    Vector3 operator*=(float k) {
+    Vector3& operator*=(float k) {
         x *= k;
         y *= k;
         z *= k;
         return *this;
     }
 
-    Vector3 operator/=(float k) {
+    Vector3& operator/=(float k) {
         assert(!FloatEq(k, 0.0f));
         float a = 1.0f / k;
         x *= a;
@@ -93,9 +103,7 @@ public:
         return *this;
     }
 
-    Vector3 operator*(const Vector3& v) {
-        return {v.x * x, v.y * y, v.z * z};
-    }
+    Vector3 operator*(const Vector3& v) { return {v.x * x, v.y * y, v.z * z}; }
 
     void Normalize() {
         float a = 1.0f / Length(*this);
@@ -138,34 +146,29 @@ inline float Length(const Vector3& v) {
 
 class Vector2 {
 public:
-    float x, y;
     static const Vector2 Zero;
     static const Vector2 XAxis;
     static const Vector2 YAxis;
 
+    float x, y;
+
     Vector2() {}
+
     Vector2(float vx, float vy) : x(vx), y(vy) {}
+
     ~Vector2() {}
 
     bool operator==(const Vector2& v) const {
         return FloatEq(x, v.x) && FloatEq(y, v.y);
     }
 
-    bool operator!=(const Vector2& v) const {
-        return !(*this == v);
-    }
+    bool operator!=(const Vector2& v) const { return !(*this == v); }
 
-    Vector2 operator-() const {
-        return Vector2(-x, -y);
-    }  // Vector negation
+    Vector2 operator-() const { return Vector2(-x, -y); }  // Vector negation
 
-    Vector2 operator+(const Vector2& v) {
-        return Vector2(x + v.x, y + v.y);
-    }
+    Vector2 operator+(const Vector2& v) { return Vector2(x + v.x, y + v.y); }
 
-    Vector2 operator-(const Vector2& v) {
-        return Vector2(x - v.x, y - v.y);
-    }
+    Vector2 operator-(const Vector2& v) { return Vector2(x - v.x, y - v.y); }
 
     Vector2 operator*(float k) { return Vector2(k * x, k * y); }
 
@@ -175,25 +178,31 @@ public:
         return Vector2(a * x, a * y);
     }
 
-    Vector2 operator+=(const Vector2& v) {
+    Vector2& operator+=(const Vector2& v) {
         x += v.x;
         y += v.y;
         return *this;
     }
 
-    Vector2 operator-=(const Vector2& v) {
+    Vector2& operator-=(const Vector2& v) {
         x -= v.x;
         y -= v.y;
         return *this;
     }
 
-    Vector2 operator*=(float k) {
+    Vector2& operator*=(float k) {
         x *= k;
         y *= k;
         return *this;
     }
 
-    Vector2 operator/=(float k) {
+    Vector2& operator*=(const Vector2& o) {
+        x *= o.x;
+        y *= o.y;
+        return *this;
+    }
+
+    Vector2& operator/=(float k) {
         assert(!FloatEq(k, 0.0f));
         float a = 1.0f / k;
         x *= a;
@@ -201,9 +210,7 @@ public:
         return *this;
     }
 
-    Vector2 operator*(const Vector2& v) {
-        return {v.x * x, v.y * y};
-    }
+    Vector2 operator*(const Vector2& v) const { return {v.x * x, v.y * y}; }
 
     void Normalize() {
         float a = 1.0f / Length(*this);
@@ -243,7 +250,7 @@ inline float Length(const Vector2& v) {
 }
 
 struct Rect {
-    float x, y, w, h; 
+    float x, y, w, h;
 };
 
 }  // namespace math

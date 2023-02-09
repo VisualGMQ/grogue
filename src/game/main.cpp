@@ -30,13 +30,11 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
         renderer.DrawRect(math::Rect{100, 200, 400, 500});
 
         auto& handle = resources.Get<ImageHandle>();
-        auto& img = assets.Image().Get(handle);
 
-        renderer.DrawImage(
-            img,
-            {0, 0, static_cast<float>(img.W()), static_cast<float>(img.H())},
-            {mouse.Position().x, mouse.Position().y,
-             static_cast<float>(img.W()), static_cast<float>(img.H())});
+        Transform transform;
+        transform.SetPos(mouse.Position());
+
+        renderer.DrawImage(handle, {0, 0, -1, -1}, transform);
     }
 }
 

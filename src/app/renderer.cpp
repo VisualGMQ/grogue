@@ -45,19 +45,39 @@ void Renderer::DrawRect(const math::Rect& rect) {
     SDL_RenderDrawRectF(renderer_, &r);
 }
 
-void Renderer::DrawImage(Image& image, const math::Rect& src, const math::Rect& des) {
-    SDL_Rect srcRect = {static_cast<int>(src.x), static_cast<int>(src.y),
-                        static_cast<int>(src.w), static_cast<int>(src.h)};
-    SDL_FRect desRect = {des.x, des.y,
-                         des.w, des.h};
-    SDL_RenderCopyF(renderer_, image.texture_, &srcRect, &desRect);
+void Renderer::DrawImage(ImageHandle& handle, const math::Rect& src, const Transform& transform) {
+    if (!handle) {
+        return ;
+    }
+    auto& image = imageManager_->Get(handle);
+    SDL_Rect srcRect;
+    srcRect.x = src.x;
+    srcRect.y = src.y;
+    srcRect.w = src.w <= 0 ? image.W() : src.w;
+    srcRect.h = src.h <= 0 ? image.H() : src.h;
+
+    SDL_FRect desRect;
+    desRect.x = transform.GetPos().x;
+    desRect.y = transform.GetPos().y;
+    desRect.w = transform.GetSize().x <= 0 ? image.W() * std::abs(transform.GetSize().x): transform.GetSize().x;
+    desRect.h = transform.GetSize().y <= 0 ? image.H() * std::abs(transform.GetSize().y): transform.GetSize().y;
+
+    auto anchor = transform.GetRotateAnchor() * transform.GetSize();
+    SDL_FPoint rotAnchor;
+    rotAnchor.x = anchor.x;
+    rotAnchor.y = anchor.y;
+
+    SDL_RenderCopyExF(renderer_, image.texture_, &srcRect, &desRect,
+                      transform.GetRotation(), &rotAnchor,
+                      static_cast<SDL_RendererFlip>(transform.GetFlip()));
 }
 
-void Renderer::DrawText(FontHandle handle, const std::string& text, const math::Vector2& pos, const Color& color) {
+void Renderer::DrawText(FontHandle handle, const std::string& text,
+                        const math::Vector2& pos, const Color& color) {
     if (fontManager_->Has(handle)) {
-        auto surface =
-            TTF_RenderUTF8_Blended(fontManager_->Get(handle).font_, text.c_str(),
-                                   {color.r, color.g, color.b, color.a});
+        auto surface = TTF_RenderUTF8_Blended(
+            fontManager_->Get(handle).font_, text.c_str(),
+            {color.r, color.g, color.b, color.a});
         auto texture = SDL_CreateTextureFromSurface(renderer_, surface);
         SDL_Rect dst{static_cast<int>(pos.x), static_cast<int>(pos.y),
                      surface->w, surface->h};
