@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SDL.h"
+#include "core/pch.hpp"
 #include "core/math.hpp"
 #include "core/ecs.hpp"
 #include "app/fwd.hpp"

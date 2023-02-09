@@ -1,8 +1,7 @@
 #pragma once
 
-#include "SDL.h"
+#include "core/pch.hpp"
 #include "core/math.hpp"
-#include "core/assert.hpp"
 
 class Window final {
 public:

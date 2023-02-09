@@ -1,9 +1,6 @@
 #pragma once
 
-#include "SDL.h"
-#include "SDL_image.h"
-#include "SDL_mixer.h"
-#include "SDL_ttf.h"
+#include "core/pch.hpp"
 #include "app/font.hpp"
 #include "app/fwd.hpp"
 #include "app/image.hpp"
@@ -12,8 +9,6 @@
 #include "app/renderer.hpp"
 #include "app/timer.hpp"
 #include "app/window.hpp"
-#include "core/ecs.hpp"
-#include "core/log.hpp"
 
 class ExitTrigger final {
 public:

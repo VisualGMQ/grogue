@@ -1,8 +1,6 @@
 #pragma once
 
-#include "SDL.h"
-#include "core/ecs.hpp"
-#include <chrono>
+#include "core/pch.hpp"
 
 class Timer final {
 public:

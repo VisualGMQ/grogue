@@ -57,6 +57,10 @@ endif()
 
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
 
+if (NOT ${is_mingw_backend})
+    target_precompile_headers(${LOWLEVEL_NAME} PUBLIC include/core/pch.hpp)
+endif()
+
 # judge platform
 if (UNIX)
     target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_UNIX)
@@ -74,6 +78,10 @@ aux_source_directory(src/game GAME_SRC)
 add_executable(${GAME_NAME})
 target_sources(${GAME_NAME} PRIVATE ${GAME_SRC})
 target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
+
+if (NOT ${is_mingw_backend})
+    target_precompile_headers(${GAME_NAME} REUSE_FROM ${LOWLEVEL_NAME})
+endif()
 
 CopyDLL(${GAME_NAME})
 

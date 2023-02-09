@@ -1,9 +1,6 @@
 #pragma once
 
-#include <stack>
-#include <unordered_map>
-#include "core/sparse_sets.hpp"
-#include "core/singleton.hpp"
+#include "core/pch.hpp"
 
 using HandleInnerIDType = uint32_t;
 

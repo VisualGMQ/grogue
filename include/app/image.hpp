@@ -1,14 +1,9 @@
-#include "SDL.h"
-#include "SDL_image.h"
+#include "core/pch.hpp"
 #include "app/handle.hpp"
 #include "app/renderer.hpp"
-#include "core/assert.hpp"
 #include "app/renderer.hpp"
 #include "app/fwd.hpp"
-#include "core/singleton.hpp"
 #include "app/manager.hpp"
-#include <string>
-#include <unordered_map>
 
 class Image final {
 public:

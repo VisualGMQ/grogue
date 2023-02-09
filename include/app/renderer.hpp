@@ -1,8 +1,7 @@
 #pragma once
 
-#include "SDL.h"
+#include "core/pch.hpp"
 #include "app/window.hpp"
-#include "core/assert.hpp"
 #include "core/math.hpp"
 #include "app/fwd.hpp"
 

@@ -1,10 +1,8 @@
 #pragma once
 
-#include "SDL_ttf.h"
+#include "core/pch.hpp"
 #include "app/handle.hpp"
-#include "core/log.hpp"
 #include "app/manager.hpp"
-#include <string>
 
 class Font;
 
