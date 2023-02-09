@@ -1,8 +1,14 @@
 #include "app/app.hpp"
 
-void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
+struct Context {
+    FontHandle font;
+};
+
+void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& renderer = resources.Get<Renderer>();
-    cmd.SetResource<ImageHandle>(renderer.LoadImage("resources/img/role.png"));
+    auto& fontManager = resources.Get<FontManager>();
+    cmd.SetResource<ImageHandle>(renderer.LoadImage("resources/img/role.png"))
+       .SetResource<Context>(Context{fontManager.Load("resources/font/SimHei.ttf", 14)});
 }
 
 void InputHandle(ecs::Commands& cmd, ecs::Queryer queryer,
@@ -30,8 +36,15 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
             {mouse.Position().x, mouse.Position().y,
              static_cast<float>(img->W()), static_cast<float>(img->H())});
     }
+}
 
-    LOGT(resources.Get<Timer>().Elapse());
+void ShowDebugInfoSystem(ecs::Commands&, ecs::Queryer,
+                         ecs::Resources resources, ecs::Events&) {
+    auto& context = resources.Get<Context>();
+    auto& renderer = resources.Get<Renderer>();
+    auto& timer = resources.Get<Timer>();
+
+    renderer.DrawText(context.font, "fps: " + std::to_string(static_cast<uint32_t>(1000.0 / timer.Elapse())), {0, 0}, {255, 255, 255});
 }
 
 class GameApp final : public App {
@@ -39,10 +52,11 @@ public:
     GameApp() {
         auto& world = GetWorld();
         world.AddPlugins<DefaultPlugins>()
-             .AddStartupSystem(StartupSystem)
-             .AddSystem(UpdateSystem)
-             .AddSystem(InputHandle)
-             .AddSystem(ExitTrigger::DetectExitSystem);
+            .AddStartupSystem(LoadResourceSystem)
+            .AddSystem(UpdateSystem)
+            .AddSystem(InputHandle)
+            .AddSystem(ShowDebugInfoSystem)
+            .AddSystem(ExitTrigger::DetectExitSystem);
     }
 };
 

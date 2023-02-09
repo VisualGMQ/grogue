@@ -1,7 +1,7 @@
 #include "app/renderer.hpp"
 #include "app/image.hpp"
 
-Renderer::Renderer(Window& window) {
+Renderer::Renderer(Window& window, FontManager& fontManager): fontManager_(&fontManager) {
     renderer_ = SDL_CreateRenderer(window.window_, -1, 0);
     if (!renderer_) {
         Assert(renderer_ != nullptr, "renderer create failed");
@@ -59,6 +59,20 @@ void Renderer::DrawImage(Image& image, const math::Rect& src, const math::Rect& 
     SDL_FRect desRect = {des.x, des.y,
                          des.w, des.h};
     SDL_RenderCopyF(renderer_, image.texture_, &srcRect, &desRect);
+}
+
+void Renderer::DrawText(FontHandle handle, const std::string& text, const math::Vector2& pos, const Color& color) {
+    if (fontManager_ && fontManager_->Has(handle)) {
+        auto surface =
+            TTF_RenderUTF8_Blended(fontManager_->Get(handle).font_, text.c_str(),
+                                   {color.r, color.g, color.b, color.a});
+        auto texture = SDL_CreateTextureFromSurface(renderer_, surface);
+        SDL_Rect dst{static_cast<int>(pos.x), static_cast<int>(pos.y),
+                     surface->w, surface->h};
+        SDL_RenderCopy(renderer_, texture, nullptr, &dst);
+        SDL_FreeSurface(surface);
+        SDL_DestroyTexture(texture);
+    }
 }
 
 Image* Renderer::GetImage(ImageHandle& handle) {

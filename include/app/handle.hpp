@@ -46,6 +46,8 @@ using HandleIDManager = HandleIDManagerBase<HandleIDGenerator<T>>;
 template <typename Tag>
 class Handle {
 public:
+    Handle() = default;
+
     struct Hash final {
         size_t operator()(const HandleInnerIDType& k) const {
             return std::hash<HandleInnerIDType>{}(k);

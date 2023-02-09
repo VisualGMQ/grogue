@@ -11,6 +11,7 @@ using FontHandle = Handle<Font>;
 class Font final {
 public:
     friend class FontManager;
+    friend class Renderer;
 
     Font(const Font&) = delete;
     Font(Font&&);
