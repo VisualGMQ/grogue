@@ -9,7 +9,7 @@ public:
 
     Timer();
 
-    uint64_t Elapse() const { return elapse_; }
+    uint64_t Elapse() const { return elapse_ > 0 ? elapse_ : 1; }
 
 private:
     std::chrono::steady_clock::time_point curTime_;
