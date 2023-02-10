@@ -1,9 +1,9 @@
 #pragma once
 
 #include "app/image.hpp"
-#include "app/image_view.hpp"
 #include "app/lua.hpp"
 #include "core/pch.hpp"
+#include "app/sprite.hpp"
 
 template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 struct Fourway {
@@ -24,8 +24,8 @@ public:
         return handle_ && tileWidth_ > 0 && tileHeight_ > 0;
     }
 
-    ImageView Get(uint32_t x, uint32_t y);
-    ImageView Get(uint32_t index);
+    Sprite Get(uint32_t x, uint32_t y);
+    Sprite Get(uint32_t index);
 
 private:
     ImageHandle handle_;

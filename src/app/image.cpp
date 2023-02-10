@@ -11,8 +11,9 @@ Image::Image(ImageHandle handle, Renderer& renderer, const std::string& filename
     }
 }
 
-Image::Image(Image&& o): handle_(ImageHandle::Null()) {
-    std::swap(*this, o);
+Image::Image(ImageHandle handle, SDL_Texture* texture) : handle_(handle) {
+    texture_ = texture;
+    SDL_QueryTexture(texture_, nullptr, nullptr, &w_, &h_);
 }
 
 Image& Image::operator=(Image&& img) {
@@ -20,6 +21,10 @@ Image& Image::operator=(Image&& img) {
         std::swap(*this, img);
     }
     return *this;
+}
+
+Image::Image(Image&& o) : handle_(ImageHandle::Null()) {
+    std::swap(*this, o);
 }
 
 Image::~Image() {
@@ -33,6 +38,11 @@ ImageManager::ImageManager(Renderer& renderer) {
 
 ImageHandle ImageManager::Load(const std::string& filename) {
     ImageHandle handle = ImageHandle::Create();
-    storeNewItem(handle, std::unique_ptr<Image>(new Image(handle, *renderer_, filename)));
+    storeNewItem(handle, std::unique_ptr<Image>(
+                             new Image(handle, *renderer_, filename)));
     return handle;
+}
+
+std::unique_ptr<Image> ImageManager::CreateSolitary(SDL_Texture* texture) {
+    return std::unique_ptr<Image>(new Image(ImageHandle::Null(), texture));
 }

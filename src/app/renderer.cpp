@@ -61,54 +61,53 @@ void Renderer::DrawText(FontHandle handle, const std::string& text,
             {color.r, color.g, color.b, color.a});
 
         auto texture = SDL_CreateTextureFromSurface(renderer_, surface);
-        drawTexture(texture, surface->w, surface->h,
-                    {0, 0, static_cast<float>(surface->w),
-                     static_cast<float>(surface->h)},
-                    transform);
+        drawTexture(
+            texture, surface->w, surface->h,
+            {0, 0, static_cast<float>(surface->w),
+             static_cast<float>(surface->h)},
+            {static_cast<float>(surface->w), static_cast<float>(surface->h)},
+            transform, {0, 0}, Flip::None);
         SDL_FreeSurface(surface);
-        SDL_DestroyTexture(texture);
     }
 }
 
-void Renderer::DrawImage(ImageView& view, const Transform& transform) {
-    drawImageByHandle(view.Handle(), view.Region(), transform);
-}
+void Renderer::DrawSprite(SpriteBundle& sprite) {
+    if (!sprite.visiable) return;
 
-void Renderer::drawImageByHandle(ImageHandle handle, const math::Rect& src,
-                                 const Transform& transform) {
-    if (!handle) {
-        return;
-    }
-    auto& image = imageManager_->Get(handle);
-    drawTexture(image.texture_, image.W(), image.H(), src, transform);
+    auto& image = imageManager_->Get(sprite.image);
+    drawTexture(image.texture_, image.W(), image.H(), sprite.sprite.region,
+                sprite.sprite.customSize, sprite.transform,
+                sprite.sprite.anchor, sprite.sprite.flip);
 }
 
 void Renderer::drawTexture(SDL_Texture* texture, int rawW, int rawH,
-                           const math::Rect& src, const Transform& transform) {
+                           const math::Rect& region, const math::Vector2& size,
+                           const Transform& transform, const math::Vector2& anchor,
+                           Flip flip) {
     if (!texture) return;
 
     SDL_Rect srcRect;
-    srcRect.x = src.x;
-    srcRect.y = src.y;
-    srcRect.w = src.w <= 0 ? rawW : src.w;
-    srcRect.h = src.h <= 0 ? rawH : src.h;
+    srcRect.x = region.x;
+    srcRect.y = region.y;
+    srcRect.w = region.w <= 0 ? rawW : region.w;
+    srcRect.h = region.h <= 0 ? rawH : region.h;
+
+    math::Vector2 finalSize = {size.x <= 0 ? rawW : size.x,
+                               size.y <= 0 ? rawH : size.y};
+    finalSize.x *= transform.scale.x;
+    finalSize.y *= transform.scale.y;
 
     SDL_FRect desRect;
-    desRect.x = transform.GetPos().x;
-    desRect.y = transform.GetPos().y;
-    desRect.w = transform.GetSize().x <= 0
-                    ? rawW * std::abs(transform.GetSize().x)
-                    : transform.GetSize().x;
-    desRect.h = transform.GetSize().y <= 0
-                    ? rawH * std::abs(transform.GetSize().y)
-                    : transform.GetSize().y;
+    desRect.x = transform.position.x;
+    desRect.y = transform.position.y;
+    desRect.w = finalSize.x - finalSize.x * anchor.x;
+    desRect.h = finalSize.y - finalSize.y * anchor.y;
 
-    auto anchor = transform.GetRotateAnchor() * transform.GetSize();
     SDL_FPoint rotAnchor;
-    rotAnchor.x = anchor.x;
-    rotAnchor.y = anchor.y;
+    rotAnchor.x = anchor.x * finalSize.x;
+    rotAnchor.y = anchor.y * finalSize.y;
 
     SDL_RenderCopyExF(renderer_, texture, &srcRect, &desRect,
-                      transform.GetRotation(), &rotAnchor,
-                      static_cast<SDL_RendererFlip>(transform.GetFlip()));
+                      transform.rotation, &rotAnchor,
+                      static_cast<SDL_RendererFlip>(flip));
 }

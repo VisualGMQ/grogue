@@ -2,24 +2,14 @@
 
 #include "app/font.hpp"
 #include "app/fwd.hpp"
-#include "app/image_view.hpp"
 #include "app/window.hpp"
 #include "core/math.hpp"
 #include "core/pch.hpp"
 #include "app/transform.hpp"
+#include "app/sprite.hpp"
 
 class Image;
 class ImageManager;
-
-struct Color {
-    unsigned char r, g, b, a;
-
-    Color() : r(0), g(0), b(0), a(255) {}
-
-    Color(unsigned char r, unsigned char g, unsigned char b,
-          unsigned char a = 255)
-        : r(r), g(g), b(b), a(a) {}
-};
 
 class Renderer final {
 public:
@@ -40,7 +30,7 @@ public:
     void DrawLine(const math::Vector2&, const math::Vector2&);
     void DrawRect(const math::Rect&);
     void DrawText(FontHandle, const std::string& text, const Transform&);
-    void DrawImage(ImageView&, const Transform&);
+    void DrawSprite(SpriteBundle&);
 
     void Present();
     void Clear();
@@ -58,8 +48,8 @@ private:
         std::swap(lhs.imageManager_, rhs.imageManager_);
     }
 
-    void drawImageByHandle(ImageHandle, const math::Rect& src, const Transform&);
-
     void drawTexture(SDL_Texture* texture, int rawW, int rawH,
-                     const math::Rect& src, const Transform&);
+                     const math::Rect& region, const math::Vector2& size,
+                     const Transform& transform, const math::Vector2& anchor,
+                     Flip flip);
 };

@@ -19,17 +19,18 @@ TileSheet::TileSheet(ImageManager& manager, ImageHandle handle, uint32_t col,
     }
 }
 
-ImageView TileSheet::Get(uint32_t x, uint32_t y) {
-    return ImageView{
-        handle_,
-        math::Rect{
-                   static_cast<float>(x * (tileWidth_ + spacing_.x) + margin_.left),
-                   static_cast<float>(y * (tileHeight_ + spacing_.y) + margin_.top),
-                   (float)tileWidth_, (float)tileHeight_}
-    };
+Sprite TileSheet::Get(uint32_t x, uint32_t y) {
+    auto sprite = Sprite::FromRegion(math::Rect{
+        static_cast<float>(x * (tileWidth_ + spacing_.x) + margin_.left),
+        static_cast<float>(y * (tileHeight_ + spacing_.y) + margin_.top),
+        static_cast<float>(tileWidth_), static_cast<float>(tileHeight_)});
+
+    sprite.customSize = math::Vector2{static_cast<float>(tileWidth_),
+                                      static_cast<float>(tileHeight_)};
+    return sprite;
 }
 
-ImageView TileSheet::Get(uint32_t index) {
+Sprite TileSheet::Get(uint32_t index) {
     return Get(index % col_, index / col_);
 }
 
@@ -68,7 +69,8 @@ TileSheet& TileSheetManager::LoadFromConfig(const std::string& configFilename) {
     margin.bottom = marginTable.get<int>(4);
 
     auto spacingTable = table.get<sol::table>("spacing");
-    math::Vector2 spacing{spacingTable.get<float>(1), spacingTable.get<float>(2)};
+    math::Vector2 spacing{spacingTable.get<float>(1),
+                          spacingTable.get<float>(2)};
 
     return LoadFromFile(filename, col, row, margin, spacing);
 }

@@ -28,6 +28,7 @@ private:
     int h_ = 0;
 
     Image(ImageHandle handle, Renderer& renderer, const std::string& filename);
+    Image(ImageHandle handle, SDL_Texture*);
 
     friend void swap(Image& lhs, Image& rhs) {
         std::swap(lhs.handle_, rhs.handle_);
@@ -41,6 +42,7 @@ class ImageManager final : public Manager<Image> {
 public:
     ImageManager(Renderer&);
     ImageHandle Load(const std::string& filename);
+    std::unique_ptr<Image> CreateSolitary(SDL_Texture*);
 
 private:
     Renderer* renderer_;

@@ -36,11 +36,11 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
         auto& handle = resources.Get<ImageHandle>();
 
         Transform transform;
-        transform.SetPos(mouse.Position());
+        transform.position = mouse.Position();
 
-        ImageView view(handle, {0, 0, -1, -1});
+        SpriteBundle sprite{Sprite::Default(), handle, transform};
 
-        renderer.DrawImage(view, transform);
+        renderer.DrawSprite(sprite);
     }
 }
 
@@ -58,7 +58,7 @@ void ShowDebugInfoSystem(ecs::Commands&, ecs::Queryer, ecs::Resources resources,
     if (context.showDebugInfo) {
         renderer.SetDrawColor({255, 255, 255});
         Transform transform;
-        transform.SetPos({0, 0});
+        transform.position = {0, 0};
         renderer.DrawText(context.font,
                           "fps: " + std::to_string(static_cast<uint32_t>(
                                         1000.0 / timer.Elapse())),
