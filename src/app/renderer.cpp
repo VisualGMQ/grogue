@@ -74,7 +74,7 @@ void Renderer::DrawImage(ImageView& view, const Transform& transform) {
     drawImageByHandle(view.Handle(), view.Region(), transform);
 }
 
-void Renderer::drawImageByHandle(ImageHandle& handle, const math::Rect& src,
+void Renderer::drawImageByHandle(ImageHandle handle, const math::Rect& src,
                                  const Transform& transform) {
     if (!handle) {
         return;

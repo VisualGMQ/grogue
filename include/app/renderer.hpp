@@ -58,7 +58,7 @@ private:
         std::swap(lhs.imageManager_, rhs.imageManager_);
     }
 
-    void drawImageByHandle(ImageHandle&, const math::Rect& src, const Transform&);
+    void drawImageByHandle(ImageHandle, const math::Rect& src, const Transform&);
 
     void drawTexture(SDL_Texture* texture, int rawW, int rawH,
                      const math::Rect& src, const Transform&);

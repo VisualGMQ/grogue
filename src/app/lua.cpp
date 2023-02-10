@@ -1,7 +1,5 @@
 #include "app/lua.hpp"
 
-namespace lua {
-
 LuaScript::~LuaScript() {
     LuaScriptHandle::Destroy(handle_);
 }
@@ -24,14 +22,16 @@ LuaScriptHandle LuaManager::Load(const std::string& filename) {
     return handle;
 }
 
-LuaScript LuaManager::CreateSolitary() {
-    return LuaScript{};
-}
-
 LuaScriptHandle LuaManager::Create() {
     auto handle = LuaScriptHandle::Create();
     storeNewItem(handle, std::unique_ptr<LuaScript>(new LuaScript{handle}));
     return handle;
 }
 
-}  // namespace lua
+LuaScript LuaManager::CreateSolitary() {
+    return LuaScript{LuaScriptHandle::Null()};
+}
+
+LuaScript LuaManager::CreateSolitary(const std::string& filename) {
+    return LuaScript{LuaScriptHandle::Null(), filename};
+}

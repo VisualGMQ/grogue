@@ -7,8 +7,6 @@
 #define SOL_ALL_SAFETIES_ON 1
 #include "sol/sol.hpp"
 
-namespace lua {
-
 class LuaScript;
 
 using LuaScriptHandle = Handle<LuaScript>;
@@ -18,7 +16,6 @@ public:
     friend class LuaManager;
     sol::state lua;
 
-    LuaScript() : handle_(LuaScriptHandle::Null()) {}
     LuaScript(const LuaScript&) = delete;
     LuaScript(LuaScript&&);
     ~LuaScript();
@@ -49,6 +46,5 @@ public:
     LuaScriptHandle Load(const std::string& filename);
     LuaScriptHandle Create();
     LuaScript CreateSolitary();
+    LuaScript CreateSolitary(const std::string&);
 };
-
-}  // namespace lua

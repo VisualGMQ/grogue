@@ -58,17 +58,18 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(Keyboard{})
         .SetResource(Mouse{})
         .SetResource(ExitTrigger{})
-        .SetResource(Timer{})
-        .SetResource(
-            TileSheetManager{world->GetResource<AssetsManager>()->Image()})
+        .SetResource(Timer{});
+
+    auto* assets = world->GetResource<AssetsManager>();
+    assets->image_ = std::unique_ptr<ImageManager>(
+        new ImageManager(*world->GetResource<Renderer>()));
+
+    world->SetResource(TileSheetManager{assets->Image(), assets->Lua()})
         .AddSystem(EventUpdateSystem)
         .AddSystem(Keyboard::UpdateSystem)
         .AddSystem(Mouse::UpdateSystem)
         .AddSystem(Timer::UpdateSystem);
-    world->GetResource<AssetsManager>()->image_ = std::unique_ptr<ImageManager>(
-        new ImageManager(*world->GetResource<Renderer>()));
-    world->GetResource<Renderer>()->imageManager_ =
-        &world->GetResource<AssetsManager>()->Image();
+    world->GetResource<Renderer>()->imageManager_ = &assets->Image();
 }
 
 void DefaultPlugins::Quit(ecs::World* world) {

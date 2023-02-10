@@ -11,6 +11,9 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     cmd.SetResource<ImageHandle>(assets.Image().Load("resources/img/role.png"))
         .SetResource<Context>(
             Context{assets.Font().Load("resources/font/SimHei.ttf", 20)});
+
+    auto& manager = resources.Get<TileSheetManager>();
+    manager.LoadFromConfig("resources/img/tilesheet_tile.lua");
 }
 
 void InputHandle(ecs::Commands& cmd, ecs::Queryer queryer,

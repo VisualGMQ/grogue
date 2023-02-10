@@ -7,7 +7,7 @@
 #include <iostream>
 
 TEST_CASE("lua") {
-    auto manager = lua::LuaManager();
+    auto manager = LuaManager();
 
     SECTION("execute lua command") {
         auto script = manager.CreateSolitary();

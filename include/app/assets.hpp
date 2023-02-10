@@ -13,7 +13,7 @@ public:
 
     FontManager& Font() { return font_; }
 
-    lua::LuaManager& Lua() { return lua_; }
+    LuaManager& Lua() { return lua_; }
 
     BGMManager& BGM() { return bgm_; }
 
@@ -21,6 +21,6 @@ private:
     // can't allocate on stack due to the cycle reference to Renderer
     std::unique_ptr<ImageManager> image_ = nullptr;
     FontManager font_;
-    lua::LuaManager lua_;
+    LuaManager lua_;
     BGMManager bgm_;
 };
