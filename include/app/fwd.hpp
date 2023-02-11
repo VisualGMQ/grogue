@@ -2,6 +2,7 @@
 
 #include "app/handle.hpp"
 #include "core/pch.hpp"
+#include "core/math.hpp"
 
 class Image;
 using ImageHandle = Handle<Image>;
@@ -29,4 +30,8 @@ struct Color {
     Color(unsigned char r, unsigned char g, unsigned char b,
           unsigned char a = 255)
         : r(r), g(g), b(b), a(a) {}
+};
+
+struct Tile final {
+    math::Rect region;
 };

@@ -17,7 +17,11 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer, ecs::Resources resou
             auto tile = tilesheet.Get(x, y);
             Transform transform;
             transform.position = math::Vector2{x * (tileSize.x + 25), y * (tileSize.y + 25)};
-            SpriteBundle bundle{tile, tilesheet.Handle(), transform};
+            Sprite sprite = Sprite::Default();
+            sprite.customSize.x = tile.region.w;
+            sprite.customSize.y = tile.region.h;
+            sprite.region = tile.region;
+            SpriteBundle bundle{sprite, tilesheet.Handle(), transform};
             renderer.DrawSprite(bundle);
         }
     }

@@ -24,8 +24,8 @@ public:
         return handle_ && tileWidth_ > 0 && tileHeight_ > 0;
     }
 
-    Sprite Get(uint32_t x, uint32_t y);
-    Sprite Get(uint32_t index);
+    Tile Get(uint32_t x, uint32_t y);
+    Tile Get(uint32_t index);
     uint32_t Row() const { return row_; }
     uint32_t Col() const { return col_; }
     ImageHandle Handle() const { return handle_; }

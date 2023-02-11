@@ -1,12 +1,13 @@
 #pragma once
 
 #include "app/fwd.hpp"
+#include "app/sprite.hpp"
 #include "app/timer.hpp"
 #include "core/ecs.hpp"
 #include "core/math.hpp"
 #include "core/pch.hpp"
 
-inline ImageHandle ImageInterpolation(ImageHandle a, ImageHandle b, float t) {
+inline Tile TileInterpolation(Tile a, Tile b, float t) {
     return a;
 }
 
@@ -22,30 +23,30 @@ public:
     template <typename U>
     friend Frame<U> CreateBasicPropFrame(Timer::TimeType, U, InterpFunc<U>);
 
-    friend Frame<ImageHandle> CreateImageFrame(Timer::TimeType, ImageHandle);
+    friend Frame<Tile> CreateTileFrame(Timer::TimeType time, const Tile& tile);
 
 private:
-    Timer::TimeType time;
-    T value;
-    InterpFunc<T> interpolation;
+    Timer::TimeType time_;
+    T value_;
+    InterpFunc<T> interpolation_;
 };
 
 template <typename T>
 Frame<T> CreateBasicPropFrame(Timer::TimeType time, T value,
                               InterpFunc<T> func = math::Lerp<T>) {
     Frame<T> frame;
-    frame.time = time;
-    frame.value = value;
-    frame.interpolation = func;
+    frame.time_ = time;
+    frame.value_ = value;
+    frame.interpolation_ = func;
     return frame;
 }
 
-inline Frame<ImageHandle> CreateImageFrame(Timer::TimeType time,
-                                           ImageHandle value) {
-    Frame<ImageHandle> frame;
-    frame.time = time;
-    frame.value = value;
-    frame.interpolation = ImageInterpolation;
+inline Frame<Tile> CreateTileFrame(Timer::TimeType time,
+                                   const Tile& tile) {
+    Frame<Tile> frame;
+    frame.time_ = time;
+    frame.value_  = tile;
+    frame.interpolation_ = TileInterpolation;
     return frame;
 }
 
@@ -82,6 +83,23 @@ struct ClipInfo {
     }
 };
 
+template <>
+struct ClipInfo<Tile> {
+    Timer::TimeType curTime = 0;
+    uint32_t frameIndex = 0;
+    std::unique_ptr<AnimationClip<Tile>> clip = nullptr;
+    ImageHandle handle;
+
+    void Reset() {
+        curTime = 0;
+        frameIndex = 0;
+        clip = nullptr;
+        handle = ImageHandle::Null();
+    }
+};
+
+using ImageClip = ClipInfo<Sprite>;
+
 class Animation final {
 public:
     void SetPosXClip(const AnimationClip<float>& clip) {
@@ -94,21 +112,13 @@ public:
         yClip_.clip.reset(new AnimationClip<float>(clip));
     }
 
-    void SetPosZClip(const AnimationClip<float>& clip) {
-        zClip_.Reset();
-        zClip_.clip.reset(new AnimationClip<float>(clip));
-    }
-
     ClipInfo<float>& GetXClip() { return xClip_; }
 
     ClipInfo<float>& GetYClip() { return yClip_; }
 
-    ClipInfo<float>& GetZClip() { return zClip_; }
-
 private:
     ClipInfo<float> xClip_;
     ClipInfo<float> yClip_;
-    ClipInfo<float> zClip_;
 };
 
 template <typename T>
@@ -132,22 +142,22 @@ public:
         }
 
         if (clip_.frameIndex >= clip_.clip->GetFrames().size() - 1) {
-            clip_.clip->Prop() = clip_.clip->GetFrames().back().value;
+            clip_.clip->Prop() = clip_.clip->GetFrames().back().value_;
             return;
         }
 
         clip_.curTime += timer.Elapse();
         auto& frame = clip_.clip->GetFrames()[clip_.frameIndex];
         auto& nextFrame = clip_.clip->GetFrames()[clip_.frameIndex + 1];
-        auto duration = nextFrame.time - frame.time;
+        auto duration = nextFrame.time_ - frame.time_;
         if (clip_.curTime >= duration) {
             clip_.curTime -= duration;
             clip_.frameIndex++;
         }
 
         clip_.clip->Prop() =
-            frame.interpolation(frame.value, nextFrame.value,
-                                static_cast<float>(clip_.curTime) / duration);
+            frame.interpolation_(frame.value_, nextFrame.value_,
+                                 static_cast<float>(clip_.curTime) / duration);
     }
 
 private:
@@ -181,13 +191,13 @@ public:
         basicPropPlayer_[prop] = std::move(clip);
     }
 
-    AnimClipPlayer<ImageHandle>& GetImagePlayer() { return *imagePlayer_; }
+    AnimClipPlayer<Sprite>& GetSpritePlayer() { return *spritePlayer_; }
 
-    void SetImagePlayer(std::unique_ptr<AnimClipPlayer<ImageHandle>>&& clip) {
-        imagePlayer_ = std::move(clip);
+    void SetSpritePlayer(std::unique_ptr<AnimClipPlayer<Sprite>>&& clip) {
+        spritePlayer_ = std::move(clip);
     }
 
 private:
     std::array<std::unique_ptr<AnimClipPlayer<float>>, 5> basicPropPlayer_;
-    std::unique_ptr<AnimClipPlayer<ImageHandle>> imagePlayer_;
+    std::unique_ptr<AnimClipPlayer<Sprite>> spritePlayer_;
 };

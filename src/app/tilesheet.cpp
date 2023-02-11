@@ -19,18 +19,16 @@ TileSheet::TileSheet(ImageManager& manager, ImageHandle handle, uint32_t col,
     }
 }
 
-Sprite TileSheet::Get(uint32_t x, uint32_t y) {
-    auto sprite = Sprite::FromRegion(math::Rect{
-        static_cast<float>(x * (tileWidth_ + spacing_.x) + margin_.left),
-        static_cast<float>(y * (tileHeight_ + spacing_.y) + margin_.top),
-        static_cast<float>(tileWidth_), static_cast<float>(tileHeight_)});
-
-    sprite.customSize = math::Vector2{static_cast<float>(tileWidth_),
-                                      static_cast<float>(tileHeight_)};
-    return sprite;
+Tile TileSheet::Get(uint32_t x, uint32_t y) {
+    return Tile{
+        math::Rect{
+                   static_cast<float>(x * (tileWidth_ + spacing_.x) + margin_.left),
+                   static_cast<float>(y * (tileHeight_ + spacing_.y) + margin_.top),
+                   static_cast<float>(tileWidth_), static_cast<float>(tileHeight_)}
+    };
 }
 
-Sprite TileSheet::Get(uint32_t index) {
+Tile TileSheet::Get(uint32_t index) {
     return Get(index % col_, index / col_);
 }
 
