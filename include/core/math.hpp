@@ -7,9 +7,9 @@
 
 #define GROGUE_MATH_FLOAT_COMPARE_USE_EPSILON
 
-constexpr double PI = 3.1415926535897932384626;
-
 namespace math {
+
+constexpr double PI = 3.1415926535897932384626;
 
 inline bool FloatEq(float value1, float value2) {
 #ifdef GROGUE_MATH_FLOAT_COMPARE_USE_EPSILON
@@ -252,5 +252,10 @@ inline float Length(const Vector2& v) {
 struct Rect {
     float x, y, w, h;
 };
+
+template <typename T>
+T Lerp(T a, T b, float t) {
+    return a + (b - a)* t;
+}
 
 }  // namespace math

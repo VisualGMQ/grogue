@@ -21,7 +21,7 @@ struct Sprite final {
     }
 
     static Sprite FromRegion(const math::Rect& region) {
-        auto default = Default();
+        auto default = Sprite::Default();
         default.region = region;
         return default;
     }

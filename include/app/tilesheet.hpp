@@ -26,6 +26,12 @@ public:
 
     Sprite Get(uint32_t x, uint32_t y);
     Sprite Get(uint32_t index);
+    uint32_t Row() const { return row_; }
+    uint32_t Col() const { return col_; }
+    ImageHandle Handle() const { return handle_; }
+    math::Vector2 TileSize() const {
+        return {static_cast<float>(tileWidth_), static_cast<float>(tileHeight_)};
+    }
 
 private:
     ImageHandle handle_;

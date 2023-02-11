@@ -34,5 +34,7 @@ AddSimpleTest(math math.cpp)
 AddSimpleTest(handle handle.cpp)
 AddSimpleTest(lua lua.cpp)
 AddInteractiveTest(input input.cpp)
+AddInteractiveTest(tilesheet tilesheet.cpp)
+AddInteractiveTest(animation animation.cpp)
 
 CopyDLL(example_test)

@@ -4,12 +4,13 @@
 
 class Timer final {
 public:
+    using TimeType = uint64_t;
     static void UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources,
                              ecs::Events&);
 
     Timer();
 
-    uint64_t Elapse() const { return elapse_ > 0 ? elapse_ : 1; }
+    TimeType Elapse() const { return elapse_ > 0 ? elapse_ : 1; }
 
 private:
     std::chrono::steady_clock::time_point curTime_;
