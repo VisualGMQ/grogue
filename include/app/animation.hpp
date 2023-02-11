@@ -1,33 +1,66 @@
 #pragma once
 
-#include "core/pch.hpp"
-#include "core/ecs.hpp"
+#include "app/fwd.hpp"
 #include "app/timer.hpp"
+#include "core/ecs.hpp"
+#include "core/math.hpp"
+#include "core/pch.hpp"
+
+inline ImageHandle ImageInterpolation(ImageHandle a, ImageHandle b, float t) {
+    return a;
+}
+
+template <typename T>
+using InterpFunc = std::function<T(T, T, float)>;
 
 template <typename T>
 struct Frame final {
+public:
+    template <typename U>
+    friend class AnimClipPlayer;
+
+    template <typename U>
+    friend Frame<U> CreateBasicPropFrame(Timer::TimeType, U, InterpFunc<U>);
+
+    friend Frame<ImageHandle> CreateImageFrame(Timer::TimeType, ImageHandle);
+
+private:
     Timer::TimeType time;
     T value;
-    std::function<T(T, T, float)> interpolation = math::Lerp<T>;
+    InterpFunc<T> interpolation;
 };
+
+template <typename T>
+Frame<T> CreateBasicPropFrame(Timer::TimeType time, T value,
+                              InterpFunc<T> func = math::Lerp<T>) {
+    Frame<T> frame;
+    frame.time = time;
+    frame.value = value;
+    frame.interpolation = func;
+    return frame;
+}
+
+inline Frame<ImageHandle> CreateImageFrame(Timer::TimeType time,
+                                           ImageHandle value) {
+    Frame<ImageHandle> frame;
+    frame.time = time;
+    frame.value = value;
+    frame.interpolation = ImageInterpolation;
+    return frame;
+}
 
 template <typename T>
 class AnimationClip final {
 public:
-    AnimationClip(T& prop): prop_(prop) {}
+    AnimationClip(T& prop) : prop_(prop) {}
 
-    void SetFrames(const std::vector<Frame<T>>& frames) {
-        frames_ =  frames;
-    }
-    void AppendFrame(const Frame<T>& frame) {
-        frames_.push_back(frame);
-    }
-    const std::vector<Frame<T>>& GetFrames() const {
-        return frames_;
-    }
-    std::vector<Frame<T>>& GetFrames() {
-        return frames_;
-    }
+    void SetFrames(const std::vector<Frame<T>>& frames) { frames_ = frames; }
+
+    void AppendFrame(const Frame<T>& frame) { frames_.push_back(frame); }
+
+    const std::vector<Frame<T>>& GetFrames() const { return frames_; }
+
+    std::vector<Frame<T>>& GetFrames() { return frames_; }
 
     T& Prop() { return prop_; }
 
@@ -81,10 +114,16 @@ private:
 template <typename T>
 class AnimClipPlayer final {
 public:
-    AnimClipPlayer(ClipInfo<T>& clip): clip_(clip) {}
+    AnimClipPlayer(ClipInfo<T>& clip) : clip_(clip) {}
 
-    void Play() {
-        isPlaying_ = true;
+    void Play() { isPlaying_ = true; }
+
+    void Pause() { isPlaying_ = false; }
+
+    void Stop() {
+        isPlaying_ = false;
+        clip_.curTime = 0;
+        clip_.frameIndex = 0;
     }
 
     void Update(const Timer& timer) {
@@ -94,7 +133,7 @@ public:
 
         if (clip_.frameIndex >= clip_.clip->GetFrames().size() - 1) {
             clip_.clip->Prop() = clip_.clip->GetFrames().back().value;
-            return ;
+            return;
         }
 
         clip_.curTime += timer.Elapse();
@@ -103,10 +142,12 @@ public:
         auto duration = nextFrame.time - frame.time;
         if (clip_.curTime >= duration) {
             clip_.curTime -= duration;
-            clip_.frameIndex ++;
+            clip_.frameIndex++;
         }
 
-        clip_.clip->Prop() = frame.interpolation(frame.value, nextFrame.value, static_cast<float>(clip_.curTime) / duration);
+        clip_.clip->Prop() =
+            frame.interpolation(frame.value, nextFrame.value,
+                                static_cast<float>(clip_.curTime) / duration);
     }
 
 private:
@@ -114,18 +155,39 @@ private:
     bool isPlaying_ = false;
 };
 
-/*
 class AnimationPlayer final {
 public:
-    AnimationPlayer(Animation&);
+    enum BasicPropIndex {
+        PosX = 0,
+        PosY,
+        ScaleX,
+        ScaleY,
+        Rotation,
+
+        BasicPropNum,
+    };
 
     void Play();
-
+    void Pause();
+    void Stop();
     void Update(const Timer&);
 
-private:
-    Animation& anim_;
-    bool isPlaying_ = false;
+    AnimClipPlayer<float>& GetPropPlayer(BasicPropIndex prop) {
+        return *basicPropPlayer_[prop];
+    }
 
+    void SetPropPlayer(BasicPropIndex prop,
+                       std::unique_ptr<AnimClipPlayer<float>>&& clip) {
+        basicPropPlayer_[prop] = std::move(clip);
+    }
+
+    AnimClipPlayer<ImageHandle>& GetImagePlayer() { return *imagePlayer_; }
+
+    void SetImagePlayer(std::unique_ptr<AnimClipPlayer<ImageHandle>>&& clip) {
+        imagePlayer_ = std::move(clip);
+    }
+
+private:
+    std::array<std::unique_ptr<AnimClipPlayer<float>>, 5> basicPropPlayer_;
+    std::unique_ptr<AnimClipPlayer<ImageHandle>> imagePlayer_;
 };
-*/
