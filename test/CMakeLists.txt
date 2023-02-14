@@ -6,9 +6,6 @@ macro(AddTest name files)
     target_link_libraries(${name}_test PRIVATE ${LOWLEVEL_NAME})
     add_test(NAME ${name}
              COMMAND $<TARGET_FILE:${name}_test>)
-    if (NOT ${is_mingw_backend})
-        target_precompile_headers(${name}_test REUSE_FROM ${LOWLEVEL_NAME})
-    endif()
 endmacro()
 
 # use this macro to add your test
