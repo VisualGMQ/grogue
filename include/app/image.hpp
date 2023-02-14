@@ -38,9 +38,9 @@ private:
     }
 };
 
-class ImageManager final : public Manager<Image> {
+class ImageManager final : public ResourceManager<Image> {
 public:
-    ImageManager(Renderer&);
+    ImageManager(const std::string& rootDir, Renderer&);
     ImageHandle Load(const std::string& filename);
     std::unique_ptr<Image> CreateSolitary(SDL_Texture*);
 

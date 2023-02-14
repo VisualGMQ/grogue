@@ -53,6 +53,16 @@ private:
     FinishFunc finish_;
 };
 
+// a resource to point out the root dir
+class ResourceRootDir {
+public:
+    explicit ResourceRootDir(const std::string& dir) : dir_(dir) {}
+    const std::string& Dir() const { return dir_; }
+
+private:
+    std::string dir_;
+};
+
 class DefaultPlugins : public ecs::Plugins {
 public:
     void Build(ecs::World* world) override;

@@ -7,7 +7,7 @@
 #include <iostream>
 
 TEST_CASE("lua") {
-    auto manager = LuaManager();
+    auto manager = LuaManager(TestHelper::Instance().GetResourcePath());
 
     SECTION("execute lua command") {
         auto script = manager.CreateSolitary();
@@ -17,8 +17,7 @@ TEST_CASE("lua") {
     }
 
     SECTION("execute lua") {
-        auto handle = manager.Load(
-            TestHelper::Instance().GetResourcePath() + "test.lua");
+        auto handle = manager.Load("test.lua");
         auto& script = manager.Get(handle);
         REQUIRE(script.lua.get<int>("GlobalNumber") == 123);
         auto table = script.lua.get<sol::table>("GlobalTable");

@@ -1,5 +1,5 @@
 description = {
-    filename = "test/resources/font.png",
+    filename = "./font.png",
     row = 8,
     col = 16,
     margin = {4, 4, 0, 0},

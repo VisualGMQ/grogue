@@ -1,5 +1,5 @@
 description = {
-    filename = "test/resources/airman.png",
+    filename = "./airman.png",
     row = 8,
     col = 5,
     margin = {1, 0, 0, 0},

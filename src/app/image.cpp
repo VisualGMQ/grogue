@@ -32,14 +32,14 @@ Image::~Image() {
     SDL_DestroyTexture(texture_);
 }
 
-ImageManager::ImageManager(Renderer& renderer) {
+ImageManager::ImageManager(const std::string& rootDir, Renderer& renderer) : ResourceManager<Image>(rootDir) {
     renderer_ = &renderer;
 }
 
 ImageHandle ImageManager::Load(const std::string& filename) {
     ImageHandle handle = ImageHandle::Create();
     storeNewItem(handle, std::unique_ptr<Image>(
-                             new Image(handle, *renderer_, filename)));
+                             new Image(handle, *renderer_, GetRootDir() + filename)));
     return handle;
 }
 

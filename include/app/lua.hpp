@@ -41,8 +41,9 @@ private:
     }
 };
 
-class LuaManager final : public Manager<LuaScript> {
+class LuaManager final : public ResourceManager<LuaScript> {
 public:
+    LuaManager(const std::string& rootDir) : ResourceManager<LuaScript>(rootDir) {}
     LuaScriptHandle Load(const std::string& filename);
     LuaScriptHandle Create();
     LuaScript CreateSolitary();

@@ -34,8 +34,9 @@ private:
     }
 };
 
-class BGMManager final : public Manager<BGM> {
+class BGMManager final : public ResourceManager<BGM> {
 public:
+    BGMManager(const std::string& filename): ResourceManager<BGM>(filename) {}
     BGMHandle Load(const std::string& filename);
 };
 

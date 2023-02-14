@@ -35,9 +35,8 @@ void InitPropertyClipSystem(ecs::Commands& cmd, ecs::Resources resources) {
 
 void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& tilesheetManager = resources.Get<TileSheetManager>();
-    auto path = TestHelper::Instance().GetResourcePath();
     imageClip.clip = std::make_unique<AnimationClip<Tile>>(tile);
-    auto tilesheet = tilesheetManager.LoadFromConfig(path + "airman_desc.lua");
+    auto tilesheet = tilesheetManager.LoadFromConfig("airman_desc.lua");
     imageClip.handle = tilesheet.Handle();
     for (int i = 0; i < 8; i++) {
         imageClip.clip->AppendFrame(CreateTileFrame(i * 1000, Tile{tilesheet.Get(0, i).region}));
@@ -79,12 +78,15 @@ class Test : public App {
 public:
     Test() {
         auto& world = GetWorld();
-        world.AddPlugins<DefaultPlugins>()
-             .AddStartupSystem(InitPropertyClipSystem)
-             .AddStartupSystem(LoadResourceSystem)
-             .AddSystem(UpdatePropSystem)
-             .AddSystem(UpdateImageSystem)
-             .AddSystem(ExitTrigger::DetectExitSystem);
+        world
+            .SetResource<ResourceRootDir>(
+                ResourceRootDir{TestHelper::Instance().GetResourcePath()})
+            .AddPlugins<DefaultPlugins>()
+            .AddStartupSystem(InitPropertyClipSystem)
+            .AddStartupSystem(LoadResourceSystem)
+            .AddSystem(UpdatePropSystem)
+            .AddSystem(UpdateImageSystem)
+            .AddSystem(ExitTrigger::DetectExitSystem);
     }
 };
 
