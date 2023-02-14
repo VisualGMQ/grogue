@@ -50,23 +50,12 @@ if (NOT TARGET SDL2)
                 set(SDL2_DYNAMIC_LIB_DIR "${SDL2_ROOT}/i686-w64-mingw32/bin" CACHE PATH "SDL2.dll directory" FORCE)
             endif()
 
-            set(LIB_PATH "${SDL_LIB_DIR}/libSDL2.a")
-            set(DYNAMIC_LIB_PATH "${SDL2_DYNAMIC_LIB_DIR}/SDL2.dll")
-            set(MAIN_LIB_PATH "${SDL_LIB_DIR}/libSDL2main.a")
-            set(mingw_specify_libs "-L${SDL_LIB_DIR} -lmingw32 -lSDL2main -lSDL2 -mwindows")
-
             mark_as_advanced(SDL2_DYNAMIC_LIB_DIR)
-            add_library(SDL2 SHARED IMPORTED GLOBAL)
-            set_target_properties(
-                SDL2
-                PROPERTIES
-                    IMPORTED_LOCATION ${DYNAMIC_LIB_PATH}
-                    IMPORTED_IMPLIB ${LIB_PATH}
-                    INTERFACE_INCLUDE_DIRECTORIES ${SDL_INCLUDE_DIR}
-                    INTERFACE_LINK_LIBRARIES "${mingw_specify_libs}"
-                    INTERFACE_LINK_DIRECTORIES ${SDL_LIB_DIR}
-                    IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-            )
+
+            add_library(SDL2 INTERFACE)
+            target_link_directories(SDL2 INTERFACE ${SDL_LIB_DIR})
+            target_link_libraries(SDL2 INTERFACE "-lmingw32 -lSDL2main -lSDL2 -mwindows")
+            target_include_directories(SDL2 INTERFACE ${SDL_INCLUDE_DIR})
         else()
             message(FATAL_ERROR "your compiler don't support, please use MSVC, Clang++ or MinGW")
         endif()
