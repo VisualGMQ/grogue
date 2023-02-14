@@ -10,6 +10,7 @@
 #include "app/image.hpp"
 #include "core/pch.hpp"
 
+// a resource to trigger application exit
 class ExitTrigger final {
 public:
     bool ShouldExit() const { return shouldExit_; }
@@ -21,6 +22,35 @@ public:
 
 private:
     bool shouldExit_ = false;
+};
+
+// a resource to regist a extra custom event handler
+class ExtraEventHandler final {
+public:
+    using EventHandler = std::function<void(const SDL_Event&)>;
+    using PrepareFunc = std::function<void(ecs::Resources)>;
+    using FinishFunc = std::function<void(ecs::Resources)>;
+
+    ExtraEventHandler(EventHandler handler, PrepareFunc prepare = [](ecs::Resources){},
+                      FinishFunc finish = [](ecs::Resources){})
+        : eventHandler_(handler), prepare_(prepare), finish_(finish) {}
+
+    void Prepare(ecs::Resources resources) {
+        prepare_(resources);
+    }
+
+    void Finish(ecs::Resources resources) {
+        finish_(resources);
+    }
+
+    void HandleEvent(const SDL_Event& event) {
+        eventHandler_(event);
+    }
+
+private:
+    EventHandler eventHandler_;
+    PrepareFunc prepare_;
+    FinishFunc finish_;
 };
 
 class DefaultPlugins : public ecs::Plugins {

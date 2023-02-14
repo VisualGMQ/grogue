@@ -35,6 +35,8 @@ public:
     void Present();
     void Clear();
 
+    SDL_Renderer* Raw() const { return renderer_; }
+
 private:
     SDL_Renderer* renderer_ = nullptr;
     FontManager* fontManager_ = nullptr;

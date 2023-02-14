@@ -17,6 +17,8 @@ public:
 
     math::Vector2 GetSize() const;
 
+    SDL_Window* Raw() const { return window_; }
+
 private:
     SDL_Window* window_ = nullptr;
 

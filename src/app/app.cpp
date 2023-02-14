@@ -20,6 +20,12 @@ void EventUpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
     KeyboardEvents keyboard;
     MouseBtnEvents mouse;
 
+    ExtraEventHandler* handler = resources.Has<ExtraEventHandler>() ? &resources.Get<ExtraEventHandler>() : nullptr;
+
+    if (handler) {
+        handler->Prepare(resources);
+    }
+
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             events.Writer<SDL_QuitEvent>().Write(event.quit);
@@ -34,6 +40,14 @@ void EventUpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
             event.type == SDL_MOUSEBUTTONUP) {
             mouse.events.push_back(event.button);
         }
+
+        if (handler) {
+            handler->HandleEvent(event);
+        }
+    }
+
+    if (handler) {
+        handler->Finish(resources);
     }
 
     if (keyboard) {

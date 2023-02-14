@@ -1,0 +1,5 @@
+aux_source_directory(./ NUKLEAR_SRC)
+add_library(nuklear STATIC ${NUKLEAR_SRC})
+target_include_directories(nuklear PUBLIC ./)
+target_link_libraries(nuklear PUBLIC SDL2)
+target_compile_features(nuklear PRIVATE c_std_11)

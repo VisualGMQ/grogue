@@ -21,15 +21,15 @@ struct Sprite final {
     }
 
     static Sprite FromRegion(const math::Rect& region) {
-        auto default = Sprite::Default();
-        default.region = region;
-        return default;
+        auto sprite = Sprite::Default();
+        sprite.region = region;
+        return sprite;
     }
 
     static Sprite FromCustomSize(const math::Vector2& size) {
-        auto default = Default();
-        default.customSize = size;
-        return default;
+        auto sprite = Sprite::Default();
+        sprite.customSize = size;
+        return sprite;
     }
 };
 

@@ -86,6 +86,12 @@ if (AUTO_FORMAT)
                     COMMENT "start format")
 endif()
 
+# utilities
+option(ENABLE_UTILITIES "enable build utilities" ON)
+if (ENABLE_UTILITIES)
+    add_subdirectory(utilities)
+endif()
+
 # unittest
 option(ENABLE_TEST "enable build unit test" ON)
 if (ENABLE_TEST)

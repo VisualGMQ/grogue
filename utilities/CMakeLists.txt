@@ -1,0 +1,2 @@
+add_subdirectory(3rdlibs)
+add_subdirectory(example)
