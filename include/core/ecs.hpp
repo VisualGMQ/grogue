@@ -423,7 +423,7 @@ public:
 
     template <typename T>
     bool Has() const {
-        auto index = IndexGetter<Component>::Get<T>();
+        auto index = IndexGetter<Resource>::Get<T>();
         auto it = world_.resources_.find(index);
         return it != world_.resources_.end() && it->second.resource;
     }
