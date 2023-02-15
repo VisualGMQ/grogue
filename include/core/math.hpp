@@ -57,17 +57,17 @@ public:
         return Vector3(-x, -y, -z);
     }  // Vector negation
 
-    Vector3 operator+(const Vector3& v) {
+    Vector3 operator+(const Vector3& v) const {
         return Vector3(x + v.x, y + v.y, z + v.z);
     }
 
-    Vector3 operator-(const Vector3& v) {
+    Vector3 operator-(const Vector3& v) const {
         return Vector3(x - v.x, y - v.y, z - v.z);
     }
 
-    Vector3 operator*(float k) { return Vector3(k * x, k * y, k * z); }
+    Vector3 operator*(float k) const { return Vector3(k * x, k * y, k * z); }
 
-    Vector3 operator/(float k) {
+    Vector3 operator/(float k) const {
         assert(std::numeric_limits<float>::epsilon() < std::abs(k));
         float a = 1.0f / k;
         return Vector3(a * x, a * y, a * z);
@@ -166,13 +166,13 @@ public:
 
     Vector2 operator-() const { return Vector2(-x, -y); }  // Vector negation
 
-    Vector2 operator+(const Vector2& v) { return Vector2(x + v.x, y + v.y); }
+    Vector2 operator+(const Vector2& v) const { return Vector2(x + v.x, y + v.y); }
 
-    Vector2 operator-(const Vector2& v) { return Vector2(x - v.x, y - v.y); }
+    Vector2 operator-(const Vector2& v) const { return Vector2(x - v.x, y - v.y); }
 
-    Vector2 operator*(float k) { return Vector2(k * x, k * y); }
+    Vector2 operator*(float k) const { return Vector2(k * x, k * y); }
 
-    Vector2 operator/(float k) {
+    Vector2 operator/(float k) const {
         assert(std::numeric_limits<float>::epsilon() < std::abs(k));
         float a = 1.0f / k;
         return Vector2(a * x, a * y);
