@@ -52,6 +52,11 @@ void Renderer::DrawRect(const math::Rect& rect) {
     SDL_RenderDrawRectF(renderer_, &r);
 }
 
+void Renderer::FillRect(const math::Rect& rect) {
+    SDL_FRect r = {rect.x, rect.y, rect.w, rect.h};
+    SDL_RenderFillRectF(renderer_, &r);
+}
+
 void Renderer::DrawText(FontHandle handle, const std::string& text,
                         const Transform& transform) {
     if (fontManager_->Has(handle)) {
@@ -69,6 +74,21 @@ void Renderer::DrawText(FontHandle handle, const std::string& text,
             transform, {0, 0}, Flip::None);
         SDL_FreeSurface(surface);
     }
+}
+
+void Renderer::DrawCircle(const math::Vector2& center, float radius, float subsection) {
+    static std::vector<SDL_FPoint> points;
+    float stepAngle = 360.0 / subsection;
+    points.resize(subsection);
+    float radians = math::Deg2Rad(stepAngle);
+
+    for (int i = 0; i < points.size(); i++) {
+        points[i].x = center.x + radius * std::cos(i * radians);
+        points[i].y = center.y + radius * std::sin(i * radians);
+    }
+
+    SDL_RenderDrawLinesF(renderer_, points.data(), points.size());
+    SDL_RenderDrawLineF(renderer_, points[0].x, points[0].y, points.back().x, points.back().y);
 }
 
 void Renderer::DrawSprite(SpriteBundle& sprite) {

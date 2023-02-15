@@ -29,8 +29,10 @@ public:
 
     void DrawLine(const math::Vector2&, const math::Vector2&);
     void DrawRect(const math::Rect&);
+    void FillRect(const math::Rect&);
     void DrawText(FontHandle, const std::string& text, const Transform&);
     void DrawSprite(SpriteBundle&);
+    void DrawCircle(const math::Vector2& center, float radius, float subsection = 20);
 
     void Present();
     void Clear();
