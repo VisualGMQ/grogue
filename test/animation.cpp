@@ -3,74 +3,77 @@
 #include "app/tilesheet.hpp"
 #include "test_helper.hpp"
 
-math::Rect rect{0, 0, 100, 100};
-ClipInfo<float> xClip;
-ClipInfo<float> yClip;
-Tile tile;
+std::unique_ptr<AnimatedProperty<float>> xClip;
+std::unique_ptr<AnimatedProperty<float>> yClip;
+std::unique_ptr<AnimatedProperty<int>> tileCol;
+math::Rect rect = {0, 0, 50, 50};
 
 struct PlayerGroup {
-    AnimClipPlayer<float> xPlayer;
-    AnimClipPlayer<float> yPlayer;
+    AnimPlayer<float> xPlayer;
+    AnimPlayer<float> yPlayer;
+    AnimPlayer<int> rowPlayer;
 };
 
-ClipInfo<Tile> imageClip;
-
 void InitPropertyClipSystem(ecs::Commands& cmd, ecs::Resources resources) {
-    xClip.clip = std::make_unique<AnimationClip<float>>(rect.x);
-    xClip.clip->AppendFrame(CreateBasicPropFrame<float>(0, 0));
-    xClip.clip->AppendFrame(CreateBasicPropFrame<float>(5000, 800));
+    xClip = std::make_unique<AnimatedProperty<float>>();
+    xClip->AppendFrame(CreateBasicPropFrame<float>(0, 0));
+    xClip->AppendFrame(CreateBasicPropFrame<float>(800, 5000));
 
-    yClip.clip = std::make_unique<AnimationClip<float>>(rect.y);
-    yClip.clip->AppendFrame(CreateBasicPropFrame<float>(0, 0));
-    yClip.clip->AppendFrame(CreateBasicPropFrame<float>(3000, 500));
+    yClip = std::make_unique<AnimatedProperty<float>>();
+    yClip->AppendFrame(CreateBasicPropFrame<float>(0, 0));
+    yClip->AppendFrame(CreateBasicPropFrame<float>(500, 3000));
+
+    tileCol = std::make_unique<AnimatedProperty<int>>();
+    tileCol->AppendFrame(CreateBasicPropFrame<int>(0, 0));
+    tileCol->AppendFrame(CreateBasicPropFrame<int>(1, 500));
+    tileCol->AppendFrame(CreateBasicPropFrame<int>(2, 1000));
+    tileCol->AppendFrame(CreateBasicPropFrame<int>(3, 1500));
+    tileCol->AppendFrame(CreateBasicPropFrame<int>(4, 2000));
+    tileCol->AppendFrame(CreateBasicPropFrame<int>(5, 2500));
+    tileCol->AppendFrame(CreateBasicPropFrame<int>(6, 3000));
+    tileCol->AppendFrame(CreateBasicPropFrame<int>(7, 3500));
 
     PlayerGroup group = {
-        AnimClipPlayer<float>(xClip),
-        AnimClipPlayer<float>(yClip),
+        AnimPlayer(*xClip),
+        AnimPlayer(*yClip),
+        AnimPlayer(*tileCol),
     };
     group.xPlayer.Play();
     group.yPlayer.Play();
+    group.rowPlayer.Play();
     cmd.SetResource(std::move(group));
 }
 
 void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& tilesheetManager = resources.Get<TileSheetManager>();
-    imageClip.clip = std::make_unique<AnimationClip<Tile>>(tile);
-    auto tilesheet = tilesheetManager.LoadFromConfig("airman_desc.lua");
-    imageClip.handle = tilesheet.Handle();
-    for (int i = 0; i < 8; i++) {
-        imageClip.clip->AppendFrame(CreateTileFrame(i * 1000, Tile{tilesheet.Get(0, i).region}));
-    }
 
-    AnimClipPlayer<Tile> imagePlayer(imageClip);
-    imagePlayer.Play();
-    cmd.SetResource<AnimClipPlayer<Tile>>(std::move(imagePlayer));
-    cmd.SetResource<TileSheet>(std::move(tilesheet));
+    cmd.SetResource<TileSheet>(std::move(tilesheetManager.LoadFromConfig("airman_desc.lua")));
 }
 
 void UpdatePropSystem(ecs::Commands& cmd, ecs::Queryer queryer, ecs::Resources resources, ecs::Events& events) {
     auto& group = resources.Get<PlayerGroup>();
     auto& timer = resources.Get<Timer>();
+    auto& tilesheet = resources.Get<TileSheet>();
+
     group.xPlayer.Update(timer);
     group.yPlayer.Update(timer);
+    group.rowPlayer.Update(timer);
+
+    rect.x = group.xPlayer.GetProp();
+    rect.y = group.yPlayer.GetProp();
+    int col = group.rowPlayer.GetProp();
 
     auto& renderer = resources.Get<Renderer>();
-    renderer.SetDrawColor({0, 255, 0});
-    renderer.DrawRect(rect);
-}
+    auto tile = tilesheet.Get(0, col);
 
-void UpdateImageSystem(ecs::Commands& cmd, ecs::Queryer queryer, ecs::Resources resources, ecs::Events& events) {
-    auto& spritePlayer = resources.Get<AnimClipPlayer<Tile>>();
-    auto& timer = resources.Get<Timer>();
-    auto& tilesheet = resources.Get<TileSheet>();
-    spritePlayer.Update(timer);
-
-    auto& renderer = resources.Get<Renderer>();
     Sprite sprite = Sprite::Default();
     sprite.region = tile.region;
     sprite.customSize.x = tile.region.w;
     sprite.customSize.y = tile.region.h;
-    SpriteBundle bundle{sprite, tilesheet.Handle(), {}};
+    SpriteBundle bundle{sprite, tile.handle, {}};
+
+    renderer.SetDrawColor({0, 255, 0});
+    renderer.DrawRect(rect);
     renderer.DrawSprite(bundle);
 }
 
@@ -85,7 +88,6 @@ public:
             .AddStartupSystem(InitPropertyClipSystem)
             .AddStartupSystem(LoadResourceSystem)
             .AddSystem(UpdatePropSystem)
-            .AddSystem(UpdateImageSystem)
             .AddSystem(ExitTrigger::DetectExitSystem);
     }
 };

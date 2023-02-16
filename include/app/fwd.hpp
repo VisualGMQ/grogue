@@ -34,4 +34,5 @@ struct Color {
 
 struct Tile final {
     math::Rect region;
+    ImageHandle handle;
 };

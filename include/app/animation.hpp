@@ -7,7 +7,8 @@
 #include "core/math.hpp"
 #include "core/pch.hpp"
 
-inline Tile TileInterpolation(Tile a, Tile b, float t) {
+template <typename T>
+inline T NoInterpolation(T a, T b, float t) {
     return a;
 }
 
@@ -18,12 +19,16 @@ template <typename T>
 struct Frame final {
 public:
     template <typename U>
-    friend class AnimClipPlayer;
+    friend class AnimPlayer;
 
     template <typename U>
-    friend Frame<U> CreateBasicPropFrame(Timer::TimeType, U, InterpFunc<U>);
+    friend Frame<U> CreateBasicPropFrame(U, Timer::TimeType, InterpFunc<U>);
 
     friend Frame<Tile> CreateTileFrame(Timer::TimeType time, const Tile& tile);
+
+    auto Duration() const { return time_; }
+
+    const T& Value() const { return value_; }
 
 private:
     Timer::TimeType time_;
@@ -32,7 +37,7 @@ private:
 };
 
 template <typename T>
-Frame<T> CreateBasicPropFrame(Timer::TimeType time, T value,
+Frame<T> CreateBasicPropFrame(T value, Timer::TimeType time,
                               InterpFunc<T> func = math::Lerp<T>) {
     Frame<T> frame;
     frame.time_ = time;
@@ -41,20 +46,9 @@ Frame<T> CreateBasicPropFrame(Timer::TimeType time, T value,
     return frame;
 }
 
-inline Frame<Tile> CreateTileFrame(Timer::TimeType time,
-                                   const Tile& tile) {
-    Frame<Tile> frame;
-    frame.time_ = time;
-    frame.value_  = tile;
-    frame.interpolation_ = TileInterpolation;
-    return frame;
-}
-
 template <typename T>
-class AnimationClip final {
+class AnimatedProperty final {
 public:
-    AnimationClip(T& prop) : prop_(prop) {}
-
     void SetFrames(const std::vector<Frame<T>>& frames) { frames_ = frames; }
 
     void AppendFrame(const Frame<T>& frame) { frames_.push_back(frame); }
@@ -63,68 +57,26 @@ public:
 
     std::vector<Frame<T>>& GetFrames() { return frames_; }
 
-    T& Prop() { return prop_; }
+    size_t FrameSize() const { return frames_.size(); }
+
+    Frame<T>& operator[](size_t index) { return frames_[index]; }
+
+    const Frame<T>& operator[](size_t index) const { return frames_[index]; }
+
+    bool Empty() const { return frames_.empty(); }
 
 private:
-    T& prop_;
     std::vector<Frame<T>> frames_;
 };
 
 template <typename T>
-struct ClipInfo {
-    Timer::TimeType curTime = 0;
-    uint32_t frameIndex = 0;
-    std::unique_ptr<AnimationClip<T>> clip = nullptr;
-
-    void Reset() {
-        curTime = 0;
-        frameIndex = 0;
-        clip = nullptr;
-    }
-};
-
-template <>
-struct ClipInfo<Tile> {
-    Timer::TimeType curTime = 0;
-    uint32_t frameIndex = 0;
-    std::unique_ptr<AnimationClip<Tile>> clip = nullptr;
-    ImageHandle handle;
-
-    void Reset() {
-        curTime = 0;
-        frameIndex = 0;
-        clip = nullptr;
-        handle = ImageHandle::Null();
-    }
-};
-
-using ImageClip = ClipInfo<Sprite>;
-
-class Animation final {
+class AnimPlayer final {
 public:
-    void SetPosXClip(const AnimationClip<float>& clip) {
-        xClip_.Reset();
-        xClip_.clip.reset(new AnimationClip<float>(clip));
+    AnimPlayer(AnimatedProperty<T>& clip) : clip_(clip) {
+        if (!clip_.Empty()) {
+            property_ = clip_[0].Value();
+        }
     }
-
-    void SetPosYClip(const AnimationClip<float>& clip) {
-        yClip_.Reset();
-        yClip_.clip.reset(new AnimationClip<float>(clip));
-    }
-
-    ClipInfo<float>& GetXClip() { return xClip_; }
-
-    ClipInfo<float>& GetYClip() { return yClip_; }
-
-private:
-    ClipInfo<float> xClip_;
-    ClipInfo<float> yClip_;
-};
-
-template <typename T>
-class AnimClipPlayer final {
-public:
-    AnimClipPlayer(ClipInfo<T>& clip) : clip_(clip) {}
 
     void Play() { isPlaying_ = true; }
 
@@ -136,68 +88,38 @@ public:
         clip_.frameIndex = 0;
     }
 
+    bool IsPlaying() const { return isPlaying_; }
+
     void Update(const Timer& timer) {
         if (!isPlaying_) {
             return;
         }
 
-        if (clip_.frameIndex >= clip_.clip->GetFrames().size() - 1) {
-            clip_.clip->Prop() = clip_.clip->GetFrames().back().value_;
+        if (frameIndex_ >= clip_.FrameSize() - 1) {
+            property_ = clip_.GetFrames().back().value_;
             return;
         }
 
-        clip_.curTime += timer.Elapse();
-        auto& frame = clip_.clip->GetFrames()[clip_.frameIndex];
-        auto& nextFrame = clip_.clip->GetFrames()[clip_.frameIndex + 1];
+        curTime_ += timer.Elapse();
+        auto& frame = clip_[frameIndex_];
+        auto& nextFrame = clip_[frameIndex_ + 1];
         auto duration = nextFrame.time_ - frame.time_;
-        if (clip_.curTime >= duration) {
-            clip_.curTime -= duration;
-            clip_.frameIndex++;
+        if (curTime_ >= duration) {
+            curTime_ -= duration;
+            frameIndex_++;
         }
 
-        clip_.clip->Prop() =
+        property_ =
             frame.interpolation_(frame.value_, nextFrame.value_,
-                                 static_cast<float>(clip_.curTime) / duration);
+                                 static_cast<float>(curTime_) / duration);
     }
 
+    T GetProp() const { return property_; }
+
 private:
-    ClipInfo<T>& clip_;
+    T property_;
+    AnimatedProperty<T>& clip_;
+    Timer::TimeType curTime_ = 0;
+    uint32_t frameIndex_ = 0;
     bool isPlaying_ = false;
-};
-
-class AnimationPlayer final {
-public:
-    enum BasicPropIndex {
-        PosX = 0,
-        PosY,
-        ScaleX,
-        ScaleY,
-        Rotation,
-
-        BasicPropNum,
-    };
-
-    void Play();
-    void Pause();
-    void Stop();
-    void Update(const Timer&);
-
-    AnimClipPlayer<float>& GetPropPlayer(BasicPropIndex prop) {
-        return *basicPropPlayer_[prop];
-    }
-
-    void SetPropPlayer(BasicPropIndex prop,
-                       std::unique_ptr<AnimClipPlayer<float>>&& clip) {
-        basicPropPlayer_[prop] = std::move(clip);
-    }
-
-    AnimClipPlayer<Sprite>& GetSpritePlayer() { return *spritePlayer_; }
-
-    void SetSpritePlayer(std::unique_ptr<AnimClipPlayer<Sprite>>&& clip) {
-        spritePlayer_ = std::move(clip);
-    }
-
-private:
-    std::array<std::unique_ptr<AnimClipPlayer<float>>, 5> basicPropPlayer_;
-    std::unique_ptr<AnimClipPlayer<Sprite>> spritePlayer_;
 };

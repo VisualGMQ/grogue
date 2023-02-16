@@ -24,7 +24,8 @@ Tile TileSheet::Get(uint32_t x, uint32_t y) {
         math::Rect{
                    static_cast<float>(x * (tileWidth_ + spacing_.x) + margin_.left),
                    static_cast<float>(y * (tileHeight_ + spacing_.y) + margin_.top),
-                   static_cast<float>(tileWidth_), static_cast<float>(tileHeight_)}
+                   static_cast<float>(tileWidth_), static_cast<float>(tileHeight_)},
+        handle_
     };
 }
 

@@ -5,17 +5,17 @@
 
 struct Sprite final {
     Color color;
-    math::Vector2 anchor;
     math::Rect region;
     math::Vector2 customSize;
+    math::Vector2 anchor;
     Flip flip = Flip::None;
 
     static Sprite Default() {
         return Sprite{
             Color::White,
-            math::Vector2::Zero,
             math::Rect{0, 0, -1, -1},
             math::Vector2{-1, -1},
+            math::Vector2::Zero,
             Flip::None,
         };
     }
