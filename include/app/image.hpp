@@ -20,6 +20,7 @@ public:
 
     int W() const { return w_; }
     int H() const { return h_; }
+    math::Vector2 Size() const { return math::Vector2(w_, h_); }
 
 private:
     ImageHandle handle_;

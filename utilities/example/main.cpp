@@ -41,6 +41,7 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
 }
 
 void UpdateSystem(ecs::Commands& cmd, ecs::Queryer, ecs::Resources resources, ecs::Events&) {
+    /* do what you want here */
     auto ctx = resources.Get<nk_context*>();
 
     nk_colorf bg;
@@ -78,9 +79,12 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Queryer, ecs::Resources resources, ec
         }
     }
     nk_end(ctx);
+}
 
+void NuklearRenderSystem(ecs::Commands& cmd, ecs::Queryer, ecs::Resources resources, ecs::Events&) {
     nk_sdl_render(NK_ANTI_ALIASING_ON);
 }
+
 
 class Example: public App {
 public:
@@ -99,6 +103,7 @@ public:
                 [](ecs::Resources resources){
                     nk_input_end(resources.Get<nk_context*>());
                 }))
+            .AddSystem(NuklearRenderSystem)
             .AddSystem(ExitTrigger::DetectExitSystem);
     }
 };
