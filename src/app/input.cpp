@@ -48,6 +48,8 @@ void Mouse::UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources resources,
         auto& motion = motionReader.Read();
         mouse.position_.x = motion.x;
         mouse.position_.y = motion.y;
+        mouse.offset_.x = motion.xrel;
+        mouse.offset_.y = motion.yrel;
     }
 
     auto reader = events.Reader<MouseBtnEvents>();

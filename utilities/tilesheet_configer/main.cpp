@@ -11,7 +11,10 @@
 #include "tinyfiledialogs.h"
 #include <filesystem>
 
+// I'm lazy, so not use ecs resources
 std::string imgFilename;
+float scale = 1;
+math::Vector2 offset;
 
 struct TileSheetConfig {
     ImageHandle handle;
@@ -56,21 +59,22 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Queryer, ecs::Resources resources, ec
     auto& config = resources.Get<TileSheetConfig>();
     auto& assets = resources.Get<AssetsManager>();
 
-    if (nk_begin(
-            ctx, "TileSheet Configer",
-            nk_rect(0, 0, 200, 450),
-            NK_WINDOW_SCALABLE | NK_WINDOW_MOVABLE | NK_WINDOW_MINIMIZABLE)) {
+    if (nk_begin(ctx, "TileSheet Configer", nk_rect(0, 0, 200, 450),
+                 NK_WINDOW_SCALABLE | NK_WINDOW_MOVABLE |
+                     NK_WINDOW_MINIMIZABLE | NK_WINDOW_BORDER)) {
         nk_layout_row_dynamic(ctx, 30, 1);
         if (nk_button_label(ctx, "Open TileSheet")) {
             std::array filterPatterns = { "*.png", "*.jpg", "*.png", "*.bmp" };
             char* filename = tinyfd_openFileDialog("Open TileSheet", "./", filterPatterns.size(), filterPatterns.data(), "image type", 0);
             if (filename) {
                 LOGD("load ", filename);
+                scale = 1.0;
                 imgFilename = filename;
                 std::replace(imgFilename.begin(), imgFilename.end(), '\\', '/');
                 if (config.handle) {
                     assets.Image().Destroy(config.handle);
                 }
+                config = TileSheetConfig{};
                 config.handle = assets.Image().Load(filename);
             } else {
                 LOGD("load ", filename, " failed");
@@ -143,13 +147,14 @@ void TileSheetRenderSystem(ecs::Commands& cmd, ecs::Queryer,
 
     if (!config.handle) return;
 
-    auto size = assets.Image().Get(config.handle).Size();
-    auto position = (window.GetSize() - size) / 2.0;
+    auto size = assets.Image().Get(config.handle).Size() * scale;
+    auto position = (window.GetSize() - size) / 2.0 + offset;
 
     SpriteBundle bundle;
     bundle.image = config.handle;
     bundle.sprite = Sprite::Default();
     bundle.transform.position = position;
+    bundle.transform.scale = {scale, scale};
     renderer.DrawSprite(bundle);
 
     renderer.SetDrawColor(Color{0, 0, 255});
@@ -188,6 +193,32 @@ void TileSheetRenderSystem(ecs::Commands& cmd, ecs::Queryer,
     }
 }
 
+void EventHandleSystem(ecs::Commands& cmd, ecs::Queryer, ecs::Resources resources, ecs::Events& events) {
+    auto& ctx = resources.Get<nk_context*>();
+    auto& mouse = resources.Get<Mouse>();
+    if (nk_item_is_any_active(ctx)) { return; }
+
+    auto& config = resources.Get<TileSheetConfig>();
+
+    if (!config.handle) return;
+
+    auto reader = events.Reader<SDL_MouseWheelEvent>();
+    if (reader.Has()) {
+        auto event = reader.Read();
+        if (event.preciseY > 0) {
+            scale *= 1.2;
+        } else if (event.preciseY < 0) {
+            scale /= 1.2;
+            scale = std::max(scale, 0.2f);
+        }
+    }
+
+    auto motionReader = events.Reader<SDL_MouseMotionEvent>();
+    if (motionReader.Has() && mouse.LeftBtn().IsPressing()) {
+        offset += mouse.Offset();
+    }
+}
+
 class Example : public App {
 public:
     Example() {
@@ -195,8 +226,9 @@ public:
         world.AddPlugins<DefaultPlugins>()
             .AddStartupSystem(StartupSystem)
             .AddSystem(UpdateSystem)
+            .AddSystem(EventHandleSystem)
             .SetResource<ExtraEventHandler>(ExtraEventHandler(
-                [](const SDL_Event& event) {
+                [&](const SDL_Event& event) {
                     nk_sdl_handle_event(const_cast<SDL_Event*>(&event));
                 },
                 [](ecs::Resources resources) {

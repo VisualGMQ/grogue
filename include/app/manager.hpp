@@ -19,8 +19,8 @@ public:
 
 protected:
     void storeNewItem(Handle<T> handle, std::unique_ptr<T>&& item) {
-        if (HandleIDManager<T>::Instance().Has(handle)) {
-            datas_[handle] = std::move(item);
+        if (handle) {
+            datas_.emplace(handle, std::move(item));
         }
     }
 

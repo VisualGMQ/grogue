@@ -35,7 +35,7 @@ inline float Deg2Rad(float degree) {
 
 class Vector3 {
 public:
-    float x, y, z;
+    float x{}, y{}, z{};
     static const Vector3 Zero;
     static const Vector3 XAxis;
     static const Vector3 YAxis;
@@ -150,7 +150,7 @@ public:
     static const Vector2 XAxis;
     static const Vector2 YAxis;
 
-    float x, y;
+    float x{}, y{};
 
     Vector2() {}
 

@@ -35,12 +35,14 @@ public:
     static void UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources, ecs::Events&);
 
     math::Vector2 Position() const { return position_; }
+    math::Vector2 Offset() const { return offset_; }
     const Button<uint8_t>& LeftBtn() const { return buttons_[0]; }
     const Button<uint8_t>& MiddleBtn() const { return buttons_[1]; }
     const Button<uint8_t>& RightBtn() const { return buttons_[2]; }
 
 private:
     math::Vector2 position_;
+    math::Vector2 offset_;
     Button<uint8_t> buttons_[3] = {Button<uint8_t>{SDL_BUTTON_LEFT},
                                    Button<uint8_t>{SDL_BUTTON_MIDDLE},
                                    Button<uint8_t>{SDL_BUTTON_RIGHT}};

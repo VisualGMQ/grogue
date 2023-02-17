@@ -43,6 +43,9 @@ void EventUpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
             event.type == SDL_MOUSEBUTTONUP) {
             mouse.events.push_back(event.button);
         }
+        if (event.type == SDL_MOUSEWHEEL) {
+            events.Writer<SDL_MouseWheelEvent>().Write(event.wheel);
+        }
 
         if (handler) {
             handler->HandleEvent(event);

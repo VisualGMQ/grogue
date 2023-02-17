@@ -9,7 +9,7 @@ class HandleIDGenerator final {
 public:
     HandleInnerIDType Generate() {
         auto id = curID_;
-        assert(curID_ != 0);
+        assert(id != 0);
         curID_++;
         return id;
     }
@@ -46,6 +46,9 @@ using HandleIDManager = HandleIDManagerBase<HandleIDGenerator<T>>;
 template <typename Tag>
 class Handle {
 public:
+    template <typename T>
+    friend std::ostream& operator<<(std::ostream&, Handle<T>);
+
     Handle() = default;
 
     struct Hash final {
@@ -93,5 +96,11 @@ public:
 private:
     HandleInnerIDType handle_ = Null();
 
-    Handle(HandleInnerIDType handle) : handle_(handle) {}
+    explicit Handle(HandleInnerIDType handle) : handle_(handle) {}
 };
+
+template <typename T>
+std::ostream& operator<<(std::ostream& o, Handle<T> handle) {
+    o << "Handle(" << handle.handle_ << ")";
+    return o;
+}
