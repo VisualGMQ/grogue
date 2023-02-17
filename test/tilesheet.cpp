@@ -3,7 +3,7 @@
 
 void LoadResourcesSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& manager = resources.Get<TileSheetManager>();
-    auto tilesheet = manager.LoadFromConfig("font_desc.lua");
+    auto tilesheet = manager.LoadFromConfig(TestHelper::Instance().GetResourcePath() + "font_desc.lua");
     cmd.SetResource<TileSheet>(std::move(tilesheet));
 }
 
@@ -32,8 +32,6 @@ public:
     Test() {
         auto& world = GetWorld();
         world
-            .SetResource<ResourceRootDir>(
-                ResourceRootDir{TestHelper::Instance().GetResourcePath()})
             .AddPlugins<DefaultPlugins>()
             .AddStartupSystem(LoadResourcesSystem)
             .AddSystem(UpdateSystem)

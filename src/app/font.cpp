@@ -31,6 +31,6 @@ Font::~Font() {
 
 FontHandle FontManager::Load(const std::string& filename, int ptsize) {
     auto newHandle = FontHandle::Create();
-    storeNewItem(newHandle, std::unique_ptr<Font>(new Font(newHandle, GetRootDir() + filename, ptsize)));
+    storeNewItem(newHandle, std::unique_ptr<Font>(new Font(newHandle, filename, ptsize)));
     return newHandle;
 }

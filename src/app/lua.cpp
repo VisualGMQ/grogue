@@ -18,7 +18,7 @@ LuaScript& LuaScript::operator=(LuaScript&& o) {
 
 LuaScriptHandle LuaManager::Load(const std::string& filename) {
     auto handle = LuaScriptHandle::Create();
-    storeNewItem(handle, std::unique_ptr<LuaScript>(new LuaScript{handle, GetRootDir() + filename}));
+    storeNewItem(handle, std::unique_ptr<LuaScript>(new LuaScript{handle, filename}));
     return handle;
 }
 
@@ -33,5 +33,5 @@ LuaScript LuaManager::CreateSolitary() {
 }
 
 LuaScript LuaManager::CreateSolitary(const std::string& filename) {
-    return LuaScript{LuaScriptHandle::Null(), GetRootDir() + filename};
+    return LuaScript{LuaScriptHandle::Null(), filename};
 }

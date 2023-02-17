@@ -70,11 +70,8 @@ void DefaultPlugins::Build(ecs::World* world) {
     Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3);
     IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
 
-    auto rootDir = world->GetResource<ResourceRootDir>();
-    std::string dir = rootDir ? rootDir->Dir() : "";
-
     world->SetResource(Window("Grogue", 1024, 720))
-        .SetResource(AssetsManager{dir})
+        .SetResource(AssetsManager{})
         .SetResource(BGMPlayer{world->GetResource<AssetsManager>()->BGM()})
         .SetResource(Renderer{*world->GetResource<Window>(),
                               world->GetResource<AssetsManager>()->Font()})
@@ -85,7 +82,7 @@ void DefaultPlugins::Build(ecs::World* world) {
 
     auto* assets = world->GetResource<AssetsManager>();
     assets->image_ = std::unique_ptr<ImageManager>(
-        new ImageManager(dir, *world->GetResource<Renderer>()));
+        new ImageManager(*world->GetResource<Renderer>()));
 
     world->SetResource(TileSheetManager{assets->Image(), assets->Lua()})
         .AddSystem(EventUpdateSystem)

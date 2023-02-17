@@ -34,6 +34,5 @@ private:
 
 class FontManager final : public ResourceManager<Font> {
 public:
-    FontManager(const std::string& rootDir) : ResourceManager<Font>(rootDir) {}
     FontHandle Load(const std::string& filename, int ptsize);
 };

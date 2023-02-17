@@ -28,7 +28,7 @@ BGM::~BGM() {
 
 BGMHandle BGMManager::Load(const std::string& filename) {
     auto handle = BGMHandle::Create();
-    storeNewItem(handle, std::unique_ptr<BGM>(new BGM(handle, GetRootDir() + filename)));
+    storeNewItem(handle, std::unique_ptr<BGM>(new BGM(handle, filename)));
     return handle;
 }
 

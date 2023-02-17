@@ -31,11 +31,4 @@ private:
 };
 
 template <typename T>
-class ResourceManager : public Manager<T> {
-public:
-    ResourceManager(const std::string& dir): dir_(dir) {}
-    const std::string& GetRootDir() const { return dir_; }
-
-private:
-    std::string dir_;
-};
+using ResourceManager = Manager<T>;

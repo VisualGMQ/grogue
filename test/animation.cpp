@@ -47,7 +47,7 @@ void InitPropertyClipSystem(ecs::Commands& cmd, ecs::Resources resources) {
 void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& tilesheetManager = resources.Get<TileSheetManager>();
 
-    cmd.SetResource<TileSheet>(std::move(tilesheetManager.LoadFromConfig("airman_desc.lua")));
+    cmd.SetResource<TileSheet>(std::move(tilesheetManager.LoadFromConfig(TestHelper::Instance().GetResourcePath() + "airman_desc.lua")));
 }
 
 void UpdatePropSystem(ecs::Commands& cmd, ecs::Queryer queryer, ecs::Resources resources, ecs::Events& events) {
@@ -82,8 +82,6 @@ public:
     Test() {
         auto& world = GetWorld();
         world
-            .SetResource<ResourceRootDir>(
-                ResourceRootDir{TestHelper::Instance().GetResourcePath()})
             .AddPlugins<DefaultPlugins>()
             .AddStartupSystem(InitPropertyClipSystem)
             .AddStartupSystem(LoadResourceSystem)

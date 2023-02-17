@@ -56,6 +56,10 @@ TileSheet& TileSheetManager::LoadFromConfig(const std::string& configFilename) {
     auto table = lua.lua.get<sol::table>("description");
 
     std::string filename = table.get<std::string>("filename");
+    auto root = configFilename;
+    std::replace(root.begin(), root.end(), '\\', '/');
+    std::replace(filename.begin(), filename.end(), '\\', '/');
+    filename = root.substr(0, root.find_last_of('/') + 1) + filename.substr(filename.find_last_of('/'));
 
     uint32_t row = table.get<int>("row");
     uint32_t col = table.get<int>("col");
