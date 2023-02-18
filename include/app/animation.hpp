@@ -63,6 +63,15 @@ public:
 
     const Frame<T>& operator[](size_t index) const { return frames_[index]; }
 
+    Frame<T>& At(size_t index) {
+        Assert(index < frames_.size(), "out of range");
+        return (*this)[index];
+    }
+
+    const Frame<T>& At(size_t index) const {
+        return const_cast<AnimatedProperty&>(*this).At(index);
+    }
+
     bool Empty() const { return frames_.empty(); }
 
 private:
@@ -70,12 +79,31 @@ private:
 };
 
 template <typename T>
+using AnimatedClip = std::shared_ptr<AnimatedProperty<T>>;
+
+template <typename T>
+AnimatedClip<T> CreateAnimClip() {
+    return std::make_shared<AnimatedProperty<T>>();
+}
+
+static constexpr int AnimInfiniteLoop = -1;
+
+template <typename T>
 class AnimPlayer final {
 public:
-    AnimPlayer(AnimatedProperty<T>& clip) : clip_(clip) {
-        if (!clip_.Empty()) {
-            property_ = clip_[0].Value();
+    template <typename U>
+    friend class AnimBunchPlayer;
+
+    AnimPlayer() = default;
+
+    AnimPlayer(AnimatedClip<T> clip) : clip_(clip) {
+        if (!clip_->Empty()) {
+            property_ = clip_->At(0).Value();
         }
+    }
+
+    void SetClip(AnimatedClip<T> clip) {
+        clip_ = clip;
     }
 
     void Play() { isPlaying_ = true; }
@@ -84,25 +112,42 @@ public:
 
     void Stop() {
         isPlaying_ = false;
-        clip_.curTime = 0;
-        clip_.frameIndex = 0;
+        Rewind();
+    }
+
+    void Rewind() {
+        curTime_ = 0;
+        frameIndex_ = 0;
+    }
+
+    void SetLoop(int loopCount) {
+        loop_ = loopCount;
     }
 
     bool IsPlaying() const { return isPlaying_; }
 
     void Update(const Timer& timer) {
         if (!isPlaying_) {
-            return;
+            return ;
         }
 
-        if (frameIndex_ >= clip_.FrameSize() - 1) {
-            property_ = clip_.GetFrames().back().value_;
+        if (isReachedLatestFrame()) {
+            property_ = clip_->GetFrames().back().value_;
+
+            if (loop_ != 0) {
+                Rewind();
+                if (loop_ > 0) {
+                    loop_ --;
+                }
+            } else {
+                isPlaying_ = false;
+            }
             return;
         }
 
         curTime_ += timer.Elapse();
-        auto& frame = clip_[frameIndex_];
-        auto& nextFrame = clip_[frameIndex_ + 1];
+        auto& frame = clip_->At(frameIndex_);
+        auto& nextFrame = clip_->At(frameIndex_ + 1);
         auto duration = nextFrame.time_ - frame.time_;
         if (curTime_ >= duration) {
             curTime_ -= duration;
@@ -118,8 +163,104 @@ public:
 
 private:
     T property_;
-    AnimatedProperty<T>& clip_;
+    AnimatedClip<T> clip_;
     Timer::TimeType curTime_ = 0;
     uint32_t frameIndex_ = 0;
     bool isPlaying_ = false;
+    int loop_ = 0;
+
+    bool isReachedLatestFrame() const {
+        return frameIndex_ >= clip_->FrameSize() - 1;
+    }
+};
+
+template <typename T>
+using AnimPlayerPtr = std::shared_ptr<AnimPlayer<T>>;
+
+template <typename T>
+AnimPlayerPtr<T> CreateAnimPlayer(AnimatedClip<T> clip) {
+    return std::make_shared<AnimPlayer<T>>(clip);
+}
+
+template <typename T>
+class AnimBunchPlayer final {
+public:
+    void AddAnimPlayer(AnimPlayerPtr<T> player) {
+        players_.push_back(player);
+        player->SetLoop(0);
+    }
+
+    void Play() {
+        for (auto& player : players_) {
+            player->Play();
+        }
+    }
+
+    void Pause() {
+        for (auto& player : players_) {
+            player->Pause();
+        }
+    }
+
+    void Stop() {
+        for (auto& player : players_) {
+            player->Stop();
+        }
+    }
+
+    void Rewind() {
+        for (auto& player : players_) {
+            player->Rewind();
+        }
+    }
+
+    bool IsPlaying() const {
+        for (auto& player : players_) {
+            if (player->IsPlaying()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void Update(const Timer& timer) {
+        if (!IsPlaying()) {
+            return;
+        }
+
+        if (isReachedLatestFrame()) {
+            if (loop_ != 0) {
+                Rewind();
+                Play();
+                if (loop_ > 0) {
+                    loop_ --;
+                }
+            } else {
+                return;
+            }
+        }
+
+        for (auto& player : players_) {
+            player->Update(timer);
+        }
+    }
+
+    AnimPlayerPtr<T> GetPlayer(size_t index) { return players_.at(index); }
+
+    void SetLoop(int loop) {
+        loop_ = loop;
+    }
+
+private:
+    std::vector<AnimPlayerPtr<T>> players_;
+    int loop_ = 0;
+
+    bool isReachedLatestFrame() const {
+        for (auto& player : players_) {
+            if (!player->isReachedLatestFrame()) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
