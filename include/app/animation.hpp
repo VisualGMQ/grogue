@@ -1,6 +1,7 @@
 #pragma once
 
 #include "app/fwd.hpp"
+#include "app/lua.hpp"
 #include "app/sprite.hpp"
 #include "app/timer.hpp"
 #include "core/ecs.hpp"
@@ -81,6 +82,9 @@ private:
 template <typename T>
 using AnimatedClip = std::shared_ptr<AnimatedProperty<T>>;
 
+AnimatedClip<float> LoadAnim(LuaManager& manager, const std::string& filename);
+std::unordered_map<std::string, AnimatedClip<float>> LoadAnims(LuaManager& manager, const std::string& filename);
+
 template <typename T>
 AnimatedClip<T> CreateAnimClip() {
     return std::make_shared<AnimatedProperty<T>>();
@@ -102,9 +106,7 @@ public:
         }
     }
 
-    void SetClip(AnimatedClip<T> clip) {
-        clip_ = clip;
-    }
+    void SetClip(AnimatedClip<T> clip) { clip_ = clip; }
 
     void Play() { isPlaying_ = true; }
 
@@ -120,15 +122,13 @@ public:
         frameIndex_ = 0;
     }
 
-    void SetLoop(int loopCount) {
-        loop_ = loopCount;
-    }
+    void SetLoop(int loopCount) { loop_ = loopCount; }
 
     bool IsPlaying() const { return isPlaying_; }
 
     void Update(const Timer& timer) {
         if (!isPlaying_) {
-            return ;
+            return;
         }
 
         if (isReachedLatestFrame()) {
@@ -137,7 +137,7 @@ public:
             if (loop_ != 0) {
                 Rewind();
                 if (loop_ > 0) {
-                    loop_ --;
+                    loop_--;
                 }
             } else {
                 isPlaying_ = false;
@@ -185,37 +185,43 @@ AnimPlayerPtr<T> CreateAnimPlayer(AnimatedClip<T> clip) {
 template <typename T>
 class AnimBunchPlayer final {
 public:
-    void AddAnimPlayer(AnimPlayerPtr<T> player) {
-        players_.push_back(player);
+    void SetAnims(std::unordered_map<std::string, AnimatedClip<T>> container) {
+        for (auto& [name, clip] : container) {
+            players_[name] = CreateAnimPlayer(clip);
+        }
+    }
+
+    void AddAnimPlayer(const std::string& name, AnimPlayerPtr<T> player) {
+        players_[name] = player;
         player->SetLoop(0);
     }
 
     void Play() {
-        for (auto& player : players_) {
+        for (auto& [_, player] : players_) {
             player->Play();
         }
     }
 
     void Pause() {
-        for (auto& player : players_) {
+        for (auto& [_, player] : players_) {
             player->Pause();
         }
     }
 
     void Stop() {
-        for (auto& player : players_) {
+        for (auto& [_, player] : players_) {
             player->Stop();
         }
     }
 
     void Rewind() {
-        for (auto& player : players_) {
+        for (auto& [_, player] : players_) {
             player->Rewind();
         }
     }
 
     bool IsPlaying() const {
-        for (auto& player : players_) {
+        for (auto& [_, player] : players_) {
             if (player->IsPlaying()) {
                 return true;
             }
@@ -233,30 +239,33 @@ public:
                 Rewind();
                 Play();
                 if (loop_ > 0) {
-                    loop_ --;
+                    loop_--;
                 }
             } else {
                 return;
             }
         }
 
-        for (auto& player : players_) {
+        for (auto& [_, player] : players_) {
             player->Update(timer);
         }
     }
 
-    AnimPlayerPtr<T> GetPlayer(size_t index) { return players_.at(index); }
-
-    void SetLoop(int loop) {
-        loop_ = loop;
+    AnimPlayerPtr<T> GetPlayer(const std::string& name) {
+        if (auto it = players_.find(name); it != players_.end()) {
+            return it->second;
+        }
+        return nullptr;
     }
 
+    void SetLoop(int loop) { loop_ = loop; }
+
 private:
-    std::vector<AnimPlayerPtr<T>> players_;
+    std::unordered_map<std::string, AnimPlayerPtr<T>> players_;
     int loop_ = 0;
 
     bool isReachedLatestFrame() const {
-        for (auto& player : players_) {
+        for (auto& [_, player] : players_) {
             if (!player->isReachedLatestFrame()) {
                 return false;
             }

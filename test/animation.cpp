@@ -8,35 +8,19 @@ math::Rect rect = {0, 0, 50, 50};
 
 struct PlayerGroup {
     AnimBunchPlayer<float> positionPlayer;
-    AnimPlayer<int> rowPlayer;
+    AnimPlayer<float> rowPlayer;
 };
 
 void InitPropertyClipSystem(ecs::Commands& cmd, ecs::Resources resources) {
-    auto xClip = CreateAnimClip<float>();
-    xClip->AppendFrame(CreateBasicPropFrame<float>(0, 0));
-    xClip->AppendFrame(CreateBasicPropFrame<float>(800, 5000));
+    auto& luaManager = resources.Get<AssetsManager>().Lua();
 
-    auto yClip = CreateAnimClip<float>();
-    yClip->AppendFrame(CreateBasicPropFrame<float>(0, 0));
-    yClip->AppendFrame(CreateBasicPropFrame<float>(500, 3000));
-
-    auto tileCol = CreateAnimClip<int>();
-    tileCol->AppendFrame(CreateBasicPropFrame<int>(0, 0));
-    tileCol->AppendFrame(CreateBasicPropFrame<int>(1, 500));
-    tileCol->AppendFrame(CreateBasicPropFrame<int>(2, 1000));
-    tileCol->AppendFrame(CreateBasicPropFrame<int>(3, 1500));
-    tileCol->AppendFrame(CreateBasicPropFrame<int>(4, 2000));
-    tileCol->AppendFrame(CreateBasicPropFrame<int>(5, 2500));
-    tileCol->AppendFrame(CreateBasicPropFrame<int>(6, 3000));
-    tileCol->AppendFrame(CreateBasicPropFrame<int>(7, 3500));
+    auto resourcePath = TestHelper::Instance().GetResourcePath();
+    auto tileCol = LoadAnim(luaManager, resourcePath + "frame_animation.lua");
+    auto clips = LoadAnims(luaManager, resourcePath + "rect_animation.lua");
 
     PlayerGroup group;
     AnimBunchPlayer<float> bunchPlayer;
-    auto xClipPlayer = CreateAnimPlayer<float>(xClip);
-    auto yClipPlayer = CreateAnimPlayer<float>(yClip);
-
-    group.positionPlayer.AddAnimPlayer(xClipPlayer);
-    group.positionPlayer.AddAnimPlayer(yClipPlayer);
+    group.positionPlayer.SetAnims(clips);
     group.rowPlayer = tileCol;
 
     group.positionPlayer.Play();
@@ -50,6 +34,7 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& tilesheetManager = resources.Get<TileSheetManager>();
 
     cmd.SetResource<TileSheet>(std::move(tilesheetManager.LoadFromConfig(TestHelper::Instance().GetResourcePath() + "airman_desc.lua")));
+
 }
 
 void UpdatePropSystem(ecs::Commands& cmd, ecs::Queryer queryer, ecs::Resources resources, ecs::Events& events) {
@@ -60,8 +45,8 @@ void UpdatePropSystem(ecs::Commands& cmd, ecs::Queryer queryer, ecs::Resources r
     group.positionPlayer.Update(timer);
     group.rowPlayer.Update(timer);
 
-    rect.x = group.positionPlayer.GetPlayer(0)->GetProp();
-    rect.y = group.positionPlayer.GetPlayer(1)->GetProp();
+    rect.x = group.positionPlayer.GetPlayer("x")->GetProp();
+    rect.y = group.positionPlayer.GetPlayer("y")->GetProp();
     int col = group.rowPlayer.GetProp();
 
     auto& renderer = resources.Get<Renderer>();
