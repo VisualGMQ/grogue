@@ -6,7 +6,7 @@ Keyboard::Keyboard() {
     }
 }
 
-void Keyboard::UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources resources, ecs::Events& events) {
+void Keyboard::UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources resources, ecs::Events& events) {
     if (!resources.Has<Keyboard>()) {
         return ;
     }
@@ -37,7 +37,7 @@ void Keyboard::updateOneKey(const SDL_KeyboardEvent& event) {
     }
 }
 
-void Mouse::UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources resources, ecs::Events& events) {
+void Mouse::UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources resources, ecs::Events& events) {
     if (!resources.Has<Mouse>()) {
         return ;
     }

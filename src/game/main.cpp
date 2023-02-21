@@ -16,12 +16,12 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     manager.LoadFromConfig("resources/img/tilesheet_tile.lua");
 }
 
-void InputHandle(ecs::Commands& cmd, ecs::Queryer queryer,
+void InputHandle(ecs::Commands& cmd, ecs::Querier queryer,
                  ecs::Resources resources, ecs::Events& events) {
     auto& keyboard = resources.Get<Keyboard>();
 }
 
-void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
+void UpdateSystem(ecs::Commands& cmd, ecs::Querier queryer,
                   ecs::Resources resources, ecs::Events&) {
     auto& mouse = resources.Get<Mouse>();
     auto& assets = resources.Get<AssetsManager>();
@@ -44,7 +44,7 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
     }
 }
 
-void ShowDebugInfoSystem(ecs::Commands&, ecs::Queryer, ecs::Resources resources,
+void ShowDebugInfoSystem(ecs::Commands&, ecs::Querier, ecs::Resources resources,
                          ecs::Events&) {
     auto& context = resources.Get<Context>();
     auto& renderer = resources.Get<Renderer>();

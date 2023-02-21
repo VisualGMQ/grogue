@@ -4,7 +4,7 @@ Timer::Timer() : elapse_(1) {
     curTime_ = std::chrono::steady_clock::now();
 }
 
-void Timer::UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources resources,
+void Timer::UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources resources,
                          ecs::Events&) {
     if (resources.Has<Timer>()) {
         auto& timer = resources.Get<Timer>();

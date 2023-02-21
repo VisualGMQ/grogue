@@ -1,6 +1,6 @@
 #include "app/app.hpp"
 
-void ExitTrigger::DetectExitSystem(ecs::Commands& cmd, ecs::Queryer queryer,
+void ExitTrigger::DetectExitSystem(ecs::Commands& cmd, ecs::Querier querier,
                                    ecs::Resources resources,
                                    ecs::Events& events) {
     if (!resources.Has<ExitTrigger>()) {
@@ -13,7 +13,7 @@ void ExitTrigger::DetectExitSystem(ecs::Commands& cmd, ecs::Queryer queryer,
     }
 }
 
-void EventUpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer,
+void EventUpdateSystem(ecs::Commands& cmd, ecs::Querier querier,
                        ecs::Resources resources, ecs::Events& events) {
     SDL_Event event;
 
@@ -112,6 +112,7 @@ void App::Run() {
 
     auto& exit = resources.Get<ExitTrigger>();
     while (!exit.ShouldExit()) {
+        Uint32 fps_start = SDL_GetTicks();
         auto renderer = world_.GetResource<Renderer>();
 
         renderer->SetDrawColor(Color(50, 50, 50));
@@ -120,6 +121,11 @@ void App::Run() {
         world_.Update();
 
         renderer->Present();
+
+        Uint32 fps_time = SDL_GetTicks() - fps_start;
+        // May be 144Hz
+        if (fps_time < 1000.0f / 144)
+            SDL_Delay((Uint32)(1000.0f / 144 - fps_time));
     }
 
     world_.Shutdown();

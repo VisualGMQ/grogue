@@ -19,7 +19,7 @@ struct Button {
 
 class Keyboard {
 public:
-    static void UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources, ecs::Events&);
+    static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
 
     Keyboard();
     const Button<SDL_Scancode>& Key(SDL_Scancode key) const { return buttons_[key]; }
@@ -32,7 +32,7 @@ private:
 
 class Mouse {
 public:
-    static void UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources, ecs::Events&);
+    static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
 
     math::Vector2 Position() const { return position_; }
     math::Vector2 Offset() const { return offset_; }

@@ -7,7 +7,7 @@ void LoadResourcesSystem(ecs::Commands& cmd, ecs::Resources resources) {
     cmd.SetResource<TileSheet>(std::move(tilesheet));
 }
 
-void UpdateSystem(ecs::Commands& cmd, ecs::Queryer queryer, ecs::Resources resources, ecs::Events& events) {
+void UpdateSystem(ecs::Commands& cmd, ecs::Querier queryer, ecs::Resources resources, ecs::Events& events) {
     auto& renderer = resources.Get<Renderer>();
 
     auto& tilesheet = resources.Get<TileSheet>();

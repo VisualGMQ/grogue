@@ -1,6 +1,6 @@
 #include "app/app.hpp"
 
-void DetectMouseInputSystem(ecs::Commands&, ecs::Queryer,
+void DetectMouseInputSystem(ecs::Commands&, ecs::Querier,
                             ecs::Resources resources, ecs::Events& events) {
     auto& renderer = resources.Get<Renderer>();
     auto& mouse = resources.Get<Mouse>();
@@ -23,7 +23,7 @@ void DetectMouseInputSystem(ecs::Commands&, ecs::Queryer,
     renderer.DrawRect({mouse.Position().x - RectLen, mouse.Position().y - RectLen, RectLen * 2, RectLen * 2});
 }
 
-void DetectKeyboardInputSystem(ecs::Commands&, ecs::Queryer,
+void DetectKeyboardInputSystem(ecs::Commands&, ecs::Querier,
                                ecs::Resources resources, ecs::Events& events) {
     auto& renderer = resources.Get<Renderer>();
     auto& keyboard = resources.Get<Keyboard>();

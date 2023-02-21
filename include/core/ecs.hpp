@@ -126,9 +126,9 @@ using EntityGenerator = IDGenerator<Entity>;
 
 class Commands;
 class Resources;
-class Queryer;
+class Querier;
 
-using UpdateSystem = void (*)(Commands &, Queryer, Resources, Events &);
+using UpdateSystem = void (*)(Commands &, Querier, Resources, Events &);
 using StartupSystem = void (*)(Commands &, Resources);
 
 class Plugins {
@@ -143,7 +143,7 @@ class World final {
 public:
     friend class Commands;
     friend class Resources;
-    friend class Queryer;
+    friend class Querier;
     using ComponentContainer = std::unordered_map<ComponentID, void *>;
 
     World() = default;
@@ -433,9 +433,9 @@ private:
     World &world_;
 };
 
-class Queryer final {
+class Querier final {
 public:
-    Queryer(World &world) : world_(world) {}
+    Querier(World &world) : world_(world) {}
 
     template <typename... Components>
     std::vector<Entity> Query() const {
@@ -516,7 +516,7 @@ inline void World::Update() {
     Events events;
     for (auto sys : updateSystems_) {
         Commands commands{*this};
-        sys(commands, Queryer{*this}, Resources{*this}, events);
+        sys(commands, Querier{*this}, Resources{*this}, events);
         commandList.push_back(commands);
     }
     events.removeAllEvents();

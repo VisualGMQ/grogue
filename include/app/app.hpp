@@ -17,14 +17,14 @@ public:
 
     void Exit() { shouldExit_ = true; }
 
-    static void DetectExitSystem(ecs::Commands& cmd, ecs::Queryer queryer,
+    static void DetectExitSystem(ecs::Commands& cmd, ecs::Querier querier,
                                  ecs::Resources resources, ecs::Events& events);
 
 private:
     bool shouldExit_ = false;
 };
 
-// a resource to regist a extra custom event handler
+// a resource to register a extra custom event handler
 class ExtraEventHandler final {
 public:
     using EventHandler = std::function<void(const SDL_Event&)>;

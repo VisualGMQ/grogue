@@ -5,7 +5,7 @@
 class Timer final {
 public:
     using TimeType = uint64_t;
-    static void UpdateSystem(ecs::Commands&, ecs::Queryer, ecs::Resources,
+    static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
                              ecs::Events&);
 
     Timer();
