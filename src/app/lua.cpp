@@ -5,12 +5,12 @@ LuaScript::~LuaScript() {
 }
 
 LuaScript::LuaScript(LuaScript&& o): handle_(LuaScriptHandle::Null()) {
-    std::swap(*this, o);
+    swap(*this, o);
 }
 
 LuaScript& LuaScript::operator=(LuaScript&& o) {
     if (&o != this) {
-        std::swap(*this, o);
+        swap(*this, o);
     }
     return *this;
 }

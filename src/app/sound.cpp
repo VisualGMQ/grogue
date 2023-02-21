@@ -9,12 +9,12 @@ BGM::BGM(BGMHandle handle, const std::string& filename) : handle_(handle) {
 }
 
 BGM::BGM(BGM&& bgm): handle_(BGMHandle::Null()) {
-    std::swap(*this, bgm);
+    swap(*this, bgm);
 }
 
 BGM& BGM::operator=(BGM&& o) {
     if (&o != this) {
-        std::swap(o, *this);
+        swap(o, *this);
     }
 
     return *this;

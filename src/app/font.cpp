@@ -1,12 +1,12 @@
 #include "app/font.hpp"
 
 Font::Font(Font&& f): handle_(FontHandle::Null()) {
-    std::swap(*this, f);
+    swap(*this, f);
 }
 
 Font& Font::operator=(Font&& f) {
     if (this != &f) {
-        std::swap(*this, f);
+        swap(*this, f);
         f.font_ = nullptr;
         f.handle_ = FontHandle::Null();
     }

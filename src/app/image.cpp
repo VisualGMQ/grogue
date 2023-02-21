@@ -18,13 +18,13 @@ Image::Image(ImageHandle handle, SDL_Texture* texture) : handle_(handle) {
 
 Image& Image::operator=(Image&& img) {
     if (&img != this) {
-        std::swap(*this, img);
+        swap(*this, img);
     }
     return *this;
 }
 
 Image::Image(Image&& o) : handle_(ImageHandle::Null()) {
-    std::swap(*this, o);
+    swap(*this, o);
 }
 
 Image::~Image() {
