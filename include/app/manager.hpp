@@ -24,10 +24,9 @@ protected:
         }
     }
 
-private:
     std::unordered_map<Handle<T>, std::unique_ptr<T>,
                        typename Handle<T>::Hash, typename Handle<T>::HashEq>
-        datas_;
+		datas_;
 };
 
 template <typename T>

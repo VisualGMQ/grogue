@@ -78,7 +78,8 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(Keyboard{})
         .SetResource(Mouse{})
         .SetResource(ExitTrigger{})
-        .SetResource(Timer{});
+        .SetResource(Time{})
+        .SetResource(TimerManager{});
 
     auto* assets = world->GetResource<AssetsManager>();
     assets->image_ = std::unique_ptr<ImageManager>(
@@ -88,7 +89,8 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(EventUpdateSystem)
         .AddSystem(Keyboard::UpdateSystem)
         .AddSystem(Mouse::UpdateSystem)
-        .AddSystem(Timer::UpdateSystem);
+        .AddSystem(Time::UpdateSystem)
+        .AddSystem(TimerManager::UpdateSystem);
     world->GetResource<Renderer>()->imageManager_ = &assets->Image();
 }
 
@@ -121,11 +123,6 @@ void App::Run() {
         world_.Update();
 
         renderer->Present();
-
-        Uint32 fps_time = SDL_GetTicks() - fps_start;
-        // May be 144Hz
-        if (fps_time < 1000.0f / 144)
-            SDL_Delay((Uint32)(1000.0f / 144 - fps_time));
     }
 
     world_.Shutdown();

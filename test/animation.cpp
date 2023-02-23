@@ -39,7 +39,7 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
 
 void UpdatePropSystem(ecs::Commands& cmd, ecs::Querier queryer, ecs::Resources resources, ecs::Events& events) {
     auto& group = resources.Get<PlayerGroup>();
-    auto& timer = resources.Get<Timer>();
+    auto& timer = resources.Get<Time>();
     auto& tilesheet = resources.Get<TileSheet>();
 
     group.positionPlayer.Update(timer);

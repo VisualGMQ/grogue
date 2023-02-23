@@ -27,7 +27,7 @@ struct ManifoldPoint final {
 };
 
 struct ManifoldDetail final {
-    Timer::TimeType collideTime{};
+    Time::TimeType collideTime{};
     std::array<ManifoldPoint, 2> contactPoint;
     int contactNum{};
 };

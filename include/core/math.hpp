@@ -103,6 +103,12 @@ public:
         return *this;
     }
 
+    void Set(float x, float y, float z) {
+        this->x = x;
+        this->y = y;
+        this->z = z;
+    }
+
     Vector3 operator*(const Vector3& v) { return {v.x * x, v.y * y, v.z * z}; }
 
     void Normalize() {
@@ -211,6 +217,11 @@ public:
     }
 
     Vector2 operator*(const Vector2& v) const { return {v.x * x, v.y * y}; }
+
+    void Set(float x, float y) {
+        this->x = x;
+        this->y = y;
+    }
 
     void Normalize() {
         float a = 1.0f / Length(*this);

@@ -23,22 +23,22 @@ public:
     friend class AnimPlayer;
 
     template <typename U>
-    friend Frame<U> CreateBasicPropFrame(U, Timer::TimeType, InterpFunc<U>);
+    friend Frame<U> CreateBasicPropFrame(U, Time::TimeType, InterpFunc<U>);
 
-    friend Frame<Tile> CreateTileFrame(Timer::TimeType time, const Tile& tile);
+    friend Frame<Tile> CreateTileFrame(Time::TimeType time, const Tile& tile);
 
     auto Duration() const { return time_; }
 
     const T& Value() const { return value_; }
 
 private:
-    Timer::TimeType time_;
+    Time::TimeType time_;
     T value_;
     InterpFunc<T> interpolation_;
 };
 
 template <typename T>
-Frame<T> CreateBasicPropFrame(T value, Timer::TimeType time,
+Frame<T> CreateBasicPropFrame(T value, Time::TimeType time,
                               InterpFunc<T> func = math::Lerp<T>) {
     Frame<T> frame;
     frame.time_ = time;
@@ -126,7 +126,7 @@ public:
 
     bool IsPlaying() const { return isPlaying_; }
 
-    void Update(const Timer& timer) {
+    void Update(const Time& timer) {
         if (!isPlaying_) {
             return;
         }
@@ -164,7 +164,7 @@ public:
 private:
     T property_;
     AnimatedClip<T> clip_;
-    Timer::TimeType curTime_ = 0;
+    Time::TimeType curTime_ = 0;
     uint32_t frameIndex_ = 0;
     bool isPlaying_ = false;
     int loop_ = 0;
@@ -229,7 +229,7 @@ public:
         return false;
     }
 
-    void Update(const Timer& timer) {
+    void Update(const Time& timer) {
         if (!IsPlaying()) {
             return;
         }

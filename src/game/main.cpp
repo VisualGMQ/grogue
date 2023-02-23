@@ -48,7 +48,7 @@ void ShowDebugInfoSystem(ecs::Commands&, ecs::Querier, ecs::Resources resources,
                          ecs::Events&) {
     auto& context = resources.Get<Context>();
     auto& renderer = resources.Get<Renderer>();
-    auto& timer = resources.Get<Timer>();
+    auto& timer = resources.Get<Time>();
     auto& keyboard = resources.Get<Keyboard>();
 
     if (keyboard.Key(SDL_SCANCODE_G).IsPressed()) {
