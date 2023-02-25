@@ -36,6 +36,5 @@ struct Sprite final {
 struct SpriteBundle final {
     Sprite sprite;
     ImageHandle image;
-    Transform transform;
     bool visiable = true;
 };

@@ -153,9 +153,10 @@ void TileSheetRenderSystem(ecs::Commands& cmd, ecs::Querier,
     SpriteBundle bundle;
     bundle.image = config.handle;
     bundle.sprite = Sprite::Default();
-    bundle.transform.position = position;
-    bundle.transform.scale = {scale, scale};
-    renderer.DrawSprite(bundle);
+    Transform transform;
+    transform.position = position;
+    transform.scale = {scale, scale};
+    renderer.DrawSprite(bundle, transform);
 
     renderer.SetDrawColor(Color{0, 0, 255});
     renderer.DrawRect(math::Rect{position.x, position.y, size.x, size.y});

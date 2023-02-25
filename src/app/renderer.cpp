@@ -91,13 +91,13 @@ void Renderer::DrawCircle(const math::Vector2& center, float radius, float subse
     SDL_RenderDrawLineF(renderer_, points[0].x, points[0].y, points.back().x, points.back().y);
 }
 
-void Renderer::DrawSprite(SpriteBundle& sprite) {
+void Renderer::DrawSprite(SpriteBundle& sprite, const Transform& transform) {
     if (!sprite.visiable) return;
 
     auto& image = imageManager_->Get(sprite.image);
     SDL_SetTextureColorMod(image.texture_, sprite.sprite.color.r, sprite.sprite.color.g, sprite.sprite.color.b);
     drawTexture(image.texture_, image.W(), image.H(), sprite.sprite.region,
-                sprite.sprite.customSize, sprite.transform,
+                sprite.sprite.customSize, transform,
                 sprite.sprite.anchor, sprite.sprite.flip);
 }
 

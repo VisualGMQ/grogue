@@ -11,6 +11,6 @@ enum Flip {
 
 struct Transform final {
     math::Vector2 position{math::Vector2::Zero};
-    float rotation = 0;  // in radians
+    float rotation = 0;  // in degress
     math::Vector2 scale{1, 1};
 };

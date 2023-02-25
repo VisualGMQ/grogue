@@ -21,8 +21,8 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Querier queryer, ecs::Resources resou
             sprite.customSize.x = tile.region.w;
             sprite.customSize.y = tile.region.h;
             sprite.region = tile.region;
-            SpriteBundle bundle{sprite, tilesheet.Handle(), transform};
-            renderer.DrawSprite(bundle);
+            SpriteBundle bundle{sprite, tilesheet.Handle()};
+            renderer.DrawSprite(bundle, transform);
         }
     }
 }

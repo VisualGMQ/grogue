@@ -56,11 +56,11 @@ void UpdatePropSystem(ecs::Commands& cmd, ecs::Querier queryer, ecs::Resources r
     sprite.region = tile.region;
     sprite.customSize.x = tile.region.w;
     sprite.customSize.y = tile.region.h;
-    SpriteBundle bundle{sprite, tile.handle, {}};
+    SpriteBundle bundle{sprite, tile.handle};
 
     renderer.SetDrawColor({0, 255, 0});
     renderer.DrawRect(rect);
-    renderer.DrawSprite(bundle);
+    renderer.DrawSprite(bundle, {});
 }
 
 class Test : public App {

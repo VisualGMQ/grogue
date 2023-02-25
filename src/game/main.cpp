@@ -28,16 +28,20 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
 
     auto& handle = resources.Get<ImageHandle>();
     Sprite sprite = Sprite::Default();
-    auto entity1 = cmd.SpawnAndReturn<SpriteBundle>(SpriteBundle{sprite, handle, transform});
+    auto entity1 = cmd.SpawnAndReturn<SpriteBundle, NodeTransform>(SpriteBundle{sprite, handle}, NodeTransform{transform, {}});
     transform.position.x = 40;
+    transform.scale = {2, 2};
+    transform.rotation = 30;
     sprite.color = {255, 0, 0};
-    auto entity2 = cmd.SpawnAndReturn<SpriteBundle>(SpriteBundle{sprite, handle, transform});
+    auto entity2 = cmd.SpawnAndReturn<SpriteBundle, NodeTransform>(SpriteBundle{sprite, handle}, NodeTransform{transform, {}});
     transform.position.x = 80;
+    transform.scale = {1, 1};
     sprite.color = {0, 255, 0};
-    auto entity3 = cmd.SpawnAndReturn<SpriteBundle>(SpriteBundle{sprite, handle, transform});
+    auto entity3 = cmd.SpawnAndReturn<SpriteBundle, NodeTransform>(SpriteBundle{sprite, handle}, NodeTransform{transform, {}});
     transform.position.x = 120;
     sprite.color = {0, 0, 255};
-    auto entity4 = cmd.SpawnAndReturn<SpriteBundle>(SpriteBundle{sprite, handle, transform});
+    transform.scale = {2, 2};
+    auto entity4 = cmd.SpawnAndReturn<SpriteBundle, NodeTransform>(SpriteBundle{sprite, handle}, NodeTransform{transform, {}});
 
     /*
         root 

@@ -2,6 +2,11 @@
 
 #include "core/ecs.hpp"
 
+struct NodeTransform {
+    Transform localTransform;
+    Transform globalTransform;
+};
+
 struct Node {
     std::optional<ecs::Entity> entity;
     std::vector<Node> children;
