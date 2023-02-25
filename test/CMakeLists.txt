@@ -34,5 +34,6 @@ AddSimpleTest(memory_recycler memory_recycler.cpp)
 AddInteractiveTest(input input.cpp)
 AddInteractiveTest(tilesheet tilesheet.cpp)
 AddInteractiveTest(animation animation.cpp)
+AddInteractiveTest(physical physical.cpp)
 
 CopyDLL(example_test)

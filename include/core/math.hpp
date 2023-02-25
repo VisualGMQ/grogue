@@ -24,6 +24,8 @@ class Vector3;
 class Vector2;
 float Length(const Vector3& v);
 float Length(const Vector2& v);
+Vector3 Normalize(const Vector3& v);
+Vector2 Normalize(const Vector2& v);
 
 inline float Rad2Deg(float radians) {
     return radians * 180.0 / PI;
@@ -112,8 +114,7 @@ public:
     Vector3 operator*(const Vector3& v) { return {v.x * x, v.y * y, v.z * z}; }
 
     void Normalize() {
-        float a = 1.0f / Length(*this);
-        *this *= a;
+        *this = ::math::Normalize(*this);
     }
 };
 
@@ -148,6 +149,11 @@ inline float LengthSquare(const Vector3& v) {
 
 inline float Length(const Vector3& v) {
     return std::sqrt(LengthSquare(v));
+}
+
+inline Vector3 Normalize(const Vector3& v) {
+    float a = 1.0f / Length(v);
+    return v * a;
 }
 
 class Vector2 {
@@ -224,10 +230,14 @@ public:
     }
 
     void Normalize() {
-        float a = 1.0f / Length(*this);
-        *this *= a;
+        *this = ::math::Normalize(*this);
     }
 };
+
+inline Vector2 Normalize(const Vector2& v) {
+    float a = 1.0f / Length(v);
+    return v * a;
+}
 
 inline Vector2 operator*(float k, const Vector2& v) {
     return Vector2(k * v.x, k * v.y);
