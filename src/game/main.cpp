@@ -16,6 +16,51 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     manager.LoadFromConfig("resources/img/tilesheet_tile.lua");
 }
 
+enum GameState {
+    Menu,
+    Game,
+} state;
+
+
+void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
+    Transform transform;
+    transform.position = {100, 100};
+
+    auto& handle = resources.Get<ImageHandle>();
+    Sprite sprite = Sprite::Default();
+    auto entity1 = cmd.SpawnAndReturn<SpriteBundle>(SpriteBundle{sprite, handle, transform});
+    transform.position.x = 40;
+    sprite.color = {255, 0, 0};
+    auto entity2 = cmd.SpawnAndReturn<SpriteBundle>(SpriteBundle{sprite, handle, transform});
+    transform.position.x = 80;
+    sprite.color = {0, 255, 0};
+    auto entity3 = cmd.SpawnAndReturn<SpriteBundle>(SpriteBundle{sprite, handle, transform});
+    transform.position.x = 120;
+    sprite.color = {0, 0, 255};
+    auto entity4 = cmd.SpawnAndReturn<SpriteBundle>(SpriteBundle{sprite, handle, transform});
+
+    /*
+        root 
+        /  \
+    child1 child2
+       |
+       leaf1
+    */
+
+    Node root;
+    root.SetEntity(entity1)
+        .AddChild(
+            Node(entity2, {
+                Node(entity3, {})
+            })
+        .AddChild(
+            Node(entity4, {})
+        ));
+
+    auto& scene = resources.Get<Scene>();
+    scene.root = root;
+}
+
 void InputHandle(ecs::Commands& cmd, ecs::Querier queryer,
                  ecs::Resources resources, ecs::Events& events) {
     auto& keyboard = resources.Get<Keyboard>();
@@ -32,15 +77,6 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Querier queryer,
         renderer.DrawLine({100, 200}, {400, 500});
         renderer.SetDrawColor(Color{255, 255, 0});
         renderer.DrawRect(math::Rect{100, 200, 400, 500});
-
-        auto& handle = resources.Get<ImageHandle>();
-
-        Transform transform;
-        transform.position = mouse.Position();
-
-        SpriteBundle sprite{Sprite::Default(), handle, transform};
-
-        renderer.DrawSprite(sprite);
     }
 }
 
@@ -72,6 +108,7 @@ public:
         auto& world = GetWorld();
         world.AddPlugins<DefaultPlugins>()
             .AddStartupSystem(LoadResourceSystem)
+            .AddStartupSystem(StartupSystem)
             .AddSystem(UpdateSystem)
             .AddSystem(InputHandle)
             .AddSystem(ShowDebugInfoSystem)

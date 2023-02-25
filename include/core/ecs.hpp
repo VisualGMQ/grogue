@@ -493,8 +493,6 @@ private:
 };
 
 inline void World::Startup() {
-    std::vector<Commands> commandList;
-
     for (auto &plugins : pluginsList_) {
         plugins->Build(this);
     }
@@ -502,10 +500,6 @@ inline void World::Startup() {
     for (auto sys : startupSystems_) {
         Commands commands{*this};
         sys(commands, Resources{*this});
-        commandList.push_back(commands);
-    }
-
-    for (auto &commands : commandList) {
         commands.Execute();
     }
 }

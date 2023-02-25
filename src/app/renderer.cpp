@@ -95,6 +95,7 @@ void Renderer::DrawSprite(SpriteBundle& sprite) {
     if (!sprite.visiable) return;
 
     auto& image = imageManager_->Get(sprite.image);
+    SDL_SetTextureColorMod(image.texture_, sprite.sprite.color.r, sprite.sprite.color.g, sprite.sprite.color.b);
     drawTexture(image.texture_, image.W(), image.H(), sprite.sprite.region,
                 sprite.sprite.customSize, sprite.transform,
                 sprite.sprite.anchor, sprite.sprite.flip);

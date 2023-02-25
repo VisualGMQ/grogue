@@ -79,7 +79,8 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(Mouse{})
         .SetResource(ExitTrigger{})
         .SetResource(Time{})
-        .SetResource(TimerManager{});
+        .SetResource(TimerManager{})
+        .SetResource(Scene{});
 
     auto* assets = world->GetResource<AssetsManager>();
     assets->image_ = std::unique_ptr<ImageManager>(
@@ -90,7 +91,8 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(Keyboard::UpdateSystem)
         .AddSystem(Mouse::UpdateSystem)
         .AddSystem(Time::UpdateSystem)
-        .AddSystem(TimerManager::UpdateSystem);
+        .AddSystem(TimerManager::UpdateSystem)
+        .AddSystem(RenderSpriteSystem);
     world->GetResource<Renderer>()->imageManager_ = &assets->Image();
 }
 

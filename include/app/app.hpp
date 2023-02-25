@@ -9,6 +9,9 @@
 #include "app/tilesheet.hpp"
 #include "app/image.hpp"
 #include "core/pch.hpp"
+#include "app/systems.hpp"
+#include "app/node.hpp"
+#include "app/scene.hpp"
 
 // a resource to trigger application exit
 class ExitTrigger final {

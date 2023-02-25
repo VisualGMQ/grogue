@@ -4,7 +4,7 @@
 #include "app/fwd.hpp"
 
 struct Sprite final {
-    Color color;
+    Color color = {255, 255, 255, 255};
     math::Rect region;
     math::Vector2 customSize;
     math::Vector2 anchor;
