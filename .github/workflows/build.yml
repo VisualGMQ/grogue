@@ -1,15 +1,79 @@
-name: build-and-test-under-ubuntu
-run-name: build-ubuntu
+name: build
+
 on: [push, pull_request]
+
+env:
+  BUILD_TYPE: Release
+
 jobs:
-  build-project-under-ubuntu:
-    runs-on: ubuntu-latest
+  build-under-unix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: sudo apt update
-      - run: sudo apt install libsdl2{,-image,-mixer,-ttf}-dev clang
-      - run: cmake -S . -B cmake-build -DCMAKE_CXX_COMPILER=clang++ -DAUTO_FORMAT=OFF
-      - run: cmake --build cmake-build
-      - run: cd cmake-build
-      - run: ctest -j8 -C Debug -L NoInteractive --output-on-failure 
+
+      - name: Install Dependencies on Ubuntu
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install libsdl2-*
+      
+      - name: Install Dependencies on MacOS
+        if: runner.os == 'maxOS'
+        run: brew install sdl2 sdl2_mixer sdl2_net sdl2_image sdl2_ttf
+
+      - name: Pull Submodules
+        run: git submodule update --init --recursive
+
+      - name: Configure CMake
+        run: cmake -S . -B cmake-build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+      - name: Build
+        run: cmake --build cmake-build --config $BUILD_TYPE
+
+      - name: Run Unittests
+        run: cd cmake-build && ctest -j8 -C Debug -L NoInteractive --output-on-failure 
+
+  build-under-windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        arch: [i686, x86_64]
+    defaults:
+        run:
+          shell: msys2 {0}
+    steps:
+      - name: Setup MSYS2 x86
+        uses: msys2/setup-msys2@v2
+        if: matrix.arch == 'i686'
+        with:
+          msystem: MINGW32
+          update: true
+          install: base-devel git gcc mingw-w64-${{matrix.arch}}-cmake mingw-w64-${{matrix.arch}}-gcc
+
+      - name: Setup MSYS2 x64
+        uses: msys2/setup-msys2@v2
+        if: matrix.arch == 'x86_64'
+        with:
+          msystem: MINGW64
+          update: true
+          install: base-devel git gcc mingw-w64-${{matrix.arch}}-cmake mingw-w64-${{matrix.arch}}-gcc
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Pull Submodules
+        run: git submodule update --init --recursive
+
+      - name: Configure CMake
+        run: cmake -S . -B cmake-build -DFETCH_SDL=ON -DAUTO_FORMAT=OFF
+
+      - name: Build CMake
+        run: cmake --build cmake-build
+        
+      - name: Run Unittest
+        run: cd cmake-build |
+          ctest -j8 -C Debug -L NoInteractive --output-on-failure 

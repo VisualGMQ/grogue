@@ -161,7 +161,7 @@ void GenerateShapesSystem(ecs::Commands& cmds, ecs::Resources resources) {
 }
 
 
-void UpdateSystem(ecs::Commands& cmds, ecs::Queryer, ecs::Resources resources, ecs::Events& events) {
+void UpdateSystem(ecs::Commands& cmds, ecs::Querier, ecs::Resources resources, ecs::Events& events) {
     auto& shapeManager = resources.Get<ShapeManager>();
     auto& shapes = resources.Get<ShapeList>();
     auto& renderer = resources.Get<Renderer>();

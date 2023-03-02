@@ -39,7 +39,7 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
     cmd.SetResource<nk_context*>(std::move(ctx));
 }
 
-void UpdateSystem(ecs::Commands& cmd, ecs::Queryer, ecs::Resources resources, ecs::Events&) {
+void UpdateSystem(ecs::Commands& cmd, ecs::Querier, ecs::Resources resources, ecs::Events&) {
     auto& ctx = resources.Get<nk_context*>();
     auto& window = resources.Get<Window>();
 
@@ -79,12 +79,12 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Queryer, ecs::Resources resources, ec
     } nk_end(ctx);
 }
 
-void NuklearRenderSystem(ecs::Commands& cmd, ecs::Queryer,
+void NuklearRenderSystem(ecs::Commands& cmd, ecs::Querier,
                          ecs::Resources resources, ecs::Events&) {
     nk_sdl_render(NK_ANTI_ALIASING_ON);
 }
 
-void EventHandleSystem(ecs::Commands& cmd, ecs::Queryer, ecs::Resources resources, ecs::Events& events) {
+void EventHandleSystem(ecs::Commands& cmd, ecs::Querier, ecs::Resources resources, ecs::Events& events) {
     auto& ctx = resources.Get<nk_context*>();
     auto& mouse = resources.Get<Mouse>();
     if (nk_item_is_any_active(ctx)) { return; }
