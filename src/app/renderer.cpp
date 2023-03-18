@@ -119,10 +119,10 @@ void Renderer::drawTexture(SDL_Texture* texture, int rawW, int rawH,
     finalSize.y *= transform.scale.y;
 
     SDL_FRect desRect;
-    desRect.x = transform.position.x;
-    desRect.y = transform.position.y;
-    desRect.w = finalSize.x - finalSize.x * anchor.x;
-    desRect.h = finalSize.y - finalSize.y * anchor.y;
+    desRect.x = transform.position.x - finalSize.x * anchor.x;
+    desRect.y = transform.position.y - finalSize.y * anchor.y;
+    desRect.w = finalSize.x;
+    desRect.h = finalSize.y;
 
     SDL_FPoint rotAnchor;
     rotAnchor.x = anchor.x * finalSize.x;
