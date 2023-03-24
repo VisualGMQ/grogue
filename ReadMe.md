@@ -3,8 +3,6 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/dri0av5hvheh7o9r?svg=true)](https://ci.appveyor.com/project/VisualGMQ/grogue-32xuj)
 ![GitHub Workflow Status (with branch)](https://img.shields.io/github/actions/workflow/status/VisualGMQ/grogue/build.yml?branch=rewrite&label=clang%2B%2B&logo=ubuntu)
 
-此工程重写中。
-
 更多内容，请看[Wiki部分](https://github.com/VisualGMQ/grogue/wiki)
 
 ## 如何编译
