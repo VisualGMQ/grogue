@@ -40,10 +40,11 @@ add_subdirectory(3rdlibs/toml++)
 set(GAME_NAME ${PROJECT_NAME})
 set(LOWLEVEL_NAME lowlevel)
 
-aux_source_directory(src/core CORE_SRC)
-aux_source_directory(src/app  APP_SRC)
+aux_source_directory(src/core LOWLEVEL_SRC)
+aux_source_directory(src/app  LOWLEVEL_SRC)
+aux_source_directory(src/game LOWLEVEL_SRC)
 
-add_library(${LOWLEVEL_NAME} STATIC ${CORE_SRC} ${APP_SRC})
+add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC})
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
 target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua toml++)
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
@@ -64,10 +65,7 @@ else()
     target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_UNKNOWN)
 endif()
 
-aux_source_directory(src/game GAME_SRC)
-
-add_executable(${GAME_NAME})
-target_sources(${GAME_NAME} PRIVATE ${GAME_SRC})
+add_executable(${GAME_NAME} ./src/main.cpp)
 target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
 
 CopyDLL(${GAME_NAME})

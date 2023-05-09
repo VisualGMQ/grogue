@@ -1,6 +1,7 @@
 #include "game/config.hpp"
 
 std::unique_ptr<GameConfig> GameConfig::instance_ = nullptr;
+ConfigReader::ErrorHandler ConfigReader::DefaultErrorHandler = [](ParseError::Type){ return false; };
 
 std::ostream& operator<<(std::ostream& o, const ConfigParseError& e) {
     o << "[ConfigParseError]"
@@ -30,8 +31,7 @@ BasicDefinitionConfig BasicDefinitionConfig::Load(const std::string& filename) {
 
 #define BEGIN_PARSE() do {              
 #define END_PARSE() } while (0)
-#define ENSURE_FIELD_EXISTS(node, table, type, lambda) \
-    if (!parseNode<type>(pathTracer_, node, table, lambda)) break;
+#define ENSURE_FIELD_EXISTS(node, table, type, lambda, ...) if (!parseNode<type>(pathTracer_, node, table, lambda, ##__VA_ARGS__)) break;
 
 BasicDefinitionConfig::BasicDefinitionConfig(const std::string& filename) {
     auto content = ReadWholeFile(filename);
@@ -116,39 +116,7 @@ RaceProfConfig::RaceProfConfig(const std::string& filename,
         error_.SetError(IOError{filename + " can't open"});
     } else if (toml::parse_result result = toml::parse(content.value());
                result) {
-        BEGIN_PARSE() {
-            const toml::table& table = result.table();
-            ENSURE_FIELD_EXISTS("race", table, toml::value<std::string>, [&](const toml::value<std::string>& race) -> bool {
-				if (race.get() != "default") {
-                        error_.SetError(
-                            ParseError{pathTracer_, "default race config field `race` must be \"default\"", ParseError::Type::Custom});
-					return false;
-				}
-				raceId_ = -1;
-                return true;
-            });
-
-            ENSURE_FIELD_EXISTS("basic", table, toml::table, [&](const toml::table& basic) -> bool {
-                if (auto basicProp =
-                        parseMonsterProperty(filename, basic);
-                    basicProp.has_value()) {
-                    basic_ = std::move(basicProp.value());
-                    return true;
-                }
-				return false;
-            });
-
-            ENSURE_FIELD_EXISTS("max", table, toml::table, [&](const toml::table& max) -> bool {
-                if (auto maxProp =
-                        parseMonsterProperty(filename, max);
-                    maxProp.has_value()) {
-                    max_ = std::move(maxProp.value());
-                    return true;
-                }
-				return false;
-            });
-        }
-        END_PARSE();
+        parseAllProperty(result.table());
     } else {
         error_.SetError(ParseError{pathTracer_,
                                    "parse failed, may has syntax error",
@@ -156,8 +124,40 @@ RaceProfConfig::RaceProfConfig(const std::string& filename,
     }
 }
 
-std::optional<MonsterProperty> RaceProfConfig::parseMonsterProperty(
-    const std::string& filename, const toml::table& table) {
+bool RaceProfConfig::parseAllProperty(const toml::table& table) {
+    BEGIN_PARSE() {
+        ENSURE_FIELD_EXISTS("name", table, toml::value<std::string>, [&](const toml::value<std::string>& name) -> bool {
+            raceId_ = -1;
+            name_ = name.get();
+            return true;
+        });
+
+        ENSURE_FIELD_EXISTS("basic", table, toml::table, [&](const toml::table& basic) -> bool {
+            if (auto basicProp =
+                    parseMonsterProperty(basic);
+                basicProp.has_value()) {
+                basic_ = std::move(basicProp.value());
+                return true;
+            }
+            return false;
+        });
+
+        ENSURE_FIELD_EXISTS("max", table, toml::table, [&](const toml::table& max) -> bool {
+            if (auto maxProp =
+                    parseMonsterProperty(max);
+                maxProp.has_value()) {
+                max_ = std::move(maxProp.value());
+                return true;
+            }
+            return false;
+        });
+    }
+    END_PARSE();
+    return true;
+}
+
+
+std::optional<MonsterProperty> RaceProfConfig::parseMonsterProperty(const toml::table& table) {
     MonsterProperty prop;
     do {
         ENSURE_FIELD_EXISTS("hp", table, toml::value<int64_t>, [&](const toml::value<int64_t>& hp) -> bool {
@@ -167,33 +167,159 @@ std::optional<MonsterProperty> RaceProfConfig::parseMonsterProperty(
         ENSURE_FIELD_EXISTS("mp", table, toml::value<int64_t>, [&](const toml::value<int64_t>& mp) -> bool {
             prop.mp = mp.get();
             return true;
-        })
+        });
         ENSURE_FIELD_EXISTS("strength", table, toml::value<int64_t>, [&](const toml::value<int64_t>& strength) -> bool {
-            prop.ability.strength = strength.get();
+            prop.strength = strength.get();
             return true;
-        })
+        });
         ENSURE_FIELD_EXISTS(
             "intelligence", table, toml::value<int64_t>, [&](const toml::value<int64_t>& intelligence) -> bool {
-                prop.ability.intelligence = intelligence.get();
+                prop.intelligence = intelligence.get();
                 return true;
-            })
+            });
         ENSURE_FIELD_EXISTS("outsight", table, toml::value<int64_t>, [&](const toml::value<int64_t>& outsight) -> bool {
-            prop.ability.outsight = outsight.get();
+            prop.outsight = outsight.get();
             return true;
-        })
+        });
         ENSURE_FIELD_EXISTS(
             "constitution", table, toml::value<int64_t>, [&](const toml::value<int64_t>& constitution) -> bool {
-                prop.ability.constitution = constitution.as_integer()->get();
+                prop.constitution = constitution.as_integer()->get();
                 return true;
-            })
+            });
         ENSURE_FIELD_EXISTS("agility", table, toml::value<int64_t>, [&](const toml::value<int64_t>& agility) -> bool {
-            prop.ability.agility = agility.get();
+            prop.agility = agility.get();
             return true;
-        })
+        });
         ENSURE_FIELD_EXISTS("nutrition", table, toml::value<int64_t>, [&](const toml::value<int64_t>& nutrition) -> bool {
-            prop.ability.nutrition = nutrition.get();
+            prop.nutrition = nutrition.get();
             return true;
-        })
+        });
+
+        return prop;
+    } while (0);
+    return std::nullopt;
+}
+
+bool RaceProfConfig::parseAllPropertyWithDefault(const std::string& raceName, const toml::table& table, const BasicDefinitionConfig& defs, const RaceProfConfig& defaultConfig) {
+    BEGIN_PARSE() {
+        ENSURE_FIELD_EXISTS("name", table, toml::value<std::string>, [&](const toml::value<std::string>& name) -> bool {
+            name_ = name.get();
+            if (auto id = defs.GetRaceID(raceName); id.has_value()) {
+                raceId_ = id.value();
+                return true;
+            } else {
+                error_.SetError(ParseError{pathTracer_, "race " + name_ + " not fount, may not define in definitions.toml?", ParseError::Type::Custom});
+                return false;
+            }
+        });
+
+        ENSURE_FIELD_EXISTS("basic", table, toml::table, [&](const toml::table& basic) -> bool {
+            if (auto basicProp =
+                    parseMonsterPropertyByDefault(basic, defaultConfig.GetBasic());
+                basicProp.has_value()) {
+                basic_ = std::move(basicProp.value());
+                return true;
+            }
+            return false;
+        });
+
+        ENSURE_FIELD_EXISTS("max", table, toml::table, [&](const toml::table& max) -> bool {
+            if (auto maxProp =
+                    parseMonsterPropertyByDefault(max, defaultConfig.GetMax());
+                maxProp.has_value()) {
+                max_ = std::move(maxProp.value());
+                return true;
+            }
+            return false;
+        });
+    }
+    END_PARSE();
+    return true;
+}
+
+RaceProfConfig RaceProfConfig::LoadByDefault(const std::string& configDir, const std::string& raceName,
+                                        const BasicDefinitionConfig& definition,
+                                        RaceProfConfig& defaultProp) {
+    return RaceProfConfig(configDir, raceName, definition, defaultProp);
+}
+
+RaceProfConfig::RaceProfConfig(const std::string& configDir,
+                               const std::string& raceName,
+                               const BasicDefinitionConfig& definition,
+                               RaceProfConfig& defaultConfig)
+    : name_(raceName) {
+    auto id = definition.GetRaceID(raceName);
+    if (id.has_value()) {
+        raceId_ = id.value();
+
+        profAddition_.resize(definition.GetProfCount());
+
+        std::string filename = configDir + raceName + ".toml";
+        auto content = ReadWholeFile(filename);
+        if (!content.has_value()) {
+            error_.SetError(IOError{filename + " can't open"});
+        } else if (toml::parse_result result = toml::parse(content.value()); result) {
+            parseAllPropertyWithDefault(raceName, result.table(), definition, defaultConfig);
+        } else {
+            error_.SetError(ParseError{pathTracer_,
+                                       "parse failed, may has syntax error",
+                                       ParseError::Type::SyntaxError});
+        }
+    }
+}
+
+// use for RaceProfConfig::parseAllPropertyWithDefault()
+template <typename T>
+bool GenericErrorHandler(ParseError::Type type, const MonsterProperty& defaultProp, MonsterProperty& prop, T pointer) {
+    if (type == ParseError::Type::FieldNotFound) {
+        prop.*pointer = defaultProp.*pointer; 
+        return true;
+    }
+    return false;
+}
+
+#define DEFAULT_FIELD_PROCESS(field) [&](ParseError::Type type) { return GenericErrorHandler(type, defaultProp, prop, &MonsterProperty::field); }
+
+std::optional<MonsterProperty> RaceProfConfig::parseMonsterPropertyByDefault(const toml::table& table, const MonsterProperty& defaultProp) {
+    MonsterProperty prop;
+    do {
+        ENSURE_FIELD_EXISTS(
+            "hp", table, toml::value<int64_t>,
+            [&](const toml::value<int64_t>& hp) -> bool {
+                prop.hp = hp.get();
+                return true;
+            },
+            DEFAULT_FIELD_PROCESS(hp));
+        ENSURE_FIELD_EXISTS("mp", table, toml::value<int64_t>, [&](const toml::value<int64_t>& mp) -> bool {
+            prop.mp = mp.get();
+            return true;
+        }, DEFAULT_FIELD_PROCESS(mp));
+        ENSURE_FIELD_EXISTS("strength", table, toml::value<int64_t>, [&](const toml::value<int64_t>& strength) -> bool {
+            prop.strength = strength.get();
+            return true;
+        }, DEFAULT_FIELD_PROCESS(strength));
+        ENSURE_FIELD_EXISTS(
+            "intelligence", table, toml::value<int64_t>, [&](const toml::value<int64_t>& intelligence) -> bool {
+                prop.intelligence = intelligence.get();
+                return true;
+            }, DEFAULT_FIELD_PROCESS(intelligence));
+        ENSURE_FIELD_EXISTS("outsight", table, toml::value<int64_t>, [&](const toml::value<int64_t>& outsight) -> bool {
+            prop.outsight = outsight.get();
+            return true;
+        });
+        ENSURE_FIELD_EXISTS(
+            "constitution", table, toml::value<int64_t>, [&](const toml::value<int64_t>& constitution) -> bool {
+                prop.constitution = constitution.as_integer()->get();
+                return true;
+            }, DEFAULT_FIELD_PROCESS(constitution));
+        ENSURE_FIELD_EXISTS("agility", table, toml::value<int64_t>, [&](const toml::value<int64_t>& agility) -> bool {
+            prop.agility = agility.get();
+            return true;
+        }, DEFAULT_FIELD_PROCESS(agility));
+        ENSURE_FIELD_EXISTS("nutrition", table, toml::value<int64_t>, [&](const toml::value<int64_t>& nutrition) -> bool {
+            prop.nutrition = nutrition.get();
+            return true;
+        }, DEFAULT_FIELD_PROCESS(nutrition));
 
         return prop;
     } while (0);

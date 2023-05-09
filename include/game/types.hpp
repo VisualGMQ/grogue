@@ -13,17 +13,13 @@ enum Race {
     Human,
 };
 
-struct MonsterAbilityProperty final {
+struct MonsterProperty final {
     int strength;       // affect attack damage, bearing amount
     int intelligence;   // affect mp recover speed
     int outsight;       // affect find trap speed
     int constitution;   // affect hp upbound, hp recover speed
     int agility;        // affect move speed and possibility of trigging trap
     int nutrition;
-};
-
-struct MonsterProperty final {
-    MonsterAbilityProperty ability; 
     int hp;
     int mp;
 };

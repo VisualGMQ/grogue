@@ -1,4 +1,4 @@
-race = "人类"
+name = "人类"
 
 [basic]
 hp = 10

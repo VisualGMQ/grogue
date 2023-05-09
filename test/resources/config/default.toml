@@ -18,7 +18,7 @@ intelligence = 100
 outsight = 100
 constitution = 100
 agility = 100
-nutrition = 1000
+nutrition = 2000
 
 [profession.normal]
 hp = [-2, 2]
