@@ -279,4 +279,46 @@ T Lerp(T a, T b, float t) {
     return a + (b - a)* t;
 }
 
+// row-major matrix
+template <typename T>
+class HeapMatrix final {
+public:
+    HeapMatrix(int w, int h) {
+        datas_ = std::unique_ptr<T[]>(new T[w * h]);
+    }
+
+    int Width() const {
+        return w_;
+    }
+
+    int Height() const {
+        return w_;
+    }
+
+    const T& Get(int x, int y) const {
+        assert(x + y * w_ < w_ * h_ && x >= 0 && y >= 0);
+        return datas_[x + y * w_];
+    }
+
+    T& Get(int x, int y) {
+        assert(x + y * w_ < w_ * h_ && x >= 0 && y >= 0);
+        return datas_[x + y * w_];
+    }
+
+    void Set(int x, int y, T& t) {
+        assert(x + y * w_ < w_ * h_ && x >= 0 && y >= 0);
+        datas_[x + y * w_] = t;
+    }
+
+    void Set(int x, int y, T&& t) {
+        assert(x + y * w_ < w_ * h_ && x >= 0 && y >= 0);
+        datas_[x + y * w_] = std::move(t);
+    }
+
+private:
+    std::unique_ptr<T[]> datas_;
+    int w_;
+    int h_;
+};
+
 }  // namespace math

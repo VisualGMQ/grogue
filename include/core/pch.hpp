@@ -5,14 +5,19 @@
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
 
+#define TOML_EXCEPTIONS 0
+#include "toml.hpp"
+
 #include "core/assert.hpp"
 #include "core/debugbreak.hpp"
 #include "core/ecs.hpp"
 #include "core/log.hpp"
+#include "core/math.hpp"
 #include "sol/sol.hpp"
 #include "core/sparse_sets.hpp"
 #include "core/magic_enum.hpp"
 #include "core/singleton.hpp"
+#include "core/utility.hpp"
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -26,3 +31,4 @@
 #include <chrono>
 #include <type_traits>
 #include <utility>
+#include <queue>
