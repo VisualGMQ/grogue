@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <memory>
 
 #define GROGUE_MATH_FLOAT_COMPARE_USE_EPSILON
 
@@ -280,6 +281,7 @@ T Lerp(T a, T b, float t) {
 }
 
 // row-major matrix
+/* temporary not use. And it will has compile error under Ubuntu
 template <typename T>
 class HeapMatrix final {
 public:
@@ -297,22 +299,22 @@ public:
 
     const T& Get(int x, int y) const {
         assert(x + y * w_ < w_ * h_ && x >= 0 && y >= 0);
-        return datas_[x + y * w_];
+        return datas_.get()[x + y * w_];
     }
 
     T& Get(int x, int y) {
         assert(x + y * w_ < w_ * h_ && x >= 0 && y >= 0);
-        return datas_[x + y * w_];
+        return datas_.get()[x + y * w_];
     }
 
     void Set(int x, int y, T& t) {
         assert(x + y * w_ < w_ * h_ && x >= 0 && y >= 0);
-        datas_[x + y * w_] = t;
+        datas_.get()[x + y * w_] = t;
     }
 
     void Set(int x, int y, T&& t) {
         assert(x + y * w_ < w_ * h_ && x >= 0 && y >= 0);
-        datas_[x + y * w_] = std::move(t);
+        datas_.get()[x + y * w_] = std::move(t);
     }
 
 private:
@@ -320,5 +322,6 @@ private:
     int w_;
     int h_;
 };
+*/
 
 }  // namespace math
