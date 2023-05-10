@@ -210,7 +210,7 @@ private:
     RaceProfConfig(const std::string& configDir,
                    const std::string& filename,
                    const BasicDefinitionConfig& definition,
-                   RaceProfConfig& default);
+                   RaceProfConfig& defaultConfig);
     std::optional<MonsterProperty> parseMonsterProperty(const toml::table& table);
     std::optional<MonsterProperty> parseMonsterPropertyByDefault(const toml::table& table, const MonsterProperty& defaultProp);
 

@@ -12,6 +12,28 @@
 //! @file test/refl.cpp
 namespace refl {
 
+template <typename Tuple, typename Func, size_t N>
+struct _tuple_processor {
+    inline static void _tuple_process(Tuple &t, Func &f) {
+        _tuple_processor<Tuple, Func, N - 1>::_tuple_process(t, f);
+        f(std::get<N - 1>(t));
+    }
+
+    inline static void _tuple_process_const(const Tuple &t, Func &f) {
+        _tuple_processor<Tuple, Func, N - 1>::_tuple_process(t, f);
+        f(std::get<N - 1>(t));
+    }
+};
+
+template <typename Tuple, typename Func>
+struct _tuple_processor<Tuple, Func, 1> {
+    inline static void _tuple_process(Tuple &t, Func &f) { f(std::get<0>(t)); }
+
+    inline static void _tuple_process_const(const Tuple &t, Func &f) {
+        f(std::get<0>(t));
+    }
+};
+
 //! @brief a help function to travese std::tuple, for elems need to be change
 //! @tparam ...Args will be auto-derivated
 //! @tparam Func will be auto-deriveted
@@ -33,28 +55,6 @@ template <typename... Args, typename Func>
 void tuple_for_each_const(const std::tuple<Args...> &t, Func &f) {
     _tuple_processor<decltype(t), Func, sizeof...(Args)>::_tuple_process_const(
         t, f);
-};
-
-template <typename Tuple, typename Func, size_t N>
-struct _tuple_processor {
-    inline static void _tuple_process(Tuple &t, Func &f) {
-        _tuple_processor<Tuple, Func, N - 1>::_tuple_process(t, f);
-        f(std::get<N - 1>(t));
-    }
-
-    inline static void _tuple_process_const(const Tuple &t, Func &f) {
-        _tuple_processor<Tuple, Func, N - 1>::_tuple_process(t, f);
-        f(std::get<N - 1>(t));
-    }
-};
-
-template <typename Tuple, typename Func>
-struct _tuple_processor<Tuple, Func, 1> {
-    inline static void _tuple_process(Tuple &t, Func &f) { f(std::get<0>(t)); }
-
-    inline static void _tuple_process_const(const Tuple &t, Func &f) {
-        f(std::get<0>(t));
-    }
 };
 
 //! @brief class member variable information, contain the member pointer and member name
@@ -120,7 +120,7 @@ public:
 
     //! @brief get all reflected member vairbales in this class
     //! @return a tuple which contains all member variables
-    constexpr const auto &GetMembers() const { return members; }
+    constexpr const auto &GetMembers() const { return members_; }
 
     //! @brief pass a function f to visit all reflected class member variable,
     //! for variabel need change

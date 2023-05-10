@@ -44,16 +44,17 @@ public:
     template <typename T>
     void operator()(T&) {}
 
-    template <>
-    void operator()<refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>>(refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>& info) {
-        if (info.Name() == "svalue") {
-            pod_.svalue = "anothername";
-        }
-    }
-
 private:
     SimplePOD& pod_;
 };
+
+
+template <>
+void Visitor::operator()<refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>>(refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>& info) {
+    if (info.Name() == "svalue") {
+        pod_.svalue = "anothername";
+    }
+}
 
 class CheckVisitor {
 public:
@@ -62,16 +63,16 @@ public:
     template <typename T>
     void operator()(T&) {}
 
-    template <>
-    void operator()<refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>>(refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>& info) {
-        if (info.Name() == "svalue") {
-            assert(pod_.svalue == "anothername");
-        }
-    }
-
 private:
     SimplePOD& pod_;
 };
+
+template <>
+void CheckVisitor::operator()<refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>>(refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>& info) {
+    if (info.Name() == "svalue") {
+        assert(pod_.svalue == "anothername");
+    }
+}
 
 TEST_CASE("refl") {
     SimplePOD pod = {
