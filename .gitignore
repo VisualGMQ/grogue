@@ -4,3 +4,4 @@
 *.inc
 cmake-build
 build
+doc-output

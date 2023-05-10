@@ -6,12 +6,17 @@
 #include <limits>
 #include <memory>
 
+//! \breif  if define this, will use std::numeric_limits<float>::epsilon() to compare floats. Or use ==
 #define GROGUE_MATH_FLOAT_COMPARE_USE_EPSILON
 
 namespace math {
 
 constexpr double PI = 3.1415926535897932384626;
 
+//! @brief  compare two float value by epsilon
+//! @param value1 
+//! @param value2 
+//! @return  whether two float equal
 inline bool FloatEq(float value1, float value2) {
 #ifdef GROGUE_MATH_FLOAT_COMPARE_USE_EPSILON
     return std::abs(value1 - value2) <= std::numeric_limits<float>::epsilon();
@@ -28,21 +33,30 @@ float Length(const Vector2& v);
 Vector3 Normalize(const Vector3& v);
 Vector2 Normalize(const Vector2& v);
 
+//! @brief convert radians to degress
+//! @param radians 
+//! @return  degrees
 inline float Rad2Deg(float radians) {
     return radians * 180.0 / PI;
 }
 
+//! @brief covert degress to radians
+//! @param degree 
+//! @return  radians
 inline float Deg2Rad(float degree) {
     return degree * PI / 180.0;
 }
 
+//! @brief 3D vector which has x, y, z components
 class Vector3 {
 public:
     float x{}, y{}, z{};
-    static const Vector3 Zero;
-    static const Vector3 XAxis;
-    static const Vector3 YAxis;
-    static const Vector3 ZAxis;
+
+
+    static const Vector3 Zero;  //!< @brief (0, 0, 0)
+    static const Vector3 XAxis; //!< @breif (1, 0, 0)
+    static const Vector3 YAxis; //!< @brief (0, 1, 0)
+    static const Vector3 ZAxis; //!< @brief (0, 0, 1)
 
     Vector3() {}
 
@@ -114,6 +128,8 @@ public:
 
     Vector3 operator*(const Vector3& v) { return {v.x * x, v.y * y, v.z * z}; }
 
+    //! @brief normalize vector itself. Use global `Normalize` function to return a normalized vector
+    //! @sa Normalize
     void Normalize() {
         *this = ::math::Normalize(*this);
     }
@@ -152,16 +168,18 @@ inline float Length(const Vector3& v) {
     return std::sqrt(LengthSquare(v));
 }
 
+//! @brief return a normalized vector. Don't change origin vector
 inline Vector3 Normalize(const Vector3& v) {
     float a = 1.0f / Length(v);
     return v * a;
 }
 
+//! @brief 2D vector which has x, y components
 class Vector2 {
 public:
-    static const Vector2 Zero;
-    static const Vector2 XAxis;
-    static const Vector2 YAxis;
+    static const Vector2 Zero;  //!< @brief (0, 0)
+    static const Vector2 XAxis; //!< @brief (1, 0)
+    static const Vector2 YAxis; //!< @brief (0, 1)
 
     float x{}, y{};
 
@@ -230,11 +248,14 @@ public:
         this->y = y;
     }
 
+    //! @brief normalize vector itself. Use global `Normalize` function to return a normalized vector
+    //! @sa Normalize
     void Normalize() {
         *this = ::math::Normalize(*this);
     }
 };
 
+//! @brief return a normalized vector. Don't change origin vector
 inline Vector2 Normalize(const Vector2& v) {
     float a = 1.0f / Length(v);
     return v * a;
