@@ -37,6 +37,42 @@ ReflRegist(refl::Class<SimplePOD>("SimplePOD")
     .Member(&SimplePOD::inner, "inner")
     .Member(&SimplePOD::iarray, "iarray"));
 
+class Visitor {
+public:
+    Visitor(SimplePOD& pod): pod_(pod) {}
+
+    template <typename T>
+    void operator()(T&) {}
+
+    template <>
+    void operator()<refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>>(refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>& info) {
+        if (info.Name() == "svalue") {
+            pod_.svalue = "anothername";
+        }
+    }
+
+private:
+    SimplePOD& pod_;
+};
+
+class CheckVisitor {
+public:
+    CheckVisitor(SimplePOD& pod): pod_(pod) {}
+
+    template <typename T>
+    void operator()(T&) {}
+
+    template <>
+    void operator()<refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>>(refl::MemberInfo<std::string, decltype(&SimplePOD::svalue)>& info) {
+        if (info.Name() == "svalue") {
+            assert(pod_.svalue == "anothername");
+        }
+    }
+
+private:
+    SimplePOD& pod_;
+};
+
 TEST_CASE("refl") {
     SimplePOD pod = {
         "pod",
@@ -51,10 +87,18 @@ TEST_CASE("refl") {
         {1, 2, 3},
     };
 
-    auto info = refl::GetClass<SimplePOD>();
+
+    constexpr auto info = refl::GetClass<SimplePOD>();
     REQUIRE(info.Name() == "SimplePOD");
-    // auto svalue = info.GetMember("svalue");
+    REQUIRE(info.HasMember("inner"));
+    REQUIRE(info.HasMember("svalue"));
+    REQUIRE_FALSE(info.HasMember("outer"));
+
+    Visitor visitor{pod};
+    info.VisitMembers(visitor);
+
+    CheckVisitor checkvisitor{pod};
+    info.VisitMembers(checkvisitor);
+
     REQUIRE(std::is_same_v<decltype(info)::type, SimplePOD>);
-    // REQUIRE(std::is_same_v(decltype(svalue)::type, std::string));
-    // REQUIRE(svalue.Apply(info) == "pod");
 }
