@@ -21,17 +21,21 @@ struct SimplePOD {
     std::array<int, 3> iarray;
 };
 
-constexpr auto c1 = refl::Class<InnerPOD>("InnerPOD")
-    .Member(&InnerPOD::innerF, "innerF")
-    .Member(&InnerPOD::innerFV, "innerFV");
+struct AnotherPOD {
+    float fvalue;
+};
 
-constexpr auto c2 = refl::Class<SimplePOD>("SimplePOD")
+ReflRegist(refl::Class<InnerPOD>("InnerPOD")
+    .Member(&InnerPOD::innerF, "innerF")
+    .Member(&InnerPOD::innerFV, "innerFV"));
+
+ReflRegist(refl::Class<SimplePOD>("SimplePOD")
     .Member(&SimplePOD::svalue, "svalue")
     .Member(&SimplePOD::fvalue, "fvalue")
     .Member(&SimplePOD::ivalue, "ivalue")
     .Member(&SimplePOD::dvalue, "dvalue")
     .Member(&SimplePOD::inner, "inner")
-    .Member(&SimplePOD::iarray, "iarray");
+    .Member(&SimplePOD::iarray, "iarray"));
 
 TEST_CASE("refl") {
     SimplePOD pod = {
@@ -47,11 +51,10 @@ TEST_CASE("refl") {
         {1, 2, 3},
     };
 
-/*
-    auto pod = refl::GetClass<SimplePOD>();
-    auto svalue = pod.Member("svalue");
-    REQUIRE(std::is_same_v<pod::type, SimplePOD>);
-    REQUIRE(std::is_same_v(svalue::type, std::string));
-    REQUIRE(svalue.Apply(pod) == "pod");
-    */
+    auto info = refl::GetClass<SimplePOD>();
+    REQUIRE(info.Name() == "SimplePOD");
+    // auto svalue = info.GetMember("svalue");
+    REQUIRE(std::is_same_v<decltype(info)::type, SimplePOD>);
+    // REQUIRE(std::is_same_v(decltype(svalue)::type, std::string));
+    // REQUIRE(svalue.Apply(info) == "pod");
 }
