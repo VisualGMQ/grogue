@@ -1,4 +1,5 @@
 #include "app/app.hpp"
+#include "game/config.hpp"
 
 struct Context {
     FontHandle font;
@@ -21,8 +22,15 @@ enum GameState {
     Game,
 } state;
 
-
 void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
+    GameConfig config("./resources/config/");
+    if (!config.Valid()) {
+        LOGF("Load config in ./resources/config failed!!! Game can't start!!!");
+        exit(1);
+    }
+
+    cmd.SetResource<GameConfig>(std::move(config));
+
     Transform transform;
     transform.position = {100, 100};
 

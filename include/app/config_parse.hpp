@@ -49,12 +49,12 @@ struct ParseError final {
         if constexpr (std::is_same_v<                                         \
                           std::remove_reference_t<decltype(data)>::pointer_t, \
                           decltype(&classtype::member)>) {                    \
-            instance.*(data.Pointer()) = value;                               \
+            if (#member == data.Name()) instance.*(data.Pointer()) = value;   \
         }                                                                     \
     }
 
-#define DeclareParseFunc(name, classtype)                   \
-    std::optional<classtype> name(const sol::table& root) { \
+#define DeclareParseFunc(classtype)                   \
+    std::optional<classtype> Parse ## classtype ## (const sol::table& root) { \
         classtype instance;                                 \
         auto classinfo = refl::GetClass<classtype>();
 
@@ -70,13 +70,28 @@ struct ParseError final {
             decltype(classinfo)::type, name, instance, field.value())); \
     }
 
-DeclareParseFunc(ParseMonsterProperty, MonsterProperty)
-    Field(hp, int)
-    Field(mp, int)
-    Field(strength, int)
-    Field(intelligence, int)
-    Field(outsight, int)
-    Field(constitution, int)
-    Field(agility, int)
-    Field(nutrition, int)
-EndDeclareParseFunc()
+#define ArrayField(name, mtype, count)                                         \
+    {                                                                          \
+        auto field = root.get<std::optional<std::array<mtype, count>>>(#name); \
+        if (!field.has_value()) return std::nullopt;                           \
+        classinfo.VisitMembers(MemberAssignmentFunc(                           \
+            decltype(classinfo)::type, name, instance, field.value()));        \
+    }
+
+#define DynArrayField(name, mtype)                                       \
+    {                                                                    \
+        auto field = root.get<std::optional<std::vector<mtype>>>(#name); \
+        if (!field.has_value()) return std::nullopt;                     \
+        classinfo.VisitMembers(MemberAssignmentFunc(                     \
+            decltype(classinfo)::type, name, instance, field.value()));  \
+    }
+
+#define ObjField(name, mtype)                                            \
+    {                                                                    \
+        auto table = root.get<std::optional<sol::table>>(#name);         \
+        if (!table.has_value()) return std::nullopt;                     \
+        auto member = Parse##mtype##(table.value());                     \
+        if (!member.has_value()) return std::nullopt;                    \
+        classinfo.VisitMembers(MemberAssignmentFunc(                     \
+            decltype(classinfo)::type, name, instance, member.value())); \
+    }
