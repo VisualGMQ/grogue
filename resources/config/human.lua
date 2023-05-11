@@ -1,0 +1,35 @@
+Config = {
+    name = "人类",
+    basic = {
+        hp = 10,
+        mp = 10,
+        strength = 10,
+        intelligence = 10,
+        outsight = 10,
+        constitution = 10,
+        agility = 10,
+        nutrition = 1000,
+    },
+    max = {
+        hp = 10,
+        mp = 10,
+        strength = 10,
+        intelligence = 10,
+        outsight = 10,
+        constitution = 10,
+        agility = 10,
+        nutrition = 1000,
+    },
+    professions = {
+        normal = {
+            hp = {-2, 2},
+            mp = {-2, 2},
+            strength = {-2, 2},
+            intelligence = {-2, 2},
+            outsight = {-2, 2},
+            constitution = {-2, 2},
+            agility = {-2, 2},
+            nutrition = {0, 0},
+        },
+    },
+}

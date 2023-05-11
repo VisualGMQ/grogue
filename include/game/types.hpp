@@ -1,5 +1,5 @@
 #pragma once
-#include <utility>
+#include "core/pch.hpp"
 
 // entity's material
 struct Material final {
@@ -40,3 +40,16 @@ struct MonsterInfo final {
 struct RaceAddition final {
     MonsterProperty addition;
 };
+
+// reflection MonsterProperty
+ReflRegist(
+    refl::Class<MonsterProperty>("MonsterProperty")
+    .Member(&MonsterProperty::hp, "hp")
+    .Member(&MonsterProperty::mp, "mp")
+    .Member(&MonsterProperty::strength, "strength")
+    .Member(&MonsterProperty::intelligence, "intelligence")
+    .Member(&MonsterProperty::outsight, "outsight")
+    .Member(&MonsterProperty::constitution, "constitution")
+    .Member(&MonsterProperty::agility, "agility")
+    .Member(&MonsterProperty::nutrition, "nutrition")
+);

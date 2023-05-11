@@ -1,5 +1,4 @@
 #include "app/app.hpp"
-#include "game/config.hpp"
 
 struct Context {
     FontHandle font;
@@ -24,9 +23,6 @@ enum GameState {
 
 
 void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
-    // load config from config file
-    GameConfig::Init("./resources/config");
-
     Transform transform;
     transform.position = {100, 100};
 

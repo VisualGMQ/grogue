@@ -4,9 +4,6 @@
 #include "app/handle.hpp"
 #include "app/manager.hpp"
 
-#define SOL_ALL_SAFETIES_ON 1
-#include "sol/sol.hpp"
-
 class LuaScript;
 
 using LuaScriptHandle = Handle<LuaScript>;
@@ -30,9 +27,19 @@ private:
         lua.open_libraries(sol::lib::base);
     }
 
-    LuaScript(LuaScriptHandle handle, const std::string& filename)
+    //! @brief open lua file or execute lua script from string
+    //! @param handle lua handle
+    //! @param str lua file name or script content
+    //! @param isContent 
+    //!     - `true`: str is script content
+    //!     - `false`: str is lua filename
+    LuaScript(LuaScriptHandle handle, const std::string& str, bool isContent)
         : LuaScript(handle) {
-        lua.script_file(filename);
+        if (isContent) {
+            lua.script(str);
+        } else {
+            lua.script_file(str);
+        }
     }
 
     friend void swap(LuaScript& lhs, LuaScript& rhs) {
@@ -47,4 +54,5 @@ public:
     LuaScriptHandle Create();
     LuaScript CreateSolitary();
     LuaScript CreateSolitary(const std::string&);
+    LuaScript CreateSolitaryFromContent(const std::string&);
 };

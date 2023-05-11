@@ -5,8 +5,8 @@
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
 
-#define TOML_EXCEPTIONS 0
-#include "toml.hpp"
+#define SOL_ALL_SAFETIES_ON 1
+#include "sol/sol.hpp"
 
 #include "core/assert.hpp"
 #include "core/debugbreak.hpp"
@@ -18,6 +18,7 @@
 #include "core/magic_enum.hpp"
 #include "core/singleton.hpp"
 #include "core/utility.hpp"
+#include "core/refl.hpp"
 #include <array>
 #include <cmath>
 #include <iostream>

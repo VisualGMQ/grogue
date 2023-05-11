@@ -64,8 +64,9 @@ template <typename T, typename PointerT>
 class MemberInfo {
 public:
     using type = T;
+    using pointer_t = PointerT;
 
-    constexpr MemberInfo(PointerT pointer, std::string_view name)
+    constexpr MemberInfo(pointer_t pointer, std::string_view name)
         : pointer(pointer), name(name) {}
 
     //! @brief get member name, can use in compile-time
@@ -77,7 +78,7 @@ public:
     constexpr auto Pointer() const { return pointer; }
 
 private:
-    PointerT pointer;       //!< @brief member variable pointer, use `classInstance.*(pointer)` to access instance member variable
+    pointer_t pointer;       //!< @brief member variable pointer, use `classInstance.*(pointer)` to access instance member variable
     std::string_view name;  //!< @brief member name
 };
 
