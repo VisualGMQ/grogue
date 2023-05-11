@@ -7,10 +7,13 @@
 #include <tuple>
 #include <unordered_map>
 
-//! @brief a very small dynamic reflection framework, only use for POD and can
-//! only reflect public member variables. See unittest "refl.cpp" for usage
-//! @file test/refl.cpp
+//! @namespace refl
 namespace refl {
+
+//! @addtogroup dynamic-reflection
+//! @{
+//! @brief a very small dynamic reflection framework, only use for POD and can
+//! only reflect public member variables
 
 template <typename Tuple, typename Func, size_t N>
 struct _tuple_processor {
@@ -174,6 +177,9 @@ template <typename ClassType>
 struct TypeInfo;
 
 //! @brief a help macro to reflect a POD
+//!
+//! use this to refect a class as following:
+//! @snippet ./test/refl.cpp Reflect Class
 #define ReflRegist(x)                    \
     namespace refl {                     \
     template <>                          \
@@ -190,5 +196,7 @@ template <typename T>
 constexpr decltype(TypeInfo<T>::info) GetClass() {
     return TypeInfo<T>::info;
 }
+
+//! @}
 
 }  // namespace refl

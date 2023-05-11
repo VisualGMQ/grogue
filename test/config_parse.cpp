@@ -11,6 +11,7 @@ struct InnerPOD final {
     int ivalue;
 };
 
+//! [TestPOD Define]
 struct TestPOD final {
     std::string svalue;
     float rvalue;
@@ -20,6 +21,7 @@ struct TestPOD final {
     std::vector<int> arrvalue2;
     InnerPOD inner;
 };
+//! [TestPOD Define]
 
 std::string TestLuaContent = R"(
 Config = {
@@ -45,6 +47,7 @@ Config = {
 )";
 
 // reflect Test POD. You must reflect the struct you want to parse
+//! [Reflect TestPOD]
 ReflRegist(
     refl::Class<TestPOD>("TestPOD")
         .Member(&TestPOD::svalue, "svalue")
@@ -55,6 +58,7 @@ ReflRegist(
         .Member(&TestPOD::arrvalue2, "arrvalue2")
         .Member(&TestPOD::inner, "inner")
 )
+//! [Reflect TestPOD]
 
 ReflRegist(
     refl::Class<InnerPOD>("InnerPOD")
@@ -70,6 +74,7 @@ DeclareParseFunc(InnerPOD)
     Field(ivalue, int)
 EndDeclareParseFunc()
 
+//! [Declare TestPOD]
 DeclareParseFunc(TestPOD)
     Field(svalue, std::string)
     Field(rvalue, float)
@@ -79,19 +84,22 @@ DeclareParseFunc(TestPOD)
     DynArrayField(arrvalue2, int)
     ObjField(inner, InnerPOD)
 EndDeclareParseFunc()
+//! [Declare TestPOD]
 
 
 TEST_CASE("config_parse") {
     LuaManager manager;
 
     SECTION("test complete content") {
+        //! [Use AutoParse]
         auto lua = manager.CreateSolitaryFromContent(TestLuaContent);
         std::optional<sol::table> table = lua.lua["Config"];
         REQUIRE(table.has_value());
 
-        auto result = ParseTestPOD(table.value());
+        std::optional<TestPOD> result = ParseTestPOD(table.value());
         REQUIRE(result.has_value());
-        auto& pod = result.value();
+        TestPOD& pod = result.value();
+        //! [Use AutoParse]
         REQUIRE(pod.svalue == "hello");
         REQUIRE(pod.rvalue == 123.3f);
         REQUIRE(pod.ivalue == 223);

@@ -6,6 +6,11 @@
 
 #include "core/refl.hpp"
 
+struct AnotherPOD {
+    float fvalue;
+};
+
+//! [Reflect Class]
 struct InnerPOD {
     float innerF;
     std::vector<float> innerFV;
@@ -21,10 +26,6 @@ struct SimplePOD {
     std::array<int, 3> iarray;
 };
 
-struct AnotherPOD {
-    float fvalue;
-};
-
 ReflRegist(refl::Class<InnerPOD>("InnerPOD")
     .Member(&InnerPOD::innerF, "innerF")
     .Member(&InnerPOD::innerFV, "innerFV"));
@@ -36,6 +37,7 @@ ReflRegist(refl::Class<SimplePOD>("SimplePOD")
     .Member(&SimplePOD::dvalue, "dvalue")
     .Member(&SimplePOD::inner, "inner")
     .Member(&SimplePOD::iarray, "iarray"));
+//! [Reflect Class]
 
 class Visitor {
 public:
