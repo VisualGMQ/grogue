@@ -74,7 +74,7 @@ TEST_CASE("ReadDefinitionConfig") {
     }
 
     SECTION("[RaceProfConfig test lack fields]") {
-        RaceProfConfig config = RaceProfConfig::LoadByDefault(TestHelper::Instance().GetResourcePath() + "config/", "human", defConfig, defaultConfig);
+        RaceProfConfig config = RaceProfConfig::LoadByDefault(TestHelper::Instance().GetResourcePath() + "config/", "lack_fields", defConfig, defaultConfig);
         REQUIRE_FALSE(config.Failed());
         auto& basic = config.GetBasic();
         REQUIRE(basic.hp == 10);
