@@ -28,7 +28,7 @@ Config = {
         value = 6,
         interpolation = "none",
     },
-    { time = 2500,
+    { time = 3500,
         value = 7,
         interpolation = "none",
     },

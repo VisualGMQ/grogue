@@ -151,6 +151,7 @@ public:
         auto& frame = clip_->At(frameIndex_);
         auto& nextFrame = clip_->At(frameIndex_ + 1);
         auto duration = nextFrame.time_ - frame.time_;
+        LOGT("time = ", timer.Elapse());
         if (curTime_ >= duration) {
             curTime_ -= duration;
             frameIndex_++;

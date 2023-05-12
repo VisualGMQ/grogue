@@ -16,14 +16,18 @@ public:
     static uint32_t GetSetFPS() { return fps_; }
 
     Time();
+    Time(const Time&) = delete;
+    Time(Time&&) = default;
+    Time& operator=(const Time&) = delete;
+    Time& operator=(Time&&) = default;
 
     //! @brief get elapse time between two frame (in millisecond)
     //! @return elapsed milliseconds
     TimeType Elapse() const { return elapse_ > 0 ? elapse_ : 1; }
 
 private:
-    static uint32_t fps_;
-    static uint32_t fpsDuration_;
+    static uint64_t fps_;
+    static uint64_t fpsDuration_;
 
     uint64_t curTime_;
     uint64_t elapse_;
