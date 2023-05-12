@@ -23,7 +23,7 @@ enum GameState {
 } state;
 
 void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
-    GameConfig config("./resources/config/race");
+    GameConfig config("./resources/config/race/");
     if (!config.Valid()) {
         LOGF("Load config in ./resources/config failed!!! Game can't start!!!");
         exit(1);
