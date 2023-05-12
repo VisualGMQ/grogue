@@ -1,7 +1,7 @@
-description = {
+Config = {
     filename = "./font.png",
     row = 8,
     col = 16,
-    margin = {4, 4, 0, 0},
-    spacing = {8, 8},
+    margin = {left = 4, top = 4, right = 0, bottom = 0},
+    spacing = {x = 8, y = 8},
 }

@@ -3,6 +3,7 @@
 #include "app/transform.hpp"
 #include "app/fwd.hpp"
 
+//! @brief a component that present a sprite
 struct Sprite final {
     Color color = {255, 255, 255, 255};
     math::Rect region;

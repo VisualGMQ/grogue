@@ -16,7 +16,7 @@ std::string imgFilename;
 float scale = 1;
 math::Vector2 offset;
 
-struct TileSheetConfig {
+struct Config {
     ImageHandle handle;
     uint32_t col = 1;
     uint32_t row = 1;
@@ -50,13 +50,13 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
     }
 
     cmd.SetResource<nk_context*>(std::move(ctx));
-    cmd.SetResource<TileSheetConfig>(TileSheetConfig{});
+    cmd.SetResource<Config>(Config{});
 }
 
 void UpdateSystem(ecs::Commands& cmd, ecs::Querier, ecs::Resources resources, ecs::Events&) {
     auto& ctx = resources.Get<nk_context*>();
     auto& window = resources.Get<Window>();
-    auto& config = resources.Get<TileSheetConfig>();
+    auto& config = resources.Get<Config>();
     auto& assets = resources.Get<AssetsManager>();
 
     if (nk_begin(ctx, "TileSheet Configer", nk_rect(0, 0, 200, 450),
@@ -74,7 +74,7 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Querier, ecs::Resources resources, ec
                 if (config.handle) {
                     assets.Image().Destroy(config.handle);
                 }
-                config = TileSheetConfig{};
+                config = Config{};
                 config.handle = assets.Image().Load(filename);
             } else {
                 LOGD("load ", filename, " failed");
@@ -141,7 +141,7 @@ void NuklearRenderSystem(ecs::Commands& cmd, ecs::Querier,
 void TileSheetRenderSystem(ecs::Commands& cmd, ecs::Querier,
                            ecs::Resources resources, ecs::Events&) {
     auto& renderer = resources.Get<Renderer>();
-    auto& config = resources.Get<TileSheetConfig>();
+    auto& config = resources.Get<Config>();
     auto& window = resources.Get<Window>();
     auto& assets = resources.Get<AssetsManager>();
 
@@ -199,7 +199,7 @@ void EventHandleSystem(ecs::Commands& cmd, ecs::Querier, ecs::Resources resource
     auto& mouse = resources.Get<Mouse>();
     if (nk_item_is_any_active(ctx)) { return; }
 
-    auto& config = resources.Get<TileSheetConfig>();
+    auto& config = resources.Get<Config>();
 
     if (!config.handle) return;
 

@@ -41,6 +41,42 @@ struct RaceAddition final {
     MonsterProperty addition;
 };
 
+struct EntityProperty final {
+    float solid; //!< in [0, 100]
+                 //!< - [0.0, 30): gass
+                 //!< - [30, 60): liquid
+                 //!< - [60, 100]: solid
+    float lumen; //!< in [0, +inf)
+    float heat;  //!< in [0, +inf)
+    float shape; //!< in [0, 100)
+    float poison; // !< in [0, 100]
+};
+
+enum class BuffType {
+    Poison,
+    Burn,
+    Bleed,
+    Stun,
+    Cold,
+};
+
+struct Buff final {
+    BuffType type;
+    float time;     //!< the buffer continue time
+    float value;    //!< the buffer energy
+    std::function<float(float)> change; //!< the buffer change while time pass
+
+    void Update(float time) {
+        this->time = std::max(this->time - time, 0.0f);
+        if (change) {
+            value = change(time);
+        }
+        if (value < 0.0 || time == 0) {
+            value = 0.0;
+        }
+    }
+};
+
 // reflection MonsterProperty
 ReflRegist(
     refl::Class<MonsterProperty>("MonsterProperty")

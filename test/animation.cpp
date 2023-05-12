@@ -31,16 +31,15 @@ void InitPropertyClipSystem(ecs::Commands& cmd, ecs::Resources resources) {
 }
 
 void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
-    auto& tilesheetManager = resources.Get<TileSheetManager>();
+    auto& tilesheetManager = resources.Get<TilesheetManager>();
 
-    cmd.SetResource<TileSheet>(std::move(tilesheetManager.LoadFromConfig(TestHelper::Instance().GetResourcePath() + "airman_desc.lua")));
-
+    cmd.SetResource<Tilesheet>(std::move(tilesheetManager.LoadFromConfig(TestHelper::Instance().GetResourcePath() + "airman_desc.lua")));
 }
 
 void UpdatePropSystem(ecs::Commands& cmd, ecs::Querier queryer, ecs::Resources resources, ecs::Events& events) {
     auto& group = resources.Get<PlayerGroup>();
     auto& timer = resources.Get<Time>();
-    auto& tilesheet = resources.Get<TileSheet>();
+    auto& tilesheet = resources.Get<Tilesheet>();
 
     group.positionPlayer.Update(timer);
     group.rowPlayer.Update(timer);

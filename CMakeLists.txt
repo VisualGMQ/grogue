@@ -80,6 +80,20 @@ if (AUTO_FORMAT)
                     COMMENT "start format")
 endif()
 
+# doc generate
+option(DOC_GENERATE "generate doc" ON)
+
+if (DOC_GENERATE)
+    find_program(DOXYGEN_PROGRAM doxygen)
+    if (DOXYGEN_PROGRAM)
+        message("found doxygen, enable build doc")
+        execute_process(
+            COMMAND doxygen
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_QUIET)
+    endif()
+endif()
+
 # utilities
 option(ENABLE_UTILITIES "enable build utilities" ON)
 if (ENABLE_UTILITIES)

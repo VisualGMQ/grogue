@@ -13,7 +13,7 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
         .SetResource<Context>(
             Context{assets.Font().Load("resources/font/SimHei.ttf", 20)});
 
-    auto& manager = resources.Get<TileSheetManager>();
+    auto& manager = resources.Get<TilesheetManager>();
     manager.LoadFromConfig("resources/img/tilesheet_tile.lua");
 }
 

@@ -9,6 +9,8 @@ class Sound;
 
 using BGMHandle = Handle<BGM>;
 
+//! @addtogroup resource-manager
+//! @{
 
 class BGM final {
 public:
@@ -57,3 +59,5 @@ public:
 private:
     BGMManager& manager_;
 };
+
+//! @}

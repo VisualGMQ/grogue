@@ -4,6 +4,10 @@
 #include "app/handle.hpp"
 #include "app/manager.hpp"
 
+//! @addtogroup resource-manager
+//! @brief some resource class and manager
+//! @{
+
 class LuaScript;
 
 using LuaScriptHandle = Handle<LuaScript>;
@@ -48,11 +52,24 @@ private:
     }
 };
 
+//! @brief manage `LuaScript`
 class LuaManager final : public ResourceManager<LuaScript> {
 public:
+    //! @brief create a `LuaScript` and load from lua file, will auto destroy when app quit
+    //! @return the `Handle` to `LuaScript`
     LuaScriptHandle Load(const std::string& filename);
+    //! @brief create a `LuaScript`, will auto destroy when app quit
+    //! @return the `Handle` to `LuaScript`
     LuaScriptHandle Create();
+
+    //! @brief create a solitary `LuaScript`, will auto destroy when out of scope
     LuaScript CreateSolitary();
+
+    //! @brief create a solitary `LuaScript` and load from file, will auto destroy when out of scope
     LuaScript CreateSolitary(const std::string&);
+
+    //! @brief create a solitary `LuaScript` and load from lua code, will auto destroy when out of scope
     LuaScript CreateSolitaryFromContent(const std::string&);
 };
+
+//! @}

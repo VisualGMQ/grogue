@@ -3,6 +3,7 @@
 #include "core/pch.hpp"
 #include "app/manager.hpp"
 
+//! @brief a resource that make you get time elapse between two frame
 class Time final {
 public:
     using TimeType = uint64_t;
@@ -16,6 +17,8 @@ public:
 
     Time();
 
+    //! @brief get elapse time between two frame (in millisecond)
+    //! @return elapsed milliseconds
     TimeType Elapse() const { return elapse_ > 0 ? elapse_ : 1; }
 
 private:
@@ -26,9 +29,14 @@ private:
     uint64_t elapse_;
 };
 
+
+//! @addtogroup resource-manager
+//! @{
+
 class Timer;
 using TimerHandle = Handle<Timer>;
 
+//! @brief a timer that tirge function when reach time
 class Timer final {
 public:
     using TickFunc = std::function<void()>;
@@ -37,6 +45,10 @@ public:
 
     Timer(const Timer&) = delete;
     Timer& operator=(const Timer&) = delete;
+
+    void OnTick(TickFunc func) {
+        func_ = func;
+    }
 
     void Update(const Time& t) {
         if (!isTicking_) return;
@@ -81,3 +93,5 @@ public:
 
     TimerHandle Create(Time::TimeType time, Timer::TickFunc func);
 };
+
+//! @}

@@ -11,6 +11,10 @@
 
 namespace math {
 
+//! @defgroup math
+//! @brief some math utilities
+//! @{
+
 constexpr double PI = 3.1415926535897932384626;
 
 //! @brief  compare two float value by epsilon
@@ -344,5 +348,7 @@ private:
     int h_;
 };
 */
+
+//! @}
 
 }  // namespace math

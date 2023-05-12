@@ -2,15 +2,15 @@
 #include "test_helper.hpp"
 
 void LoadResourcesSystem(ecs::Commands& cmd, ecs::Resources resources) {
-    auto& manager = resources.Get<TileSheetManager>();
+    auto& manager = resources.Get<TilesheetManager>();
     auto tilesheet = manager.LoadFromConfig(TestHelper::Instance().GetResourcePath() + "font_desc.lua");
-    cmd.SetResource<TileSheet>(std::move(tilesheet));
+    cmd.SetResource<Tilesheet>(std::move(tilesheet));
 }
 
 void UpdateSystem(ecs::Commands& cmd, ecs::Querier queryer, ecs::Resources resources, ecs::Events& events) {
     auto& renderer = resources.Get<Renderer>();
 
-    auto& tilesheet = resources.Get<TileSheet>();
+    auto& tilesheet = resources.Get<Tilesheet>();
     auto tileSize = tilesheet.TileSize();
     for (int x = 0; x < tilesheet.Col(); x++) {
         for (int y = 0; y < tilesheet.Row(); y++) {

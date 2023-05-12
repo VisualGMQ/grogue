@@ -78,12 +78,15 @@ private:
     bool valid_;
 };
 
+//! @brief contains all game config
 class GameConfig final {
 public:
     explicit GameConfig(const std::string& configDir);
 
     auto& GetRaceProfDef() const { return *raceProfDef_; }
     auto& GetRaceProfConfig() const { return raceProfConfig_; }
+
+    //! @brief whether config init OK
     bool Valid() const { return valid_; }
 
 private:

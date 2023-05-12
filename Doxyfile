@@ -917,12 +917,13 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = D:/Codes/grogue/include/core \
-                         D:/Codes/grogue/include/app \
-                         D:/Codes/grogue/include/game \
-                         D:/Codes/grogue/src/game \
-                         D:/Codes/grogue/src/app \
-                         D:/Codes/grogue/src/core
+INPUT                  = ./include/core \
+                         ./include/app \
+                         ./include/game \
+                         ./src/game \
+                         ./src/app \
+                         ./src/core \
+                         ./ReadMe.md
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1136,7 +1137,7 @@ FILTER_SOURCE_PATTERNS =
 # (index.html). This can be useful if you have a project on for instance GitHub
 # and want to reuse the introduction page also for the doxygen output.
 
-USE_MDFILE_AS_MAINPAGE =
+USE_MDFILE_AS_MAINPAGE = ReadMe.md
 
 # The Fortran standard specifies that for fixed formatted Fortran code all
 # characters from position 72 are to be considered as comment. A common

@@ -1,8 +1,50 @@
 #include "app/tilesheet.hpp"
 
-TileSheet::TileSheet(ImageManager& manager, ImageHandle handle, uint32_t col,
+ReflRegist(
+refl::Class<Margin>("Margin")
+    .Member(&Margin::top, "top")
+    .Member(&Margin::left, "left")
+    .Member(&Margin::right, "right")
+    .Member(&Margin::bottom, "bottom")
+)
+
+ReflRegist(
+refl::Class<Spacing>("Spacing")
+    .Member(&Spacing::x, "x")
+    .Member(&Spacing::y, "y")
+)
+
+ReflRegist(
+refl::Class<TilesheetConfig>("TilesheetDesc")
+    .Member(&TilesheetConfig::filename, "filename")
+    .Member(&TilesheetConfig::row, "row")
+    .Member(&TilesheetConfig::col, "col")
+    .Member(&TilesheetConfig::spacing, "spacing")
+)
+
+DeclareParseFunc(Margin)
+    Field(left, uint32_t)
+    Field(right, uint32_t)
+    Field(top, uint32_t)
+    Field(bottom, uint32_t)
+EndDeclareParseFunc()
+
+DeclareParseFunc(Spacing)
+    Field(x, uint32_t)
+    Field(y, uint32_t)
+EndDeclareParseFunc()
+
+DeclareParseFunc(TilesheetConfig)
+    Field(filename, std::string)
+    Field(row, uint32_t)
+    Field(col, uint32_t)
+    ObjField(margin, Margin)
+    ObjField(spacing, Spacing)
+EndDeclareParseFunc()
+
+Tilesheet::Tilesheet(ImageManager& manager, ImageHandle handle, uint32_t col,
                      uint32_t row, const Margin& margin,
-                     const math::Vector2& spacing)
+                     const Spacing& spacing)
     : handle_(handle),
       margin_(margin),
       spacing_(spacing),
@@ -19,7 +61,7 @@ TileSheet::TileSheet(ImageManager& manager, ImageHandle handle, uint32_t col,
     }
 }
 
-Tile TileSheet::Get(uint32_t x, uint32_t y) {
+Tile Tilesheet::Get(uint32_t x, uint32_t y) {
     return Tile{
         math::Rect{
                    static_cast<float>(x * (tileWidth_ + spacing_.x) + margin_.left),
@@ -29,51 +71,37 @@ Tile TileSheet::Get(uint32_t x, uint32_t y) {
     };
 }
 
-Tile TileSheet::Get(uint32_t index) {
+Tile Tilesheet::Get(uint32_t index) {
     return Get(index % col_, index / col_);
 }
 
-TileSheetManager::TileSheetManager(ImageManager& imageMgr, LuaManager& luaMgr)
+TilesheetManager::TilesheetManager(ImageManager& imageMgr, LuaManager& luaMgr)
     : imageManager_(&imageMgr), luaManager_(&luaMgr) {}
 
-TileSheet& TileSheetManager::CreateFromImage(ImageHandle handle, uint32_t col,
+Tilesheet& TilesheetManager::CreateFromImage(ImageHandle handle, uint32_t col,
                                              uint32_t row, const Margin& margin,
-                                             const math::Vector2& spacing) {
+                                             const Spacing& spacing) {
     tilesheets_.emplace_back(*imageManager_, handle, col, row, margin, spacing);
     return tilesheets_.back();
 }
 
-TileSheet& TileSheetManager::LoadFromFile(const std::string& filename,
+Tilesheet& TilesheetManager::LoadFromFile(const std::string& filename,
                                           uint32_t col, uint32_t row,
                                           const Margin& margin,
-                                          const math::Vector2& spacing) {
+                                          const Spacing& spacing) {
     auto handle = imageManager_->Load(filename);
     return CreateFromImage(handle, col, row, margin, spacing);
 }
 
-TileSheet& TileSheetManager::LoadFromConfig(const std::string& configFilename) {
+Tilesheet& TilesheetManager::LoadFromConfig(const std::string& configFilename) {
     auto lua = luaManager_->CreateSolitary(configFilename);
-    auto table = lua.lua.get<sol::table>("description");
+    auto table = lua.lua.get<sol::table>("Config");
 
-    std::string filename = table.get<std::string>("filename");
-    auto root = configFilename;
-    std::replace(root.begin(), root.end(), '\\', '/');
-    std::replace(filename.begin(), filename.end(), '\\', '/');
-    filename = root.substr(0, root.find_last_of('/') + 1) + filename.substr(filename.find_last_of('/'));
+    auto config = ParseTilesheetConfig(table);
 
-    uint32_t row = table.get<int>("row");
-    uint32_t col = table.get<int>("col");
+    std::string filename = configFilename.substr(0, configFilename.find_last_of('/') + 1) + config.value().filename.substr(config.value().filename.find_last_of('/'));
 
-    auto marginTable = table.get<sol::table>("margin");
-    Margin margin;
-    margin.left = marginTable.get<int>(1);
-    margin.right = marginTable.get<int>(2);
-    margin.top = marginTable.get<int>(3);
-    margin.bottom = marginTable.get<int>(4);
-
-    auto spacingTable = table.get<sol::table>("spacing");
-    math::Vector2 spacing{spacingTable.get<float>(1),
-                          spacingTable.get<float>(2)};
-
-    return LoadFromFile(filename, col, row, margin, spacing);
+    return LoadFromFile(filename, config.value().col,
+                        config.value().row, config.value().margin,
+                        config.value().spacing);
 }

@@ -1,5 +1,5 @@
 --@field interpolation function
-frames = {
+Config = {
     { time = 0,
         value = 0,
         interpolation = "none"

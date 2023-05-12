@@ -10,6 +10,10 @@
 
 namespace logger {
 
+//! @defgroup log
+//! @brief log system
+//! @{
+
 enum Level {
     Trace = 0,
     Debug,
@@ -146,23 +150,32 @@ private:
     LoggerMgr() { defaultLogger_.reset(new Logger(std::cout)); }
 };
 
+//@breif trace log
 #define LOGT(...)                                                            \
     logger::LoggerMgr::Instance().GetDefault().Trace(__FUNCTION__, __FILE__, \
                                                      __LINE__, ##__VA_ARGS__)
+//@breif debug log
 #define LOGD(...)                                                            \
     logger::LoggerMgr::Instance().GetDefault().Debug(__FUNCTION__, __FILE__, \
                                                      __LINE__, ##__VA_ARGS__)
+//@breif information log
 #define LOGI(...)                                                           \
     logger::LoggerMgr::Instance().GetDefault().Info(__FUNCTION__, __FILE__, \
                                                     __LINE__, ##__VA_ARGS__)
+//@breif warning log
 #define LOGW(...)                                       \
     logger::LoggerMgr::Instance().GetDefault().Warning( \
         __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
+//@breif error log
 #define LOGE(...)                                                            \
     logger::LoggerMgr::Instance().GetDefault().Error(__FUNCTION__, __FILE__, \
                                                      __LINE__, ##__VA_ARGS__)
+//@breif fatal error log
 #define LOGF(...)                                          \
     logger::LoggerMgr::Instance().GetDefault().FatalError( \
         __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
+//! @}
 
 }  // namespace logger

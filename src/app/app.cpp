@@ -87,7 +87,7 @@ void DefaultPlugins::Build(ecs::World* world) {
     assets->image_ = std::unique_ptr<ImageManager>(
         new ImageManager(*world->GetResource<Renderer>()));
 
-    world->SetResource(TileSheetManager{assets->Image(), assets->Lua()})
+    world->SetResource(TilesheetManager{assets->Image(), assets->Lua()})
         .AddSystem(EventUpdateSystem)
         .AddSystem(Keyboard::UpdateSystem)
         .AddSystem(Mouse::UpdateSystem)

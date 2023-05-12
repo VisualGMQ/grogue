@@ -6,6 +6,9 @@
 #include "app/manager.hpp"
 #include "app/renderer.hpp"
 
+//! @addtogroup resource-manager
+//! @{
+
 class Image final {
 public:
     friend class Renderer;
@@ -48,3 +51,5 @@ public:
 private:
     Renderer* renderer_;
 };
+
+//! @}

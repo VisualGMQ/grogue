@@ -1,4 +1,4 @@
-clips = {
+Config = {
     x = {
         { time = 0,
             value = 0,

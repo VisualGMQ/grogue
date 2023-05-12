@@ -4,9 +4,10 @@
 #include "app/lua.hpp"
 #include "core/pch.hpp"
 #include "app/sprite.hpp"
+#include "app/config_parse.hpp"
 
 template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-struct Fourway {
+struct Fourway final {
     static Fourway Zero() { return {0, 0, 0, 0}; };
 
     T left, right, top, bottom;
@@ -14,11 +15,15 @@ struct Fourway {
 
 using Margin = Fourway<uint32_t>;
 
-class TileSheet final {
+struct Spacing final {
+    uint32_t x, y;
+};
+
+class Tilesheet final {
 public:
-    TileSheet(ImageManager&, ImageHandle, uint32_t col, uint32_t row,
+    Tilesheet(ImageManager&, ImageHandle, uint32_t col, uint32_t row,
               const Margin& margin = Margin::Zero(),
-              const math::Vector2& spacing = math::Vector2::Zero);
+              const Spacing& spacing = {0, 0});
 
     operator bool() const {
         return handle_ && tileWidth_ > 0 && tileHeight_ > 0;
@@ -36,28 +41,36 @@ public:
 private:
     ImageHandle handle_;
     Margin margin_;
-    math::Vector2 spacing_;
+    Spacing spacing_;
     uint32_t tileWidth_;
     uint32_t tileHeight_;
     uint32_t col_;
     uint32_t row_;
 };
 
-class TileSheetManager final {
+
+struct TilesheetConfig final {
+    std::string filename;
+    uint32_t row, col;
+    Margin margin = Margin::Zero();
+    Spacing spacing = {0, 0};
+};
+
+class TilesheetManager final {
 public:
-    TileSheetManager(ImageManager&, LuaManager&);
-    TileSheet& CreateFromImage(
+    TilesheetManager(ImageManager&, LuaManager&);
+    Tilesheet& CreateFromImage(
         ImageHandle, uint32_t col, uint32_t row,
         const Margin& margin = Margin::Zero(),
-        const math::Vector2& spacing = math::Vector2::Zero);
-    TileSheet& LoadFromFile(
+        const Spacing& spacing = {0, 0});
+    Tilesheet& LoadFromFile(
         const std::string& filename, uint32_t col, uint32_t row,
         const Margin& margin = Margin::Zero(),
-        const math::Vector2& spacing = math::Vector2::Zero);
-    TileSheet& LoadFromConfig(const std::string& configFilename);
+        const Spacing& spacing = {0, 0});
+    Tilesheet& LoadFromConfig(const std::string& configFilename);
 
 private:
     ImageManager* imageManager_;
     LuaManager* luaManager_;
-    std::vector<TileSheet> tilesheets_;
+    std::vector<Tilesheet> tilesheets_;
 };

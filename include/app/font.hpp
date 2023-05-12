@@ -4,6 +4,10 @@
 #include "app/handle.hpp"
 #include "app/manager.hpp"
 
+
+//! @addtogroup resource-manager
+//! @{
+
 class Font;
 
 using FontHandle = Handle<Font>;
@@ -36,3 +40,5 @@ class FontManager final : public ResourceManager<Font> {
 public:
     FontHandle Load(const std::string& filename, int ptsize);
 };
+
+//! @}
