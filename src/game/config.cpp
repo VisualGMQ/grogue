@@ -2,6 +2,7 @@
 
 // generate parse funcs
 
+// clang-format off
 DeclareParseFunc(MonsterProperty)
     Field(hp, int)
     Field(mp, int)
@@ -34,7 +35,7 @@ DeclareParseFunc(RacePOD)
     ObjField(basic, MonsterProperty)
     ObjField(max, MonsterProperty)
 EndDeclareParseFunc()
-
+// clang-format on
 
 // config class
 

@@ -1,5 +1,7 @@
 #pragma once
+
 #include "core/pch.hpp"
+#include "app/sprite.hpp"
 
 // entity's material
 struct Material final {
@@ -48,8 +50,7 @@ struct EntityProperty final {
                  //!< - [60, 100]: solid
     float lumen; //!< in [0, +inf)
     float heat;  //!< in [0, +inf)
-    float shape; //!< in [0, 100)
-    float poison; // !< in [0, 100]
+    float sharp; //!< in [0, 100)
 };
 
 enum class BuffType {
@@ -89,3 +90,25 @@ ReflRegist(
     .Member(&MonsterProperty::agility, "agility")
     .Member(&MonsterProperty::nutrition, "nutrition")
 );
+
+//! @brief the operation you can apply on item
+using ItemOpFunc = std::function<bool(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&)>;
+
+struct Item final {
+    std::string_view nameID;
+    std::string name;
+};
+
+struct ItemInfo final {
+    std::string name;
+    struct {
+        std::string_view operate;
+        bool valid;
+    } operations;
+    SpriteBundle sprite;
+};
+
+struct Terrian final {
+    EntityProperty property;
+    SpriteBundle sprite;
+};

@@ -87,15 +87,15 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Querier, ecs::Resources resources, ec
             if (filename != "") {
                 std::ofstream file(filename);
                 auto imgPureFilename = imgFilename.substr(imgFilename.find_last_of('/') + 1) ;
-                file << "description = {" << std::endl
+                file << "Config = {" << std::endl
                      << "\tfilename = \"./" << imgPureFilename << "\"," << std::endl
                      << "\trow = " << config.row << "," << std::endl
                      << "\tcol = " << config.col << "," << std::endl
-                     << "\tmargin = {" << config.margin.left << ", "
-                     << config.margin.right << ", " << config.margin.top << ", "
+                     << "\tmargin = { left = " << config.margin.left << ", right = "
+                     << config.margin.right << ", top" << config.margin.top << ", bottom"
                      << config.margin.bottom << "}," << std::endl
-                     << "\tspacing = {"
-                     << static_cast<uint32_t>(config.spacing.x) << ", "
+                     << "\tspacing = { x = "
+                     << static_cast<uint32_t>(config.spacing.x) << ", y = "
                      << static_cast<uint32_t>(config.spacing.y) << "},"
                      << std::endl
                      << "}";

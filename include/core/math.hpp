@@ -306,7 +306,6 @@ T Lerp(T a, T b, float t) {
 }
 
 // row-major matrix
-/* temporary not use. And it will has compile error under Ubuntu
 template <typename T>
 class HeapMatrix final {
 public:
@@ -347,7 +346,6 @@ private:
     int w_;
     int h_;
 };
-*/
 
 //! @}
 

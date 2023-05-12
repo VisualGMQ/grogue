@@ -22,6 +22,7 @@ refl::Class<TilesheetConfig>("TilesheetDesc")
     .Member(&TilesheetConfig::spacing, "spacing")
 )
 
+// clang-format off
 DeclareParseFunc(Margin)
     Field(left, uint32_t)
     Field(right, uint32_t)
@@ -41,6 +42,7 @@ DeclareParseFunc(TilesheetConfig)
     ObjField(margin, Margin)
     ObjField(spacing, Spacing)
 EndDeclareParseFunc()
+// clang-format on
 
 Tilesheet::Tilesheet(ImageManager& manager, ImageHandle handle, uint32_t col,
                      uint32_t row, const Margin& margin,

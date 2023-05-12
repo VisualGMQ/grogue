@@ -69,6 +69,7 @@ ReflRegist(
 // declare parse function
 // Field don't require declare order
 
+// clang-format off
 DeclareParseFunc(InnerPOD)
     Field(fvalue, float)
     Field(ivalue, int)
@@ -85,6 +86,7 @@ DeclareParseFunc(TestPOD)
     ObjField(inner, InnerPOD)
 EndDeclareParseFunc()
 //! [Declare TestPOD]
+// clang-format on
 
 
 TEST_CASE("config_parse") {
