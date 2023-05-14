@@ -9,7 +9,6 @@ struct Sprite final {
     math::Rect region;
     math::Vector2 customSize;
     math::Vector2 anchor;
-    Flip flip = Flip::None;
 
     static Sprite Default() {
         return Sprite{
@@ -17,13 +16,13 @@ struct Sprite final {
             math::Rect{0, 0, -1, -1},
             math::Vector2{-1, -1},
             math::Vector2::Zero,
-            Flip::None,
         };
     }
 
     static Sprite FromRegion(const math::Rect& region) {
         auto sprite = Sprite::Default();
         sprite.region = region;
+        sprite.customSize.Set(region.w, region.h);
         return sprite;
     }
 
@@ -37,5 +36,6 @@ struct Sprite final {
 struct SpriteBundle final {
     Sprite sprite;
     ImageHandle image;
+    Flip flip = Flip::None;
     bool visiable = true;
 };

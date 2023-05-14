@@ -464,7 +464,11 @@ private:
     template <typename T, typename... Remains>
     void doQuery(std::vector<Entity> &outEntities) const {
         auto index = IndexGetter::Get<T>();
-        World::ComponentInfo &info = world_.componentMap_[index];
+        auto it = world_.componentMap_.find(index);
+        if (it == world_.componentMap_.end()) {
+            return;
+        }
+        World::ComponentInfo &info = it->second;
 
         for (auto e : info.sparseSet) {
             if constexpr (sizeof...(Remains) != 0) {

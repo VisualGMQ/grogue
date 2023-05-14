@@ -5,9 +5,9 @@ Config = {
             color = {255, 255, 255, 255},
             flip = false,
             tilesheet = {
-                name = "xxx",
-                row = 1,
-                col = 1,
+                name = "tilesheet",
+                row = 9,
+                col = 2,
             },
         },
         property = {

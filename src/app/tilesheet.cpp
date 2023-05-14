@@ -17,6 +17,7 @@ refl::Class<Spacing>("Spacing")
 ReflRegist(
 refl::Class<TilesheetConfig>("TilesheetDesc")
     .Member(&TilesheetConfig::filename, "filename")
+    .Member(&TilesheetConfig::name, "name")
     .Member(&TilesheetConfig::row, "row")
     .Member(&TilesheetConfig::col, "col")
     .Member(&TilesheetConfig::spacing, "spacing")
@@ -37,6 +38,7 @@ EndDeclareParseFunc()
 
 DeclareParseFunc(TilesheetConfig)
     Field(filename, std::string)
+    Field(name, std::string)
     Field(row, uint32_t)
     Field(col, uint32_t)
     ObjField(margin, Margin)
@@ -80,19 +82,24 @@ Tile Tilesheet::Get(uint32_t index) {
 TilesheetManager::TilesheetManager(ImageManager& imageMgr, LuaManager& luaMgr)
     : imageManager_(&imageMgr), luaManager_(&luaMgr) {}
 
-Tilesheet& TilesheetManager::CreateFromImage(ImageHandle handle, uint32_t col,
+Tilesheet& TilesheetManager::CreateFromImage(ImageHandle handle,
+                                             const std::string& name,
+                                             uint32_t col,
                                              uint32_t row, const Margin& margin,
                                              const Spacing& spacing) {
-    tilesheets_.emplace_back(*imageManager_, handle, col, row, margin, spacing);
-    return tilesheets_.back();
+    tilesheets_.emplace(std::piecewise_construct,
+                       std::forward_as_tuple(name),
+                       std::forward_as_tuple(*imageManager_, handle, col, row, margin, spacing));
+    return tilesheets_[name];
 }
 
 Tilesheet& TilesheetManager::LoadFromFile(const std::string& filename,
+                                          const std::string& name,
                                           uint32_t col, uint32_t row,
                                           const Margin& margin,
                                           const Spacing& spacing) {
     auto handle = imageManager_->Load(filename);
-    return CreateFromImage(handle, col, row, margin, spacing);
+    return CreateFromImage(handle, name, col, row, margin, spacing);
 }
 
 Tilesheet& TilesheetManager::LoadFromConfig(const std::string& configFilename) {
@@ -103,7 +110,18 @@ Tilesheet& TilesheetManager::LoadFromConfig(const std::string& configFilename) {
 
     std::string filename = configFilename.substr(0, configFilename.find_last_of('/') + 1) + config.value().filename.substr(config.value().filename.find_last_of('/'));
 
-    return LoadFromFile(filename, config.value().col,
+    return LoadFromFile(filename,
+                        config.value().name,
+                        config.value().col,
                         config.value().row, config.value().margin,
                         config.value().spacing);
+}
+
+Tilesheet& TilesheetManager::Find(std::string_view name) {
+    if (auto it = tilesheets_.find(std::string(name)); it != tilesheets_.end()) {
+        return it->second;
+    } else {
+        LOGW("tilesheet ", name, " not found");
+        assert(false);
+    }
 }

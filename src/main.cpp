@@ -1,5 +1,7 @@
 #include "app/app.hpp"
 #include "game/config.hpp"
+#include "game/map.hpp"
+#include "game/monster.hpp"
 
 struct Context {
     FontHandle font;
@@ -14,7 +16,8 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
             Context{assets.Font().Load("resources/font/SimHei.ttf", 20)});
 
     auto& manager = resources.Get<TilesheetManager>();
-    manager.LoadFromConfig("resources/img/tilesheet_tile.lua");
+    manager.LoadFromConfig("resources/img/tilesheet.lua");
+    manager.LoadFromConfig("resources/img/role.lua");
 }
 
 enum GameState {
@@ -24,6 +27,8 @@ enum GameState {
 
 void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
     GameConfig config("./resources/config/race/");
+    Random::Init();
+
     if (!config.Valid()) {
         LOGF("Load config in ./resources/config failed!!! Game can't start!!!");
         exit(1);
@@ -31,6 +36,26 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
 
     cmd.SetResource<GameConfig>(std::move(config));
 
+    MapManager mapMgr;
+    mapMgr.Add(GenDebugDemo(resources, 32, 23));
+
+    cmd.SetResource<MapManager>(std::move(mapMgr));
+
+    auto& tilesheetMgr = resources.Get<TilesheetManager>();
+    auto& tilesheet = tilesheetMgr.Find("role");
+
+    auto downTile = tilesheet.Get(0, 0);
+    auto rightTile = tilesheet.Get(1, 0);
+    auto upTile = tilesheet.Get(2, 0);
+
+	auto monster = Monster::CreateMonster(
+        SpriteBundle{Sprite::FromRegion(rightTile.region), rightTile.handle},
+        SpriteBundle{Sprite::FromRegion(upTile.region), upTile.handle},
+        SpriteBundle{Sprite::FromRegion(downTile.region), downTile.handle});
+
+    auto entity = cmd.Spawn<Monster, Player>(std::move(monster), Player{});
+
+    /* old example to show how to build a scene.
     Transform transform;
     transform.position = {100, 100};
 
@@ -51,13 +76,11 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
     transform.scale = {2, 2};
     auto entity4 = cmd.SpawnAndReturn<SpriteBundle, NodeTransform>(SpriteBundle{sprite, handle}, NodeTransform{transform, {}});
 
-    /*
-        root 
-        /  \
-    child1 child2
-       |
-       leaf1
-    */
+    //     root 
+    //     /  \
+    // child1 child2
+    //    |
+    //    leaf1
 
     Node root;
     root.SetEntity(entity1)
@@ -71,24 +94,39 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
 
     auto& scene = resources.Get<Scene>();
     scene.root = root;
+    */
 }
 
 void InputHandle(ecs::Commands& cmd, ecs::Querier queryer,
                  ecs::Resources resources, ecs::Events& events) {
+    constexpr float SPEED = 2;
+
     auto& keyboard = resources.Get<Keyboard>();
-}
 
-void UpdateSystem(ecs::Commands& cmd, ecs::Querier queryer,
-                  ecs::Resources resources, ecs::Events&) {
-    auto& mouse = resources.Get<Mouse>();
-    auto& assets = resources.Get<AssetsManager>();
+    auto entities = queryer.Query<Player>();
+    for (auto entity : entities) {
+        auto& monster = queryer.Get<Monster>(entity);
 
-    if (resources.Has<Renderer>()) {
-        auto& renderer = resources.Get<Renderer>();
-        renderer.SetDrawColor(Color{0, 255, 0});
-        renderer.DrawLine({100, 200}, {400, 500});
-        renderer.SetDrawColor(Color{255, 255, 0});
-        renderer.DrawRect(math::Rect{100, 200, 400, 500});
+        math::Vector2 velocity;
+        
+        if (keyboard.Key(SDL_SCANCODE_D).IsPressing() || keyboard.Key(SDL_SCANCODE_A).IsPressing()) {
+            if (keyboard.Key(SDL_SCANCODE_D).IsPressing()) {
+                velocity.Set(1.0, 0.0);
+            } else {
+                velocity.Set(-1.0, 0.0);
+            }
+        }
+        if (keyboard.Key(SDL_SCANCODE_W).IsPressing() || keyboard.Key(SDL_SCANCODE_S).IsPressing()) {
+            if (keyboard.Key(SDL_SCANCODE_S).IsPressing()) {
+                velocity += math::Vector2(0, 1);
+            } else {
+                velocity += math::Vector2(0, -1);
+            }
+        }
+
+        velocity.Normalize();
+        velocity *= SPEED;
+        monster.Move(velocity);
     }
 }
 
@@ -121,8 +159,10 @@ public:
         world.AddPlugins<DefaultPlugins>()
             .AddStartupSystem(LoadResourceSystem)
             .AddStartupSystem(StartupSystem)
-            .AddSystem(UpdateSystem)
             .AddSystem(InputHandle)
+            .AddSystem(MonsterUpdate)
+            .AddSystem(DrawMapSystem)
+            .AddSystem(DrawMonsterSystem)
             .AddSystem(ShowDebugInfoSystem)
             .AddSystem(ExitTrigger::DetectExitSystem);
     }

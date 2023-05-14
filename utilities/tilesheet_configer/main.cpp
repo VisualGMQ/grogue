@@ -18,6 +18,8 @@ math::Vector2 offset;
 
 struct Config {
     ImageHandle handle;
+    char buf[1024] = {0};
+    int len = 0;
     uint32_t col = 1;
     uint32_t row = 1;
     Margin margin = Margin::Zero();
@@ -84,15 +86,16 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Querier, ecs::Resources resources, ec
             std::array filterPatterns = { "*.lua" };
             std::string filename = tinyfd_saveFileDialog("Save TileSheet", "./", filterPatterns.size(), filterPatterns.data(), ".lua");
             LOGD("save ", filename);
-            if (filename != "") {
+            if (filename != "" && config.len != 0) {
                 std::ofstream file(filename);
                 auto imgPureFilename = imgFilename.substr(imgFilename.find_last_of('/') + 1) ;
                 file << "Config = {" << std::endl
                      << "\tfilename = \"./" << imgPureFilename << "\"," << std::endl
+                     << "\tname = \"" << std::string(config.buf) << "\"," << std::endl
                      << "\trow = " << config.row << "," << std::endl
                      << "\tcol = " << config.col << "," << std::endl
                      << "\tmargin = { left = " << config.margin.left << ", right = "
-                     << config.margin.right << ", top" << config.margin.top << ", bottom"
+                     << config.margin.right << ", top = " << config.margin.top << ", bottom = "
                      << config.margin.bottom << "}," << std::endl
                      << "\tspacing = { x = "
                      << static_cast<uint32_t>(config.spacing.x) << ", y = "
@@ -109,8 +112,14 @@ void UpdateSystem(ecs::Commands& cmd, ecs::Querier, ecs::Resources resources, ec
                 } else {
                     LOGW(des, " already exists!");
                 }
+            } else if (filename.empty()) {
+                LOGW("filename is empty");
+            } else if (config.len == 0) {
+                LOGW("you must give a name");
             }
         }
+
+        nk_edit_string(ctx, NK_EDIT_FIELD, config.buf, &config.len, 256, 0);
         config.col = nk_propertyi(ctx, "Col", 1, config.col, 50, 1, 1);
         config.row = nk_propertyi(ctx, "Row", 1, config.row, 50, 1, 1);
 

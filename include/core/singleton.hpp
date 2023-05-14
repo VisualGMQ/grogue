@@ -35,15 +35,15 @@ public:
     //! @brief Get the singleton of class T
     //! @return The singleton instance
     static T& Instance() {
-        assert(instance_ == nullptr);
-        return instance_.get();
+        assert(instance_ != nullptr);
+        return *instance_;
     }
 
     //! @brief Explicit init the singleton.You must call this before call `Instance()`
     //! @param ...args the params pass to constructor of T
     template <typename... Args>
     static void Init(Args&&... args) {
-        instance_ = new T(std::forward<Args>(args)...);
+        instance_ = std::make_unique<T>(std::forward<Args>(args)...);
     }
 
     //! @brief Explicit destroy the singlton.You can't call `Instance()` after call this

@@ -261,7 +261,11 @@ public:
 
 //! @brief return a normalized vector. Don't change origin vector
 inline Vector2 Normalize(const Vector2& v) {
-    float a = 1.0f / Length(v);
+    float len = Length(v);
+    if (FloatEq(len, 0)) {
+        return Vector2::Zero;
+    }
+    float a = 1.0f / len;
     return v * a;
 }
 
@@ -309,8 +313,14 @@ T Lerp(T a, T b, float t) {
 template <typename T>
 class HeapMatrix final {
 public:
-    HeapMatrix(int w, int h) {
+    HeapMatrix(int w, int h): w_(w), h_(h) {
         datas_ = std::unique_ptr<T[]>(new T[w * h]);
+    }
+
+    void Fill(const T& elem) {
+        for (int i = 0; i < w_ * h_; i++) {
+            *(datas_.get() + i) = elem;
+        }
     }
 
     int Width() const {
@@ -318,7 +328,7 @@ public:
     }
 
     int Height() const {
-        return w_;
+        return h_;
     }
 
     const T& Get(int x, int y) const {

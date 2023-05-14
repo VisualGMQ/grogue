@@ -21,6 +21,7 @@ struct Spacing final {
 
 class Tilesheet final {
 public:
+    Tilesheet() = default;
     Tilesheet(ImageManager&, ImageHandle, uint32_t col, uint32_t row,
               const Margin& margin = Margin::Zero(),
               const Spacing& spacing = {0, 0});
@@ -51,6 +52,7 @@ private:
 
 struct TilesheetConfig final {
     std::string filename;
+    std::string name;
     uint32_t row, col;
     Margin margin = Margin::Zero();
     Spacing spacing = {0, 0};
@@ -60,17 +62,22 @@ class TilesheetManager final {
 public:
     TilesheetManager(ImageManager&, LuaManager&);
     Tilesheet& CreateFromImage(
-        ImageHandle, uint32_t col, uint32_t row,
+        ImageHandle,
+        const std::string& name,
+        uint32_t col, uint32_t row,
         const Margin& margin = Margin::Zero(),
         const Spacing& spacing = {0, 0});
     Tilesheet& LoadFromFile(
-        const std::string& filename, uint32_t col, uint32_t row,
+        const std::string& filename,
+        const std::string& name,
+        uint32_t col, uint32_t row,
         const Margin& margin = Margin::Zero(),
         const Spacing& spacing = {0, 0});
     Tilesheet& LoadFromConfig(const std::string& configFilename);
+    Tilesheet& Find(std::string_view name);
 
 private:
     ImageManager* imageManager_;
     LuaManager* luaManager_;
-    std::vector<Tilesheet> tilesheets_;
+    std::unordered_map<std::string, Tilesheet> tilesheets_;
 };

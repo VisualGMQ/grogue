@@ -109,6 +109,12 @@ struct ItemInfo final {
 };
 
 struct Terrian final {
+    enum class Type {
+        DryLand,
+        Water,
+    } type;
     EntityProperty property;
     SpriteBundle sprite;
 };
+
+constexpr float SCALE = 2.0;
