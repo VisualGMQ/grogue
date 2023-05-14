@@ -47,7 +47,7 @@ struct ParseError final {
 #define MemberAssignmentFunc(classtype, member, instance, value)              \
     [&](auto& data) {                                                         \
         if constexpr (std::is_same_v<                                         \
-                          std::remove_reference_t<decltype(data)>::pointer_t, \
+                          typename std::remove_reference_t<decltype(data)>::pointer_t, \
                           decltype(&classtype::member)>) {                    \
             if (#member == data.Name()) instance.*(data.Pointer()) = value;   \
         }                                                                     \
@@ -77,7 +77,7 @@ struct ParseError final {
 //! you can pass your lua table to it and get the parsed class instance:
 //! @snippet ./test/config_parse.cpp Use AutoParse
 #define DeclareParseFunc(classtype)                   \
-    std::optional<classtype> Parse ## classtype ## (const sol::table& root) { \
+    std::optional<classtype> Parse ## classtype(const sol::table& root) { \
         classtype instance;                                 \
         auto classinfo = refl::GetClass<classtype>();
 
@@ -140,7 +140,7 @@ struct ParseError final {
     {                                                                    \
         auto table = root.get<std::optional<sol::table>>(#name);         \
         if (!table.has_value()) return std::nullopt;                     \
-        auto member = Parse##mtype##(table.value());                     \
+        auto member = Parse##mtype(table.value());                       \
         if (!member.has_value()) return std::nullopt;                    \
         classinfo.VisitMembers(MemberAssignmentFunc(                     \
             decltype(classinfo)::type, name, instance, member.value())); \
