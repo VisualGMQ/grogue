@@ -131,7 +131,7 @@ public:
     //! @tparam F function type, will auto-deriveted normally
     //! @param f function-object like `void(auto& elem)`
     template <typename F>
-    void VisitMembers(F &f) {
+    void VisitMembers(const F &f) {
         tuple_for_each(members_, f);
     }
 
