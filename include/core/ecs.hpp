@@ -247,7 +247,8 @@ private:
         ResourceInfo(DestroyFunc destroy) : destroy(destroy) {
             assertm("you must give a non-null destroy function", destroy);
         }
-        ResourceInfo() = default;
+        // ResourceInfo() { int a = 123;
+        // }
         ~ResourceInfo() { destroy(resource); }
     };
 
@@ -291,7 +292,7 @@ public:
             assertm("resource already exists", it->second.resource);
             it->second.resource = new T(std::move(std::forward<T>(resource)));
         } else {
-            auto newIt = world_.resources_.emplace(
+            auto newIt = world_.resources_.insert_or_assign(
                 index,
                 World::ResourceInfo([](void *elem) { delete (T *)elem; }));
             newIt.first->second.resource = new T(std::move(std::forward<T>(resource)));
@@ -426,7 +427,7 @@ public:
     template <typename T>
     T &Get() {
         auto index = IndexGetter::Get<T>();
-        return *((T *)world_.resources_[index].resource);
+        return *((T *)world_.resources_.at(index).resource);
     }
 
 private:

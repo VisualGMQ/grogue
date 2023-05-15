@@ -87,10 +87,8 @@ Tilesheet& TilesheetManager::CreateFromImage(ImageHandle handle,
                                              uint32_t col,
                                              uint32_t row, const Margin& margin,
                                              const Spacing& spacing) {
-    tilesheets_.emplace(std::piecewise_construct,
-                       std::forward_as_tuple(name),
-                       std::forward_as_tuple(*imageManager_, handle, col, row, margin, spacing));
-    return tilesheets_[name];
+    auto it = tilesheets_.insert_or_assign(name, Tilesheet(*imageManager_, handle, col, row, margin, spacing));
+    return it.first->second;
 }
 
 Tilesheet& TilesheetManager::LoadFromFile(const std::string& filename,

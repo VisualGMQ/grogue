@@ -21,7 +21,6 @@ struct Spacing final {
 
 class Tilesheet final {
 public:
-    Tilesheet() = default;
     Tilesheet(ImageManager&, ImageHandle, uint32_t col, uint32_t row,
               const Margin& margin = Margin::Zero(),
               const Spacing& spacing = {0, 0});

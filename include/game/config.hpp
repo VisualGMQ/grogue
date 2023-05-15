@@ -2,8 +2,9 @@
 
 #include "core/pch.hpp"
 #include "app/config_parse.hpp"
+#include "app/tilesheet.hpp"
 
-// some config data
+// some config data for auto-parse tool
 
 struct RaceProfDefPOD final {
     std::vector<std::string> races;
@@ -26,6 +27,24 @@ struct RacePOD final {
     MonsterProperty basic;
     MonsterProperty max;
     std::vector<MonsterPropertyRange> professions;
+};
+
+struct TilesheetPOD final {
+    std::string name;
+    int row, col;
+};
+
+struct SpritePOD final {
+    std::array<int, 4> color;
+    TilesheetPOD tilesheet;
+};
+
+struct ItemPOD final {
+    std::string name;
+    int weight;
+    std::vector<std::string> operations;
+    SpritePOD sprite;
+    Material material;
 };
 
 // reflect datas
@@ -56,11 +75,33 @@ ReflRegist(
         .Member(&RacePOD::professions, "professions")
 )
 
+ReflRegist(
+    refl::Class<TilesheetPOD>("TilesheetPOD")
+        .Member(&TilesheetPOD::name, "name")
+        .Member(&TilesheetPOD::row, "row")
+        .Member(&TilesheetPOD::col, "col")
+)
+
+ReflRegist(
+    refl::Class<SpritePOD>("SpritePOD")
+        .Member(&SpritePOD::color, "color")
+        .Member(&SpritePOD::tilesheet, "tilesheet")
+)
+
+ReflRegist(
+    refl::Class<ItemPOD>("ItemPOD")
+        .Member(&ItemPOD::name, "name")
+        .Member(&ItemPOD::weight, "weight")
+        .Member(&ItemPOD::operations, "operations")
+        .Member(&ItemPOD::material, "material")
+        .Member(&ItemPOD::sprite, "sprite")
+)
+
 class RaceProfDef final {
 public:
     RaceProfDef(LuaManager&, const std::string& filename);
-    const std::vector<std::string>& GetRaces() const { return data_.races; }
-    const std::vector<std::string>& GetProfessions() const { return data_.professions; }
+    const std::vector<std::string>& Races() const { return data_.races; }
+    const std::vector<std::string>& Professions() const { return data_.professions; }
     bool Valid() const { return valid_; }
 
 private:
@@ -78,13 +119,32 @@ private:
     bool valid_;
 };
 
+class ItemConfig final {
+public:
+    ItemConfig(LuaManager&, TilesheetManager&, const std::string& filename);
+
+    auto& Items() const { return items_; }
+    auto& Names() const { return names_; }
+    float TotleWeight() const { return totleWeight_; }
+
+    //! @brief whether config init OK
+    bool Valid() const { return valid_; }
+
+private:
+    std::unordered_map<std::string, ItemInfo> items_;
+    std::vector<std::string> names_;
+    float totleWeight_ = 0.0;
+    bool valid_;
+};
+
 //! @brief contains all game config
 class GameConfig final {
 public:
-    explicit GameConfig(const std::string& configDir);
+    explicit GameConfig(LuaManager&, TilesheetManager&, const std::string& configDir);
 
     auto& GetRaceProfDef() const { return *raceProfDef_; }
     auto& GetRaceProfConfig() const { return raceProfConfig_; }
+    auto& GetItemConfig() const { return itemConfig_; }
 
     //! @brief whether config init OK
     bool Valid() const { return valid_; }
@@ -92,5 +152,6 @@ public:
 private:
     std::unique_ptr<RaceProfDef> raceProfDef_;
     std::vector<std::unique_ptr<RaceProfConfig>> raceProfConfig_;
+    std::unique_ptr<ItemConfig> itemConfig_;
     bool valid_;
 };

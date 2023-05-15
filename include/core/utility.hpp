@@ -23,8 +23,8 @@ inline std::optional<std::string> ReadWholeFile(const std::string& filename) {
 
 class Random final: public Singleton<Random, true> {
 public:
-    Random(): seed_(time(nullptr)) { Rand(); }
-    explicit Random(int seed): seed_(seed) { Rand(); }
+    Random(): seed_(time(nullptr)) { num_ = seed_; }
+    explicit Random(int seed): seed_(seed) { num_ = seed_; }
 
     std::uint32_t Rand() {
         num_ = (a_ * num_ + b_) % m_;
@@ -38,7 +38,7 @@ public:
     std::uint32_t Seed() const { return seed_; }
 
 private:
-    std::uint32_t a_ = 48271, b_ = 0, m_ = (1 << 31) - 1;
+    std::uint32_t a_ = 48271, b_ = 2312, m_ = std::numeric_limits<uint32_t>::max();
     std::uint32_t seed_;
     std::uint32_t num_;
 };

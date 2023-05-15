@@ -81,6 +81,7 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(Time{})
         .SetResource(TimerManager{})
         .SetResource(Scene{})
+        .SetResource(LuaManager{})
         .SetResource(DebugConfig{});
 
     auto* assets = world->GetResource<AssetsManager>();

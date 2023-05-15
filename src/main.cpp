@@ -26,7 +26,9 @@ enum GameState {
 } state;
 
 void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
-    GameConfig config("./resources/config/race/");
+    auto& luaMgr = resources.Get<LuaManager>();
+    auto& tilesheetMgr = resources.Get<TilesheetManager>();
+    GameConfig config(luaMgr, tilesheetMgr, "./resources/config/");
     Random::Init();
 
     if (!config.Valid()) {
@@ -41,7 +43,6 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
 
     cmd.SetResource<MapManager>(std::move(mapMgr));
 
-    auto& tilesheetMgr = resources.Get<TilesheetManager>();
     auto& tilesheet = tilesheetMgr.Find("role");
 
     auto downTile = tilesheet.Get(0, 0);

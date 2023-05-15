@@ -2,13 +2,14 @@
 
 #include "core/pch.hpp"
 #include "game/types.hpp"
+#include "game/config.hpp"
 #include "app/image.hpp"
 #include "app/sprite.hpp"
 #include "app/tilesheet.hpp"
 
 struct MapTile final {
     Terrian terrian;
-    std::vector<Item> item;
+    std::vector<Item> items;
 };
 
 struct Map final {

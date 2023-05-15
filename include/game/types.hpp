@@ -10,11 +10,6 @@ struct Material final {
     float lumen;    // in [0, +inf). 0 means no emission.
 };
 
-// monster race
-enum Race {
-    Human,
-};
-
 struct MonsterProperty final {
     int strength;       // affect attack damage, bearing amount
     int intelligence;   // affect mp recover speed
@@ -33,7 +28,7 @@ struct MonsterMetaProperty final {
 };
 
 struct MonsterInfo final {
-    Race race;
+    std::string_view race;
     Material material;
     MonsterProperty property;
     int level;
@@ -78,33 +73,22 @@ struct Buff final {
     }
 };
 
-// reflection MonsterProperty
-ReflRegist(
-    refl::Class<MonsterProperty>("MonsterProperty")
-    .Member(&MonsterProperty::hp, "hp")
-    .Member(&MonsterProperty::mp, "mp")
-    .Member(&MonsterProperty::strength, "strength")
-    .Member(&MonsterProperty::intelligence, "intelligence")
-    .Member(&MonsterProperty::outsight, "outsight")
-    .Member(&MonsterProperty::constitution, "constitution")
-    .Member(&MonsterProperty::agility, "agility")
-    .Member(&MonsterProperty::nutrition, "nutrition")
-);
 
 //! @brief the operation you can apply on item
 using ItemOpFunc = std::function<bool(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&)>;
 
 struct Item final {
-    std::string_view nameID;
-    std::string name;
+    std::string nameID;
 };
 
 struct ItemInfo final {
     std::string name;
-    struct {
-        std::string_view operate;
+    int weight;
+    struct Operation {
+        std::string operate;
         bool valid;
-    } operations;
+    };
+    std::vector<Operation> operations;
     SpriteBundle sprite;
 };
 
@@ -118,3 +102,24 @@ struct Terrian final {
 };
 
 constexpr float SCALE = 2.0;
+
+// reflect
+
+ReflRegist(
+    refl::Class<Material>("Material")
+        .Member(&Material::opaque, "opaque")
+        .Member(&Material::solid, "solid")
+        .Member(&Material::lumen, "lumen")
+)
+
+ReflRegist(
+    refl::Class<MonsterProperty>("MonsterProperty")
+    .Member(&MonsterProperty::hp, "hp")
+    .Member(&MonsterProperty::mp, "mp")
+    .Member(&MonsterProperty::strength, "strength")
+    .Member(&MonsterProperty::intelligence, "intelligence")
+    .Member(&MonsterProperty::outsight, "outsight")
+    .Member(&MonsterProperty::constitution, "constitution")
+    .Member(&MonsterProperty::agility, "agility")
+    .Member(&MonsterProperty::nutrition, "nutrition")
+);

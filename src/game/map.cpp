@@ -9,6 +9,9 @@ std::shared_ptr<Map> GenDebugDemo(ecs::Resources resources, int w, int h) {
     auto& tilesheetMgr = resources.Get<TilesheetManager>();
     auto tilesheet = tilesheetMgr.Find("tilesheet");
 
+    auto& gameConfig = resources.Get<GameConfig>();
+    auto& itemConfig = gameConfig.GetItemConfig();
+
     for (int x = 0; x < w; x++) {
         for (int y = 0; y < h; y++) {
             auto tile = tilesheet.Get(0, Random::Instance().RandRange(10, 11));
@@ -24,7 +27,17 @@ std::shared_ptr<Map> GenDebugDemo(ecs::Resources resources, int w, int h) {
                                sprite, tile.handle,
                                }
             };
-            map->tiles.Set(x, y, MapTile{terrian, {}});
+
+            std::vector<Item> items;
+            for (auto& itemInfo : itemConfig->Items()) {
+                if (Random::Instance().RandRange(0, itemConfig->TotleWeight()) < itemInfo.second.weight) {
+                    Item item;
+                    item.nameID = itemInfo.second.name;
+                    items.push_back(item);
+                    break;
+                }
+            }
+            map->tiles.Set(x, y, MapTile{terrian, items});
         }
     }
 
@@ -35,6 +48,7 @@ void DrawMapSystem(ecs::Commands& cmd, ecs::Querier queryer,
                    ecs::Resources resources, ecs::Events& events) {
     auto& mapMgr = resources.Get<MapManager>();
     auto& renderer = resources.Get<Renderer>();
+    auto& gameConfig = resources.Get<GameConfig>();
 
     auto& map = mapMgr.GetCurrentMap();
     for (int y = 0; y < map->tiles.Height(); y++) {
@@ -44,6 +58,11 @@ void DrawMapSystem(ecs::Commands& cmd, ecs::Querier queryer,
                 math::Vector2(x * MapTileSize * SCALE, y * MapTileSize * SCALE),
                 0, math::Vector2(SCALE, SCALE));
             renderer.DrawSprite(tile.terrian.sprite, transform);
+
+            for (const auto& item : tile.items) {
+                const auto& info = gameConfig.GetItemConfig()->Items().at(item.nameID);
+                renderer.DrawSprite(info.sprite, transform);
+            }
         }
     }
 }
