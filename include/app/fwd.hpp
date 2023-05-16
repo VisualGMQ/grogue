@@ -20,10 +20,13 @@ using KeyboardEvents = DuplicateEvent<SDL_KeyboardEvent>;
 using MouseBtnEvents = DuplicateEvent<SDL_MouseButtonEvent>;
 
 struct Color {
-    unsigned char r, g, b, a;
+    uint8_t r, g, b, a;
 
     static Color White;
     static Color Black;
+    static Color Red;
+    static Color Blue;
+    static Color Green;
 
     Color() : r(0), g(0), b(0), a(255) {}
 

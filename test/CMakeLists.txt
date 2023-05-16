@@ -36,6 +36,6 @@ AddSimpleTest(config_parse config_parse.cpp)
 AddInteractiveTest(input input.cpp)
 AddInteractiveTest(tilesheet tilesheet.cpp)
 AddInteractiveTest(animation animation.cpp)
-AddInteractiveTest(physical physical.cpp)
+AddInteractiveTest(shapes shapes.cpp)
 
 CopyDLL(example_test)

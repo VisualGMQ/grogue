@@ -80,7 +80,6 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(ExitTrigger{})
         .SetResource(Time{})
         .SetResource(TimerManager{})
-        .SetResource(Scene{})
         .SetResource(LuaManager{})
         .SetResource(DebugConfig{});
 
@@ -95,7 +94,8 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(Time::UpdateSystem)
         .AddSystem(TimerManager::UpdateSystem)
         .AddSystem(UpdateTransformSystem)
-        .AddSystem(RenderSpriteSystem);
+        .AddSystem(RenderSpriteSystem)
+        .AddSystem(RenderShapeSystem);
     world->GetResource<Renderer>()->imageManager_ = &assets->Image();
 }
 

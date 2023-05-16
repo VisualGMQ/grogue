@@ -357,6 +357,25 @@ private:
     int h_;
 };
 
+//! @brief rotate a 2D vector
+//! @param v src vector
+//! @param radians angle in radians, in clockwise
+//! @return rotated vector
+inline Vector2 Rotate(const Vector2& v, float radians) {
+    float c = std::cos(radians);
+    float s = std::sin(radians);
+
+    return Vector2(v.x * c - v.y * s, v.x * s + v.y * c);
+}
+
+inline Vector2 Scale(const Vector2& v, const Vector2& scale) {
+    return Vector2(v.x * scale.x, v.y * scale.y);
+}
+
+inline Vector2 Translate(const Vector2& v, const Vector2& offset) {
+    return Vector2(v.x + offset.x, v.y + offset.y);
+}
+
 //! @}
 
 }  // namespace math

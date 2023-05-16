@@ -7,6 +7,7 @@
 #include "core/pch.hpp"
 #include "app/transform.hpp"
 #include "app/sprite.hpp"
+#include "app/shape.hpp"
 
 class Image;
 class ImageManager;
@@ -33,6 +34,7 @@ public:
     void DrawText(FontHandle, const std::string& text, const Transform&);
     void DrawSprite(const SpriteBundle&, const Transform&);
     void DrawCircle(const math::Vector2& center, float radius, float subsection = 20);
+    void DrawShape(const Shape&, const Transform&);
 
     void Present();
     void Clear();

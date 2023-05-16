@@ -55,47 +55,6 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
         SpriteBundle{Sprite::FromRegion(downTile.region), downTile.handle});
 
     auto entity = cmd.Spawn<Monster, Player>(std::move(monster), Player{});
-
-    /* old example to show how to build a scene.
-    Transform transform;
-    transform.position = {100, 100};
-
-    auto& handle = resources.Get<ImageHandle>();
-    Sprite sprite = Sprite::Default();
-    auto entity1 = cmd.SpawnAndReturn<SpriteBundle, NodeTransform>(SpriteBundle{sprite, handle}, NodeTransform{transform, {}});
-    transform.position.x = 40;
-    transform.scale = {2, 2};
-    transform.rotation = 30;
-    sprite.color = {255, 0, 0};
-    auto entity2 = cmd.SpawnAndReturn<SpriteBundle, NodeTransform>(SpriteBundle{sprite, handle}, NodeTransform{transform, {}});
-    transform.position.x = 80;
-    transform.scale = {1, 1};
-    sprite.color = {0, 255, 0};
-    auto entity3 = cmd.SpawnAndReturn<SpriteBundle, NodeTransform>(SpriteBundle{sprite, handle}, NodeTransform{transform, {}});
-    transform.position.x = 120;
-    sprite.color = {0, 0, 255};
-    transform.scale = {2, 2};
-    auto entity4 = cmd.SpawnAndReturn<SpriteBundle, NodeTransform>(SpriteBundle{sprite, handle}, NodeTransform{transform, {}});
-
-    //     root 
-    //     /  \
-    // child1 child2
-    //    |
-    //    leaf1
-
-    Node root;
-    root.SetEntity(entity1)
-        .AddChild(
-            Node(entity2, {
-                Node(entity3, {})
-            })
-        .AddChild(
-            Node(entity4, {})
-        ));
-
-    auto& scene = resources.Get<Scene>();
-    scene.root = root;
-    */
 }
 
 void InputHandle(ecs::Commands& cmd, ecs::Querier queryer,

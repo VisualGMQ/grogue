@@ -101,6 +101,34 @@ void Renderer::DrawSprite(const SpriteBundle& sprite, const Transform& transform
                 sprite.sprite.anchor, sprite.flip);
 }
 
+void Renderer::DrawShape(const Shape& shape, const Transform& transform) {
+    static std::vector<float> uvCache;
+
+    Assert(!shape.vertices.empty(), "shape position or colors must > 0");
+
+    int result;
+    // don't need transform, we use raw datas
+    if (transform.position == math::Vector2::Zero && transform.rotation == 0 && transform.scale == math::Vector2(1, 1)) {
+        result = SDL_RenderGeometry(renderer_, nullptr,
+                            (SDL_Vertex*)shape.vertices.data(), shape.vertices.size(),
+                            shape.indices.has_value() ? (const int*)shape.indices.value().data() : nullptr,
+                            shape.indices.has_value() ? shape.indices.value().size() : 0);
+    } else {    // need transform, we must copy data on heap and change them
+        auto vertices = shape.vertices;
+        for (auto& vertex : vertices) {
+            vertex.position = math::Translate(math::Rotate(math::Scale(vertex.position, transform.scale), transform.rotation), transform.position);
+        }
+
+        result = SDL_RenderGeometry(renderer_, nullptr,
+                            (SDL_Vertex*)vertices.data(), vertices.size(),
+                            shape.indices.has_value() ? (const int*)shape.indices.value().data() : nullptr,
+                            shape.indices.has_value() ? shape.indices.value().size() : 0);
+    }
+    if (result == -1) {
+        LOGW("SDL_RenderGeometryRaw error: ", SDL_GetError());
+    }
+}
+
 void Renderer::drawTexture(SDL_Texture* texture, int rawW, int rawH,
                            const math::Rect& region, const math::Vector2& size,
                            const Transform& transform, const math::Vector2& anchor,
