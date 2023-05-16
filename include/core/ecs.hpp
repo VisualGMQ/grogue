@@ -278,7 +278,17 @@ public:
         return info.entity;
     }
 
-    Commands &Destroy(Entity entity) {
+    template <typename T>
+    Commands &DestroyComponent(Entity entity) {
+        auto idx = IndexGetter::Get<T>();
+        destroyComponents_.emplace_back(ComponentDestroyInfo{
+            entity, idx
+        });
+
+        return *this;
+    }
+
+    Commands &DestroyEntity(Entity entity) {
         destroyEntities_.push_back(entity);
 
         return *this;
@@ -311,11 +321,14 @@ public:
     }
 
     void Execute() {
-        for (auto &info : destroyResources_) {
+        for (const auto &info : destroyResources_) {
             removeResource(info);
         }
         for (auto e : destroyEntities_) {
             destroyEntity(e);
+        }
+        for (const auto& c : destroyComponents_) {
+            destroyComponent(c);
         }
 
         for (auto &spawnInfo : spawnEntities_) {
@@ -356,9 +369,19 @@ private:
         std::vector<ComponentSpawnInfo> components;
     };
 
+    struct EntityDestroyInfo {
+        Entity entity;
+    };
+
+    struct ComponentDestroyInfo {
+        Entity entity;
+        ComponentID index;
+    };
+
     std::vector<Entity> destroyEntities_;
     std::vector<ResourceDestroyInfo> destroyResources_;
     std::vector<EntitySpawnInfo> spawnEntities_;
+    std::vector<ComponentDestroyInfo> destroyComponents_;
 
     template <typename T, typename... Remains>
     void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo,
@@ -404,7 +427,20 @@ private:
         }
     }
 
-    void removeResource(ResourceDestroyInfo &info) {
+    void destroyComponent(const ComponentDestroyInfo& c) {
+        if (auto it = world_.entities_.find(c.entity); it != world_.entities_.end()) {
+            if (auto cit = it->second.find(c.index); cit != it->second.end()) {
+                void* component = cit->second;
+                it->second.erase(cit);
+                if (auto iit = world_.componentMap_.find(c.index); iit != world_.componentMap_.end()) {
+                    iit->second.pool.Destroy(component);
+                    iit->second.sparseSet.Remove(c.entity);
+                }
+            }
+        }
+    }
+
+    void removeResource(const ResourceDestroyInfo &info) {
         if (auto it = world_.resources_.find(info.index);
             it != world_.resources_.end()) {
             info.destroy(it->second.resource);
@@ -443,6 +479,10 @@ public:
         std::vector<Entity> entities;
         doQuery<Components...>(entities);
         return entities;
+    }
+
+    bool Exists(Entity entity) const {
+        return world_.entities_.find(entity) != world_.entities_.end();
     }
 
     template <typename T>
