@@ -278,6 +278,16 @@ public:
         return info.entity;
     }
 
+    template <typename... ComponentTypes>
+    Commands& AddComponent(Entity entity, ComponentTypes&&... components) {
+        EntitySpawnInfo info;
+        info.entity = entity;
+        doSpawn<ComponentTypes...>(info.components,
+                                   std::forward<ComponentTypes>(components)...);
+        addComponents_.push_back(info);
+        return *this;
+    }
+
     template <typename T>
     Commands &DestroyComponent(Entity entity) {
         auto idx = IndexGetter::Get<T>();
@@ -340,6 +350,18 @@ public:
                     doSpawnWithoutType(spawnInfo.entity, componentInfo);
             }
         }
+
+        for (auto& addInfo : addComponents_) {
+            auto it = world_.entities_.find(addInfo.entity);
+            if (it == world_.entities_.end()) {
+                continue;
+            }
+            auto &componentContainer = it->second;
+            for (auto &componentInfo : addInfo.components) {
+                componentContainer[componentInfo.index] =
+                    doSpawnWithoutType(addInfo.entity, componentInfo);
+            }
+        }
     }
 
 private:
@@ -381,6 +403,7 @@ private:
     std::vector<Entity> destroyEntities_;
     std::vector<ResourceDestroyInfo> destroyResources_;
     std::vector<EntitySpawnInfo> spawnEntities_;
+    std::vector<EntitySpawnInfo> addComponents_;;
     std::vector<ComponentDestroyInfo> destroyComponents_;
 
     template <typename T, typename... Remains>
@@ -404,7 +427,7 @@ private:
     void *doSpawnWithoutType(Entity entity, ComponentSpawnInfo &info) {
         if (auto it = world_.componentMap_.find(info.index);
             it == world_.componentMap_.end()) {
-            world_.componentMap_.emplace(
+            world_.componentMap_.insert_or_assign(
                 info.index, World::ComponentInfo(info.create, info.destroy));
         }
         World::ComponentInfo &componentInfo = world_.componentMap_[info.index];

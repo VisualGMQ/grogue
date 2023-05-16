@@ -78,11 +78,14 @@ TEST_CASE("example") {
 
     Commands cmd2(world);
     cmd2.DestroyComponent<Male>(entities[0]);
+    cmd2.AddComponent<ID>(entities[0], ID{});
 
     entities = querier.Query<Male>();
     REQUIRE(entities.size() == 1);
 
     cmd2.Execute();
+
+    REQUIRE(querier.Has<ID>(entities[0]));
 
     entities = querier.Query<Male>();
     REQUIRE(entities.empty());
