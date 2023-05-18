@@ -65,7 +65,9 @@ void RenderSpriteSystem(ecs::Commands& cmd, ecs::Querier querier,
         auto& node = querier.Get<Node>(entity);
         if (!node.parent) {
             PreorderVisit(entity, querier, [&](ecs::Entity entity) {
-                renderOneSprite(entity, querier, renderer);
+                if (querier.Has<SpriteBundle>(entity)) {
+					renderOneSprite(entity, querier, renderer);
+                }
             });
         }
     }
@@ -104,31 +106,36 @@ void RenderShapeSystem(ecs::Commands& cmd, ecs::Querier querier,
     }
 }
 
-void UpdateTransformSystem(ecs::Commands& cmd, ecs::Querier querier,
-                            ecs::Resources resources, ecs::Events& events) {
-    auto& renderer = resources.Get<Renderer>();
+void updateOneTransform(ecs::Entity entity, ecs::Querier querier) {
+    if (!querier.Has<NodeTransform>(entity)) {
+        return;
+    }
 
-    auto entities = querier.Query<SpriteBundle>();
+    auto& node = querier.Get<Node>(entity);
+    auto& transform = querier.Get<NodeTransform>(entity);
+
+    // FIXME: low performance, will query parent NodeTransform twice(when visit parent, query entity's NodeTransform, then visit parent's child, query node.parent NodeTransform)
+    // Solution: pass parent NodeTransform to this function to void query
+    if (node.parent && querier.Has<NodeTransform>(node.parent.value())) {
+        auto& parent = querier.Get<NodeTransform>(node.parent.value());
+
+        transform.globalTransform.position = transform.localTransform.position + parent.globalTransform.position;
+        transform.globalTransform.scale = transform.localTransform.scale * parent.globalTransform.scale;
+        transform.globalTransform.rotation = transform.localTransform.rotation + parent.globalTransform.rotation;
+    } else if (!node.parent) {
+        transform.globalTransform = transform.localTransform;
+    }
+}
+
+void UpdateTransformSystem(ecs::Commands& cmd, ecs::Querier querier,
+                           ecs::Resources resources, ecs::Events& events) {
+    auto entities = querier.Query<Node>();
     for (auto entity : entities) {
         auto& node = querier.Get<Node>(entity);
-
         if (!node.parent) {
-            for (auto child : node.children) {
-                PreorderVisit(child, querier, [&](ecs::Entity entity) {
-                    auto& node = querier.Get<Node>(child);
-
-                    if (!querier.Has<NodeTransform>(child) || !querier.Has<NodeTransform>(node.parent.value())) {
-                        return;
-                    }
-
-                    auto& transform = querier.Get<NodeTransform>(child);
-                    auto& parentTransform = querier.Get<NodeTransform>(node.parent.value());
-
-                    transform.globalTransform.position = transform.localTransform.position + parentTransform.globalTransform.position;
-                    transform.globalTransform.scale = transform.localTransform.scale * parentTransform.globalTransform.scale;
-                    transform.globalTransform.rotation = transform.localTransform.rotation + parentTransform.globalTransform.rotation;
-                });
-            }
+            PreorderVisit(entity, querier, [&](ecs::Entity entity) {
+                updateOneTransform(entity, querier);
+            });
         }
     }
 }

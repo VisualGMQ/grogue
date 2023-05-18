@@ -116,7 +116,7 @@ void Renderer::DrawShape(const Shape& shape, const Transform& transform) {
     } else {    // need transform, we must copy data on heap and change them
         auto vertices = shape.vertices;
         for (auto& vertex : vertices) {
-            vertex.position = math::Translate(math::Rotate(math::Scale(vertex.position, transform.scale), transform.rotation), transform.position);
+            vertex.position = math::Translate(math::Rotate(math::Scale(vertex.position, transform.scale), math::Deg2Rad(transform.rotation)), transform.position);
         }
 
         result = SDL_RenderGeometry(renderer_, nullptr,
