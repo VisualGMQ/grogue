@@ -25,6 +25,8 @@ public:
               const Margin& margin = Margin::Zero(),
               const Spacing& spacing = {0, 0});
 
+    static Tilesheet Null;
+
     operator bool() const {
         return handle_ && tileWidth_ > 0 && tileHeight_ > 0;
     }
@@ -46,6 +48,8 @@ private:
     uint32_t tileHeight_;
     uint32_t col_;
     uint32_t row_;
+
+    Tilesheet() = default;
 };
 
 

@@ -31,7 +31,7 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
     GameConfig config(luaMgr, tilesheetMgr, "./resources/config/");
     Random::Init();
 
-    if (!config.Valid()) {
+    if (!config) {
         LOGF("Load config in ./resources/config failed!!! Game can't start!!!");
         exit(1);
     }

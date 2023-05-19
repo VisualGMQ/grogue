@@ -46,6 +46,8 @@ DeclareParseFunc(TilesheetConfig)
 EndDeclareParseFunc()
 // clang-format on
 
+Tilesheet Tilesheet::Null;
+
 Tilesheet::Tilesheet(ImageManager& manager, ImageHandle handle, uint32_t col,
                      uint32_t row, const Margin& margin,
                      const Spacing& spacing)
@@ -120,6 +122,6 @@ Tilesheet& TilesheetManager::Find(std::string_view name) {
         return it->second;
     } else {
         LOGW("tilesheet ", name, " not found");
-        assert(false);
+        return Tilesheet::Null;
     }
 }

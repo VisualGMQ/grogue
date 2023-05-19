@@ -147,7 +147,7 @@ public:
     auto& GetItemConfig() const { return itemConfig_; }
 
     //! @brief whether config init OK
-    bool Valid() const { return valid_; }
+    operator bool() const { return valid_; }
 
 private:
     std::unique_ptr<RaceProfDef> raceProfDef_;
