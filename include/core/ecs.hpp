@@ -167,6 +167,7 @@ public:
     friend class Commands;
     friend class Resources;
     friend class Querier;
+    friend class CondQuerier;
     using ComponentContainer = std::unordered_map<ComponentID, void *>;
 
     World() = default;
@@ -519,6 +520,68 @@ private:
     World &world_;
 };
 
+// some query condition
+enum class ConditionType {
+    All,
+    Any,
+    No,
+};
+
+// some condition
+template <typename... Args>
+struct All {};
+
+template <typename... Args>
+struct Any {};
+
+template <typename... Args>
+struct No {};
+
+template <typename T>
+struct ConditionExtractor;
+
+template <typename... Args>
+struct ConditionExtractor<No<Args...>> {
+    using args = std::tuple<Args...>;
+    static constexpr ConditionType type = ConditionType::No;
+};
+
+template <typename... Args>
+struct ConditionExtractor<All<Args...>> {
+    using args = std::tuple<Args...>;
+    static constexpr ConditionType type = ConditionType::All;
+};
+
+template <typename... Args>
+struct ConditionExtractor<Any<Args...>> {
+    using args = std::tuple<Args...>;
+    static constexpr ConditionType type = ConditionType::Any;
+};
+
+template <typename T>
+struct IsCondition {
+    static constexpr bool value = false;
+};
+
+template <typename... Args>
+struct IsCondition<All<Args...>> {
+    static constexpr bool value = true;
+};
+
+template <typename... Args>
+struct IsCondition<Any<Args...>> {
+    static constexpr bool value = true;
+};
+
+template <typename... Args>
+struct IsCondition<No<Args...>> {
+    static constexpr bool value = true;
+};
+
+template <typename T>
+constexpr auto IsConditionV = IsCondition<T>::value;
+
+
 class Querier final {
 public:
     Querier(World &world) : world_(world) {}
@@ -583,6 +646,79 @@ private:
         } else {
             doQueryRemains<Remains...>(entity, outEntities);
         }
+    }
+};
+
+//! @brief condition querier, can accept conditions
+class CondQuerier final {
+public:
+    CondQuerier(World& world): world_(world) {}
+
+    template <typename T, typename...Remains>
+    std::vector<Entity> Query() {
+        if constexpr (sizeof...(Remains) != 0) {
+            return Query<Remains...>();
+        }
+    }
+
+    template <typename T>
+    bool Has(ecs::Entity entity) const {
+        return queryCondition<T>(entity);
+    }
+
+private:
+    World& world_;
+
+    template <typename T>
+    bool queryCondition(Entity entity) const {
+        using extractor = ConditionExtractor<T>;
+        return doQueryCondition<0, extractor::args>(entity, extractor::type);
+    }
+
+    template <size_t Idx, typename TupleT>
+    bool doQueryCondition(Entity entity, ConditionType type) const {
+        if constexpr (Idx < std::tuple_size_v<TupleT>) {
+            bool result = queryConditionElem<Idx, TupleT>(entity);
+            switch (type) {
+                case ConditionType::All:
+                    if (!result) {
+                        return false;
+                    } else {
+                        return doQueryCondition<Idx + 1, TupleT>(entity, type);
+                    }
+                case ConditionType::Any:
+                    if (result) {
+                        return true;
+                    } else {
+                        return doQueryCondition<Idx + 1, TupleT>(entity, type);
+                    }
+                case ConditionType::No:
+                    if (result) {
+                        return false;
+                    } else {
+                        return doQueryCondition<Idx + 1, TupleT>(entity, type);
+                    }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    template <size_t Idx, typename TupleT>
+    bool queryConditionElem(Entity entity) const {
+        using T = std::tuple_element_t<Idx, TupleT>;
+        if constexpr (IsConditionV<T>) {
+            return queryCondition<T>(entity);
+        } else {
+            return queryExists<T>(entity);
+        }
+    }
+
+    template <typename T>
+    bool queryExists(Entity entity) const {
+        auto index = IndexGetter::Get<T>();
+        auto &componentContainer = world_.entities_[entity];
+        return componentContainer.find(index) != componentContainer.end();
     }
 };
 
