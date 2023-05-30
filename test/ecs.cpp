@@ -59,7 +59,7 @@ TEST_CASE("example") {
     entities = querier.Query<ID>();
     REQUIRE(entities.size() == 1);
 
-    // we call this handly, you needn't to call it
+    // we call this handly, you shouldn't call it
     cmd.Execute();
 
     entities = querier.Query<ID>();

@@ -301,7 +301,19 @@ inline float Length(const Vector2& v) {
 }
 
 struct Rect {
-    float x, y, w, h;
+    float x = 0, y = 0, w = 0, h = 0;
+
+    static Rect Create(float x, float y, float w, float h) {
+        return Rect{x, y, w, h};
+    }
+
+    static Rect Create(const Vector2& position, const Vector2& size) {
+        return Rect{position.x, position.y, size.x, size.y};
+    }
+
+    bool ContainPt(const Vector3& pt) {
+        return pt.x > x && pt.x < x + w && pt.y > y && pt.y < y + h;
+    }
 };
 
 template <typename T>

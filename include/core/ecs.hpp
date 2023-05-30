@@ -4,16 +4,32 @@
 #include <functional>
 #include <optional>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "sparse_sets.hpp"
+#include "log.hpp"
 
 #define assertm(msg, expr) assert(((void)msg, (expr)))
 
-namespace ecs {
+namespace ecs {  // fwd declare
 
 using ComponentID = uint32_t;
 using Entity = uint32_t;
+
+}  // namespace ecs
+
+//! @brief ECS Component, identify a node entity in herarchy
+//! @note maybe you think component shouldn't in ecs.hpp,
+//!        but for supporting herarchy in ecs, we must put it here(for
+//!        HierarchyUpdateSystem)
+struct Node final {
+    std::optional<ecs::Entity>
+        parent;  //!< parent node, std::nullopt means this node is root
+    std::vector<ecs::Entity> children;
+};
+
+namespace ecs {
 
 class IndexGetter final {
 public:
@@ -40,6 +56,7 @@ template <typename T>
 class EventStaging final {
 public:
     static void Set(const T &t) { event_ = t; }
+
     static void Set(T &&t) { event_ = std::move(t); }
 
     static T &Get() { return *event_; }
@@ -57,7 +74,7 @@ class EventReader final {
 public:
     bool Has() const { return EventStaging<T>::Has(); }
 
-    const T& Read() { return EventStaging<T>::Get(); }
+    const T &Read() { return EventStaging<T>::Get(); }
 
     void Clear() { EventStaging<T>::Clear(); }
 };
@@ -100,6 +117,7 @@ template <typename T>
 class EventWriter final {
 public:
     EventWriter(Events &e) : events_(e) {}
+
     void Write(const T &t);
 
 private:
@@ -128,8 +146,13 @@ class Commands;
 class Resources;
 class Querier;
 
-using UpdateSystem = void (*)(Commands &, Querier, Resources, Events &);
-using StartupSystem = void (*)(Commands &, Resources);
+using EachElemUpdateSystem = void(*)(Commands &, Querier, Resources, Events &);
+using HierarchyUpdateSystem = void(*)(std::optional<Entity>, Entity,
+                                       Commands &, Querier, Resources,
+                                       Events &);
+using StartupSystem = void(*)(Commands &, Resources);
+
+using UpdateSystem = std::variant<EachElemUpdateSystem, HierarchyUpdateSystem>;
 
 class Plugins {
 public:
@@ -166,22 +189,24 @@ public:
     World &SetResource(T &&resource);
 
     template <typename T>
-    T* GetResource();
+    T *GetResource();
 
     template <typename T, typename... Args>
-    World& AddPlugins(Args&&... args) {
+    World &AddPlugins(Args &&...args) {
         static_assert(std::is_base_of_v<Plugins, T>);
-        pluginsList_.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+        pluginsList_.push_back(
+            std::make_unique<T>(std::forward<Args>(args)...));
         return *this;
     }
 
     void Startup();
     void Update();
+
     void Shutdown() {
         entities_.clear();
         resources_.clear();
         componentMap_.clear();
-        for (auto& plugin : pluginsList_) {
+        for (auto &plugin : pluginsList_) {
             plugin->Quit(this);
         }
     }
@@ -231,6 +256,7 @@ private:
 
         ComponentInfo(Pool::CreateFunc create, Pool::DestroyFunc destroy)
             : pool(create, destroy) {}
+
         ComponentInfo() : pool(nullptr, nullptr) {}
     };
 
@@ -247,6 +273,7 @@ private:
         ResourceInfo(DestroyFunc destroy) : destroy(destroy) {
             assertm("you must give a non-null destroy function", destroy);
         }
+
         // ResourceInfo() { int a = 123;
         // }
         ~ResourceInfo() { destroy(resource); }
@@ -279,7 +306,7 @@ public:
     }
 
     template <typename... ComponentTypes>
-    Commands& AddComponent(Entity entity, ComponentTypes&&... components) {
+    Commands &AddComponent(Entity entity, ComponentTypes &&...components) {
         EntitySpawnInfo info;
         info.entity = entity;
         doSpawn<ComponentTypes...>(info.components,
@@ -291,9 +318,7 @@ public:
     template <typename T>
     Commands &DestroyComponent(Entity entity) {
         auto idx = IndexGetter::Get<T>();
-        destroyComponents_.emplace_back(ComponentDestroyInfo{
-            entity, idx
-        });
+        destroyComponents_.emplace_back(ComponentDestroyInfo{entity, idx});
 
         return *this;
     }
@@ -315,7 +340,8 @@ public:
             auto newIt = world_.resources_.insert_or_assign(
                 index,
                 World::ResourceInfo([](void *elem) { delete (T *)elem; }));
-            newIt.first->second.resource = new T(std::move(std::forward<T>(resource)));
+            newIt.first->second.resource =
+                new T(std::move(std::forward<T>(resource)));
         }
 
         return *this;
@@ -337,7 +363,7 @@ public:
         for (auto e : destroyEntities_) {
             destroyEntity(e);
         }
-        for (const auto& c : destroyComponents_) {
+        for (const auto &c : destroyComponents_) {
             destroyComponent(c);
         }
 
@@ -351,7 +377,7 @@ public:
             }
         }
 
-        for (auto& addInfo : addComponents_) {
+        for (auto &addInfo : addComponents_) {
             auto it = world_.entities_.find(addInfo.entity);
             if (it == world_.entities_.end()) {
                 continue;
@@ -403,24 +429,22 @@ private:
     std::vector<Entity> destroyEntities_;
     std::vector<ResourceDestroyInfo> destroyResources_;
     std::vector<EntitySpawnInfo> spawnEntities_;
-    std::vector<EntitySpawnInfo> addComponents_;;
+    std::vector<EntitySpawnInfo> addComponents_;
+    ;
     std::vector<ComponentDestroyInfo> destroyComponents_;
 
     template <typename T, typename... Remains>
-    void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo,
-                 T &&component, Remains &&...remains) {
+    void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo, T &&component,
+                 Remains &&...remains) {
         ComponentSpawnInfo info;
         info.index = IndexGetter::Get<T>();
         info.create = [](void) -> void * { return new T; };
         info.destroy = [](void *elem) { delete (T *)elem; };
-        info.assign = [=](void *elem) {
-            *((T *)elem) = component;
-        };
+        info.assign = [=](void *elem) { *((T *)elem) = component; };
         spawnInfo.push_back(info);
 
         if constexpr (sizeof...(Remains) != 0) {
-            doSpawn<Remains...>(spawnInfo,
-                                std::forward<Remains>(remains)...);
+            doSpawn<Remains...>(spawnInfo, std::forward<Remains>(remains)...);
         }
     }
 
@@ -450,12 +474,14 @@ private:
         }
     }
 
-    void destroyComponent(const ComponentDestroyInfo& c) {
-        if (auto it = world_.entities_.find(c.entity); it != world_.entities_.end()) {
+    void destroyComponent(const ComponentDestroyInfo &c) {
+        if (auto it = world_.entities_.find(c.entity);
+            it != world_.entities_.end()) {
             if (auto cit = it->second.find(c.index); cit != it->second.end()) {
-                void* component = cit->second;
+                void *component = cit->second;
                 it->second.erase(cit);
-                if (auto iit = world_.componentMap_.find(c.index); iit != world_.componentMap_.end()) {
+                if (auto iit = world_.componentMap_.find(c.index);
+                    iit != world_.componentMap_.end()) {
                     iit->second.pool.Destroy(component);
                     iit->second.sparseSet.Remove(c.entity);
                 }
@@ -572,14 +598,77 @@ inline void World::Startup() {
     }
 }
 
+//! @brief a help function to preorder node tree
+inline void PreorderVisit(std::optional<Entity> parent, Entity entity,
+                          World &world, std::vector<Commands> commandList,
+                          Querier querier, Resources res, Events &events,
+                          HierarchyUpdateSystem system) {
+    Commands commands{world};
+    system(parent, entity, commands, querier, res, events);
+    commandList.push_back(commands);
+
+    assert(querier.Has<Node>(entity));
+
+    auto &node = querier.Get<Node>(entity);
+
+    for (auto &child : node.children) {
+        PreorderVisit(entity, child, world, commandList, querier, res, events,
+                      system);
+    }
+}
+
 inline void World::Update() {
     std::vector<Commands> commandList;
 
     Events events;
-    for (auto sys : updateSystems_) {
-        Commands commands{*this};
-        sys(commands, Querier{*this}, Resources{*this}, events);
-        commandList.push_back(commands);
+    Querier querier{*this};
+
+    // find all root entity in hierarchy
+    static std::vector<Entity> nodeEntities;
+    static std::vector<Entity> rootNodeEntity;
+    nodeEntities.clear();
+    rootNodeEntity.clear();
+    nodeEntities = querier.Query<Node>();
+    for (auto entity : nodeEntities) {
+        if (!querier.Get<Node>(entity).parent) {
+            rootNodeEntity.push_back(entity);
+        }
+    }
+
+    for (auto& sys : updateSystems_) {
+        auto system = std::get_if<EachElemUpdateSystem>(&sys);
+        if (system) {
+            Commands commands{*this};
+            (*system)(commands, Querier{*this}, Resources{*this}, events);
+            commandList.push_back(commands);
+        } else {
+            auto hierarchySystem = std::get_if<HierarchyUpdateSystem>(&sys);
+            for (auto root : rootNodeEntity) {
+                PreorderVisit(std::nullopt, root, *this, commandList,
+                                Querier{*this}, Resources{*this}, events,
+                                *hierarchySystem);
+            }
+        }
+        /* FIXME: want to use compile-if, but can't determine system type
+        std::visit(
+            [&](auto &&system) {
+                using T = std::decay_t<decltype(system)>;
+                if constexpr (std::is_same_v<T, EachElemUpdateSystem>) {
+                    Commands commands{*this};
+                    sys(commands, Querier{*this}, Resources{*this}, events);
+                    commandList.push_back(commands);
+                } else if constexpr (std::is_same_v<T, HierarchyUpdateSystem>) {
+                    for (auto root : rootNodeEntity) {
+                        PreorderVisit(std::nullopt, root, *this, commandList,
+                                      Querier{*this}, Resources{*this}, events,
+                                      system);
+                    }
+                } else {
+                    static_assert(std::always_false_v<T> "unknown ecs system type");
+                }
+            },
+            sys);
+        */
     }
     events.removeAllEvents();
     events.addAllEvents();
@@ -598,7 +687,7 @@ World &World::SetResource(T &&resource) {
 }
 
 template <typename T>
-T* World::GetResource() {
+T *World::GetResource() {
     Resources resources(*this);
     if (!resources.Has<T>()) {
         return nullptr;
