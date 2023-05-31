@@ -70,11 +70,11 @@ TEST_CASE("example") {
 
     world.Update();
 
-    // template for new feature test
-    entities = querier.Query<Name, Male>();
-    ecs::CondQuerier condQuerier(world);
-    REQUIRE(condQuerier.Has<ecs::All<Name, Male>>(entities[0]));
-    // end
+    entities = querier.Query<ecs::With<Name, Male>>();
+    REQUIRE(querier.Has<ecs::With<Name, Male>>(entities[0]));
+    REQUIRE(querier.Has<ecs::Without<ID>>(entities[0]));
+    REQUIRE(querier.Has<ecs::With<Name, Male, ecs::Without<ID>>>(entities[0]));
+    REQUIRE(querier.Has<ecs::Option<Name, Male, ID>>(entities[0]));
 
     entities = querier.Query<Name>();
     REQUIRE(entities.size() == 2);

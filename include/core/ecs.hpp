@@ -431,7 +431,6 @@ private:
     std::vector<ResourceDestroyInfo> destroyResources_;
     std::vector<EntitySpawnInfo> spawnEntities_;
     std::vector<EntitySpawnInfo> addComponents_;
-    ;
     std::vector<ComponentDestroyInfo> destroyComponents_;
 
     template <typename T, typename... Remains>
@@ -522,40 +521,53 @@ private:
 
 // some query condition
 enum class ConditionType {
-    All,
-    Any,
-    No,
+    With,
+    Option,
+    Without,
 };
 
 // some condition
-template <typename... Args>
-struct All {};
 
+//! @brief query condition, all conditions must be true
+//! @tparam ...Args  conditions, can be component or query condition
+//! @see Option Without
 template <typename... Args>
-struct Any {};
+struct With {};
 
+//! @brief query condition, any conditions be true will satisfy
+//! @tparam ...Args  conditions, can be component or query condition
+//! @see With Without
 template <typename... Args>
-struct No {};
+struct Option {};
 
+//! @brief query condition, all conditions be false will satisfy
+//! @tparam ...Args  conditions, can be component or query condition
+//! @see With Option
+template <typename... Args>
+struct Without {};
+
+//! @brief query condition extractor, will extract condition arguments and condition type
+//! @tparam query condition
+//! @see With Option Without
 template <typename T>
 struct ConditionExtractor;
 
 template <typename... Args>
-struct ConditionExtractor<No<Args...>> {
+struct ConditionExtractor<Without<Args...>> {
     using args = std::tuple<Args...>;
-    static constexpr ConditionType type = ConditionType::No;
+    static constexpr ConditionType type = ConditionType::Without;
 };
 
 template <typename... Args>
-struct ConditionExtractor<All<Args...>> {
+struct ConditionExtractor<With<Args...>> {
     using args = std::tuple<Args...>;
-    static constexpr ConditionType type = ConditionType::All;
+    static constexpr ConditionType type = ConditionType::With;
 };
 
 template <typename... Args>
-struct ConditionExtractor<Any<Args...>> {
+struct ConditionExtractor<Option<Args...>> {
     using args = std::tuple<Args...>;
-    static constexpr ConditionType type = ConditionType::Any;
+    static constexpr ConditionType type = ConditionType::Option;
 };
 
 template <typename T>
@@ -564,45 +576,55 @@ struct IsCondition {
 };
 
 template <typename... Args>
-struct IsCondition<All<Args...>> {
+struct IsCondition<With<Args...>> {
     static constexpr bool value = true;
 };
 
 template <typename... Args>
-struct IsCondition<Any<Args...>> {
+struct IsCondition<Option<Args...>> {
     static constexpr bool value = true;
 };
 
 template <typename... Args>
-struct IsCondition<No<Args...>> {
+struct IsCondition<Without<Args...>> {
     static constexpr bool value = true;
 };
 
+//! @brief judge if template T is a query condition
+//! @tparam T 
+//! @see Without With Option
 template <typename T>
 constexpr auto IsConditionV = IsCondition<T>::value;
 
-
+//! @brief condition querier, can accept conditions
+//! @see Without With Option
 class Querier final {
 public:
-    Querier(World &world) : world_(world) {}
+    Querier(World& world): world_(world) {}
 
-    template <typename... Components>
-    std::vector<Entity> Query() const {
+    /* IMPROVE: currently it iterate all entities,
+                it don't take advantage of the efficiency of the sparseset.
+                don't forget to fix it later */
+    template <typename T>
+    std::vector<Entity> Query() {
         std::vector<Entity> entities;
-        doQuery<Components...>(entities);
+            for (auto& [entity, _] : world_.entities_) {
+            if constexpr(IsConditionV<T>) {
+                if (Has<T>(entity)) {
+                    entities.push_back(entity);
+                }
+            } else {
+                if (queryExists<T>(entity)) {
+                    entities.push_back(entity);
+                }
+            }
+        }
         return entities;
     }
 
-    bool Exists(Entity entity) const {
-        return world_.entities_.find(entity) != world_.entities_.end();
-    }
-
     template <typename T>
-    bool Has(Entity entity) const {
-        auto it = world_.entities_.find(entity);
-        auto index = IndexGetter::Get<T>();
-        return it != world_.entities_.end() &&
-               it->second.find(index) != it->second.end();
+    bool Has(ecs::Entity entity) const {
+        return queryCondition<T>(entity);
     }
 
     template <typename T>
@@ -612,67 +634,16 @@ public:
     }
 
 private:
-    World &world_;
-
-    template <typename T, typename... Remains>
-    void doQuery(std::vector<Entity> &outEntities) const {
-        auto index = IndexGetter::Get<T>();
-        auto it = world_.componentMap_.find(index);
-        if (it == world_.componentMap_.end()) {
-            return;
-        }
-        World::ComponentInfo &info = it->second;
-
-        for (auto e : info.sparseSet) {
-            if constexpr (sizeof...(Remains) != 0) {
-                doQueryRemains<Remains...>(e, outEntities);
-            } else {
-                outEntities.push_back(e);
-            }
-        }
-    }
-
-    template <typename T, typename... Remains>
-    void doQueryRemains(Entity entity, std::vector<Entity> &outEntities) const {
-        auto index = IndexGetter::Get<T>();
-        auto &componentContainer = world_.entities_[entity];
-        if (auto it = componentContainer.find(index);
-            it == componentContainer.end()) {
-            return;
-        }
-
-        if constexpr (sizeof...(Remains) == 0) {
-            outEntities.push_back(entity);
-        } else {
-            doQueryRemains<Remains...>(entity, outEntities);
-        }
-    }
-};
-
-//! @brief condition querier, can accept conditions
-class CondQuerier final {
-public:
-    CondQuerier(World& world): world_(world) {}
-
-    template <typename T, typename...Remains>
-    std::vector<Entity> Query() {
-        if constexpr (sizeof...(Remains) != 0) {
-            return Query<Remains...>();
-        }
-    }
-
-    template <typename T>
-    bool Has(ecs::Entity entity) const {
-        return queryCondition<T>(entity);
-    }
-
-private:
     World& world_;
 
     template <typename T>
     bool queryCondition(Entity entity) const {
-        using extractor = ConditionExtractor<T>;
-        return doQueryCondition<0, extractor::args>(entity, extractor::type);
+        if constexpr (IsConditionV<T>) {
+            using extractor = ConditionExtractor<T>;
+            return doQueryCondition<0, extractor::args>(entity, extractor::type);
+        } else {
+            return queryExists<T>(entity);
+        }
     }
 
     template <size_t Idx, typename TupleT>
@@ -680,19 +651,19 @@ private:
         if constexpr (Idx < std::tuple_size_v<TupleT>) {
             bool result = queryConditionElem<Idx, TupleT>(entity);
             switch (type) {
-                case ConditionType::All:
+                case ConditionType::With:
                     if (!result) {
                         return false;
                     } else {
                         return doQueryCondition<Idx + 1, TupleT>(entity, type);
                     }
-                case ConditionType::Any:
+                case ConditionType::Option:
                     if (result) {
                         return true;
                     } else {
                         return doQueryCondition<Idx + 1, TupleT>(entity, type);
                     }
-                case ConditionType::No:
+                case ConditionType::Without:
                     if (result) {
                         return false;
                     } else {

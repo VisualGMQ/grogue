@@ -95,7 +95,9 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(TimerManager::UpdateSystem)
         .AddSystem(UpdateTransformSystem)
         .AddSystem(RenderSpriteSystem)
-        .AddSystem(RenderShapeSystem);
+        .AddSystem(HierarchyRenderSpriteSystem)
+        .AddSystem(RenderShapeSystem)
+        .AddSystem(HierarchyRenderShapeSystem);
     world->GetResource<Renderer>()->imageManager_ = &assets->Image();
 }
 

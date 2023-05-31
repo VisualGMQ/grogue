@@ -2,14 +2,21 @@
 
 #include "core/ecs.hpp"
 
-void RenderSpriteSystem(ecs::Commands& cmd, ecs::Querier querier,
-                        ecs::Resources resources, ecs::Events& events);
+void RenderSpriteSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
+                        ecs::Events&);
+void HierarchyRenderSpriteSystem(std::optional<ecs::Entity>, ecs::Entity,
+                                 ecs::Commands&, ecs::Querier, ecs::Resources,
+                                 ecs::Events&);
 
-void RenderShapeSystem(ecs::Commands& cmd, ecs::Querier querier,
-                       ecs::Resources resources, ecs::Events& events);
+void RenderShapeSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
+                       ecs::Events&);
+void HierarchyRenderShapeSystem(std::optional<ecs::Entity>, ecs::Entity,
+                                ecs::Commands&, ecs::Querier,
+                                ecs::Resources, ecs::Events&);
 
-void UpdateTransformSystem(ecs::Commands& cmd, ecs::Querier querier,
-                            ecs::Resources resources, ecs::Events& events);
+void UpdateTransformSystem(std::optional<ecs::Entity>, ecs::Entity,
+                           ecs::Commands&, ecs::Querier, ecs::Resources,
+                           ecs::Events&);
 
 struct DebugConfig {
     bool showAnchor = false;
