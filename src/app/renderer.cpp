@@ -1,5 +1,6 @@
 #include "app/renderer.hpp"
 #include "app/image.hpp"
+#include "app/renderer.hpp"
 
 Renderer::Renderer(Window& window, FontManager& fontManager)
     : fontManager_(&fontManager) {
@@ -60,20 +61,24 @@ void Renderer::FillRect(const math::Rect& rect) {
 void Renderer::DrawText(FontHandle handle, const std::string& text,
                         const Transform& transform) {
     if (fontManager_->Has(handle)) {
-        auto color = GetDrawColor();
-        auto surface = TTF_RenderUTF8_Blended(
-            fontManager_->Get(handle).font_, text.c_str(),
-            {color.r, color.g, color.b, color.a});
-
-        auto texture = SDL_CreateTextureFromSurface(renderer_, surface);
-        drawTexture(
-            texture, surface->w, surface->h,
-            {0, 0, static_cast<float>(surface->w),
-             static_cast<float>(surface->h)},
-            {static_cast<float>(surface->w), static_cast<float>(surface->h)},
-            transform, {0, 0}, Flip::None);
-        SDL_FreeSurface(surface);
+        DrawText(fontManager_->Get(handle), text.c_str(), transform);
     }
+}
+
+void Renderer::DrawText(Font& font, const std::string& text, const Transform& transform) {
+    auto color = GetDrawColor();
+    auto surface = TTF_RenderUTF8_Blended(
+        font.font_, text.c_str(),
+        {color.r, color.g, color.b, color.a});
+
+    auto texture = SDL_CreateTextureFromSurface(renderer_, surface);
+    drawTexture(
+        texture, surface->w, surface->h,
+        {0, 0, static_cast<float>(surface->w),
+            static_cast<float>(surface->h)},
+        {static_cast<float>(surface->w), static_cast<float>(surface->h)},
+        transform, {0, 0}, Flip::None);
+    SDL_FreeSurface(surface);
 }
 
 void Renderer::DrawCircle(const math::Vector2& center, float radius, float subsection) {
@@ -127,6 +132,19 @@ void Renderer::DrawShape(const Shape& shape, const Transform& transform) {
     if (result == -1) {
         LOGW("SDL_RenderGeometryRaw error: ", SDL_GetError());
     }
+}
+
+void Renderer::SetClipArea(const math::Rect& area) {
+    SDL_Rect rect;
+    rect.x = area.x;
+    rect.y = area.y;
+    rect.w = area.w;
+    rect.h = area.h;
+    SDL_RenderSetClipRect(renderer_, &rect);
+}
+
+void Renderer::SetDefaultClipArea() {
+    SDL_RenderSetClipRect(renderer_, nullptr);
 }
 
 void Renderer::drawTexture(SDL_Texture* texture, int rawW, int rawH,

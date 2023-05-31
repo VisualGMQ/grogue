@@ -32,9 +32,13 @@ public:
     void DrawRect(const math::Rect&);
     void FillRect(const math::Rect&);
     void DrawText(FontHandle, const std::string& text, const Transform&);
+    void DrawText(Font& font, const std::string& text, const Transform&);
     void DrawSprite(const SpriteBundle&, const Transform&);
     void DrawCircle(const math::Vector2& center, float radius, float subsection = 20);
     void DrawShape(const Shape&, const Transform&);
+
+    void SetClipArea(const math::Rect&);
+    void SetDefaultClipArea();
 
     void Present();
     void Clear();

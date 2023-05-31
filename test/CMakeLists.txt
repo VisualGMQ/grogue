@@ -39,5 +39,6 @@ AddInteractiveTest(tilesheet tilesheet.cpp)
 AddInteractiveTest(animation animation.cpp)
 AddInteractiveTest(shapes shapes.cpp)
 AddInteractiveTest(hierarchy hierarchy.cpp)
+AddInteractiveTest(ui ui.cpp)
 
 CopyDLL(example_test)

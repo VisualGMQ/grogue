@@ -21,6 +21,10 @@ public:
     Font(Font&&);
     ~Font();
 
+    //! @brief predict the size of font image
+    math::Vector2 Size(const std::string&);
+    void SetPt(int ptsize);
+
     Font& operator=(const Font&) = delete;
     Font& operator=(Font&&);
 

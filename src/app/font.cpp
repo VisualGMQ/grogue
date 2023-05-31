@@ -1,4 +1,5 @@
 #include "app/font.hpp"
+#include "app/font.hpp"
 
 Font::Font(Font&& f): handle_(FontHandle::Null()) {
     swap(*this, f);
@@ -28,6 +29,15 @@ Font::~Font() {
     TTF_CloseFont(font_);
 }
 
+math::Vector2 Font::Size(const std::string& text) {
+    int w, h;
+    TTF_SizeUTF8(font_, text.c_str(), &w, &h);
+    return math::Vector2(w, h);
+}
+
+void Font::SetPt(int ptsize) {
+    TTF_SetFontSize(font_, ptsize);
+}
 
 FontHandle FontManager::Load(const std::string& filename, int ptsize) {
     auto newHandle = FontHandle::Create();

@@ -11,6 +11,8 @@
 #include "core/pch.hpp"
 #include "app/systems.hpp"
 #include "app/scene.hpp"
+#include "app/ui.hpp"
+#include "app/assets.hpp"
 
 // a resource to trigger application exit
 class ExitTrigger final {

@@ -31,20 +31,20 @@ void EventUpdateSystem(ecs::Commands& cmd, ecs::Querier querier,
 
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
-            events.Writer<SDL_QuitEvent>().Write(event.quit);
+            events.Writer<QuitEvent>().Write(event.quit);
         }
         if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
             keyboard.events.push_back(event.key);
         }
         if (event.type == SDL_MOUSEMOTION) {
-            events.Writer<SDL_MouseMotionEvent>().Write(event.motion);
+            events.Writer<MouseMotionEvent>().Write(event.motion);
         }
         if (event.type == SDL_MOUSEBUTTONDOWN ||
             event.type == SDL_MOUSEBUTTONUP) {
             mouse.events.push_back(event.button);
         }
         if (event.type == SDL_MOUSEWHEEL) {
-            events.Writer<SDL_MouseWheelEvent>().Write(event.wheel);
+            events.Writer<MouseWheelEvent>().Write(event.wheel);
         }
 
         if (handler) {
@@ -80,7 +80,6 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(ExitTrigger{})
         .SetResource(Time{})
         .SetResource(TimerManager{})
-        .SetResource(LuaManager{})
         .SetResource(DebugConfig{});
 
     auto* assets = world->GetResource<AssetsManager>();
@@ -97,7 +96,9 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(RenderSpriteSystem)
         .AddSystem(HierarchyRenderSpriteSystem)
         .AddSystem(RenderShapeSystem)
-        .AddSystem(HierarchyRenderShapeSystem);
+        .AddSystem(HierarchyRenderShapeSystem)
+        .AddSystem(UpdateUISystem)
+        .AddSystem(HierarchyUpdateUISystem);
     world->GetResource<Renderer>()->imageManager_ = &assets->Image();
 }
 

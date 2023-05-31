@@ -2,6 +2,7 @@
 #include "app/renderer.hpp"
 #include "app/scene.hpp"
 #include "app/sprite.hpp"
+#include "app/ui.hpp"
 
 void renderOneSprite(ecs::Entity entity, ecs::Querier querier,
                      Renderer& renderer) {
@@ -101,5 +102,42 @@ void UpdateTransformSystem(std::optional<ecs::Entity>, ecs::Entity entity,
                            ecs::Events&) {
     if (querier.Has<NodeTransform>(entity)) {
         updateOneTransform(entity, querier);
+    }
+}
+
+void updateButtonUI(std::optional<ecs::Entity> parent, ecs::Entity entity,
+                 ecs::Commands& cmds, ecs::Querier querier,
+                 ecs::Resources res,
+                 ecs::Events& events) {
+    if (!querier.Has<ui::Button>(entity)) {
+        return;
+    }
+
+    auto& renderer = res.Get<Renderer>();
+    ui::Widget& widget = querier.Get<ui::Widget>(entity);
+    ui::Button& button = querier.Get<ui::Button>(entity);
+    button.system(parent, entity, cmds, querier, res, events);
+}
+
+void updateOneUI(std::optional<ecs::Entity> parent, ecs::Entity entity,
+                 ecs::Commands& cmds, ecs::Querier querier,
+                 ecs::Resources res,
+                 ecs::Events& events) {
+    updateButtonUI(parent, entity, cmds, querier, res, events);
+}
+
+void UpdateUISystem(ecs::Commands& cmds, ecs::Querier querier,
+                    ecs::Resources res, ecs::Events& events) {
+    auto entities = querier.Query<ecs::With<ui::Widget, ecs::Without<Node>>>();
+    for (auto entity : entities) {
+        updateOneUI(std::nullopt, entity, cmds, querier, res, events);
+    }
+}
+
+void HierarchyUpdateUISystem(std::optional<ecs::Entity>, ecs::Entity entity,
+                             ecs::Commands& cmds, ecs::Querier querier,
+                             ecs::Resources res, ecs::Events& events) {
+    if (querier.Has<ui::Widget>(entity)) {
+        updateOneUI(std::nullopt, entity, cmds, querier, res, events);
     }
 }

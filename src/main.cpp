@@ -26,7 +26,7 @@ enum GameState {
 } state;
 
 void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
-    auto& luaMgr = resources.Get<LuaManager>();
+    auto& luaMgr = resources.Get<AssetsManager>().Lua();
     auto& tilesheetMgr = resources.Get<TilesheetManager>();
     GameConfig config(luaMgr, tilesheetMgr, "./resources/config/");
     Random::Init();

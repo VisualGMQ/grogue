@@ -1,23 +1,12 @@
 #pragma once
 
+#include "app/events.hpp"
 #include "app/handle.hpp"
 #include "core/pch.hpp"
 #include "core/math.hpp"
 
 class Image;
 using ImageHandle = Handle<Image>;
-
-template <typename T>
-struct DuplicateEvent {
-    std::vector<T> events;
-
-    operator bool() const {
-        return !events.empty();
-    }
-};
-
-using KeyboardEvents = DuplicateEvent<SDL_KeyboardEvent>;
-using MouseBtnEvents = DuplicateEvent<SDL_MouseButtonEvent>;
 
 struct Color {
     uint8_t r, g, b, a;

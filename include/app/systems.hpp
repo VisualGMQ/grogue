@@ -18,6 +18,12 @@ void UpdateTransformSystem(std::optional<ecs::Entity>, ecs::Entity,
                            ecs::Commands&, ecs::Querier, ecs::Resources,
                            ecs::Events&);
 
+void UpdateUISystem(ecs::Commands&, ecs::Querier, ecs::Resources,
+                    ecs::Events&);
+void HierarchyUpdateUISystem(std::optional<ecs::Entity>, ecs::Entity,
+                                ecs::Commands&, ecs::Querier,
+                                ecs::Resources, ecs::Events&);
+
 struct DebugConfig {
     bool showAnchor = false;
 };
