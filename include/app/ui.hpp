@@ -13,29 +13,43 @@ struct ColorBundle final {
     Color normal, hover, press;
 };
 
-//! @brief a tag component for all ui widget
-struct Widget final {
+//! @brief component for ui rect
+struct RectTransform final {
+    NodeTransform transform;
     math::Vector2 size;
-    std::optional<ColorBundle> content, border;
-
-    static Widget CreateDefault(const math::Vector2& size);
 };
 
-//! @brief button widget
-struct Button final {
+struct Text final {
     FontHandle font;
-    Color fontColor;
     std::string text;
-
-    ecs::HierarchyUpdateSystem system;  // IMPROVE: may change this function, due to the ducplicate query in function
-
-    static Button CreateDefault(const std::string& text, FontHandle font, const Color& fontColor);
+    ColorBundle color;
+    math::Vector2 offset;
 };
 
-void RenderBackSystem(std::optional<ecs::Entity>, ecs::Entity,
-                      ecs::Commands&, ecs::Querier, ecs::Resources,
-                      ecs::Events&);
+//! @brief component for text
+struct Label final {
+    Text text;
+};
 
-void RenderButtonSystem(std::optional<ecs::Entity>, ecs::Entity, ecs::Commands&,
+//! @brief component for text
+struct Button final {
+    ColorBundle contentColor;
+    ColorBundle borderColor;
+};
+
+using UIEventListener = std::function<void(ecs::Entity, ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&)>;
+
+//! @brief component for ui interaction
+struct Interaction final {
+    UIEventListener OnClick;
+    UIEventListener OnHover;
+    UIEventListener OnScroll;
+};
+
+void HierarchyRenderLabelSystem(std::optional<ecs::Entity>, ecs::Entity, ecs::Commands&,
+                        ecs::Querier, ecs::Resources, ecs::Events&);
+void HierarchyRenderButtonSystem(std::optional<ecs::Entity>, ecs::Entity, ecs::Commands&,
+                        ecs::Querier, ecs::Resources, ecs::Events&);
+void HierarchyHandleUIEventSystem(std::optional<ecs::Entity>, ecs::Entity, ecs::Commands&,
                         ecs::Querier, ecs::Resources, ecs::Events&);
 }

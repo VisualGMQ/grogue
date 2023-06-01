@@ -5,6 +5,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <optional>
 
 //! \breif  if define this, will use std::numeric_limits<float>::epsilon() to compare floats. Or use ==
 #define GROGUE_MATH_FLOAT_COMPARE_USE_EPSILON
@@ -313,6 +314,21 @@ struct Rect {
 
     bool ContainPt(const Vector2& pt) {
         return pt.x > x && pt.x < x + w && pt.y > y && pt.y < y + h;
+    }
+
+    bool Intersect(const Rect& o) const {
+        return !(x + w <= o.x || x >= o.x + o.w || y + h <= o.y ||
+                 y >= o.y + o.h);
+    }
+
+    std::optional<Rect> Union(const Rect& o) const {
+        Vector2 min(std::max(o.x, x), std::max(o.y, y)),
+                max(std::min(o.x + o.w, x + w), std::min(o.y + o.h, y + h));
+        if (min.x >= max.x || min.y >= max.y) {
+            return std::nullopt;
+        } else {
+            return Rect::Create(min, max - min);
+        }
     }
 };
 

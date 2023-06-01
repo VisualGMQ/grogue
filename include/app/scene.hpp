@@ -9,20 +9,15 @@ struct NodeTransform {
     Transform globalTransform;
 };
 
-ecs::Entity FindRoot(ecs::Entity entity, ecs::Querier querier);
-void PreorderVisit(ecs::Entity entity, ecs::Querier querier, std::function<void(ecs::Entity)> func);
-void PostorderVisit(ecs::Entity entity, ecs::Querier querier, std::function<void(ecs::Entity)> func);
-
 class HierarchyBuilder final {
 public:
     HierarchyBuilder(ecs::Commands& cmds, ecs::Entity parent): cmds_(cmds), parent_(parent) {}
 
     //! @brief set entity childrens
-    //! @warning this will reset `NodeTransform` and `Node` component
     ecs::Entity SetChilds(const std::initializer_list<ecs::Entity>& entities) {
-        cmds_.AddComponent<Node, NodeTransform>(parent_, Node{std::nullopt, entities}, NodeTransform{});
+        cmds_.AddComponent<Node>(parent_, Node{std::nullopt, entities});
         for (auto entity : entities) {
-            cmds_.AddComponent<Node, NodeTransform>(entity, Node{parent_, {}}, NodeTransform{});
+            cmds_.AddComponent<Node>(entity, Node{parent_, {}});
         }
         return parent_;
     }

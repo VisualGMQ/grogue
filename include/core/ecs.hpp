@@ -73,10 +73,9 @@ template <typename T>
 class EventReader final {
 public:
     bool Has() const { return EventStaging<T>::Has(); }
-
     const T &Read() { return EventStaging<T>::Get(); }
-
     void Clear() { EventStaging<T>::Clear(); }
+    operator bool() const { return Has(); }
 };
 
 class World;

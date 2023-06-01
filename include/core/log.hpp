@@ -150,31 +150,54 @@ private:
     LoggerMgr() { defaultLogger_.reset(new Logger(std::cout)); }
 };
 
-//@breif trace log
+//! @breif trace log
 #define LOGT(...)                                                            \
     logger::LoggerMgr::Instance().GetDefault().Trace(__FUNCTION__, __FILE__, \
                                                      __LINE__, ##__VA_ARGS__)
-//@breif debug log
+//! @breif debug log
 #define LOGD(...)                                                            \
     logger::LoggerMgr::Instance().GetDefault().Debug(__FUNCTION__, __FILE__, \
                                                      __LINE__, ##__VA_ARGS__)
-//@breif information log
+//! @breif information log
 #define LOGI(...)                                                           \
     logger::LoggerMgr::Instance().GetDefault().Info(__FUNCTION__, __FILE__, \
                                                     __LINE__, ##__VA_ARGS__)
-//@breif warning log
+//! @breif warning log
 #define LOGW(...)                                       \
     logger::LoggerMgr::Instance().GetDefault().Warning( \
         __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
 
-//@breif error log
+//! @breif error log
 #define LOGE(...)                                                            \
     logger::LoggerMgr::Instance().GetDefault().Error(__FUNCTION__, __FILE__, \
                                                      __LINE__, ##__VA_ARGS__)
-//@breif fatal error log
+//! @breif fatal error log
 #define LOGF(...)                                          \
     logger::LoggerMgr::Instance().GetDefault().FatalError( \
         __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+
+#define EXE_ONCE(expr) do { \
+    static bool executed = false; \
+    if (!executed) {    \
+        expr;   \
+        executed = true;    \
+    }   \
+} while(0)
+
+//! @breif trace log once
+#define LOGT_ONCE(...) EXE_ONCE(LOGT(__VA_ARGS__))
+
+//! @breif debug log once
+#define LOGD_ONCE(...) EXE_ONCE(LOGD(__VA_ARGS__))
+
+//! @breif error log once
+#define LOGE_ONCE(...) EXE_ONCE(LOGE(__VA_ARGS__))
+
+//! @breif warning log once
+#define LOGW_ONCE(...) EXE_ONCE(LOGW(__VA_ARGS__))
+
+//! @breif fatal error log once
+#define LOGF_ONCE(...) EXE_ONCE(LOGF(__VA_ARGS__))
 
 //! @}
 

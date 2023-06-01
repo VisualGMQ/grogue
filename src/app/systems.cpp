@@ -74,7 +74,10 @@ void HierarchyRenderShapeSystem(std::optional<ecs::Entity>, ecs::Entity entity,
     }
 }
 
-void updateOneTransform(ecs::Entity entity, ecs::Querier querier) {
+void updateOneNodeTransform(ecs::Entity entity, ecs::Querier querier) {
+    if (!querier.Has<NodeTransform>(entity)) {
+        return;
+    }
 
     auto& node = querier.Get<Node>(entity);
     auto& transform = querier.Get<NodeTransform>(entity);
@@ -92,52 +95,46 @@ void updateOneTransform(ecs::Entity entity, ecs::Querier querier) {
             transform.localTransform.scale * parent.globalTransform.scale;
         transform.globalTransform.rotation =
             transform.localTransform.rotation + parent.globalTransform.rotation;
-    } else if (!node.parent) {
+    } else {
         transform.globalTransform = transform.localTransform;
     }
 }
 
-void UpdateTransformSystem(std::optional<ecs::Entity>, ecs::Entity entity,
+void UpdateNodeTransformSystem(std::optional<ecs::Entity>, ecs::Entity entity,
                            ecs::Commands&, ecs::Querier querier, ecs::Resources,
                            ecs::Events&) {
     if (querier.Has<NodeTransform>(entity)) {
-        updateOneTransform(entity, querier);
+        updateOneNodeTransform(entity, querier);
     }
 }
 
-void updateButtonUI(std::optional<ecs::Entity> parent, ecs::Entity entity,
-                 ecs::Commands& cmds, ecs::Querier querier,
-                 ecs::Resources res,
-                 ecs::Events& events) {
-    if (!querier.Has<ui::Button>(entity)) {
+void updateOneRectTransform(ecs::Entity entity, ecs::Querier querier) {
+    if (!querier.Has<ui::RectTransform>(entity)) {
         return;
     }
 
-    auto& renderer = res.Get<Renderer>();
-    ui::Widget& widget = querier.Get<ui::Widget>(entity);
-    ui::Button& button = querier.Get<ui::Button>(entity);
-    button.system(parent, entity, cmds, querier, res, events);
-}
+    auto& node = querier.Get<Node>(entity);
+    auto& transform = querier.Get<ui::RectTransform>(entity);
 
-void updateOneUI(std::optional<ecs::Entity> parent, ecs::Entity entity,
-                 ecs::Commands& cmds, ecs::Querier querier,
-                 ecs::Resources res,
-                 ecs::Events& events) {
-    updateButtonUI(parent, entity, cmds, querier, res, events);
-}
+    if (node.parent && querier.Has<ui::RectTransform>(node.parent.value())) {
+        auto& parent = querier.Get<ui::RectTransform>(node.parent.value());
 
-void UpdateUISystem(ecs::Commands& cmds, ecs::Querier querier,
-                    ecs::Resources res, ecs::Events& events) {
-    auto entities = querier.Query<ecs::With<ui::Widget, ecs::Without<Node>>>();
-    for (auto entity : entities) {
-        updateOneUI(std::nullopt, entity, cmds, querier, res, events);
+        transform.transform.globalTransform.position =
+            transform.transform.localTransform.position + parent.transform.globalTransform.position;
+        transform.transform.globalTransform.scale =
+            transform.transform.localTransform.scale * parent.transform.globalTransform.scale;
+        transform.transform.globalTransform.rotation =
+            transform.transform.localTransform.rotation + parent.transform.globalTransform.rotation;
+    } else {
+        transform.transform.globalTransform = transform.transform.localTransform;
     }
 }
 
-void HierarchyUpdateUISystem(std::optional<ecs::Entity>, ecs::Entity entity,
-                             ecs::Commands& cmds, ecs::Querier querier,
-                             ecs::Resources res, ecs::Events& events) {
-    if (querier.Has<ui::Widget>(entity)) {
-        updateOneUI(std::nullopt, entity, cmds, querier, res, events);
+void UpdateRectTransformSystem(std::optional<ecs::Entity>, ecs::Entity entity,
+                                       ecs::Commands&, ecs::Querier querier,
+                                       ecs::Resources, ecs::Events&) {
+    if (querier.Has<ui::RectTransform>(entity)) {
+        updateOneRectTransform(entity, querier);
     }
 }
+

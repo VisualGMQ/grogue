@@ -2,90 +2,145 @@
 
 namespace ui {
 
-void RenderBackSystem(std::optional<ecs::Entity>, ecs::Entity entity,
-                         ecs::Commands&, ecs::Querier querier,
-                         ecs::Resources res, ecs::Events& events) {
+enum class EventType {
+    None,
+    Hover,
+    Click,
+};
+
+EventType judgeEvent(const RectTransform& transform, const Mouse& mouse, ecs::Events& events) {
+    EventType event = EventType::None;
+    auto rect = math::Rect::Create(
+            transform.transform.globalTransform.position,
+            transform.transform.globalTransform.scale * transform.size);
+    if (rect.ContainPt(mouse.Position())) {
+        event = EventType::Hover;
+
+        auto reader = events.Reader<MouseBtnEvents>();
+        if (reader && reader.Read().events[0].button == SDL_BUTTON_LEFT) {
+            event = EventType::Click;
+        }
+    }
+    return event;
+}
+
+const Color* selectColor(EventType event, const ColorBundle colors) {
+    const Color* color = &colors.normal;
+    switch (event) {
+        case EventType::Hover:
+            color = &colors.hover;
+            break;
+        case EventType::Click:
+            color = &colors.press;
+            break;
+    }
+    return color;
+}
+
+void drawText(Renderer& renderer, Font& font, const NodeTransform& transform, const Text& text, const Color& color) {
+    renderer.SetDrawColor(color);
+    Transform drawTrans = transform.globalTransform;
+    drawTrans.position += text.offset * drawTrans.scale;
+    renderer.DrawText(font, text.text, drawTrans);
+}
+
+void HierarchyRenderLabelSystem(std::optional<ecs::Entity>, ecs::Entity entity,
+                                ecs::Commands& cmds, ecs::Querier querier,
+                                ecs::Resources res, ecs::Events& events) {
+    if (!querier.Has<RectTransform>(entity) || !querier.Has<Label>(entity)) {
+        return;
+    }
+
+    auto& transform = querier.Get<RectTransform>(entity);
+    auto& label = querier.Get<Label>(entity);
+    auto& fontMgr = res.Get<AssetsManager>().Font();
     auto& renderer = res.Get<Renderer>();
     auto& mouse = res.Get<Mouse>();
 
-    Transform* transform = nullptr;
-    if (querier.Has<NodeTransform>(entity)) {
-        transform = &querier.Get<NodeTransform>(entity).localTransform;
-    } else if (querier.Has<Transform>(entity)) {
-        transform = &querier.Get<Transform>(entity);
-    } else {
-        return;
-    }
+    auto event = judgeEvent(transform, mouse, events);
+    auto color = selectColor(event, label.text.color);
 
-    auto& widget = querier.Get<Widget>(entity);
-    auto rect = math::Rect::Create(transform->position, widget.size);
-
-    // IMPROVE: too many (?:), simplify it
-    const Color* contentColor = widget.content ? &widget.content.value().normal : nullptr;
-    const Color* borderColor = widget.border ? &widget.border.value().normal : nullptr;
-    if (rect.ContainPt(mouse.Position())) {
-        contentColor = widget.content ? &widget.content.value().hover : nullptr;
-        borderColor = widget.border ? &widget.border.value().hover : nullptr;
-        if (mouse.LeftBtn().IsPressing()) {
-            contentColor = widget.content ? &widget.content.value().press: nullptr;
-            borderColor = widget.border ? &widget.border.value().press: nullptr;
-        }
-    }
-
-    if (contentColor) {
-        renderer.SetDrawColor(*contentColor);
-        renderer.FillRect(rect);
-    }
-
-    if (borderColor) {
-        renderer.SetDrawColor(*borderColor);
-        renderer.DrawRect(rect);
-    }
+    auto& font = fontMgr.Get(label.text.font);
+    drawText(renderer, font, transform.transform, label.text, *color);
 }
 
-void RenderButtonSystem(std::optional<ecs::Entity> parent, ecs::Entity entity,
-                        ecs::Commands& cmds, ecs::Querier querier,
-                        ecs::Resources res,
-                        ecs::Events& events){
-    RenderBackSystem(parent, entity, cmds, querier, res, events);
-
-    Transform* transform = nullptr;
-    if (querier.Has<NodeTransform>(entity)) {
-        transform = &querier.Get<NodeTransform>(entity).localTransform;
-    } else if (querier.Has<Transform>(entity)) {
-        transform = &querier.Get<Transform>(entity);
-    } else {
+void HierarchyRenderButtonSystem(std::optional<ecs::Entity>, ecs::Entity entity,
+                                 ecs::Commands& cmds, ecs::Querier querier, ecs::Resources res,
+                                 ecs::Events& events) {
+    if (!querier.Has<RectTransform>(entity) || !querier.Has<Button>(entity)) {
         return;
     }
-    auto& renderer = res.Get<Renderer>();
-    auto& widget = querier.Get<Widget>(entity);
-    auto rect = math::Rect::Create(transform->position, widget.size);
 
+    auto& transform = querier.Get<RectTransform>(entity);
     auto& button = querier.Get<Button>(entity);
     auto& fontMgr = res.Get<AssetsManager>().Font();
-    auto& font = fontMgr.Get(button.font);
-    auto fontSize = font.Size(button.text);
-    Transform fontTrans = *transform;
-    fontTrans.position = (widget.size - fontSize) * 0.5 + transform->position;
-    renderer.SetDrawColor(button.fontColor);
-    renderer.DrawText(button.font, button.text, fontTrans);
+    auto& renderer = res.Get<Renderer>();
+    auto& mouse = res.Get<Mouse>();
+
+    auto event = judgeEvent(transform, mouse, events);
+    auto contentColor = selectColor(event, button.contentColor);
+    auto borderColor = selectColor(event, button.borderColor);
+
+    auto rect = math::Rect::Create(
+            transform.transform.globalTransform.position,
+            transform.transform.globalTransform.scale * transform.size);
+
+    renderer.SetDrawColor(*contentColor);
+    renderer.FillRect(rect);
+    renderer.SetDrawColor(*borderColor);
+    renderer.DrawRect(rect);
+
+    if (querier.Has<Text>(entity)) {
+        auto& text = querier.Get<Text>(entity);
+        auto& fontMgr = res.Get<AssetsManager>().Font();
+        auto& font = fontMgr.Get(text.font);
+        auto color = selectColor(event, text.color);
+        drawText(renderer, font, transform.transform, text, *color);
+    }
 }
 
-Widget Widget::CreateDefault(const math::Vector2& size) {
-    return Widget{
-        size,
-        ColorBundle{Color::Green,   Color::Red,  Color::Blue},
-        ColorBundle{Color::Black, Color::Black, Color::Black},
-    };
+inline math::Rect rectTransform2Rect(const RectTransform& transform) {
+    return math::Rect::Create(
+        transform.transform.globalTransform.position,
+        transform.transform.globalTransform.scale * transform.size);
 }
 
-Button Button::CreateDefault(const std::string& text, FontHandle font, const Color& fontColor) {
-    return Button{
-        font,
-        fontColor,
-        text,
-        {RenderButtonSystem},
-    };
+void HierarchyHandleUIEventSystem(std::optional<ecs::Entity>, ecs::Entity entity, ecs::Commands& cmds,
+                        ecs::Querier querier, ecs::Resources res, ecs::Events& events) {
+    if (!querier.Has<RectTransform>(entity)) {
+        return;
+    }
+
+    auto& transform = querier.Get<RectTransform>(entity);
+    auto& mouse = res.Get<Mouse>();
+    auto rect = rectTransform2Rect(transform);
+
+    if (querier.Has<Interaction>(entity) && rect.ContainPt(mouse.Position())) {
+        auto& node = querier.Get<Node>(entity);
+
+        for (auto child : node.children) {
+            if (querier.Has<RectTransform>(child)) {
+                auto& transform = querier.Get<RectTransform>(child);
+                auto childRect = rectTransform2Rect(transform);
+                auto unionRect = rect.Union(childRect);
+                if (unionRect && unionRect->ContainPt(mouse.Position())) {
+                    // mouse hover on child ui, so we can't deal this ui's event
+                    return;
+                }
+            }
+        }
+
+        auto& interaction = querier.Get<Interaction>(entity);
+        if (rect.ContainPt(mouse.Position())) {
+            auto reader = events.Reader<MouseBtnEvents>();
+            if (reader && reader.Read().events[0].button == SDL_BUTTON_LEFT &&
+                reader.Read().events[0].type == SDL_MOUSEBUTTONDOWN) {
+                if (interaction.OnClick) interaction.OnClick(entity, cmds, querier, res, events);
+            } else {
+                if (interaction.OnHover) interaction.OnHover(entity, cmds, querier, res, events);
+            }
+        }
+    }
 }
 
 }  // namespace ui
