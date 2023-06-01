@@ -3,6 +3,7 @@
 
 void CreateUISystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& fontMgr = resources.Get<AssetsManager>().Font();
+    auto& tilesheetMgr = resources.Get<TilesheetManager>();
     auto font = fontMgr.Load(TestHelper::Instance().GetResourcePath() + "PoppkornRegular.ttf", 20);
     cmd.Spawn<Node, ui::RectTransform, ui::Label>(
         Node{},
@@ -18,6 +19,20 @@ void CreateUISystem(ecs::Commands& cmd, ecs::Resources resources) {
             LOGT("button click");
         }}
     );
+
+    auto tilesheet = tilesheetMgr.LoadFromConfig(TestHelper::Instance().GetResourcePath() + "airman_desc.lua");
+    auto tile = tilesheet.Get(0, 0);
+
+    cmd.Spawn(
+        Node{},
+        ui::RectTransform{NodeTransform{Transform::FromPosition({400, 400})},
+                          math::Vector2(100, 50)},
+        ui::Button{ui::ColorBundle{Color::White, Color::Green, Color::Blue}},
+        ui::Image{tile.handle, tile.region, ui::ColorBundle{Color::White, Color::Green, Color::Blue}},
+        ui::Text{font, "image button", ui::ColorBundle{Color::White}},
+        ui::Interaction{[](ecs::Entity, ecs::Commands&, ecs::Querier,
+                           ecs::Resources,
+                           ecs::Events&) { LOGT("button click"); }});
 }
 
 class Test : public App {

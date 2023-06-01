@@ -8,6 +8,7 @@ Renderer::Renderer(Window& window, FontManager& fontManager)
     if (!renderer_) {
         Assert(renderer_ != nullptr, "renderer create failed");
     }
+    SDL_SetRenderDrawBlendMode(renderer_, SDL_BlendMode::SDL_BLENDMODE_BLEND);
 }
 
 Renderer::~Renderer() {
@@ -101,6 +102,7 @@ void Renderer::DrawSprite(const SpriteBundle& sprite, const Transform& transform
 
     auto& image = imageManager_->Get(sprite.image);
     SDL_SetTextureColorMod(image.texture_, sprite.sprite.color.r, sprite.sprite.color.g, sprite.sprite.color.b);
+    SDL_SetTextureAlphaMod(image.texture_, sprite.sprite.color.a);
     drawTexture(image.texture_, image.W(), image.H(), sprite.sprite.region,
                 sprite.sprite.customSize, transform,
                 sprite.sprite.anchor, sprite.flip);

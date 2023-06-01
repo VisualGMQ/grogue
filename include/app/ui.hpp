@@ -26,6 +26,13 @@ struct Text final {
     math::Vector2 offset;
 };
 
+struct Image final {
+    ImageHandle image;
+    math::Rect region;
+    ColorBundle color = {Color::White};
+    Flip flip = Flip::None;
+};
+
 //! @brief component for text
 struct Label final {
     Text text;

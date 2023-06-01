@@ -89,6 +89,18 @@ void HierarchyRenderButtonSystem(std::optional<ecs::Entity>, ecs::Entity entity,
     renderer.FillRect(rect);
     renderer.SetDrawColor(*borderColor);
     renderer.DrawRect(rect);
+    
+    if (querier.Has<Image>(entity)) {
+        auto& image = querier.Get<Image>(entity);
+        auto color = selectColor(event, image.color);
+        SpriteBundle bundle;
+        bundle.flip = image.flip;
+        bundle.image = image.image;
+        bundle.sprite.color = *color;
+        bundle.sprite.region = image.region;
+        bundle.sprite.customSize = transform.size;
+        renderer.DrawSprite(bundle, transform.transform.globalTransform);
+    }
 
     if (querier.Has<Text>(entity)) {
         auto& text = querier.Get<Text>(entity);
