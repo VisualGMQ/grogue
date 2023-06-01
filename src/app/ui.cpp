@@ -24,7 +24,7 @@ EventType judgeEvent(const RectTransform& transform, const Mouse& mouse, ecs::Ev
     return event;
 }
 
-const Color* selectColor(EventType event, const ColorBundle colors) {
+const Color* selectColor(EventType event, const ColorBundle& colors) {
     const Color* color = &colors.normal;
     switch (event) {
         case EventType::Hover:

@@ -639,7 +639,7 @@ private:
     bool queryCondition(Entity entity) const {
         if constexpr (IsConditionV<T>) {
             using extractor = ConditionExtractor<T>;
-            return doQueryCondition<0, extractor::args>(entity, extractor::type);
+            return doQueryCondition<0, typename extractor::args>(entity, extractor::type);
         } else {
             return queryExists<T>(entity);
         }
