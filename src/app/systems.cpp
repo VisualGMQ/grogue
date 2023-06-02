@@ -4,6 +4,12 @@
 #include "app/sprite.hpp"
 #include "app/ui.hpp"
 
+void ResetRenderStateSystem(ecs::Commands& cmd, ecs::Querier querier,
+                        ecs::Resources res, ecs::Events& events) {
+    auto& renderer = res.Get<Renderer>();
+    renderer.SetDefaultClipArea();
+}
+
 void renderOneSprite(ecs::Entity entity, ecs::Querier querier,
                      Renderer& renderer) {
     SpriteBundle& bundle = querier.Get<SpriteBundle>(entity);

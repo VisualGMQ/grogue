@@ -117,7 +117,15 @@ class EventWriter final {
 public:
     EventWriter(Events &e) : events_(e) {}
 
+    //! @brief write event data, it can be read after `world.Update()`
+    //! @param t the data you want save
     void Write(const T &t);
+    //! @brief write event data immediatly(don't delay to `world.Update()`)
+    //! @param t the data you want save
+    void WriteImmediate(const T& t);
+    //! @brief write event data immediatly(don't delay to `world.Update()`)
+    //! @param t the data you want save
+    void WriteImmediate(T&& t);
 
 private:
     Events &events_;
@@ -137,6 +145,16 @@ auto Events::Writer() {
 template <typename T>
 void EventWriter<T>::Write(const T &t) {
     events_.addEventFuncs_.push_back([=]() { EventStaging<T>::Set(t); });
+}
+
+template <typename T>
+void EventWriter<T>::WriteImmediate(const T& t) {
+    EventStaging<T>::Set(t);
+}
+
+template <typename T>
+void EventWriter<T>::WriteImmediate(T&& t) {
+    EventStaging<T>::Set(std::move(t));
 }
 
 using EntityGenerator = IDGenerator<Entity>;

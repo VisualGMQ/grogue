@@ -142,7 +142,9 @@ void Renderer::SetClipArea(const math::Rect& area) {
     rect.y = area.y;
     rect.w = area.w;
     rect.h = area.h;
-    SDL_RenderSetClipRect(renderer_, &rect);
+    if (SDL_RenderSetClipRect(renderer_, &rect) != 0) {
+        LOGE("set render clip rect failed: ", SDL_GetError());
+    }
 }
 
 void Renderer::SetDefaultClipArea() {

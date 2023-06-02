@@ -95,16 +95,18 @@ void DefaultPlugins::Build(ecs::World* world) {
         // transform update
         .AddSystem(UpdateNodeTransformSystem)
         .AddSystem(UpdateRectTransformSystem)
+        // ui event handle
+        .AddSystem(ui::HierarchyHandleUIEventSystem)
+        .AddSystem(ui::HierarchyUpdateScrollbarSystem)
         // sprite and shape render
+        .AddSystem(ResetRenderStateSystem)
         .AddSystem(RenderSpriteSystem)
         .AddSystem(HierarchyRenderSpriteSystem)
         .AddSystem(RenderShapeSystem)
         .AddSystem(HierarchyRenderShapeSystem)
         // ui render
-        .AddSystem(ui::HierarchyRenderButtonSystem)
-        .AddSystem(ui::HierarchyRenderLabelSystem)
-        // ui event handle
-        .AddSystem(ui::HierarchyHandleUIEventSystem);
+        .AddSystem(ui::HierarchyRenderPanelSystem)
+        .AddSystem(ui::HierarchyRenderLabelSystem);
     world->GetResource<Renderer>()->imageManager_ = &assets->Image();
 }
 

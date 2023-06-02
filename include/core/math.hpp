@@ -312,7 +312,7 @@ struct Rect {
         return Rect{position.x, position.y, size.x, size.y};
     }
 
-    bool ContainPt(const Vector2& pt) {
+    bool ContainPt(const Vector2& pt) const {
         return pt.x > x && pt.x < x + w && pt.y > y && pt.y < y + h;
     }
 

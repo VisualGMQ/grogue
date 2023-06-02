@@ -2,6 +2,9 @@
 
 #include "core/ecs.hpp"
 
+void ResetRenderStateSystem(ecs::Commands& cmd, ecs::Querier querier,
+                        ecs::Resources resources, ecs::Events& events);
+
 void RenderSpriteSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
                         ecs::Events&);
 void HierarchyRenderSpriteSystem(std::optional<ecs::Entity>, ecs::Entity,
