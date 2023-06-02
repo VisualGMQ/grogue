@@ -47,6 +47,26 @@ inline bool isChildrenInParent(ecs::Entity parent, ecs::Entity entity, ecs::Quer
     return false;
 }
 
+inline void tryClipArea(ecs::Entity entity, ecs::Querier querier, Renderer& renderer) {
+    if (querier.Has<RectTransform>(entity) &&
+        querier.Has<Panel>(entity)) {
+        auto& parentTrans = querier.Get<RectTransform>(entity);
+        auto& panel = querier.Get<Panel>(entity);
+        auto rect = rectTransform2Rect(parentTrans);
+        if (panel.clipChildren) {
+            math::Rect clipRect = rect;
+            // border will not clip
+            clipRect.x += 1;
+            clipRect.y += 1;
+            clipRect.w -= 2;
+            clipRect.h -= 2;
+            renderer.SetClipArea(clipRect);
+        } else {
+            renderer.SetDefaultClipArea();
+        }
+    }
+}
+
 void HierarchyRenderLabelSystem(std::optional<ecs::Entity> parent, ecs::Entity entity,
                                 ecs::Commands& cmds, ecs::Querier querier,
                                 ecs::Resources res, ecs::Events& events) {
@@ -60,10 +80,32 @@ void HierarchyRenderLabelSystem(std::optional<ecs::Entity> parent, ecs::Entity e
 
     tryResetUIRenderStateAtRoot(parent, entity, querier, res);
 
+    auto& renderer = res.Get<Renderer>();
+    if (parent) {
+        tryClipArea(parent.value(), querier, renderer);
+    }
+
+    if (parent && querier.Has<RectTransform>(parent.value()) &&
+        querier.Has<Panel>(parent.value())) {
+        auto& parentTrans = querier.Get<RectTransform>(parent.value());
+        auto& panel = querier.Get<Panel>(parent.value());
+        auto rect = rectTransform2Rect(parentTrans);
+        if (panel.clipChildren) {
+            math::Rect clipRect = rect;
+            // border will not clip
+            clipRect.x += 1;
+            clipRect.y += 1;
+            clipRect.w -= 2;
+            clipRect.h -= 2;
+            renderer.SetClipArea(clipRect);
+        } else {
+            renderer.SetDefaultClipArea();
+        }
+    }
+
     auto& transform = querier.Get<RectTransform>(entity);
     auto& label = querier.Get<Label>(entity);
     auto& fontMgr = res.Get<AssetsManager>().Font();
-    auto& renderer = res.Get<Renderer>();
     auto& mouse = res.Get<Mouse>();
 
     auto rect = rectTransform2Rect(transform);
@@ -73,9 +115,10 @@ void HierarchyRenderLabelSystem(std::optional<ecs::Entity> parent, ecs::Entity e
     drawText(renderer, font, transform.transform, label.text, *color);
 }
 
-void HierarchyRenderPanelSystem(std::optional<ecs::Entity> parent, ecs::Entity entity,
-                                 ecs::Commands& cmds, ecs::Querier querier, ecs::Resources res,
-                                 ecs::Events& events) {
+void HierarchyRenderPanelSystem(std::optional<ecs::Entity> parent,
+                                ecs::Entity entity, ecs::Commands& cmds,
+                                ecs::Querier querier, ecs::Resources res,
+                                ecs::Events& events) {
     if (parent && !isChildrenInParent(parent.value(), entity, querier)) {
         return;
     }
@@ -86,50 +129,45 @@ void HierarchyRenderPanelSystem(std::optional<ecs::Entity> parent, ecs::Entity e
 
     tryResetUIRenderStateAtRoot(parent, entity, querier, res);
 
+    auto& renderer = res.Get<Renderer>();
+    if (parent) {
+        tryClipArea(parent.value(), querier, renderer);
+    }
+
+    if (parent && querier.Has<NodeTransform>(parent.value()) &&
+        querier.Has<Panel>(parent.value())) {
+        auto& parentTrans = querier.Get<RectTransform>(parent.value());
+        auto& panel = querier.Get<Panel>(parent.value());
+        auto rect = rectTransform2Rect(parentTrans);
+        if (panel.clipChildren) {
+            math::Rect clipRect = rect;
+            // border will not clip
+            clipRect.x += 1;
+            clipRect.y += 1;
+            clipRect.w -= 2;
+            clipRect.h -= 2;
+            renderer.SetClipArea(clipRect);
+        } else {
+            renderer.SetDefaultClipArea();
+        }
+    }
+
     auto& transform = querier.Get<RectTransform>(entity);
     auto& panel = querier.Get<Panel>(entity);
     auto& fontMgr = res.Get<AssetsManager>().Font();
-    auto& renderer = res.Get<Renderer>();
     auto& mouse = res.Get<Mouse>();
     auto rect = rectTransform2Rect(transform);
 
-    auto contentColor = selectColor(rect, mouse.Position(), events, panel.contentColor);
-    auto borderColor = selectColor(rect, mouse.Position(), events, panel.borderColor);
-
-    if (querier.Has<Scrollbar>(entity)) {
-        auto& scrollbar = querier.Get<Scrollbar>(entity);
-        math::Rect barRect = math::Rect::Create(rect.x + rect.w, rect.y, scrollbar.width, rect.h);
-        renderer.SetDrawColor(Color::White);
-        renderer.FillRect(barRect);
-        renderer.SetDrawColor(Color::Black);
-        renderer.DrawRect(barRect);
-
-        float offset = scrollbar.Ratio() * (rect.h - scrollbar.sliderLen);
-
-        math::Rect slideRect = math::Rect::Create(barRect.x, barRect.y + offset, barRect.w, scrollbar.sliderLen);
-        renderer.SetDrawColor(Color{150, 150, 150});
-        renderer.FillRect(slideRect);
-        renderer.SetDrawColor(Color::Black);
-        renderer.DrawRect(slideRect);
-    }
-
-    if (panel.clipChildren) {
-        math::Rect clipRect = rect;
-        // border will not clip
-        clipRect.x += 1;
-        clipRect.y += 1;
-        clipRect.w -= 2;
-        clipRect.h -= 2;
-        renderer.SetClipArea(clipRect);
-    } else {
-        renderer.SetDefaultClipArea();
-    }
+    auto contentColor =
+        selectColor(rect, mouse.Position(), events, panel.contentColor);
+    auto borderColor =
+        selectColor(rect, mouse.Position(), events, panel.borderColor);
 
     renderer.SetDrawColor(*contentColor);
     renderer.FillRect(rect);
     renderer.SetDrawColor(*borderColor);
     renderer.DrawRect(rect);
-    
+
     if (querier.Has<Image>(entity)) {
         auto& image = querier.Get<Image>(entity);
         auto color = selectColor(rect, mouse.Position(), events, image.color);
@@ -149,11 +187,33 @@ void HierarchyRenderPanelSystem(std::optional<ecs::Entity> parent, ecs::Entity e
         auto color = selectColor(rect, mouse.Position(), events, text.color);
         drawText(renderer, font, transform.transform, text, *color);
     }
+
+    if (querier.Has<Scrollbar>(entity)) {
+        auto& scrollbar = querier.Get<Scrollbar>(entity);
+        math::Rect barRect = math::Rect::Create(rect.x + rect.w, rect.y,
+                                                scrollbar.width, rect.h);
+        renderer.SetDrawColor(Color::White);
+        renderer.FillRect(barRect);
+        renderer.SetDrawColor(Color::Black);
+        renderer.DrawRect(barRect);
+
+        float offset = scrollbar.Ratio() * (rect.h - scrollbar.sliderLen);
+
+        math::Rect slideRect = math::Rect::Create(
+            barRect.x, barRect.y + offset, barRect.w, scrollbar.sliderLen);
+        renderer.SetDrawColor(Color{150, 150, 150});
+        renderer.FillRect(slideRect);
+        renderer.SetDrawColor(Color::Black);
+        renderer.DrawRect(slideRect);
+    }
 }
 
-void HierarchyHandleUIEventSystem(std::optional<ecs::Entity>, ecs::Entity entity, ecs::Commands& cmds,
-                        ecs::Querier querier, ecs::Resources res, ecs::Events& events) {
-    if (!querier.Has<RectTransform>(entity) || !querier.Has<Interaction>(entity)) {
+void HierarchyHandleUIEventSystem(std::optional<ecs::Entity> parent,
+                                  ecs::Entity entity, ecs::Commands& cmds,
+                                  ecs::Querier querier, ecs::Resources res,
+                                  ecs::Events& events) {
+    if (!querier.Has<RectTransform>(entity) ||
+        !querier.Has<Interaction>(entity)) {
         return;
     }
 
@@ -161,8 +221,23 @@ void HierarchyHandleUIEventSystem(std::optional<ecs::Entity>, ecs::Entity entity
     auto& mouse = res.Get<Mouse>();
     auto rect = rectTransform2Rect(transform);
 
+    if (parent && querier.Has<RectTransform>(parent.value()) &&
+        querier.Has<Panel>(parent.value())) {
+        auto& parentTrans = querier.Get<RectTransform>(parent.value());
+        auto& parentPanel = querier.Get<Panel>(parent.value());
+
+        auto parentRect = rectTransform2Rect(parentTrans);
+        auto unionRect = rect.Union(parentRect);
+        if (!unionRect) {
+            return;
+        }
+        rect = unionRect.value();
+    }
+
     std::optional<ecs::Entity> mouseHoverChild;
-    if (!rect.ContainPt(mouse.Position())) { return; }
+    if (!rect.ContainPt(mouse.Position())) {
+        return;
+    }
 
     auto& node = querier.Get<Node>(entity);
 
@@ -183,7 +258,7 @@ void HierarchyHandleUIEventSystem(std::optional<ecs::Entity>, ecs::Entity entity
     auto handledReader = events.Reader<EventHandledEvent>();
     auto reader = events.Reader<MouseBtnEvents>();
 
-// some temporary macro to help judge event handlable
+    // some temporary macro to help judge event handlable
 
 #define IsHandled(event) \
     (handledReader && handledReader.Read().IsHandled(EventType::Click))
@@ -233,7 +308,7 @@ void HierarchyHandleUIEventSystem(std::optional<ecs::Entity>, ecs::Entity entity
         if (querier.Has<Scrollbar>(entity)) {
             auto& scrollbar = querier.Get<Scrollbar>(entity);
             scrollbar.value = std::clamp(
-                scrollbar.value +
+                scrollbar.value -
                     scrollbar.incStep *
                         (wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -1 : 1) *
                         wheel.preciseY,
@@ -246,9 +321,12 @@ void HierarchyHandleUIEventSystem(std::optional<ecs::Entity>, ecs::Entity entity
 #undef IsHandled
 }
 
-void HierarchyUpdateScrollbarSystem(std::optional<ecs::Entity>, ecs::Entity entity, ecs::Commands&,
-                        ecs::Querier querier, ecs::Resources, ecs::Events&) {
-    if (!querier.Has<RectTransform>(entity) || !querier.Has<Scrollbar>(entity)) {
+void HierarchyUpdateScrollbarSystem(std::optional<ecs::Entity>,
+                                    ecs::Entity entity, ecs::Commands&,
+                                    ecs::Querier querier, ecs::Resources,
+                                    ecs::Events&) {
+    if (!querier.Has<RectTransform>(entity) ||
+        !querier.Has<Scrollbar>(entity)) {
         return;
     }
 
@@ -261,7 +339,8 @@ void HierarchyUpdateScrollbarSystem(std::optional<ecs::Entity>, ecs::Entity enti
         for (auto child : node.children) {
             if (querier.Has<RectTransform>(child)) {
                 auto& transform = querier.Get<RectTransform>(child);
-                transform.transform.globalTransform.position.y -= scrollbar.Ratio() * rect.h;
+                transform.transform.globalTransform.position.y -=
+                    scrollbar.Ratio() * rect.h;
             }
         }
     }

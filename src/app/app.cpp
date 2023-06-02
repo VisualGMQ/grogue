@@ -96,8 +96,8 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(UpdateNodeTransformSystem)
         .AddSystem(UpdateRectTransformSystem)
         // ui event handle
-        .AddSystem(ui::HierarchyHandleUIEventSystem)
         .AddSystem(ui::HierarchyUpdateScrollbarSystem)
+        .AddSystem(ui::HierarchyHandleUIEventSystem)
         // sprite and shape render
         .AddSystem(ResetRenderStateSystem)
         .AddSystem(RenderSpriteSystem)
