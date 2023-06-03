@@ -60,6 +60,14 @@ DeclareParseFunc(ItemPOD)
     ObjField(sprite, SpritePOD)
     ObjField(material, Material)
 EndDeclareParseFunc()
+
+DeclareParseFunc(BackpackUIInfo)
+    Field(width, int)
+    Field(height, int)
+    Field(gridSize, int)
+    Field(padding, int)
+    Field(margin, int)
+EndDeclareParseFunc()
 // clang-format on
 
 // config class
@@ -133,6 +141,13 @@ GameConfig::GameConfig(LuaManager& luaMgr, TilesheetManager& tsMgr, const std::s
             valid_ = false;
         }
     }
+
+    if (valid_) {
+        backpackUIConfig_ = std::make_unique<BackpackUIConfig>(luaMgr, configDir + "backpack_ui.lua");
+        if (!backpackUIConfig_->Valid()) {
+            valid_ = false;
+        }
+    }
 }
 
 ItemConfig::ItemConfig(LuaManager& luaMgr, TilesheetManager& tsMgr, const std::string& filename): valid_(true) {
@@ -179,6 +194,21 @@ ItemConfig::ItemConfig(LuaManager& luaMgr, TilesheetManager& tsMgr, const std::s
                 items_[name] = info;
                 names_.push_back(name);
             }
+        }
+    }
+}
+
+BackpackUIConfig::BackpackUIConfig(LuaManager& mgr, const std::string& filename): valid_(true) {
+    auto lua = mgr.CreateSolitary(filename);
+    auto root = lua.lua.get<std::optional<sol::table>>("Config");
+    if (root) {
+        auto info = ParseBackpackUIInfo(root.value());
+        if (!info) {
+            valid_ = false;
+        } else {
+            info->col = (info->width - 2.0 * info->margin + info->padding) / (info->gridSize + info->padding);
+            info->row = (info->height - 2.0 * info->margin + info->padding) / (info->gridSize + info->padding);
+            info_ = info.value();
         }
     }
 }

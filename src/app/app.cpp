@@ -99,14 +99,15 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(ui::HierarchyUpdateScrollbarSystem)
         .AddSystem(ui::HierarchyHandleUIEventSystem)
         // sprite and shape render
-        .AddSystem(ResetRenderStateSystem)
         .AddSystem(RenderSpriteSystem)
         .AddSystem(HierarchyRenderSpriteSystem)
         .AddSystem(RenderShapeSystem)
         .AddSystem(HierarchyRenderShapeSystem)
         // ui render
         .AddSystem(ui::HierarchyRenderPanelSystem)
-        .AddSystem(ui::HierarchyRenderLabelSystem);
+        .AddSystem(ui::HierarchyRenderLabelSystem)
+        // reset render state for next frame
+        .AddSystem(ResetRenderStateSystem);
     world->GetResource<Renderer>()->imageManager_ = &assets->Image();
 }
 
@@ -118,6 +119,7 @@ void DefaultPlugins::Quit(ecs::World* world) {
 }
 
 void App::Run() {
+    Random::Init();
     world_.Startup();
     world_.Update();
 
@@ -142,4 +144,5 @@ void App::Run() {
     }
 
     world_.Shutdown();
+    Random::Delete();
 }

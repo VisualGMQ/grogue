@@ -16,7 +16,7 @@ struct Map final {
     Map(int w, int h): tiles(w, h) {}
 
     math::HeapMatrix<MapTile> tiles;
-    std::vector<Item> items;    //!< seperate items that not on grid
+    std::vector<ecs::Entity> items;    //!< seperate items that not on grid
     std::vector<ecs::Entity> entities;   //!< moveable entities
 };
 

@@ -3,6 +3,9 @@
 #include "game/map.hpp"
 #include "game/monster.hpp"
 
+//! @brief tag component for backpack panel UI
+struct BackpackUIPanel {};
+
 struct Context {
     FontHandle font;
     bool showDebugInfo = false;
@@ -25,24 +28,26 @@ enum GameState {
     Game,
 } state;
 
-void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
+void ReadConfigSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& luaMgr = resources.Get<AssetsManager>().Lua();
     auto& tilesheetMgr = resources.Get<TilesheetManager>();
     GameConfig config(luaMgr, tilesheetMgr, "./resources/config/");
-    Random::Init();
-
     if (!config) {
         LOGF("Load config in ./resources/config failed!!! Game can't start!!!");
         exit(1);
     }
-
     cmd.SetResource<GameConfig>(std::move(config));
+}
 
+void InitMapSystem(ecs::Commands& cmd, ecs::Resources resources) {
     MapManager mapMgr;
     mapMgr.Add(GenDebugDemo(resources, 32, 23));
 
     cmd.SetResource<MapManager>(std::move(mapMgr));
+}
 
+void InitMonstersSystem(ecs::Commands& cmd, ecs::Resources resources) {
+    auto& tilesheetMgr = resources.Get<TilesheetManager>();
     auto& tilesheet = tilesheetMgr.Find("role");
 
     auto downTile = tilesheet.Get(0, 0);
@@ -53,8 +58,52 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
         SpriteBundle{Sprite::FromRegion(rightTile.region), rightTile.handle},
         SpriteBundle{Sprite::FromRegion(upTile.region), upTile.handle},
         SpriteBundle{Sprite::FromRegion(downTile.region), downTile.handle});
+    cmd.Spawn<Monster, Player, Backpack>(std::move(monster), Player{}, Backpack{});
+}
 
-    auto entity = cmd.Spawn<Monster, Player>(std::move(monster), Player{});
+void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
+    auto& config = resources.Get<GameConfig>();
+    auto& window = resources.Get<Window>();
+    auto& backpackUIConfig = config.GetBackpackUIConfig().Info();
+    auto backpackPanel = cmd.SpawnAndReturn<ui::Panel, ui::RectTransform, BackpackUIPanel>(
+        ui::Panel::Create(
+            ui::ColorBundle::CreatePureColor(Color{200, 200, 200}),
+            ui::ColorBundle::CreatePureColor(Color::Black)),
+        ui::RectTransform{NodeTransform{Transform::FromPosition({0, window.GetSize().y - backpackUIConfig.height})},
+                          math::Vector2(backpackUIConfig.width, backpackUIConfig.height)},
+        {});
+    std::vector<ecs::Entity> grides;
+    for (int x = 0; x < backpackUIConfig.col; x++) {
+        for (int y = 0; y < backpackUIConfig.row; y++) {
+            auto entity = cmd.SpawnAndReturn<ui::Panel, ui::RectTransform>(
+                ui::Panel::Create(
+                    ui::ColorBundle::CreatePureColor(Color{70, 70, 70}),
+                    ui::ColorBundle::CreatePureColor(Color::Black)),
+                ui::RectTransform{
+                    NodeTransform{Transform::FromPosition(
+                        math::Vector2(backpackUIConfig.margin + (backpackUIConfig.gridSize +
+                                                    backpackUIConfig.padding) *
+                                                       x,
+                         backpackUIConfig.margin + (backpackUIConfig.gridSize +
+                                                    backpackUIConfig.padding) *
+                                                       y))},
+                    math::Vector2(backpackUIConfig.gridSize,
+                                  backpackUIConfig.gridSize)});
+            grides.push_back(entity);
+        }
+    }
+
+    HierarchyBuilder builder(cmd, backpackPanel);
+    builder.SetChilds(grides);
+
+    cmd.SetResource<GameConfig>(std::move(config));
+}
+
+void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
+    ReadConfigSystem(cmd, resources);
+    InitMapSystem(cmd, resources);
+    InitMonstersSystem(cmd, resources);
+    InitBackpackUISystem(cmd, resources);
 }
 
 void InputHandle(ecs::Commands& cmd, ecs::Querier queryer,
@@ -82,6 +131,9 @@ void InputHandle(ecs::Commands& cmd, ecs::Querier queryer,
             } else {
                 velocity += math::Vector2(0, -1);
             }
+        }
+        if (keyboard.Key(SDL_SCANCODE_TAB).IsPressed()) {
+            
         }
 
         velocity.Normalize();

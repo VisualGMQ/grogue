@@ -11,6 +11,14 @@ namespace ui {
 
 struct ColorBundle final {
     Color normal, hover, press;
+
+    static ColorBundle Create(const Color& normal, const Color& hover, const Color& press) {
+        return ColorBundle{normal, hover, press};
+    }
+
+    static ColorBundle CreatePureColor(const Color& color) {
+        return ColorBundle{color, color, color};
+    }
 };
 
 //! @brief component for ui rect
@@ -25,6 +33,10 @@ struct Text final {
     std::string text;
     ColorBundle color;
     math::Vector2 offset;
+
+    static Text Create(FontHandle font, const std::string& text, const ColorBundle& color, const math::Vector2& offset) {
+        return Text{font, text, color, offset};
+    }
 };
 
 //! @brief component for ui which want to show a background image on it
@@ -35,16 +47,34 @@ struct Image final {
     Flip flip = Flip::None;
 };
 
+struct Widget {
+    bool visiable = true;
+    virtual ~Widget() = default;
+};
+
 //! @brief component for label
-struct Label final {
+struct Label final: public Widget {
     Text text;
+
+    static Label Create(const Text& text) {
+        Label label;
+        label.text = text;
+        return label;
+    }
 };
 
 //! @brief component for panel
-struct Panel final {
+struct Panel final: public Widget {
     ColorBundle contentColor;
     ColorBundle borderColor;
     bool clipChildren = true;    // if children exceed panel area, clip them
+
+    static Panel Create(const ColorBundle& content, const ColorBundle& border) {
+        Panel panel;
+        panel.contentColor = content;
+        panel.borderColor = border;
+        return panel;
+    }
 };
 
 //! @brief component for ui which want to show a scrolbar and scroll it's content

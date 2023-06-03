@@ -97,6 +97,15 @@ ReflRegist(
         .Member(&ItemPOD::sprite, "sprite")
 )
 
+ReflRegist(
+    refl::Class<BackpackUIInfo>("BakpackUIInfo")
+        .Member(&BackpackUIInfo::width, "width")
+        .Member(&BackpackUIInfo::height, "height")
+        .Member(&BackpackUIInfo::gridSize, "gridSize")
+        .Member(&BackpackUIInfo::padding, "padding")
+        .Member(&BackpackUIInfo::margin, "margin")
+)
+
 class RaceProfDef final {
 public:
     RaceProfDef(LuaManager&, const std::string& filename);
@@ -137,6 +146,19 @@ private:
     bool valid_;
 };
 
+class BackpackUIConfig final {
+public:
+    BackpackUIConfig(LuaManager&, const std::string& filename);
+    const BackpackUIInfo& Info() const { return info_; }
+
+    //! @brief whether config init OK
+    bool Valid() const { return valid_; }
+
+private:
+    BackpackUIInfo info_;
+    bool valid_;
+};
+
 //! @brief contains all game config
 class GameConfig final {
 public:
@@ -145,6 +167,7 @@ public:
     auto& GetRaceProfDef() const { return *raceProfDef_; }
     auto& GetRaceProfConfig() const { return raceProfConfig_; }
     auto& GetItemConfig() const { return itemConfig_; }
+    auto& GetBackpackUIConfig() const { return *backpackUIConfig_; }
 
     //! @brief whether config init OK
     operator bool() const { return valid_; }
@@ -153,5 +176,6 @@ private:
     std::unique_ptr<RaceProfDef> raceProfDef_;
     std::vector<std::unique_ptr<RaceProfConfig>> raceProfConfig_;
     std::unique_ptr<ItemConfig> itemConfig_;
+    std::unique_ptr<BackpackUIConfig> backpackUIConfig_;
     bool valid_;
 };

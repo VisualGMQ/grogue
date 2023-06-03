@@ -73,10 +73,26 @@ struct Buff final {
     }
 };
 
+//! @brief backpack component for monster
+struct Backpack final {
+    std::vector<ecs::Entity> items;
+};
+
+struct BackpackUIInfo final {
+    int width;
+    int height;
+    int gridSize;
+    int padding;
+    int margin;
+
+    int row; //!< calculate, not load from config
+    int col; //!< calculate, not load from config
+};
 
 //! @brief the operation you can apply on item
 using ItemOpFunc = std::function<bool(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&)>;
 
+//! @brief a component for item
 struct Item final {
     std::string nameID;
 };
