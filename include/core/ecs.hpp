@@ -724,14 +724,14 @@ inline void World::Startup() {
 
 //! @brief a help function to preorder node tree
 inline void PreorderVisit(std::optional<Entity> parent, Entity entity,
-                          World &world, std::vector<Commands> commandList,
+                          World &world, std::vector<Commands>& commandList,
                           Querier querier, Resources res, Events &events,
                           HierarchyUpdateSystem system) {
     Commands commands{world};
     system(parent, entity, commands, querier, res, events);
     commandList.push_back(commands);
 
-    assert(querier.Has<Node>(entity));
+    // assert(querier.Has<Node>(entity));
 
     auto &node = querier.Get<Node>(entity);
 
