@@ -80,6 +80,7 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(ExitTrigger{})
         .SetResource(Time{})
         .SetResource(TimerManager{})
+        .SetResource(SignalManager{})
         .SetResource(DebugConfig{});
 
     auto* assets = world->GetResource<AssetsManager>();

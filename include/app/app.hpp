@@ -13,6 +13,7 @@
 #include "app/scene.hpp"
 #include "app/ui.hpp"
 #include "app/assets.hpp"
+#include "app/signal.hpp"
 
 // a resource to trigger application exit
 class ExitTrigger final {

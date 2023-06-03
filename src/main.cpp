@@ -106,15 +106,15 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
     InitBackpackUISystem(cmd, resources);
 }
 
-void InputHandle(ecs::Commands& cmd, ecs::Querier queryer,
+void InputHandle(ecs::Commands& cmd, ecs::Querier querier,
                  ecs::Resources resources, ecs::Events& events) {
     constexpr float SPEED = 2;
 
     auto& keyboard = resources.Get<Keyboard>();
 
-    auto entities = queryer.Query<Player>();
+    auto entities = querier.Query<Player>();
     for (auto entity : entities) {
-        auto& monster = queryer.Get<Monster>(entity);
+        auto& monster = querier.Get<Monster>(entity);
 
         math::Vector2 velocity;
         
@@ -133,7 +133,18 @@ void InputHandle(ecs::Commands& cmd, ecs::Querier queryer,
             }
         }
         if (keyboard.Key(SDL_SCANCODE_TAB).IsPressed()) {
-            
+            auto entities = querier.Query<BackpackUIPanel>();
+            if (!entities.empty()) {
+                auto& window = resources.Get<Window>();
+                auto& transform = querier.Get<ui::RectTransform>(entities[0]);
+                float& y = transform.transform.localTransform.position.y;
+                if (y >= 0 && y < window.GetSize().y) { // panel in windows, move it out
+                    y = window.GetSize().y;
+                } else {
+                    auto& info = resources.Get<GameConfig>().GetBackpackUIConfig().Info();
+                    y = window.GetSize().y - info.height;
+                }
+            }
         }
 
         velocity.Normalize();
