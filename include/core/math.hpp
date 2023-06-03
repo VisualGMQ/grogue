@@ -379,6 +379,10 @@ public:
         datas_.get()[x + y * w_] = std::move(t);
     }
 
+    bool IsInRange(int x, int y) const {
+        return x >= 0 && x < Width() && y >= 0 && y < Height();
+    }
+
 private:
     std::unique_ptr<T[]> datas_;
     int w_;

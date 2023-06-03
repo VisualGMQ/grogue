@@ -2,7 +2,20 @@
 #include "catch.hpp"
 #include "app/signal.hpp"
 
-TEST_CASE("refl") {
+namespace test {
+
+enum SignalCategory {
+    Signal1 = 0,
+};
+
+enum SignalFunc {
+    Func1 = 0,
+    Func2,
+};
+
+}
+
+TEST_CASE("signal") {
     ecs::World world;
     ecs::Commands cmds(world);
     ecs::Querier querier(world);
@@ -11,29 +24,29 @@ TEST_CASE("refl") {
 
     SignalManager mgr; 
     int a = 0;
-    mgr.Regist("signal1", "func1", [&](ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&) {
+    mgr.Regist(test::Signal1, test::Func1, [&](ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&, void*) {
         a ++;
     });
 
     REQUIRE(a == 0);
 
-    mgr.Raise("func1", cmds, querier, resouces, events);
+    mgr.Raise(test::Func1, cmds, querier, resouces, events, nullptr);
     REQUIRE(a == 1);
-    mgr.Raise("func1", cmds, querier, resouces, events);
+    mgr.Raise(test::Func1, cmds, querier, resouces, events, nullptr);
     REQUIRE(a == 2);
 
-    mgr.Regist("signal1", "func2", [&](ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&) {
+    mgr.Regist(test::Signal1, test::Func2, [&](ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&, void*) {
         a += 3;
     });
-    mgr.Raise("func2", cmds, querier, resouces, events);
+    mgr.Raise(test::Func2, cmds, querier, resouces, events, nullptr);
     REQUIRE(a == 5);
 
-    mgr.RaiseCategory("signal1", cmds, querier, resouces, events);
+    mgr.RaiseCategory(test::Signal1, cmds, querier, resouces, events, nullptr);
     REQUIRE(a == 9);
 
-    mgr.Remove("func2");
-    mgr.Raise("func2", cmds, querier, resouces, events);
+    mgr.Remove(test::Func2);
+    mgr.Raise(test::Func2, cmds, querier, resouces, events, nullptr);
     REQUIRE(a == 9);
-    mgr.RaiseCategory("signal1", cmds, querier, resouces, events);
+    mgr.RaiseCategory(test::Signal1, cmds, querier, resouces, events, nullptr);
     REQUIRE(a == 10);
 }

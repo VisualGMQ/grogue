@@ -55,7 +55,7 @@ void DrawMapSystem(ecs::Commands& cmd, ecs::Querier queryer,
         for (int x = 0; x < map->tiles.Width(); x++) {
             const auto& tile = map->tiles.Get(x, y);
             Transform transform = Transform::Create(
-                math::Vector2(x * MapTileSize * SCALE, y * MapTileSize * SCALE),
+                math::Vector2(x * MapTileRealSize, y * MapTileRealSize),
                 0, math::Vector2(SCALE, SCALE));
             renderer.DrawSprite(tile.terrian.sprite, transform);
 

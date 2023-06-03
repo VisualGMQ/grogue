@@ -73,9 +73,29 @@ struct Buff final {
     }
 };
 
+//! @brief the operation you can apply on item
+using ItemOpFunc = std::function<bool(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&)>;
+
+//! @brief game item
+struct Item final {
+    std::string nameID; //!< raw nameID in GameConfig
+    // std::string name; // new name for item
+};
+
+struct ItemInfo final {
+    std::string name;
+    int weight;
+    struct Operation {
+        std::string operate;
+        bool valid;
+    };
+    std::vector<Operation> operations;
+    SpriteBundle sprite;
+};
+
 //! @brief backpack component for monster
 struct Backpack final {
-    std::vector<ecs::Entity> items;
+    std::vector<Item> items;
 };
 
 struct BackpackUIInfo final {
@@ -89,24 +109,7 @@ struct BackpackUIInfo final {
     int col; //!< calculate, not load from config
 };
 
-//! @brief the operation you can apply on item
-using ItemOpFunc = std::function<bool(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&)>;
 
-//! @brief a component for item
-struct Item final {
-    std::string nameID;
-};
-
-struct ItemInfo final {
-    std::string name;
-    int weight;
-    struct Operation {
-        std::string operate;
-        bool valid;
-    };
-    std::vector<Operation> operations;
-    SpriteBundle sprite;
-};
 
 struct Terrian final {
     enum class Type {

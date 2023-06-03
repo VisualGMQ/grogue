@@ -324,6 +324,25 @@ public:
     }
 
     template <typename... ComponentTypes>
+    Entity SpawnImmediateAndReturn(ComponentTypes &&...components) {
+        EntitySpawnInfo info;
+        info.entity = EntityGenerator::Gen();
+        doSpawn<ComponentTypes...>(info.components,
+                                   std::forward<ComponentTypes>(components)...);
+
+		auto it = world_.entities_.emplace(info.entity,
+										   World::ComponentContainer{});
+		auto &componentContainer = it.first->second;
+		for (auto &componentInfo : info.components) {
+			componentContainer[componentInfo.index] =
+				doSpawnWithoutType(info.entity, componentInfo);
+		}
+
+        return info.entity;
+    }
+
+
+    template <typename... ComponentTypes>
     Commands &AddComponent(Entity entity, ComponentTypes &&...components) {
         EntitySpawnInfo info;
         info.entity = entity;

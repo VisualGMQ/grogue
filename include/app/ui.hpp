@@ -6,6 +6,7 @@
 #include "app/scene.hpp"
 #include "app/input.hpp"
 #include "app/assets.hpp"
+#include "app/tilesheet.hpp"
 
 namespace ui {
 
@@ -45,6 +46,23 @@ struct Image final {
     math::Rect region;
     ColorBundle color = {Color::White};
     Flip flip = Flip::None;
+
+    static Image FromTilesheet(Tilesheet& tilesheet, uint32_t x, uint32_t y) {
+        auto tile = tilesheet.Get(x, y);
+        Image image;
+        image.region = tile.region;
+        image.image = tile.handle;
+        return image;
+    }
+
+    static Image FromSpriteBundle(const SpriteBundle& sprite) {
+        Image image;
+        image.region = sprite.sprite.region;
+        image.image = sprite.image;
+        image.color = ColorBundle::CreatePureColor(sprite.sprite.color);
+        image.flip = sprite.flip;
+        return image;
+    }
 };
 
 struct Widget {

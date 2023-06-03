@@ -31,6 +31,7 @@ private:
 };
 
 constexpr int MapTileSize = 16;
+constexpr int MapTileRealSize = MapTileSize * SCALE;
 
 std::shared_ptr<Map> GenDebugDemo(ecs::Resources resources, int w, int h);
 
