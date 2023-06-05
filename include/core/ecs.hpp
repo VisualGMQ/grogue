@@ -7,8 +7,8 @@
 #include <variant>
 #include <vector>
 
-#include "sparse_sets.hpp"
 #include "log.hpp"
+#include "sparse_sets.hpp"
 
 #define assertm(msg, expr) assert(((void)msg, (expr)))
 
@@ -73,8 +73,11 @@ template <typename T>
 class EventReader final {
 public:
     bool Has() const { return EventStaging<T>::Has(); }
+
     const T &Read() { return EventStaging<T>::Get(); }
+
     void Clear() { EventStaging<T>::Clear(); }
+
     operator bool() const { return Has(); }
 };
 
@@ -122,10 +125,10 @@ public:
     void Write(const T &t);
     //! @brief write event data immediatly(don't delay to `world.Update()`)
     //! @param t the data you want save
-    void WriteImmediate(const T& t);
+    void WriteImmediate(const T &t);
     //! @brief write event data immediatly(don't delay to `world.Update()`)
     //! @param t the data you want save
-    void WriteImmediate(T&& t);
+    void WriteImmediate(T &&t);
 
 private:
     Events &events_;
@@ -148,12 +151,12 @@ void EventWriter<T>::Write(const T &t) {
 }
 
 template <typename T>
-void EventWriter<T>::WriteImmediate(const T& t) {
+void EventWriter<T>::WriteImmediate(const T &t) {
     EventStaging<T>::Set(t);
 }
 
 template <typename T>
-void EventWriter<T>::WriteImmediate(T&& t) {
+void EventWriter<T>::WriteImmediate(T &&t) {
     EventStaging<T>::Set(std::move(t));
 }
 
@@ -163,11 +166,11 @@ class Commands;
 class Resources;
 class Querier;
 
-using EachElemUpdateSystem = void(*)(Commands &, Querier, Resources, Events &);
-using HierarchyUpdateSystem = void(*)(std::optional<Entity>, Entity,
+using EachElemUpdateSystem = void (*)(Commands &, Querier, Resources, Events &);
+using HierarchyUpdateSystem = void (*)(std::optional<Entity>, Entity,
                                        Commands &, Querier, Resources,
                                        Events &);
-using StartupSystem = void(*)(Commands &, Resources);
+using StartupSystem = void (*)(Commands &, Resources);
 
 using UpdateSystem = std::variant<EachElemUpdateSystem, HierarchyUpdateSystem>;
 
@@ -292,8 +295,6 @@ private:
             assertm("you must give a non-null destroy function", destroy);
         }
 
-        // ResourceInfo() { int a = 123;
-        // }
         ~ResourceInfo() { destroy(resource); }
     };
 
@@ -308,8 +309,7 @@ public:
 
     template <typename... ComponentTypes>
     Commands &Spawn(ComponentTypes &&...components) {
-        SpawnAndReturn<ComponentTypes...>(
-            std::forward<ComponentTypes>(components)...);
+        SpawnAndReturn(std::forward<ComponentTypes>(components)...);
         return *this;
     }
 
@@ -317,8 +317,7 @@ public:
     Entity SpawnAndReturn(ComponentTypes &&...components) {
         EntitySpawnInfo info;
         info.entity = EntityGenerator::Gen();
-        doSpawn<ComponentTypes...>(info.components,
-                                   std::forward<ComponentTypes>(components)...);
+        doSpawn(info.components, std::forward<ComponentTypes>(components)...);
         spawnEntities_.push_back(info);
         return info.entity;
     }
@@ -327,27 +326,24 @@ public:
     Entity SpawnImmediateAndReturn(ComponentTypes &&...components) {
         EntitySpawnInfo info;
         info.entity = EntityGenerator::Gen();
-        doSpawn<ComponentTypes...>(info.components,
-                                   std::forward<ComponentTypes>(components)...);
+        doSpawn(info.components, std::forward<ComponentTypes>(components)...);
 
-		auto it = world_.entities_.emplace(info.entity,
-										   World::ComponentContainer{});
-		auto &componentContainer = it.first->second;
-		for (auto &componentInfo : info.components) {
-			componentContainer[componentInfo.index] =
-				doSpawnWithoutType(info.entity, componentInfo);
-		}
+        auto it =
+            world_.entities_.emplace(info.entity, World::ComponentContainer{});
+        auto &componentContainer = it.first->second;
+        for (auto &componentInfo : info.components) {
+            componentContainer[componentInfo.index] =
+                doSpawnWithoutType(info.entity, componentInfo);
+        }
 
         return info.entity;
     }
-
 
     template <typename... ComponentTypes>
     Commands &AddComponent(Entity entity, ComponentTypes &&...components) {
         EntitySpawnInfo info;
         info.entity = entity;
-        doSpawn<ComponentTypes...>(info.components,
-                                   std::forward<ComponentTypes>(components)...);
+        doSpawn(info.components, std::forward<ComponentTypes>(components)...);
         addComponents_.push_back(info);
         return *this;
     }
@@ -435,16 +431,14 @@ private:
     template <typename T>
     struct RValueStaging final {
     public:
-        static void Save(T&& value) {
+        static void Save(T &&value) {
             value_ = std::move(value);
             valid_ = true;
         }
 
-        static bool Valid() {
-            return valid_;
-        }
+        static bool Valid() { return valid_; }
 
-        static T&& Move() {
+        static T &&Move() {
             valid_ = false;
             return std::move(value_);
         }
@@ -492,7 +486,7 @@ private:
     std::vector<ComponentDestroyInfo> destroyComponents_;
 
     template <typename T, typename... Remains>
-    void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo, T&& component,
+    void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo, T &&component,
                  Remains &&...remains) {
         ComponentSpawnInfo info;
         info.index = IndexGetter::Get<T>();
@@ -509,7 +503,7 @@ private:
         spawnInfo.push_back(info);
 
         if constexpr (sizeof...(Remains) != 0) {
-            doSpawn<Remains...>(spawnInfo, std::forward<Remains>(remains)...);
+            doSpawn(spawnInfo, std::forward<Remains>(remains)...);
         }
     }
 
@@ -611,7 +605,8 @@ struct Option {};
 template <typename... Args>
 struct Without {};
 
-//! @brief query condition extractor, will extract condition arguments and condition type
+//! @brief query condition extractor, will extract condition arguments and
+//! condition type
 //! @tparam query condition
 //! @see With Option Without
 template <typename T>
@@ -656,7 +651,7 @@ struct IsCondition<Without<Args...>> {
 };
 
 //! @brief judge if template T is a query condition
-//! @tparam T 
+//! @tparam T
 //! @see Without With Option
 template <typename T>
 constexpr auto IsConditionV = IsCondition<T>::value;
@@ -665,7 +660,7 @@ constexpr auto IsConditionV = IsCondition<T>::value;
 //! @see Without With Option
 class Querier final {
 public:
-    Querier(World& world): world_(world) {}
+    Querier(World &world) : world_(world) {}
 
     /* IMPROVE: currently it iterate all entities,
                 it don't take advantage of the efficiency of the sparseset.
@@ -673,8 +668,8 @@ public:
     template <typename T>
     std::vector<Entity> Query() {
         std::vector<Entity> entities;
-            for (auto& [entity, _] : world_.entities_) {
-            if constexpr(IsConditionV<T>) {
+        for (auto &[entity, _] : world_.entities_) {
+            if constexpr (IsConditionV<T>) {
                 if (Has<T>(entity)) {
                     entities.push_back(entity);
                 }
@@ -699,13 +694,14 @@ public:
     }
 
 private:
-    World& world_;
+    World &world_;
 
     template <typename T>
     bool queryCondition(Entity entity) const {
         if constexpr (IsConditionV<T>) {
             using extractor = ConditionExtractor<T>;
-            return doQueryCondition<0, typename extractor::args>(entity, extractor::type);
+            return doQueryCondition<0, typename extractor::args>(
+                entity, extractor::type);
         } else {
             return queryExists<T>(entity);
         }
@@ -772,7 +768,7 @@ inline void World::Startup() {
 
 //! @brief a help function to preorder node tree
 inline void PreorderVisit(std::optional<Entity> parent, Entity entity,
-                          World &world, std::vector<Commands>& commandList,
+                          World &world, std::vector<Commands> &commandList,
                           Querier querier, Resources res, Events &events,
                           HierarchyUpdateSystem system) {
     Commands commands{world};
@@ -807,7 +803,7 @@ inline void World::Update() {
         }
     }
 
-    for (auto& sys : updateSystems_) {
+    for (auto &sys : updateSystems_) {
         auto system = std::get_if<EachElemUpdateSystem>(&sys);
         if (system) {
             Commands commands{*this};
@@ -817,8 +813,8 @@ inline void World::Update() {
             auto hierarchySystem = std::get_if<HierarchyUpdateSystem>(&sys);
             for (auto root : rootNodeEntity) {
                 PreorderVisit(std::nullopt, root, *this, commandList,
-                                Querier{*this}, Resources{*this}, events,
-                                *hierarchySystem);
+                              Querier{*this}, Resources{*this}, events,
+                              *hierarchySystem);
             }
         }
         /* FIXME: want to use compile-if, but can't determine system type
@@ -836,7 +832,8 @@ inline void World::Update() {
                                       system);
                     }
                 } else {
-                    static_assert(std::always_false_v<T> "unknown ecs system type");
+                    static_assert(std::always_false_v<T> "unknown ecs system
+        type");
                 }
             },
             sys);
