@@ -7,6 +7,7 @@
 #include "app/input.hpp"
 #include "app/assets.hpp"
 #include "app/tilesheet.hpp"
+#include "app/text_texture.hpp"
 
 namespace ui {
 
@@ -30,13 +31,12 @@ struct RectTransform final {
 
 //! @brief component for ui which want to show a text on it
 struct Text final {
-    FontHandle font;
-    std::string text;
+    std::unique_ptr<TextTexture> text;
     ColorBundle color;
     math::Vector2 offset;
 
-    static Text Create(FontHandle font, const std::string& text, const ColorBundle& color, const math::Vector2& offset) {
-        return Text{font, text, color, offset};
+    static Text Create(std::unique_ptr<TextTexture>&& texture, const ColorBundle& color, const math::Vector2& offset) {
+        return Text{std::move(texture), color, offset};
     }
 };
 
@@ -65,24 +65,19 @@ struct Image final {
     }
 };
 
-struct Widget {
-    bool visiable = true;
-    virtual ~Widget() = default;
-};
-
 //! @brief component for label
-struct Label final: public Widget {
+struct Label final {
     Text text;
 
-    static Label Create(const Text& text) {
+    static Label Create(Text&& text) {
         Label label;
-        label.text = text;
+        label.text = std::move(text);
         return label;
     }
 };
 
 //! @brief component for panel
-struct Panel final: public Widget {
+struct Panel final {
     ColorBundle contentColor;
     ColorBundle borderColor;
     bool clipChildren = true;    // if children exceed panel area, clip them

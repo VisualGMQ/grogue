@@ -6,6 +6,7 @@
 #include "app/image.hpp"
 #include "app/sprite.hpp"
 #include "app/tilesheet.hpp"
+#include "app/renderer.hpp"
 
 struct MapTile final {
     Terrian terrian;

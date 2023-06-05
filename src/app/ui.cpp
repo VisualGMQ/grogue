@@ -15,11 +15,15 @@ const Color* selectColor(const math::Rect& rect, const math::Vector2& mousePos, 
     return color;
 }
 
-void drawText(Renderer& renderer, Font& font, const NodeTransform& transform, const Text& text, const Color& color) {
+void drawText(Renderer& renderer, Text& text, const NodeTransform& transform, const Color& color) {
     renderer.SetDrawColor(color);
     Transform drawTrans = transform.globalTransform;
     drawTrans.position += text.offset * drawTrans.scale;
-    renderer.DrawText(font, text.text, drawTrans);
+    SpriteBundleSolitary spriteBundle {
+        Sprite::Default(),
+        *text.text->GetImage(),
+    };
+    renderer.DrawSprite(spriteBundle, drawTrans);
 }
 
 inline math::Rect rectTransform2Rect(const RectTransform& transform) {
@@ -111,8 +115,7 @@ void HierarchyRenderLabelSystem(std::optional<ecs::Entity> parent, ecs::Entity e
     auto rect = rectTransform2Rect(transform);
     auto color = selectColor(rect, mouse.Position(), events, label.text.color);
 
-    auto& font = fontMgr.Get(label.text.font);
-    drawText(renderer, font, transform.transform, label.text, *color);
+    drawText(renderer, label.text, transform.transform, *color);
 }
 
 void HierarchyRenderPanelSystem(std::optional<ecs::Entity> parent,
@@ -183,9 +186,8 @@ void HierarchyRenderPanelSystem(std::optional<ecs::Entity> parent,
     if (querier.Has<Text>(entity)) {
         auto& text = querier.Get<Text>(entity);
         auto& fontMgr = res.Get<AssetsManager>().Font();
-        auto& font = fontMgr.Get(text.font);
         auto color = selectColor(rect, mouse.Position(), events, text.color);
-        drawText(renderer, font, transform.transform, text, *color);
+        drawText(renderer, text, transform.transform, *color);
     }
 
     if (querier.Has<Scrollbar>(entity)) {

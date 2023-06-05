@@ -108,6 +108,17 @@ void Renderer::DrawSprite(const SpriteBundle& sprite, const Transform& transform
                 sprite.sprite.anchor, sprite.flip);
 }
 
+void Renderer::DrawSprite(const SpriteBundleSolitary& sprite, const Transform& transform) {
+    if (!sprite.visiable) return;
+
+    auto& image = sprite.image;
+    SDL_SetTextureColorMod(image.texture_, sprite.sprite.color.r, sprite.sprite.color.g, sprite.sprite.color.b);
+    SDL_SetTextureAlphaMod(image.texture_, sprite.sprite.color.a);
+    drawTexture(image.texture_, image.W(), image.H(), sprite.sprite.region,
+                sprite.sprite.customSize, transform,
+                sprite.sprite.anchor, sprite.flip);
+}
+
 void Renderer::DrawShape(const Shape& shape, const Transform& transform) {
     static std::vector<float> uvCache;
 
@@ -134,6 +145,21 @@ void Renderer::DrawShape(const Shape& shape, const Transform& transform) {
     if (result == -1) {
         LOGW("SDL_RenderGeometryRaw error: ", SDL_GetError());
     }
+}
+
+std::unique_ptr<TextTexture> Renderer::GenTextTexture(const std::string& text, Font& font) {
+    return std::make_unique<TextTexture>(this, text, font);
+}
+
+std::unique_ptr<Image> Renderer::GenTextImage(const std::string& text, Font& font) {
+    auto surface = TTF_RenderUTF8_Blended(
+        font.font_, text.c_str(),
+        {255, 255, 255, 255});
+
+    auto texture = SDL_CreateTextureFromSurface(renderer_, surface);
+    SDL_FreeSurface(surface);
+
+    return std::unique_ptr<Image>(new Image(ImageHandle::Null(), texture));
 }
 
 void Renderer::SetClipArea(const math::Rect& area) {

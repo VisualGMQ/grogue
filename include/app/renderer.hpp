@@ -8,6 +8,7 @@
 #include "app/transform.hpp"
 #include "app/sprite.hpp"
 #include "app/shape.hpp"
+#include "app/text_texture.hpp"
 
 class Image;
 class ImageManager;
@@ -34,9 +35,13 @@ public:
     void DrawText(FontHandle, const std::string& text, const Transform&);
     void DrawText(Font& font, const std::string& text, const Transform&);
     void DrawSprite(const SpriteBundle&, const Transform&);
+    void DrawSprite(const SpriteBundleSolitary&, const Transform&);
     void DrawCircle(const math::Vector2& center, float radius, float subsection = 20);
     void DrawShape(const Shape&, const Transform&);
 
+    std::unique_ptr<TextTexture> GenTextTexture(const std::string& text, Font& font);
+    std::unique_ptr<Image> GenTextImage(const std::string& text, Font& font);
+    
     void SetClipArea(const math::Rect&);
     void SetDefaultClipArea();
 

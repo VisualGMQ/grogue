@@ -1,4 +1,5 @@
 #include "app/image.hpp"
+#include "app/renderer.hpp"
 
 Image::Image(ImageHandle handle, Renderer& renderer, const std::string& filename)
     : handle_(handle) {
