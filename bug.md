@@ -7,3 +7,7 @@
 ## Bug和未来隐患
 
 * 在产生`Entity`的时候，`SparseSet`的`density`数组会随着Enitty的ID增大而无止境增大。可以考虑对EntityID进行复用。
+
+## 缺陷
+
+* ecs中`Commands`在Spawn Entity的时候，**如果Component只能移动，会自动移动，并且不能出现多个一样的Component类型**(由`ecs::Commands::RValueStaging`的设计导致)

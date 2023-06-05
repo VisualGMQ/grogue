@@ -68,6 +68,7 @@ void InitMonstersSystem(ecs::Commands& cmd, ecs::Resources resources) {
 }
 
 void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
+
     auto& config = resources.Get<GameConfig>();
     auto& window = resources.Get<Window>();
     auto& backpackUIConfig = config.GetBackpackUIConfig().Info();

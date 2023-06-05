@@ -432,6 +432,28 @@ private:
 
     using DestroyFunc = void (*)(void *);
 
+    template <typename T>
+    struct RValueStaging final {
+    public:
+        static void Save(T&& value) {
+            value_ = std::move(value);
+            valid_ = true;
+        }
+
+        static bool Valid() {
+            return valid_;
+        }
+
+        static T&& Move() {
+            valid_ = false;
+            return std::move(value_);
+        }
+
+    private:
+        inline static T value_;
+        inline static bool valid_ = false;
+    };
+
     struct ResourceDestroyInfo {
         uint32_t index;
         DestroyFunc destroy;
@@ -470,13 +492,20 @@ private:
     std::vector<ComponentDestroyInfo> destroyComponents_;
 
     template <typename T, typename... Remains>
-    void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo, T &&component,
+    void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo, T& component,
                  Remains &&...remains) {
         ComponentSpawnInfo info;
         info.index = IndexGetter::Get<T>();
         info.create = [](void) -> void * { return new T; };
         info.destroy = [](void *elem) { delete (T *)elem; };
-        info.assign = [=](void *elem) { *((T *)elem) = component; };
+        if constexpr (!std::is_copy_assignable_v<decltype(component)>) {
+            RValueStaging<T>::Save(std::move(component));
+            info.assign = [](void *elem) {
+                *((T *)elem) = RValueStaging<T>::Move();
+            };
+        } else {
+            info.assign = [=](void *elem) { *((T *)elem) = component; };
+        }
         spawnInfo.push_back(info);
 
         if constexpr (sizeof...(Remains) != 0) {
