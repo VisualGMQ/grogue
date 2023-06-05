@@ -492,13 +492,13 @@ private:
     std::vector<ComponentDestroyInfo> destroyComponents_;
 
     template <typename T, typename... Remains>
-    void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo, T& component,
+    void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo, T&& component,
                  Remains &&...remains) {
         ComponentSpawnInfo info;
         info.index = IndexGetter::Get<T>();
         info.create = [](void) -> void * { return new T; };
         info.destroy = [](void *elem) { delete (T *)elem; };
-        if constexpr (!std::is_copy_assignable_v<decltype(component)>) {
+        if constexpr (std::is_reference_v<decltype(component)>) {
             RValueStaging<T>::Save(std::move(component));
             info.assign = [](void *elem) {
                 *((T *)elem) = RValueStaging<T>::Move();
