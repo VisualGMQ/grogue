@@ -79,7 +79,16 @@ using ItemOpFunc = std::function<bool(ecs::Commands&, ecs::Querier, ecs::Resourc
 //! @brief game item
 struct Item final {
     std::string nameID; //!< raw nameID in GameConfig
+    int amount = 1;
     // std::string name; // new name for item
+
+    bool operator==(const Item& o) const {
+        if (&o == this) {
+            return true;
+        }
+
+        return o.nameID == nameID;
+    }
 };
 
 struct ItemInfo final {

@@ -4,10 +4,11 @@
 #include "app/handle.hpp"
 #include "app/fwd.hpp"
 #include "app/manager.hpp"
-#include "app/renderer.hpp"
 
 //! @addtogroup resource-manager
 //! @{
+
+class Renderer;
 
 class Image final {
 public:

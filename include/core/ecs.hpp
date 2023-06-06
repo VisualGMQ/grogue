@@ -237,8 +237,8 @@ private:
         std::vector<void *> instances;
         std::vector<void *> cache;
 
-        using CreateFunc = void *(*)(void);
-        using DestroyFunc = void (*)(void *);
+        using CreateFunc = std::function<void*(void)>;
+        using DestroyFunc = std::function<void(void *)>;
 
         CreateFunc create;
         DestroyFunc destroy;

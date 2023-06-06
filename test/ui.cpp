@@ -4,8 +4,10 @@
 void CreateUISystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& fontMgr = resources.Get<AssetsManager>().Font();
     auto& tilesheetMgr = resources.Get<TilesheetManager>();
-    auto font = fontMgr.Load(
+    auto& renderer = resources.Get<Renderer>();
+    auto fontHandle = fontMgr.Load(
         TestHelper::Instance().GetResourcePath() + "PoppkornRegular.ttf", 20);
+    auto& font = fontMgr.Get(fontHandle);
 
     // a label
     cmd.Spawn<Node, ui::RectTransform, ui::Label>(
@@ -13,7 +15,7 @@ void CreateUISystem(ecs::Commands& cmd, ecs::Resources resources) {
         ui::RectTransform{NodeTransform{Transform::FromPosition({100, 200})},
                           math::Vector2(100, 25)},
         ui::Label::Create(ui::Text::Create(
-            font, "this is label",
+            renderer.GenTextTexture("this is label", font),
             ui::ColorBundle::Create(Color::Black, Color::White, Color::Green),
             {})));
 
@@ -25,7 +27,7 @@ void CreateUISystem(ecs::Commands& cmd, ecs::Resources resources) {
         ui::Panel::Create(
             ui::ColorBundle::Create(Color::White, Color::Green, Color::Blue),
             ui::ColorBundle::CreatePureColor(Color::Black)),
-        ui::Text::Create(font, "button",
+        ui::Text::Create(renderer.GenTextTexture("button", font),
                          ui::ColorBundle::CreatePureColor(Color::Black), {}),
         ui::Interaction::Create(
             [](ecs::Entity, ecs::Commands&, ecs::Querier, ecs::Resources,
@@ -49,7 +51,6 @@ void CreateUISystem(ecs::Commands& cmd, ecs::Resources resources) {
             ui::ColorBundle::CreatePureColor(Color::Black)),
         ui::Image{tile.handle, tile.region,
                   ui::ColorBundle{Color::White, Color::Green, Color::Blue}},
-        ui::Text{font, "image button", ui::ColorBundle{Color::White}},
         ui::Interaction::Create(
             [](ecs::Entity, ecs::Commands&, ecs::Querier, ecs::Resources,
                ecs::Events&) { LOGT("button click"); },

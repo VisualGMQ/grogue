@@ -39,3 +39,10 @@ struct SpriteBundle final {
     Flip flip = Flip::None;
     bool visiable = true;
 };
+
+struct SpriteBundleSolitary final {
+    Sprite sprite;
+    Image& image;
+    Flip flip = Flip::None;
+    bool visiable = true;
+};
