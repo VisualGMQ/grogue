@@ -1,0 +1,6 @@
+aux_source_directory(./src TREESITTER_SRC)
+aux_source_directory(./src/unicode TREESITTER_SRC)
+add_library(treesitter STATIC ${TREESITTER_SRC})
+target_include_directories(treesitter PUBLIC ./include)
+target_include_directories(treesitter PRIVATE ./src)
+target_compile_features(treesitter PRIVATE c_std_99)
