@@ -12,14 +12,16 @@ public:
     ::Keyboard& GetKeyboard();
     ::Mouse& GetMouse();
     ::Time& GetTime();
+    ::TilesheetManager& GetTilesheetManager();
+    ::Renderer& GetRenderer();
+    ::ImageManager& GetImageManager();
+    ::FontManager & GetFontManager();
 
 private:
     ecs::Resources res_;
 };
 
 void BindLuaResources(::LuaScript& script);
-void BindKeyboard(::LuaScript& script);
-void BindMouse(::LuaScript& script);
-void BindTime(::LuaScript& script);
+void BindResources(::LuaScript& script);
 
 }

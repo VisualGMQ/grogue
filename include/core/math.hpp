@@ -37,6 +37,11 @@ float Length(const Vector3& v);
 float Length(const Vector2& v);
 Vector3 Normalize(const Vector3& v);
 Vector2 Normalize(const Vector2& v);
+float Cross(const Vector2& v1, const Vector2& v2);
+float Dot(const Vector2& v1, const Vector2& v2);
+float Distance(const Vector2& v1, const Vector2& v2);
+float LengthSqrd(const Vector2& v);
+float Length(const Vector2& v);
 
 //! @brief convert radians to degress
 //! @param radians 
@@ -258,6 +263,26 @@ public:
     void Normalize() {
         *this = ::math::Normalize(*this);
     }
+
+    float Dot(const Vector2& v) const {
+        return ::math::Dot(*this, v);
+    }
+
+    float Cross(const Vector2& v) const {
+        return ::math::Cross(*this, v);
+    }
+
+    float Distance(const Vector2& v) const {
+        return ::math::Distance(*this, v);
+    }
+
+    float Length() const {
+        return ::math::Length(*this);
+    }
+
+    float LengthSqrd() const {
+        return ::math::LengthSqrd(*this);
+    }
 };
 
 //! @brief return a normalized vector. Don't change origin vector
@@ -293,16 +318,20 @@ inline float Distance(const Vector2& v1, const Vector2& v2) {
     return std::sqrt(dx * dx + dy * dy);
 }
 
-inline float LengthSquare(const Vector2& v) {
+inline float LengthSqrd(const Vector2& v) {
     return Dot(v, v);
 }
 
 inline float Length(const Vector2& v) {
-    return std::sqrt(LengthSquare(v));
+    return std::sqrt(LengthSqrd(v));
 }
 
 struct Rect {
     float x = 0, y = 0, w = 0, h = 0;
+
+    Rect() = default;
+    Rect(float x, float y, float w, float h): x(x), y(y), w(w), h(h) {
+    }
 
     static Rect Create(float x, float y, float w, float h) {
         return Rect{x, y, w, h};
@@ -316,7 +345,7 @@ struct Rect {
         return pt.x > x && pt.x < x + w && pt.y > y && pt.y < y + h;
     }
 
-    bool Intersect(const Rect& o) const {
+    bool IsIntersect(const Rect& o) const {
         return !(x + w <= o.x || x >= o.x + o.w || y + h <= o.y ||
                  y >= o.y + o.h);
     }

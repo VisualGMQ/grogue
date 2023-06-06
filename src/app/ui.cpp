@@ -46,7 +46,7 @@ inline bool isChildrenInParent(ecs::Entity parent, ecs::Entity entity, ecs::Quer
     if (querier.Has<RectTransform>(parent) && querier.Has<RectTransform>(entity)) {
         auto parentRect = rectTransform2Rect(querier.Get<RectTransform>(parent));
         auto rect = rectTransform2Rect(querier.Get<RectTransform>(entity));
-        return parentRect.Intersect(rect);
+        return parentRect.IsIntersect(rect);
     }
     return false;
 }

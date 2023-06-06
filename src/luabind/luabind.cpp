@@ -4,9 +4,10 @@ namespace lua_bind {
 
 void BindLua(LuaScript& script) {
     BindLuaResources(script);
-    BindMouse(script);
-    BindKeyboard(script);
-    BindTime(script);
+    BindResources(script);
+    BindSimpleTypes(script);
+    BindComponents(script);
+    BindLuaQuerier(script);
 }
 
 }

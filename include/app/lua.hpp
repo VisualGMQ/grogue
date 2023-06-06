@@ -17,6 +17,7 @@ public:
     friend class LuaManager;
     sol::state lua;
 
+    LuaScript() = default;
     LuaScript(const LuaScript&) = delete;
     LuaScript(LuaScript&&);
     ~LuaScript();
@@ -29,6 +30,8 @@ private:
 
     LuaScript(LuaScriptHandle handle) : handle_(handle) {
         lua.open_libraries(sol::lib::base);
+        lua.open_libraries(sol::lib::package);
+
     }
 
     //! @brief open lua file or execute lua script from string

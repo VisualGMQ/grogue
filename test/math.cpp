@@ -85,7 +85,7 @@ TEST_CASE("Vector2 for vector 2D representation and calculate") {
         REQUIRE(math::Distance(math::Vector2::Zero, d) == 1);
         REQUIRE(math::Cross(v, d) == -1);
         REQUIRE(math::Cross(d, v) == 1);
-        REQUIRE(math::LengthSquare(c) == 8);
+        REQUIRE(math::LengthSqrd(c) == 8);
         REQUIRE(math::Length(c) == sqrtf(8));
     }
 }

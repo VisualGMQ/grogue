@@ -4,11 +4,9 @@
 
 //! @brief a component for running lua script
 struct Script final {
-    bool work = true;
     LuaScript lua;
+    bool work = true;
 };
-
-void RunOneScript(Script&, ecs::Resources);
 
 void RunScriptSystem(ecs::Commands& cmd, ecs::Querier querier,
                     ecs::Resources resources, ecs::Events& events);

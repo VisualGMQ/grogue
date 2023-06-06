@@ -219,7 +219,7 @@ void DetectNearestItem(ecs::Commands& cmd, ecs::Querier querier,
         for (int y = bottom; y < top; y++) {
             math::Vector2 tileCenter((x + 0.5) * MapTileRealSize, (y + 0.5) * MapTileRealSize);
             auto& tile = map->tiles.Get(x, y);
-            double distSqrd = math::LengthSquare(tileCenter - monsterPos);
+            double distSqrd = math::LengthSqrd(tileCenter - monsterPos);
             if (!tile.items.empty() &&
                 distSqrd < minDistSqrd &&
                 distSqrd <= PickupHalfRange * PickupHalfRange) {
@@ -315,6 +315,13 @@ void ShowDebugInfoSystem(ecs::Commands&, ecs::Querier, ecs::Resources resources,
     }
 }
 
+void InitLuaScript(ecs::Commands& cmds, ecs::Resources res) {
+    auto& luaMgr = res.Get<AssetsManager>().Lua();
+    cmds.Spawn<Script>(Script {
+        luaMgr.CreateSolitary("script/test.lua")
+    });
+}
+
 class GameApp final : public App {
 public:
     GameApp() {
@@ -322,6 +329,7 @@ public:
         world.AddPlugins<DefaultPlugins>()
             .AddStartupSystem(LoadResourceSystem)
             .AddStartupSystem(StartupSystem)
+            .AddStartupSystem(InitLuaScript)
             .AddSystem(RunScriptSystem)
             .AddSystem(HierarchyRunScriptSystem)
             .AddSystem(DetectNearestItem)
