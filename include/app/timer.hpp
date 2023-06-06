@@ -13,7 +13,7 @@ public:
         fps_ = fps;
         fpsDuration_ = 1000.0 / fps;
     }
-    static uint32_t GetSetFPS() { return fps_; }
+    static uint32_t GetFPS() { return fps_; }
 
     Time();
     Time(const Time&) = delete;

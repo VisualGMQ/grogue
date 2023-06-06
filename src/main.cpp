@@ -3,6 +3,7 @@
 #include "game/map.hpp"
 #include "game/monster.hpp"
 #include "game/signal_defs.hpp"
+#include "game/script.hpp"
 
 //! @brief tag component for backpack panel UI
 struct BackpackUIPanel {};
@@ -321,6 +322,8 @@ public:
         world.AddPlugins<DefaultPlugins>()
             .AddStartupSystem(LoadResourceSystem)
             .AddStartupSystem(StartupSystem)
+            .AddSystem(RunScriptSystem)
+            .AddSystem(HierarchyRunScriptSystem)
             .AddSystem(DetectNearestItem)
             .AddSystem(InputHandle)
             .AddSystem(MonsterUpdate)

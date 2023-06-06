@@ -8,6 +8,8 @@
 #define SOL_ALL_SAFETIES_ON 1
 #include "sol/sol.hpp"
 
+#include "tl/expected.hpp"
+
 #include "core/assert.hpp"
 #include "core/debugbreak.hpp"
 #include "core/ecs.hpp"

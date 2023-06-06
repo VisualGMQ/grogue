@@ -41,6 +41,7 @@ private:
         : LuaScript(handle) {
         if (isContent) {
             lua.script(str);
+            sol::load_result result = lua.load_file(str);
         } else {
             lua.script_file(str);
         }

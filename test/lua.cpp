@@ -28,4 +28,22 @@ TEST_CASE("lua") {
         int result = func();
         REQUIRE(result == 123);
     }
+
+    SECTION("execute lua repeated") {
+        auto handle = manager.CreateSolitaryFromContent(R"(
+            local a = 123;
+            function test()
+                a = a + 1    
+                return a
+            end
+        )");
+        auto func = handle.lua["test"];
+        REQUIRE(func.get_type() == sol::type::function);
+        int a = func();
+        REQUIRE(a == 124);
+        a = func();
+        REQUIRE(a == 125);
+        a = func();
+        REQUIRE(a == 126);
+    }
 }
