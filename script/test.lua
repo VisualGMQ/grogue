@@ -1,8 +1,9 @@
 -- require("defs")
 
 ---@param entity Entity
----@param res Resources
+---@param cmds Commands
 ---@param querier Querier
-function Run(entity, res, querier)
+---@param res Resources
+function Run(entity, cmds, querier, res)
     -- do what you want
 end

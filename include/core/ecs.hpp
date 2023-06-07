@@ -321,8 +321,11 @@ public:
     Entity SpawnAndReturn(ComponentTypes &&...components) {
         EntitySpawnInfo info;
         info.entity = EntityGenerator::Gen();
-        doSpawn(info.components, std::forward<ComponentTypes>(components)...);
-        spawnEntities_.push_back(info);
+
+        if constexpr (sizeof...(components) != 0) {
+            doSpawn(info.components, std::forward<ComponentTypes>(components)...);
+            spawnEntities_.push_back(info);
+        }
         return info.entity;
     }
 
