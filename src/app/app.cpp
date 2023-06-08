@@ -129,11 +129,8 @@ void DefaultPlugins::Quit(ecs::World* world) {
 }
 
 void App::Init() {
-    LOGI("here1");
     Random::Init();
-    LOGI("here2");
     world_.Startup();
-    LOGI("here3");
     world_.Update();
 
     ecs::Resources resources(world_);

@@ -43,43 +43,44 @@ aux_source_directory(src/app  LOWLEVEL_SRC)
 aux_source_directory(src/game LOWLEVEL_SRC)
 aux_source_directory(src/luabind LOWLEVEL_SRC)
 
+# compile 3rdlibs
+add_subdirectory(3rdlibs/lua)
 add_subdirectory(3rdlibs/sol)
 add_subdirectory(3rdlibs/expected)
 
-if (NOT EMSCRIPTEN) 
-    # compile 3rdlibs
-    add_subdirectory(3rdlibs/lua)
+add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC})
+target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
+target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
+if (MSVC)
+    target_compile_options(${LOWLEVEL_NAME} PUBLIC /bigobj)
+endif()
 
-    add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC})
-    target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
-    target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
-    if (MSVC)
-        target_compile_options(${LOWLEVEL_NAME} PUBLIC /bigobj)
-    endif()
+if (NOT ${is_mingw_backend})
+    target_precompile_headers(${LOWLEVEL_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include/core/pch.hpp)
+endif()
 
+# judge platform
+if (UNIX)
+    target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_UNIX)
+elseif (WIN32)
+    target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_WIN32)
+    target_link_libraries(${LOWLEVEL_NAME} PUBLIC DbgHelp.Lib)
+elseif (APPLE)
+    target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_APPLE)
+elseif (EMSCRIPTEN)
+    target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_EMSCRIPTEN)
+else()
+    target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_UNKNOWN)
+endif()
+
+add_executable(${GAME_NAME} ./src/main.cpp)
+target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
+
+CopyDLL(${GAME_NAME})
+
+if (NOT EMSCRIPTEN)
     target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua sol2 expected)
-
-    if (NOT ${is_mingw_backend})
-        target_precompile_headers(${LOWLEVEL_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include/core/pch.hpp)
-    endif()
-
-    # judge platform
-    if (UNIX)
-        target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_UNIX)
-    elseif (WIN32)
-        target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_WIN32)
-        target_link_libraries(${LOWLEVEL_NAME} PUBLIC DbgHelp.Lib)
-    elseif (APPLE)
-        target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_APPLE)
-    else()
-        target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_UNKNOWN)
-    endif()
-
-    add_executable(${GAME_NAME} ./src/main.cpp)
-    target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
-
-    CopyDLL(${GAME_NAME})
-else() # build for WASM
+else()
     message("-- build for wasm")
     set(USE_SDL "-sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_SDL_TTF=2 -sUSE_SDL_MIXER=2 -sSDL2_IMAGE_FORMATS=\"[\"png\", \"jpg\", \"bmp\"]\"" )
     set(PRELOAD "--preload-file resources --use-preload-plugins")
@@ -88,47 +89,7 @@ else() # build for WASM
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_SDL}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_SDL} ${PRELOAD} ${OTHER_FLAGS}")
     set(CMAKE_EXECUTABLE_SUFFIX .html)
-    # so ugly, fix it later
-    set(LUA_LIB_SRC
-        3rdlibs/lua/src/lapi.c
-        3rdlibs/lua/src/lcode.c
-        3rdlibs/lua/src/lctype.c
-        3rdlibs/lua/src/ldebug.c
-        3rdlibs/lua/src/ldo.c
-        3rdlibs/lua/src/ldump.c
-        3rdlibs/lua/src/lfunc.c
-        3rdlibs/lua/src/lgc.c
-        3rdlibs/lua/src/llex.c
-        3rdlibs/lua/src/lmem.c
-        3rdlibs/lua/src/lobject.c
-        3rdlibs/lua/src/lopcodes.c
-        3rdlibs/lua/src/lparser.c
-        3rdlibs/lua/src/lstate.c
-        3rdlibs/lua/src/lstring.c
-        3rdlibs/lua/src/ltable.c
-        3rdlibs/lua/src/ltm.c
-        3rdlibs/lua/src/lundump.c
-        3rdlibs/lua/src/lvm.c
-        3rdlibs/lua/src/lzio.c
-        3rdlibs/lua/src/ltests.c
-        3rdlibs/lua/src/lauxlib.c
-        3rdlibs/lua/src/lbaselib.c
-        3rdlibs/lua/src/ldblib.c
-        3rdlibs/lua/src/liolib.c
-        3rdlibs/lua/src/lmathlib.c
-        3rdlibs/lua/src/loslib.c
-        3rdlibs/lua/src/ltablib.c
-        3rdlibs/lua/src/lstrlib.c
-        3rdlibs/lua/src/lutf8lib.c
-        3rdlibs/lua/src/loadlib.c
-        3rdlibs/lua/src/lcorolib.c
-        3rdlibs/lua/src/linit.c
-    )
-    add_executable(${GAME_NAME} ${LOWLEVEL_SRC} ./src/main.cpp ${LUA_LIB_SRC})
-    target_include_directories(${GAME_NAME} PUBLIC include 3rdlibs/lua/include)
-    target_compile_features(${GAME_NAME} PUBLIC cxx_std_17 c_std_99)
-    target_compile_definitions(${GAME_NAME} PUBLIC __EMSCRIPTEN__ GROGUE_PLATFORM_EMSCRIPTEN)
-    target_link_libraries(${GAME_NAME} PUBLIC sol2 expected)
+    target_link_libraries(${LOWLEVEL_NAME} PUBLIC lua sol2 expected)
     CopyResForWASM(${GAME_NAME})
 endif()
 
