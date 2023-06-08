@@ -301,14 +301,6 @@ void InitLuaScript(ecs::Commands& cmds, ecs::Resources res) {
     });
 }
 
-void TestUpdate(ecs::Commands& cmd, ecs::Querier querier,
-                ecs::Resources resources, ecs::Events& events) {
-    LOGT("here");
-    // auto& renderer = resources.Get<Renderer>();
-    // renderer.SetDrawColor(Color::Green);
-    // renderer.FillRect(math::Rect(100, 200, 50, 50));
-}
-
 class GameApp final : public App {
 public:
     GameApp() {
@@ -325,7 +317,6 @@ public:
             .AddSystem(DrawMapSystem)
             .AddSystem(DrawMonsterSystem)
             .AddSystem(DrawNearestItemPointer)
-            //.AddSystem(TestUpdate)
             .AddSystem(ExitTrigger::DetectExitSystem);
     }
 };

@@ -66,9 +66,13 @@ public:
 
 class App {
 public:
+    virtual ~App() = default;
+
     ecs::World& GetWorld() { return world_; }
 
-    void Run();
+    void Init();
+    bool Run();
+    void Shutdown();
 
 private:
     ecs::World world_;
@@ -78,22 +82,33 @@ private:
 #include "emscripten.h"
 
 #define RUN_APP(clazz) \
-void mainloop() { \
-    LOGI("in mainloop"); \
-    clazz app; \
-    app.Run(); \
+void mainloop(void* param) { \
+    clazz* app  = (clazz*)param; \
+    static bool shouldClose = false; \
+    if (!shouldClose) { \
+        shouldClose = app->Run(); \
+    } else { \
+        LOGI("app shutdown"); \
+    } \
 } \
 \
 int main(int argc, char** argv) { \
-    LOGI("app init");   \
-    emscripten_set_main_loop(mainloop, 60, 1); \
+    clazz app; \
+    app.Init(); \
+    emscripten_set_main_loop_arg(mainloop, &app, 60, 1); \
+    app.Shutdown(); \
 }
 
-#else 
+#else
 #define RUN_APP(clazz)                \
     int main(int argc, char** argv) { \
         clazz app;                    \
-        app.Run();                    \
+        app.Init();                   \
+        bool shouldClose = false;     \
+        while (!shouldClose) {           \
+            shouldClose = app.Run();  \
+        }                             \
+        app.Shutdown();               \
         return 0;                     \
     }
 #endif

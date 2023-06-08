@@ -128,7 +128,7 @@ void DefaultPlugins::Quit(ecs::World* world) {
     SDL_Quit();
 }
 
-void App::Run() {
+void App::Init() {
     LOGI("here1");
     Random::Init();
     LOGI("here2");
@@ -142,23 +142,24 @@ void App::Run() {
              "your ECS");
         return;
     }
+}
 
+bool App::Run() {
+    ecs::Resources resources(world_);
     auto& exit = resources.Get<ExitTrigger>();
-    while (!exit.ShouldExit()) {
-        LOGI("in loop");
-        Uint32 fps_start = SDL_GetTicks();
-        auto renderer = world_.GetResource<Renderer>();
+    Uint32 fps_start = SDL_GetTicks();
+    auto renderer = world_.GetResource<Renderer>();
 
-        renderer->SetDrawColor(Color(50, 50, 50));
-        renderer->Clear();
+    renderer->SetDrawColor(Color(50, 50, 50));
+    renderer->Clear();
 
-        world_.Update();
-        LOGI("updated world");
+    world_.Update();
 
-        renderer->Present();
-        LOGI("render present");
-    }
+    renderer->Present();
+    return exit.ShouldExit();
+}
 
+void App::Shutdown() {
     world_.Shutdown();
     Random::Delete();
 }
