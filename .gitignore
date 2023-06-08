@@ -5,3 +5,4 @@
 cmake-build
 build
 doc-output
+wasm-build

@@ -3,7 +3,15 @@
 #include "game/script.hpp"
 #include "test_helper.hpp"
 
+enum TestSignalFnc {
+    Func1 = 0,
+};
+
 void InitLuaScript(ecs::Commands& cmds, ecs::Resources res) {
+    auto& signalMgr = res.Get<SignalManager>();
+    signalMgr.Regist(Func1, [](ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&, void*){
+        LOGT("signaled");
+    });
     auto& luaMgr = res.Get<AssetsManager>().Lua();
     auto parent = cmds.SpawnAndReturn<Node>(Node{});
     auto child = cmds.SpawnAndReturn<Script, Node>(

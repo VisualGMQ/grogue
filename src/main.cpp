@@ -22,12 +22,12 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& renderer = resources.Get<Renderer>();
     auto& assets = resources.Get<AssetsManager>();
     cmd.SetResource<ImageHandle>(assets.Image().Load("resources/img/role.png"))
-        .SetResource<Context>(
-            Context{assets.Font().Load("resources/font/SimHei.ttf", 20)});
+        .SetResource<Context>(Context{FontHandle::Null()});
 
     auto& manager = resources.Get<TilesheetManager>();
     manager.LoadFromConfig("resources/img/tilesheet.lua");
     manager.LoadFromConfig("resources/img/role.lua");
+    LOGI("resources loaded");
 }
 
 enum GameState {
@@ -44,6 +44,7 @@ void ReadConfigSystem(ecs::Commands& cmd, ecs::Resources resources) {
         exit(1);
     }
     cmd.SetResource<GameConfig>(std::move(config));
+    LOGI("config readed");
 }
 
 void InitMapSystem(ecs::Commands& cmd, ecs::Resources resources) {
@@ -69,7 +70,6 @@ void InitMonstersSystem(ecs::Commands& cmd, ecs::Resources resources) {
 }
 
 void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
-
     auto& config = resources.Get<GameConfig>();
     auto& window = resources.Get<Window>();
     auto& backpackUIConfig = config.GetBackpackUIConfig().Info();
@@ -84,7 +84,7 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
 
     auto& signalMgr = resources.Get<SignalManager>();
     signalMgr.Regist(
-        SignalCategory::BackpackUI, SignalCallback::UpdateBackpackItem,
+        SignalCallback::UpdateBackpackItem,
         [](ecs::Commands& cmds, ecs::Querier querier, ecs::Resources resources,
            ecs::Events&, void* param) {
             auto entities = querier.Query<BackpackUIPanel>();
@@ -144,6 +144,7 @@ void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
     InitMapSystem(cmd, resources);
     InitMonstersSystem(cmd, resources);
     InitBackpackUISystem(cmd, resources);
+    LOGI("game startup");
 }
 
 void PlayerMove(Keyboard& keyboard, Monster& monster) {
@@ -293,32 +294,10 @@ void InputHandle(ecs::Commands& cmd, ecs::Querier querier,
     }
 }
 
-void ShowDebugInfoSystem(ecs::Commands&, ecs::Querier, ecs::Resources resources,
-                         ecs::Events&) {
-    auto& context = resources.Get<Context>();
-    auto& renderer = resources.Get<Renderer>();
-    auto& timer = resources.Get<Time>();
-    auto& keyboard = resources.Get<Keyboard>();
-
-    if (keyboard.Key(SDL_SCANCODE_G).IsPressed()) {
-        context.showDebugInfo = !context.showDebugInfo;
-    }
-
-    if (context.showDebugInfo) {
-        renderer.SetDrawColor({255, 255, 255});
-        Transform transform;
-        transform.position = {0, 0};
-        renderer.DrawText(context.font,
-                          "fps: " + std::to_string(static_cast<uint32_t>(
-                                        1000.0 / timer.Elapse())),
-                          transform);
-    }
-}
-
 void InitLuaScript(ecs::Commands& cmds, ecs::Resources res) {
     auto& luaMgr = res.Get<AssetsManager>().Lua();
     cmds.Spawn<Script>(Script {
-        luaMgr.CreateSolitary("script/test.lua")
+        luaMgr.CreateSolitary("resources/script/test.lua")
     });
 }
 
@@ -338,7 +317,6 @@ public:
             .AddSystem(DrawMapSystem)
             .AddSystem(DrawMonsterSystem)
             .AddSystem(DrawNearestItemPointer)
-            .AddSystem(ShowDebugInfoSystem)
             .AddSystem(ExitTrigger::DetectExitSystem);
     }
 };

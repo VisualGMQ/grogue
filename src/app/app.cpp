@@ -65,10 +65,19 @@ void EventUpdateSystem(ecs::Commands& cmd, ecs::Querier querier,
 }
 
 void DefaultPlugins::Build(ecs::World* world) {
-    SDL_Init(SDL_INIT_EVERYTHING);
-    TTF_Init();
-    Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3);
-    IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
+    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER |
+                 SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) != 0) {
+        LOGE("SDL init failed: ", SDL_GetError());
+    }
+    if (TTF_Init() != 0) {
+        LOGE("SDL_ttf init failed: ", TTF_GetError());
+    }
+    if (Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3) == 0) {
+        LOGE("SDL mixer init failed: ", Mix_GetError());
+    }
+    if (IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG) == 0) {
+        LOGE("SDL_image init failed: ", IMG_GetError());
+    }
 
     world->SetResource(Window("Grogue", 1024, 720))
         .SetResource(AssetsManager{})

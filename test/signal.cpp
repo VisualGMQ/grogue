@@ -24,7 +24,7 @@ TEST_CASE("signal") {
 
     SignalManager mgr; 
     int a = 0;
-    mgr.Regist(test::Signal1, test::Func1, [&](ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&, void*) {
+    mgr.Regist(test::Func1, [&](ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&, void*) {
         a ++;
     });
 
@@ -35,18 +35,13 @@ TEST_CASE("signal") {
     mgr.Raise(test::Func1, cmds, querier, resouces, events, nullptr);
     REQUIRE(a == 2);
 
-    mgr.Regist(test::Signal1, test::Func2, [&](ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&, void*) {
+    mgr.Regist(test::Func2, [&](ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&, void*) {
         a += 3;
     });
     mgr.Raise(test::Func2, cmds, querier, resouces, events, nullptr);
     REQUIRE(a == 5);
 
-    mgr.RaiseCategory(test::Signal1, cmds, querier, resouces, events, nullptr);
-    REQUIRE(a == 9);
-
     mgr.Remove(test::Func2);
     mgr.Raise(test::Func2, cmds, querier, resouces, events, nullptr);
-    REQUIRE(a == 9);
-    mgr.RaiseCategory(test::Signal1, cmds, querier, resouces, events, nullptr);
-    REQUIRE(a == 10);
+    REQUIRE(a == 5);
 }

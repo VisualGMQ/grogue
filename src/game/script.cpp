@@ -9,10 +9,8 @@ void runOneScript(ecs::Entity entity, ecs::Commands& cmds, Script& script, ecs::
         lua_bind::LuaQuerier luaQuerier(querier);
         auto func = script.lua.lua["Run"];
         if (func.get_type() == sol::type::function) {
-            std::function<void(ecs::Entity, lua_bind::LuaCommands&,
-                               lua_bind::LuaQuerier, lua_bind::LuaResources)>
-                f = func;
-            f(entity, luaCmds, luaQuerier, res);
+            static_cast<std::function<void(ecs::Entity, lua_bind::LuaCommands&,
+                               lua_bind::LuaQuerier, lua_bind::LuaResources)>>(func)(entity, luaCmds, luaQuerier, res);
         }
     }
 }

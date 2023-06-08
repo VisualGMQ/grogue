@@ -14,17 +14,17 @@ using ui::RectTransform;
 using ui::Panel;
 
 #define IMPL_QUERY_FUNC(type) \
-std::vector<ecs::Entity> Query ## type ## () { \
+std::vector<ecs::Entity> Query ## type() { \
     return querier_.Query<type>(); \
 }
 
 #define IMPL_HAS_FUNC(type) \
-bool Has ## type ## (ecs::Entity entity) { \
+bool Has ## type(ecs::Entity entity) { \
     return querier_.Has<type>(entity); \
 }
 
 #define IMPL_GET_FUNC(type) \
-auto Get ## type ## (ecs::Entity entity) { \
+auto Get ## type(ecs::Entity entity) { \
     return querier_.Get<type>(entity); \
 } 
 

@@ -31,6 +31,10 @@ namespace lua_bind {
     return res_.Get<::FontManager>();
 }
 
+::SignalManager& LuaResources::GetSignalManager() {
+    return res_.Get<::SignalManager>();
+}
+
 void BindLuaResources(::LuaScript& script) {
     sol::usertype<LuaResources> resources =
         script.lua.new_usertype<LuaResources>("Resources");
@@ -41,6 +45,7 @@ void BindLuaResources(::LuaScript& script) {
     resources["get_renderer"] = &LuaResources::GetRenderer;
     resources["get_image_manager"] = &LuaResources::GetImageManager;
     resources["get_font_manager"] = &LuaResources::GetFontManager;
+    resources["get_signal_manager"] = &LuaResources::GetSignalManager;
 }
 
 void bindKeyboard(::LuaScript& script) {
@@ -74,8 +79,8 @@ void bindMouse(::LuaScript& script) {
 
 void bindTime(::LuaScript& script) {
     sol::usertype<::Time> time = script.lua.new_usertype<::Time>("Time");
-    time["set_fPS"] = &Time::SetFPS;
-    time["get_gPS"] = &Time::GetFPS;
+    time["set_fps"] = &Time::SetFPS;
+    time["get_fps"] = &Time::GetFPS;
     time["elapse"] = &Time::Elapse;
 }
 
@@ -132,6 +137,14 @@ void bindRenderer(LuaScript& script) {
     renderer["set_cliparea"] = &Renderer::SetClipArea;
 }
 
+void bindSignalManager(::LuaScript& script) {
+    sol::usertype<SignalManager> signalMgr =
+        script.lua.new_usertype<SignalManager>("SignalManager");
+    signalMgr["raise"] = &SignalManager::Raise;
+    signalMgr["regist"] = &SignalManager::Regist;
+    signalMgr["remove"] = &SignalManager::Remove;
+}
+
 void BindResources(::LuaScript& script) {
     bindKeyboard(script);
     bindMouse(script);
@@ -140,6 +153,7 @@ void BindResources(::LuaScript& script) {
     bindRenderer(script);
     bindImageMgr(script);
     bindFontMgr(script);
+    bindSignalManager(script);
 }
 
 }  // namespace lua_bind

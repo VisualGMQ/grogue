@@ -74,9 +74,23 @@ private:
     ecs::World world_;
 };
 
+#ifdef __EMSCRIPTEN__
+#include "emscripten.h"
+
+#define RUN_APP(clazz) \
+inline void mainloop() { \
+    clazz app;                    \
+    app.Run();                    \
+} \
+int main(int argc, char** argv) { \
+    emscripten_set_main_loop(mainloop, -1, 1); \
+}
+
+#else 
 #define RUN_APP(clazz)                \
     int main(int argc, char** argv) { \
         clazz app;                    \
         app.Run();                    \
         return 0;                     \
     }
+#endif

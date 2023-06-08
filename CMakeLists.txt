@@ -10,7 +10,7 @@ project(
 
 # fetch SDL under Windows
 # for Appveyor CI/CD
-if (WIN32)
+if (WIN32 AND NOT EMSCRIPTEN)
     include(cmake/fetch_sdl.cmake)
     option(FETCH_SDL "fetch SDL2 SDL2_image SDL2_ttf SDL2_mixer from web" FALSE)
     if (FETCH_SDL)
@@ -21,10 +21,12 @@ endif()
 include(cmake/utility.cmake)
 
 # find SDL
-include(cmake/FindSDL2_image.cmake)
-include(cmake/FindSDL2_mixer.cmake)
-include(cmake/FindSDL2_ttf.cmake)
-include(cmake/FindSDL2.cmake)
+if (NOT EMSCRIPTEN)
+    include(cmake/FindSDL2_image.cmake)
+    include(cmake/FindSDL2_mixer.cmake)
+    include(cmake/FindSDL2_ttf.cmake)
+    include(cmake/FindSDL2.cmake)
+endif()
 
 # some useful utiilities
 include(cmake/copydll.cmake)
@@ -48,10 +50,24 @@ aux_source_directory(src/luabind LOWLEVEL_SRC)
 
 add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC})
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
-target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua sol2 expected)
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
 if (MSVC)
     target_compile_options(${LOWLEVEL_NAME} PUBLIC /bigobj)
+endif()
+
+if(EMSCRIPTEN)
+    message("-- build for wasm")
+    set(USE_SDL "-sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_SDL_TTF=2 -sUSE_SDL_MIXER=2 -sSDL2_IMAGE_FORMATS=\"[\"png\", \"jpg\", \"bmp\"]\"" )
+    set(PRELOAD "--preload-file resources --use-preload-plugins")
+    set(OTHER_FLAGS "-s WASM=1 -s ALLOW_MEMORY_GROWTH=1")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OTHER_FLAGS} ${USE_SDL}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OTHER_FLAGS} ${USE_SDL}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_SDL} ${PRELOAD}")
+    set(CMAKE_EXECUTABLE_SUFFIX .html)
+    target_compile_definitions(${LOWLEVEL_NAME} PUBLIC __EMSCRIPTEN__)
+    target_link_libraries(${LOWLEVEL_NAME} PUBLIC lua sol2 expected)
+else()
+    target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua sol2 expected)
 endif()
 
 if (NOT ${is_mingw_backend})
@@ -74,6 +90,9 @@ add_executable(${GAME_NAME} ./src/main.cpp)
 target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
 
 CopyDLL(${GAME_NAME})
+if (EMSCRIPTEN)
+    CopyResForWASM(${GAME_NAME})
+endif()
 
 # auto format
 option(AUTO_FORMAT "should auto-format before build using clang-format?" ON)
@@ -102,13 +121,13 @@ endif()
 
 # utilities
 option(ENABLE_UTILITIES "enable build utilities" ON)
-if (ENABLE_UTILITIES)
+if (ENABLE_UTILITIES AND NOT EMSCRIPTEN)
     add_subdirectory(utilities)
 endif()
 
 # unittest
 option(ENABLE_TEST "enable build unit test" ON)
-if (ENABLE_TEST)
+if (ENABLE_TEST AND NOT EMSCRIPTEN)
     enable_testing()
     add_subdirectory(test)
 endif()

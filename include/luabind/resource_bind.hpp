@@ -16,6 +16,7 @@ public:
     ::Renderer& GetRenderer();
     ::ImageManager& GetImageManager();
     ::FontManager & GetFontManager();
+    ::SignalManager& GetSignalManager();
 
 private:
     ecs::Resources res_;
