@@ -78,12 +78,15 @@ private:
 #include "emscripten.h"
 
 #define RUN_APP(clazz) \
-inline void mainloop() { \
-    clazz app;                    \
-    app.Run();                    \
+void mainloop() { \
+    LOGI("in mainloop"); \
+    clazz app; \
+    app.Run(); \
 } \
+\
 int main(int argc, char** argv) { \
-    emscripten_set_main_loop(mainloop, -1, 1); \
+    LOGI("app init");   \
+    emscripten_set_main_loop(mainloop, 60, 1); \
 }
 
 #else 

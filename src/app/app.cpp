@@ -129,8 +129,11 @@ void DefaultPlugins::Quit(ecs::World* world) {
 }
 
 void App::Run() {
+    LOGI("here1");
     Random::Init();
+    LOGI("here2");
     world_.Startup();
+    LOGI("here3");
     world_.Update();
 
     ecs::Resources resources(world_);
@@ -142,6 +145,7 @@ void App::Run() {
 
     auto& exit = resources.Get<ExitTrigger>();
     while (!exit.ShouldExit()) {
+        LOGI("in loop");
         Uint32 fps_start = SDL_GetTicks();
         auto renderer = world_.GetResource<Renderer>();
 
@@ -149,8 +153,10 @@ void App::Run() {
         renderer->Clear();
 
         world_.Update();
+        LOGI("updated world");
 
         renderer->Present();
+        LOGI("render present");
     }
 
     world_.Shutdown();
