@@ -90,6 +90,7 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(Time{})
         .SetResource(TimerManager{})
         .SetResource(SignalManager{})
+        .SetResource(LuaShareContext{})
         .SetResource(DebugConfig{});
 
     auto* assets = world->GetResource<AssetsManager>();
@@ -103,6 +104,8 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(Time::UpdateSystem)
         .AddSystem(TimerManager::UpdateSystem)
         // transform update
+        .AddSystem(RunScriptSystem)
+        .AddSystem(HierarchyRunScriptSystem)
         .AddSystem(UpdateNodeTransformSystem)
         .AddSystem(UpdateRectTransformSystem)
         // ui event handle

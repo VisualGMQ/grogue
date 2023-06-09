@@ -34,6 +34,7 @@ void bindMath(LuaScript& script) {
     rect["w"] = &math::Rect::w;
     rect["h"] = &math::Rect::h;
     rect["union"] = &math::Rect::Union;
+    rect["contain_pt"] = &math::Rect::ContainPt;
     rect["is_intersect"] = &math::Rect::IsIntersect;
 
     script.lua["rad2deg"] = math::Rad2Deg;
@@ -207,13 +208,13 @@ void BindSimpleTypes(LuaScript& script) {
 }
 
 #define BIND_QUERIER_FUNC(name, type) \
-querier["query_" name] = &LuaQuerier::Query ## type; \
-querier["has_" name] = &LuaQuerier::Has ## type; \
-querier["get_" name] = &LuaQuerier::Get ## type;
+querier["query_" name] = &QuerierWrapper::Query ## type; \
+querier["has_" name] = &QuerierWrapper::Has ## type; \
+querier["get_" name] = &QuerierWrapper::Get ## type;
 
-void BindLuaQuerier(LuaScript& script) {
-    sol::usertype<LuaQuerier> querier =
-        script.lua.new_usertype<LuaQuerier>("Querier");
+void BindQuerierWrapper(LuaScript& script) {
+    sol::usertype<QuerierWrapper> querier =
+        script.lua.new_usertype<QuerierWrapper>("Querier");
     BIND_QUERIER_FUNC("transform", Transform);
     BIND_QUERIER_FUNC("nodetransform", NodeTransform);
     BIND_QUERIER_FUNC("recttransform", RectTransform);

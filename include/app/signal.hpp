@@ -8,7 +8,7 @@ public:
     // FIXME: I don't want to see the last void* parameter, want to replace it
     // by a concret type
     using CallbackFunc = std::function<void(
-        ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&, void*)>;
+        ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&)>;
 
     void Regist(uint32_t name, CallbackFunc func) {
         callbacks_.insert_or_assign(name, func);
@@ -18,9 +18,9 @@ public:
         callbacks_.erase(name);
     }
 
-    void Raise(uint32_t name, ecs::Commands& cmds, ecs::Querier querier, ecs::Resources res, ecs::Events& events, void* param) {
+    void Raise(uint32_t name, ecs::Commands& cmds, ecs::Querier querier, ecs::Resources res, ecs::Events& events) {
         if (auto it = callbacks_.find(name); it != callbacks_.end()) {
-            (it->second)(cmds, querier, res, events, param);
+            (it->second)(cmds, querier, res, events);
         }
     }
 

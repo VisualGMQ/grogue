@@ -1,6 +1,5 @@
-#include "core/pch.hpp"
 #include "app/app.hpp"
-#include "game/script.hpp"
+#include "core/pch.hpp"
 #include "test_helper.hpp"
 
 enum TestSignalFnc {
@@ -9,14 +8,13 @@ enum TestSignalFnc {
 
 void InitLuaScript(ecs::Commands& cmds, ecs::Resources res) {
     auto& signalMgr = res.Get<SignalManager>();
-    signalMgr.Regist(Func1, [](ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&, void*){
-        LOGT("signaled");
-    });
+    signalMgr.Regist(Func1, [](ecs::Commands&, ecs::Querier, ecs::Resources,
+                               ecs::Events&) { LOGT("signaled"); });
     auto& luaMgr = res.Get<AssetsManager>().Lua();
     auto parent = cmds.SpawnAndReturn<Node>(Node{});
     auto child = cmds.SpawnAndReturn<Script, Node>(
-        Script{luaMgr.CreateSolitary(TestHelper::Instance().GetResourcePath() +
-                                     "lua_script.lua")},
+        Script::Create(luaMgr.CreateSolitary(
+            TestHelper::Instance().GetResourcePath() + "lua_script.lua")),
         Node{});
     HierarchyBuilder builder(cmds, parent);
     builder.SetChilds({child});

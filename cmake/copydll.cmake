@@ -14,3 +14,9 @@ macro(CopyResForWASM target_name)
         TARGET ${target_name} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources ${CMAKE_BINARY_DIR}/resources)
 endmacro()
+
+macro(CopyDefScript target_name)
+    add_custom_command(
+        TARGET ${target_name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/resources/script/defs.lua $<TARGET_FILE_DIR:${target_name}>)
+endmacro()

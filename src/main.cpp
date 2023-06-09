@@ -3,7 +3,6 @@
 #include "game/map.hpp"
 #include "game/monster.hpp"
 #include "game/signal_defs.hpp"
-#include "game/script.hpp"
 
 //! @brief tag component for backpack panel UI
 struct BackpackUIPanel {};
@@ -86,7 +85,7 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
     signalMgr.Regist(
         SignalCallback::UpdateBackpackItem,
         [](ecs::Commands& cmds, ecs::Querier querier, ecs::Resources resources,
-           ecs::Events&, void* param) {
+           ecs::Events&) {
             auto entities = querier.Query<BackpackUIPanel>();
             if (entities.empty()) return;
 
@@ -97,7 +96,8 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
             auto backpackEntity = entities[0];
             auto& backpack = querier.Get<Backpack>(backpackEntity);
 
-            uint32_t* newItemCount = (uint32_t*)param;
+            // uint32_t* newItemCount = (uint32_t*)param;
+            uint32_t* newItemCount = nullptr;
 
             auto& panel = querier.Get<ui::Panel>(entity);
             auto& node = querier.Get<Node>(entity);
@@ -269,7 +269,7 @@ void PickupItemOnTile(Monster& monster, Backpack& backpack, ecs::Commands& cmd,
         uint32_t newItemCount = 1;
         auto& signalMgr = resources.Get<SignalManager>();
         signalMgr.Raise(SignalCallback::UpdateBackpackItem, cmd,
-                        querier, resources, events, (void*)&newItemCount);
+                        querier, resources, events);
     }
 }
 
@@ -309,8 +309,6 @@ public:
             .AddStartupSystem(LoadResourceSystem)
             .AddStartupSystem(StartupSystem)
             .AddStartupSystem(InitLuaScript)
-            .AddSystem(RunScriptSystem)
-            .AddSystem(HierarchyRunScriptSystem)
             .AddSystem(DetectNearestItem)
             .AddSystem(InputHandle)
             .AddSystem(MonsterUpdate)

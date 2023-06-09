@@ -28,9 +28,11 @@ auto Get ## type(ecs::Entity entity) { \
     return querier_.Get<type>(entity); \
 } 
 
-class LuaQuerier final {
+class QuerierWrapper final {
 public:
-    LuaQuerier(ecs::Querier querier): querier_(querier) {}
+    friend class SignalManagerWrapper;
+
+    QuerierWrapper(ecs::Querier querier): querier_(querier) {}
 
     IMPL_QUERY_FUNC(SpriteBundle)
     IMPL_QUERY_FUNC(NodeTransform)
@@ -61,7 +63,7 @@ private:
 #undef IMPL_HAS_FUNC
 #undef IMPL_GET_FUNC
 
-void BindLuaQuerier(LuaScript&);
+void BindQuerierWrapper(LuaScript&);
 void BindComponents(LuaScript&);
 void BindSimpleTypes(LuaScript&);
 

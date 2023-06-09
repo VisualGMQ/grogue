@@ -28,6 +28,11 @@ if (NOT EMSCRIPTEN)
     include(cmake/FindSDL2.cmake)
 endif()
 
+# compile 3rdlibs
+add_subdirectory(3rdlibs/lua)
+add_subdirectory(3rdlibs/sol)
+add_subdirectory(3rdlibs/expected)
+
 # some useful utiilities
 include(cmake/copydll.cmake)
 include(cmake/cppcheck.cmake)
@@ -42,11 +47,6 @@ aux_source_directory(src/core LOWLEVEL_SRC)
 aux_source_directory(src/app  LOWLEVEL_SRC)
 aux_source_directory(src/game LOWLEVEL_SRC)
 aux_source_directory(src/luabind LOWLEVEL_SRC)
-
-# compile 3rdlibs
-add_subdirectory(3rdlibs/lua)
-add_subdirectory(3rdlibs/sol)
-add_subdirectory(3rdlibs/expected)
 
 add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC})
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
@@ -80,6 +80,7 @@ CopyDLL(${GAME_NAME})
 
 if (NOT EMSCRIPTEN)
     target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua sol2 expected)
+    CopyDefScript(${GAME_NAME})
 else()
     message("-- build for wasm")
     set(USE_SDL "-sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_SDL_TTF=2 -sUSE_SDL_MIXER=2 -sSDL2_IMAGE_FORMATS=\"[\"png\", \"jpg\", \"bmp\"]\"" )

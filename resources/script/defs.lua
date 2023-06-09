@@ -1,4 +1,4 @@
--- Comments for lua lsp hint. Don't remove them!
+-- Comments are for lua-lsp hint. Don't remove them!
 
 ---@class Resources
 ---@field get_keyboard fun(): Keyboard get Keyboard resource
@@ -6,6 +6,35 @@
 ---@field get_time fun(): Time get Time resource
 ---@field get_tilesheet_manager fun(): TilesheetManager get tilesheet manager
 ---@field get_renderer fun(): Renderer get tilesheet manager
+---@field get_signal_manager fun(): SignalManager get tilesheet manager
+---@field get_share_context fun(): ShareContext
+
+---@class Commands
+---@field spawn fun(): Entity create a entity
+---@field destory_entity fun(e: Entity) destroy entity and it's components
+---@field add_component fun(e: Entity, component: any) add a component to entity. component can be one of [Node SpriteBundle Panel Transform NodeTransform RectTransform]
+
+---@class Querier
+---@field query_transform fun(): table<Entity> 
+---@field query_nodetransform fun(): table<Entity> 
+---@field query_recttransform fun(): table<Entity> 
+---@field query_spritebundle fun(): table<Entity> 
+---@field query_panel fun(): table<Entity> 
+---@field query_node fun(): table<Entity> 
+---@field has_transform fun(e: Entity): boolean
+---@field has_nodetransform fun(e: Entity): boolean
+---@field has_recttransform fun(e: Entity): boolean
+---@field has_spritebundle fun(e: Entity): boolean
+---@field has_panel fun(e: Entity): boolean
+---@field has_node fun(e: Entity): boolean
+---@field get_transform fun(e: Entity): Transform
+---@field get_nodetransform fun(e: Entity): NodeTransform
+---@field get_recttransform fun(e: Entity): RectTransform
+---@field get_spritebundle fun(e: Entity): SpriteBundle
+---@field get_panel fun(e: Entity): Panel
+---@field get_node fun(e: Entity): Node
+
+---@class Events
 
 ---@class Renderer
 ---@field draw_line fun(p1: Vector2, p2: Vector2)
@@ -18,6 +47,9 @@
 ---@field clear fun()
 ---@field set_drawcolor fun(c: Color)
 ---@field get_drawcolor fun(): Color
+
+---@class ShareContext
+---@field context table
 
 ---@class Shape
 
@@ -58,6 +90,9 @@
 ---@field w number
 ---@field h number
 ---@field is_intersect fun(r: Rect): boolean
+---@field union fun(r: Rect): Rect
+---@field contain_pt fun(p: Vector2): boolean
+---@field new fun(x: number, y: number, w: number, h: number): Rect  static function for create a Rect
 
 ---@class Mouse
 ---@field position Vector2
@@ -86,6 +121,7 @@
 ---@field g number must in [0, 255]
 ---@field b number must in [0, 255]
 ---@field a number must in [0, 255]
+---@field new fun(r: number, g: number, b: number, a: number): Color  static function to create Color
 
 ---@class FontHandle
 ---@field is_valid fun(): boolean is handle valid
@@ -102,6 +138,10 @@
 ---@class NodeTransform
 ---@field global_transform Transform
 ---@field local_transform Transform
+
+---@class Node
+---@field parent Entity parent node, can be nil
+---@field children table<Entity>
 
 ---@class Sprite
 ---@field anchor Vector2
@@ -140,6 +180,11 @@ Flip = {
 ---@field border_color ColorBundle
 ---@field content_color ColorBundle
 ---@field clip_children boolean
+
+---@class SignalManager
+---@field remove fun(name: number)  remove signal, number must uint32_t
+---@field raise  fun(name: number, c: Commands, q: Querier, r: Resources, e: Events)  raise signal, number must uint32_t
+---@field regist fun(name: number, f: fun(c: Commands, q: Querier, r: Resources, e: Events))  regist signal
 
 ---@class Entity
 

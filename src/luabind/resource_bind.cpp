@@ -3,49 +3,60 @@
 
 namespace lua_bind {
 
-::Keyboard& LuaResources::GetKeyboard() {
+::Keyboard& ResourcesWrapper::GetKeyboard() {
     return res_.Get<::Keyboard>();
 }
 
-::Mouse& LuaResources::GetMouse() {
+::Mouse& ResourcesWrapper::GetMouse() {
     return res_.Get<::Mouse>();
 }
 
-::Time& LuaResources::GetTime() {
+::Time& ResourcesWrapper::GetTime() {
     return res_.Get<::Time>();
 }
 
-::TilesheetManager& LuaResources::GetTilesheetManager() {
+::TilesheetManager& ResourcesWrapper::GetTilesheetManager() {
     return res_.Get<::TilesheetManager>();
 }
 
-::Renderer& LuaResources::GetRenderer() {
+::Renderer& ResourcesWrapper::GetRenderer() {
     return res_.Get<::Renderer>();
 }
 
-::ImageManager& LuaResources::GetImageManager() {
+::ImageManager& ResourcesWrapper::GetImageManager() {
     return res_.Get<::ImageManager>();
 }
 
-::FontManager & LuaResources::GetFontManager() {
+::FontManager & ResourcesWrapper::GetFontManager() {
     return res_.Get<::FontManager>();
 }
 
-::SignalManager& LuaResources::GetSignalManager() {
-    return res_.Get<::SignalManager>();
+SignalManagerWrapper ResourcesWrapper::GetSignalManager() {
+    return SignalManagerWrapper(res_.Get<::SignalManager>());
 }
 
-void BindLuaResources(::LuaScript& script) {
-    sol::usertype<LuaResources> resources =
-        script.lua.new_usertype<LuaResources>("Resources");
-    resources["get_keyboard"] = &LuaResources::GetKeyboard;
-    resources["get_mouse"] = &LuaResources::GetMouse;
-    resources["get_time"] = &LuaResources::GetTime;
-    resources["get_tilesheet_manager"] = &LuaResources::GetTilesheetManager;
-    resources["get_renderer"] = &LuaResources::GetRenderer;
-    resources["get_image_manager"] = &LuaResources::GetImageManager;
-    resources["get_font_manager"] = &LuaResources::GetFontManager;
-    resources["get_signal_manager"] = &LuaResources::GetSignalManager;
+::LuaShareContext& ResourcesWrapper::GetLuaShareContext() {
+    return res_.Get<::LuaShareContext>();
+}
+
+void BindResourcesWrapper(::LuaScript& script) {
+    sol::usertype<ResourcesWrapper> resources =
+        script.lua.new_usertype<ResourcesWrapper>("Resources");
+    resources["get_keyboard"] = &ResourcesWrapper::GetKeyboard;
+    resources["get_mouse"] = &ResourcesWrapper::GetMouse;
+    resources["get_time"] = &ResourcesWrapper::GetTime;
+    resources["get_tilesheet_manager"] = &ResourcesWrapper::GetTilesheetManager;
+    resources["get_renderer"] = &ResourcesWrapper::GetRenderer;
+    resources["get_image_manager"] = &ResourcesWrapper::GetImageManager;
+    resources["get_font_manager"] = &ResourcesWrapper::GetFontManager;
+    resources["get_signal_manager"] = &ResourcesWrapper::GetSignalManager;
+    resources["get_share_context"] = &ResourcesWrapper::GetLuaShareContext;
+}
+
+void bindShareContext(::LuaScript& script) {
+    sol::usertype<::LuaShareContext> context =
+        script.lua.new_usertype<::LuaShareContext>("ShareContext");
+    context["context"] = &::LuaShareContext::context;
 }
 
 void bindKeyboard(::LuaScript& script) {
@@ -138,14 +149,15 @@ void bindRenderer(LuaScript& script) {
 }
 
 void bindSignalManager(::LuaScript& script) {
-    sol::usertype<SignalManager> signalMgr =
-        script.lua.new_usertype<SignalManager>("SignalManager");
-    signalMgr["raise"] = &SignalManager::Raise;
-    signalMgr["regist"] = &SignalManager::Regist;
-    signalMgr["remove"] = &SignalManager::Remove;
+    sol::usertype<SignalManagerWrapper> signalMgr =
+        script.lua.new_usertype<SignalManagerWrapper>("SignalManager");
+    signalMgr["raise"] = &SignalManagerWrapper::Raise;
+    signalMgr["remove"] = &SignalManagerWrapper::Remove;
+    signalMgr["regist"] = &SignalManagerWrapper::Regist;
 }
 
 void BindResources(::LuaScript& script) {
+    bindShareContext(script);
     bindKeyboard(script);
     bindMouse(script);
     bindTime(script);

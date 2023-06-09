@@ -14,6 +14,7 @@
 #include "app/ui.hpp"
 #include "app/assets.hpp"
 #include "app/signal.hpp"
+#include "app/script.hpp"
 
 // a resource to trigger application exit
 class ExitTrigger final {

@@ -1,4 +1,4 @@
--- require("defs")
+require("defs")
 
 ---@param entity Entity
 ---@param cmds Commands

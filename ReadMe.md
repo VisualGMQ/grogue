@@ -35,3 +35,11 @@ Linux和MacOSX下，使用包管理器安装完SDL系列库后，可以直接进
 cmake -S . -B build
 cmake --build build
 ```
+
+
+要编译成网页汇编（WASM），请先安装emscripten工具，然后使用CMake编译：
+
+```bash
+emcmake cmake -S . -B wasm-build
+cmake --build build
+```
