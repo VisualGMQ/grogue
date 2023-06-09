@@ -2,6 +2,7 @@
 
 #include "app/ui.hpp"
 #include "core/pch.hpp"
+#include "app/script.hpp"
 
 namespace lua_bind {
 
@@ -37,18 +38,28 @@ private:
 
 void BindCommandsWrapper(LuaScript& script);
 
+using LuaEventContextReader = ecs::EventReader<::LuaEventContext>;
+using LuaEventContextWriter = ecs::EventWriter<::LuaEventContext>;
+
 class EventsWrapper final {
 public:
     friend class SignalManagerWrapper;
 
     EventsWrapper(ecs::Events& events): events_(events) {}
 
-    // TODO: add events reader and writer
+    LuaEventContextReader ReadEventContext() {
+        return events_.Reader<::LuaEventContext>();
+    }
+
+    LuaEventContextWriter WriteEventContext() {
+        return events_.Writer<::LuaEventContext>();
+    }
 
 private:
     ecs::Events& events_;
 };
 
 void BindEventsWrapper(LuaScript& script);
+void BindEvents(LuaScript& script);
 
 }

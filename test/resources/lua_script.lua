@@ -6,9 +6,14 @@ require("defs")
 ---@param res Resources
 function Startup(entity, cmds, res)
     local signal = res:get_signal_manager();
-    signal:regist(1, function (c, q, r, e)
-        print("regist function called") 
-    end)
+    signal:regist(1,
+        ---@param c Commands
+        ---@param q Querier
+        ---@param r Resources
+        ---@param e Events
+        function (c, q, r, e)
+            print("regist function called") 
+        end)
 
     local context = res:get_share_context()
     context.context = {
@@ -35,5 +40,4 @@ function Run(entity, cmds, querier, res, events)
         local context = res:get_share_context()
         print(context.context.msg)
     end
-
 end

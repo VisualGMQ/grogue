@@ -59,6 +59,12 @@ void bindShareContext(::LuaScript& script) {
     context["context"] = &::LuaShareContext::context;
 }
 
+void bindEventContext(::LuaScript& script) {
+    sol::usertype<::LuaEventContext> context =
+        script.lua.new_usertype<::LuaEventContext>("EventContext");
+    context["context"] = &::LuaEventContext::context;
+}
+
 void bindKeyboard(::LuaScript& script) {
     sol::usertype<::Keyboard> keyboard =
         script.lua.new_usertype<::Keyboard>("Keyboard");
@@ -158,6 +164,7 @@ void bindSignalManager(::LuaScript& script) {
 
 void BindResources(::LuaScript& script) {
     bindShareContext(script);
+    bindEventContext(script);
     bindKeyboard(script);
     bindMouse(script);
     bindTime(script);

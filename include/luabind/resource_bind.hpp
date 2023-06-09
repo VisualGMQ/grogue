@@ -32,6 +32,8 @@ private:
 
 class SignalManagerWrapper final {
 public:
+    using CallbackFunc = std::function<void(CommandsWrapper, QuerierWrapper, ResourcesWrapper, EventsWrapper)>;
+
     SignalManagerWrapper(SignalManager& raw): raw_(raw) {}
 
     void Remove(uint32_t name) {
@@ -42,9 +44,12 @@ public:
         raw_.Raise(name, cmds.cmds_, querier.querier_, res.res_, events.events_);
     }
 
-
-    void Regist(uint32_t name, ::SignalManager::CallbackFunc func) {
-        raw_.Regist(name, func);
+    void Regist(uint32_t name, CallbackFunc func) {
+        raw_.Regist(name, [=](ecs::Commands& cmds, ecs::Querier querier,
+                              ecs::Resources res, ecs::Events& events) {
+            func(CommandsWrapper(cmds), QuerierWrapper(querier),
+                 ResourcesWrapper(res), EventsWrapper(events));
+        });
     }
 
 private:

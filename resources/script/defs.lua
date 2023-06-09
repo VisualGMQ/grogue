@@ -35,6 +35,19 @@
 ---@field get_node fun(e: Entity): Node
 
 ---@class Events
+---@field read_event_context fun(): EventContext
+---@field write_event_context fun(e: EventContext)
+
+---@class EventContextReader
+---@field has fun(): boolean
+---@field read fun(): EventContext
+
+---@class EventContextWriter
+---@field write fun(e: EventContextWriter)
+---@field write_immediatly fun(e: EventContextWriter)
+
+---@class EventContext
+---@field context table
 
 ---@class Renderer
 ---@field draw_line fun(p1: Vector2, p2: Vector2)

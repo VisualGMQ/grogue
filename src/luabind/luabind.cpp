@@ -10,6 +10,8 @@ void BindLua(LuaScript& script) {
     BindResourcesWrapper(script);
     BindQuerierWrapper(script);
     BindResources(script);
+    BindEventsWrapper(script);
+    BindEvents(script);
     BindSimpleTypes(script);
     BindComponents(script);
 }

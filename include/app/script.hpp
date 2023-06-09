@@ -17,6 +17,11 @@ struct LuaShareContext final {
     sol::table context;
 };
 
+//! @brief resources for sharing variable between lua
+struct LuaEventContext final {
+    sol::table context;
+};
+
 void RunScriptSystem(ecs::Commands& cmd, ecs::Querier querier,
                     ecs::Resources resources, ecs::Events& events);
 
