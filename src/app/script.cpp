@@ -16,13 +16,24 @@ void runOneScript(ecs::Entity entity, ecs::Commands& cmds, Script& script, ecs::
             script.inited = true;
             auto func = script.lua.lua["Startup"];
             if (func.valid()) {
-                static_cast<std::function<void(ecs::Entity, lua_bind::CommandsWrapper&, lua_bind::ResourcesWrapper)>>(func)(entity, luaCmds, luaRes);
+                sol::protected_function f = func;
+                sol::protected_function_result result = f(entity, luaCmds, luaRes);
+                if (!result.valid()) {
+                    sol::error err = result;
+                    LOGE("[Lua Error]: ", err.what());
+                    script.lua.lua.do_string("debug.traceback()");
+                }
             }
         }
         auto func = script.lua.lua["Run"];
         if (func.get_type() == sol::type::function) {
-            static_cast<std::function<void(ecs::Entity, lua_bind::CommandsWrapper,
-                               lua_bind::QuerierWrapper, lua_bind::ResourcesWrapper, lua_bind::EventsWrapper)>>(func)(entity, luaCmds, luaQuerier, luaRes, luaEvents);
+            sol::protected_function f = func;
+            sol::protected_function_result result = f(entity, luaCmds, luaQuerier, luaRes, luaEvents);
+            if (!result.valid()) {
+                    sol::error err = result;
+                    LOGE("[Lua Error]: ", err.what());
+                    script.lua.lua.do_string("debug.traceback()");
+            }
         }
     }
 }

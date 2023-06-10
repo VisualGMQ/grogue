@@ -70,15 +70,15 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& window = resources.Get<Window>();
     auto& backpackUIConfig = config.GetBackpackUIConfig().Info();
     auto& luaMgr = resources.Get<AssetsManager>().Lua();
-    auto backpackPanel = cmd.SpawnAndReturn<Node, ui::Panel, ui::RectTransform, BackpackUIPanel, Script>(
+    auto backpackPanel = cmd.SpawnAndReturn<Node, ui::Panel, ui::RectTransform, BackpackUIPanel>(
 		Node {},
         ui::Panel::Create(
             ui::ColorBundle::CreatePureColor(Color{200, 200, 200}),
             ui::ColorBundle::CreatePureColor(Color::Black)),
         ui::RectTransform{NodeTransform{Transform::FromPosition({0, window.GetSize().y - backpackUIConfig.height})},
                           math::Vector2(backpackUIConfig.width, backpackUIConfig.height)},
-        {},
-        Script::Create(luaMgr.CreateSolitary("resources/script/backpack_panel.lua")));
+        {});
+        // Script::Create(luaMgr.CreateSolitary("resources/script/backpack_panel.lua")));
 
     auto& signalMgr = resources.Get<SignalManager>();
     signalMgr.Regist(

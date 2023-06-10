@@ -1,5 +1,22 @@
 #include "app/lua.hpp"
 
+LuaScript::LuaScript(LuaScriptHandle handle) : handle_(handle) {
+    lua.open_libraries(sol::lib::base);
+    lua.open_libraries(sol::lib::package);
+    lua.open_libraries(sol::lib::debug);
+}
+
+LuaScript::LuaScript(LuaScriptHandle handle, const std::string& str, bool isContent)
+    : LuaScript(handle) {
+    if (isContent) {
+        lua.script(str);
+        sol::load_result result = lua.load_file(str);
+    } else {
+        lua.script_file(str);
+    }
+}
+
+
 LuaScript::~LuaScript() {
     LuaScriptHandle::Destroy(handle_);
 }

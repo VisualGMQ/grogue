@@ -32,6 +32,8 @@ endif()
 add_subdirectory(3rdlibs/lua)
 add_subdirectory(3rdlibs/sol)
 add_subdirectory(3rdlibs/expected)
+add_subdirectory(3rdlibs/ltreesitter)
+add_subdirectory(3rdlibs/tree-sitter)
 
 # some useful utiilities
 include(cmake/copydll.cmake)
