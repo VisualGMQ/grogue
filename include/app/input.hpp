@@ -19,7 +19,7 @@ struct Button {
 
 using KeyButton = Button<SDL_Scancode>;
 
-class Keyboard {
+class LUA_BIND_RESOURCE Keyboard {
 public:
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
 
@@ -34,7 +34,7 @@ private:
 
 using MouseButton = Button<uint8_t>;
 
-class Mouse {
+class LUA_BIND_RESOURCE Mouse {
 public:
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
 

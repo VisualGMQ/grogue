@@ -32,8 +32,6 @@ endif()
 add_subdirectory(3rdlibs/lua)
 add_subdirectory(3rdlibs/sol)
 add_subdirectory(3rdlibs/expected)
-add_subdirectory(3rdlibs/ltreesitter)
-add_subdirectory(3rdlibs/tree-sitter)
 
 # some useful utiilities
 include(cmake/copydll.cmake)
@@ -49,8 +47,33 @@ aux_source_directory(src/core LOWLEVEL_SRC)
 aux_source_directory(src/app  LOWLEVEL_SRC)
 aux_source_directory(src/game LOWLEVEL_SRC)
 aux_source_directory(src/luabind LOWLEVEL_SRC)
+aux_source_directory(luabind LOWLEVEL_SRC)
+
+find_program(PYTHON python3)
+if (PYTHON-NOTFOUND)
+    find_program(PYTHON python)
+    if (PYTHON-NOTFOUND)
+        message(FATAL_ERROR "you must install python 3.0 and pip 3.0")
+    endif()
+endif()
+
+# run python parser to generate luabind codes
+message("found pip and python")
+execute_process(
+    COMMAND "${PIP} install" "-r utilities/ecs_parser/requirements.txt"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+execute_process(
+    COMMAND ${PYTHON} "${CMAKE_SOURCE_DIR}/utilities/ecs_parser/parser.py"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC})
+
+add_custom_command(
+    TARGET ${LOWLEVEL_NAME}
+    PRE_BUILD
+    COMMAND ${PYTHON} "${CMAKE_SOURCE_DIR}/utilities/ecs_parser/parser.py"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
 if (MSVC)
@@ -80,6 +103,16 @@ target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
 
 CopyDLL(${GAME_NAME})
 
+# run parser.py to generate luabind codes
+find_program(PIP pip3)
+if (PIP-NOTFOUND)
+    find_program(PIP pip3)
+    if (PIP-NOTFOUND)
+        message(FATAL_ERROR "you must install python 3.0 and pip 3.0")
+    endif()
+endif()
+
+# emscripten special link
 if (NOT EMSCRIPTEN)
     target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua sol2 expected)
     CopyDefScript(${GAME_NAME})

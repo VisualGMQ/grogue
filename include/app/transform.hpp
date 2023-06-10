@@ -9,7 +9,7 @@ enum Flip {
     Both = Vertical | Horizontal,
 };
 
-struct Transform final {
+struct LUA_BIND_COMPONENT Transform final {
     math::Vector2 position{math::Vector2::Zero};
     float rotation = 0;  // in degress
     math::Vector2 scale{1, 1};

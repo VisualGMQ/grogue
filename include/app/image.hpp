@@ -10,7 +10,7 @@
 
 class Renderer;
 
-class Image final {
+class LUA_BIND Image final {
 public:
     friend class Renderer;
     friend class ImageManager;
@@ -43,7 +43,7 @@ private:
     }
 };
 
-class ImageManager final : public ResourceManager<Image> {
+class LUA_BIND_RESOURCE ImageManager final : public ResourceManager<Image> {
 public:
     ImageManager(Renderer&);
     ImageHandle Load(const std::string& filename);

@@ -12,7 +12,7 @@ using BGMHandle = Handle<BGM>;
 //! @addtogroup resource-manager
 //! @{
 
-class BGM final {
+class LUA_BIND BGM final {
 public:
     friend class BGMManager;
     friend class BGMPlayer;
@@ -36,7 +36,7 @@ private:
     }
 };
 
-class BGMManager final : public ResourceManager<BGM> {
+class LUA_BIND_RESOURCE BGMManager final : public ResourceManager<BGM> {
 public:
     BGMHandle Load(const std::string& filename);
 };

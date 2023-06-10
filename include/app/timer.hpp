@@ -4,7 +4,7 @@
 #include "app/manager.hpp"
 
 //! @brief a resource that make you get time elapse between two frame
-class Time final {
+class LUA_BIND_RESOURCE Time final {
 public:
     using TimeType = uint64_t;
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
@@ -41,7 +41,7 @@ class Timer;
 using TimerHandle = Handle<Timer>;
 
 //! @brief a timer that tirge function when reach time
-class Timer final {
+class LUA_BIND Timer final {
 public:
     using TickFunc = std::function<void()>;
 
@@ -90,7 +90,7 @@ private:
     Time::TimeType dstTime_;
 };
 
-class TimerManager : public ResourceManager<Timer> {
+class LUA_BIND_RESOURCE TimerManager : public ResourceManager<Timer> {
 public:
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
                         ecs::Events&);

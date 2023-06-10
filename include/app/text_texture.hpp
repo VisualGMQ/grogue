@@ -5,7 +5,7 @@
 
 class Renderer;
 
-class TextTexture final {
+class LUA_BIND_COMPONENT TextTexture final {
 public:
     TextTexture(Renderer* renderer, Font& font) : renderer_(renderer), font_(font) {}
 
@@ -14,7 +14,7 @@ public:
         SetText(text);
     }
 
-    const std::unique_ptr<Image>& GetImage() const { return image_; }
+    const std::unique_ptr<Image>& LUA_NOBIND GetImage() const { return image_; }
     void SetText(const std::string& text);
     const std::string& GetText() const { return text_; }
 

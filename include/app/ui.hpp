@@ -11,7 +11,7 @@
 
 namespace ui {
 
-struct ColorBundle final {
+struct LUA_BIND_COMPONENT ColorBundle final {
     Color normal, hover, press;
 
     static ColorBundle Create(const Color& normal, const Color& hover, const Color& press) {
@@ -24,13 +24,13 @@ struct ColorBundle final {
 };
 
 //! @brief component for ui rect
-struct RectTransform final {
+struct LUA_BIND_COMPONENT RectTransform final {
     NodeTransform transform;
     math::Vector2 size;
 };
 
 //! @brief component for ui which want to show a text on it
-struct Text final {
+struct /*LUA_BIND_COMPONENT*/ Text final {
     std::unique_ptr<TextTexture> text;
     ColorBundle color;
     math::Vector2 offset;
@@ -41,7 +41,7 @@ struct Text final {
 };
 
 //! @brief component for ui which want to show a background image on it
-struct Image final {
+struct LUA_BIND_COMPONENT Image final {
     ImageHandle image;
     math::Rect region;
     ColorBundle color = {Color::White};
@@ -77,7 +77,7 @@ struct Label final {
 };
 
 //! @brief component for panel
-struct Panel final {
+struct LUA_BIND_COMPONENT Panel final {
     ColorBundle contentColor;
     ColorBundle borderColor;
     bool clipChildren = true;    // if children exceed panel area, clip them
@@ -91,7 +91,7 @@ struct Panel final {
 };
 
 //! @brief component for ui which want to show a scrolbar and scroll it's content
-struct Scrollbar final {
+struct LUA_BIND_COMPONENT Scrollbar final {
     float min;
     float max;
     float value;
@@ -137,7 +137,7 @@ private:
     std::array<bool, static_cast<size_t>(EventType::NUM)> events;
 };
 
-struct UIEventListener {
+struct LUA_BIND UIEventListener {
     using ListenerFunc = std::function<void(ecs::Entity, ecs::Commands&, ecs::Querier,
                        ecs::Resources, ecs::Events&)>;
 
@@ -150,7 +150,7 @@ struct UIEventListener {
 };
 
 //! @brief component for ui interaction
-struct Interaction final {
+struct LUA_BIND_COMPONENT Interaction final {
     UIEventListener& Get(EventType type) {
         return events_[static_cast<size_t>(type)];
     }

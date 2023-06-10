@@ -8,7 +8,7 @@
 class Image;
 using ImageHandle = Handle<Image>;
 
-struct Color {
+struct LUA_BIND Color {
     uint8_t r, g, b, a;
 
     static Color White;
@@ -24,7 +24,7 @@ struct Color {
         : r(r), g(g), b(b), a(a) {}
 };
 
-struct Tile final {
+struct LUA_BIND Tile final {
     math::Rect region;
     ImageHandle handle;
 };

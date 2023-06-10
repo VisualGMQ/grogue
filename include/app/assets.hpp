@@ -9,7 +9,7 @@
 //! @addtogroup resource-manager
 //! @{
 
-class AssetsManager final {
+class LUA_BIND_RESOURCE AssetsManager final {
 public:
     friend class DefaultPlugins;
 

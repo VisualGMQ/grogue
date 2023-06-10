@@ -13,7 +13,7 @@
 class Image;
 class ImageManager;
 
-class Renderer final {
+class LUA_BIND_RESOURCE Renderer final {
 public:
     friend class Image;
     friend class DefaultPlugins;
@@ -48,7 +48,7 @@ public:
     void Present();
     void Clear();
 
-    SDL_Renderer* Raw() const { return renderer_; }
+    SDL_Renderer* LUA_NOBIND Raw() const { return renderer_; }
 
 private:
     SDL_Renderer* renderer_ = nullptr;

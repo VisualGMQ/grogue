@@ -4,7 +4,7 @@
 #include "app/fwd.hpp"
 
 //! @brief a component that present a sprite
-struct Sprite final {
+struct LUA_BIND_COMPONENT Sprite final {
     Color color = {255, 255, 255, 255};
     math::Rect region;
     math::Vector2 customSize;
@@ -33,7 +33,7 @@ struct Sprite final {
     }
 };
 
-struct SpriteBundle final {
+struct LUA_BIND_COMPONENT SpriteBundle final {
     Sprite sprite;
     ImageHandle image;
     Flip flip = Flip::None;

@@ -4,12 +4,12 @@
 #include "app/transform.hpp"
 
 //! @brief use for transform in hierarchy
-struct NodeTransform {
+struct LUA_BIND_COMPONENT NodeTransform {
     Transform localTransform;
     Transform globalTransform;
 };
 
-class HierarchyBuilder final {
+class LUA_BIND HierarchyBuilder final {
 public:
     HierarchyBuilder(ecs::Commands& cmds, ecs::Entity parent): cmds_(cmds), parent_(parent) {}
 
