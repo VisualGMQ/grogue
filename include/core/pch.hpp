@@ -18,7 +18,6 @@
 #include "core/math.hpp"
 #include "sol/sol.hpp"
 #include "core/sparse_sets.hpp"
-#include "core/magic_enum.hpp"
 #include "core/singleton.hpp"
 #include "core/utility.hpp"
 #include "core/refl.hpp"

@@ -13,8 +13,8 @@
 #define assertm(msg, expr) assert(((void)msg, (expr)))
 
 //! @brief a macro to tag a struct is a component, for parser.
-//!     use: `class YourComponent ECS_COMPONENT {};`
-#define ECS_COMPONENT
+//!     use: `class LUA_BIND YourComponent {};`
+#define LUA_BIND
 
 namespace ecs {  // fwd declare
 
@@ -27,7 +27,7 @@ using Entity = uint32_t;
 //! @note maybe you think component shouldn't in ecs.hpp,
 //!        but for supporting herarchy in ecs, we must put it here(for
 //!        HierarchyUpdateSystem)
-struct Node ECS_COMPONENT final {
+struct LUA_BIND Node final {
     std::optional<ecs::Entity>
         parent;  //!< parent node, std::nullopt means this node is root
     std::vector<ecs::Entity> children;
