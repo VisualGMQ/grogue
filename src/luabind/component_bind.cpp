@@ -213,6 +213,7 @@ querier["has_" name] = &QuerierWrapper::Has ## type; \
 querier["get_" name] = &QuerierWrapper::Get ## type;
 
 void BindQuerierWrapper(LuaScript& script) {
+    // engin related
     sol::usertype<QuerierWrapper> querier =
         script.lua.new_usertype<QuerierWrapper>("Querier");
     BIND_QUERIER_FUNC("transform", Transform);
@@ -221,6 +222,10 @@ void BindQuerierWrapper(LuaScript& script) {
     BIND_QUERIER_FUNC("spritebundle", SpriteBundle);
     BIND_QUERIER_FUNC("panel", Panel);
     BIND_QUERIER_FUNC("node", Node);
+
+    // game related
+    BIND_QUERIER_FUNC("backpack_ui_panel", BackpackUIPanel);
+    BIND_QUERIER_FUNC("player", Player);
 }
 
 #undef BIND_QUERIER_FUNC

@@ -4,9 +4,6 @@
 #include "game/monster.hpp"
 #include "game/signal_defs.hpp"
 
-//! @brief tag component for backpack panel UI
-struct BackpackUIPanel {};
-
 struct NearestItemHover {
     bool valid = false;
     math::Vector2 position;
@@ -72,14 +69,16 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& config = resources.Get<GameConfig>();
     auto& window = resources.Get<Window>();
     auto& backpackUIConfig = config.GetBackpackUIConfig().Info();
-    auto backpackPanel = cmd.SpawnAndReturn<Node, ui::Panel, ui::RectTransform, BackpackUIPanel>(
+    auto& luaMgr = resources.Get<AssetsManager>().Lua();
+    auto backpackPanel = cmd.SpawnAndReturn<Node, ui::Panel, ui::RectTransform, BackpackUIPanel, Script>(
 		Node {},
         ui::Panel::Create(
             ui::ColorBundle::CreatePureColor(Color{200, 200, 200}),
             ui::ColorBundle::CreatePureColor(Color::Black)),
         ui::RectTransform{NodeTransform{Transform::FromPosition({0, window.GetSize().y - backpackUIConfig.height})},
                           math::Vector2(backpackUIConfig.width, backpackUIConfig.height)},
-        {});
+        {},
+        Script::Create(luaMgr.CreateSolitary("resources/script/backpack_panel.lua")));
 
     auto& signalMgr = resources.Get<SignalManager>();
     signalMgr.Regist(
@@ -294,13 +293,6 @@ void InputHandle(ecs::Commands& cmd, ecs::Querier querier,
     }
 }
 
-void InitLuaScript(ecs::Commands& cmds, ecs::Resources res) {
-    auto& luaMgr = res.Get<AssetsManager>().Lua();
-    cmds.Spawn<Script>(Script {
-        luaMgr.CreateSolitary("resources/script/test.lua")
-    });
-}
-
 class GameApp final : public App {
 public:
     GameApp() {
@@ -308,7 +300,6 @@ public:
         world.AddPlugins<DefaultPlugins>()
             .AddStartupSystem(LoadResourceSystem)
             .AddStartupSystem(StartupSystem)
-            .AddStartupSystem(InitLuaScript)
             .AddSystem(DetectNearestItem)
             .AddSystem(InputHandle)
             .AddSystem(MonsterUpdate)

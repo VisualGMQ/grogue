@@ -479,3 +479,7 @@ Key = {
     CALL = 289,
     ENDCALL = 290,
 }
+
+---game related
+
+---@class BackpackUIPanel a tag component for backpack ui panel

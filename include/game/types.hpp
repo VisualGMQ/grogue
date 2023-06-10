@@ -129,6 +129,12 @@ struct Terrian final {
     SpriteBundle sprite;
 };
 
+//! @brief tag component for backpack panel UI
+struct BackpackUIPanel {};
+
+/// @brief a tag component to point out player entity
+struct Player {};
+
 constexpr float SCALE = 2.0;
 
 // reflect

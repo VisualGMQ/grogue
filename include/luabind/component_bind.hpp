@@ -7,6 +7,7 @@
 #include "app/sprite.hpp"
 #include "app/font.hpp"
 #include "app/ui.hpp"
+#include "game/types.hpp"
 
 namespace lua_bind {
 
@@ -28,32 +29,28 @@ auto Get ## type(ecs::Entity entity) { \
     return querier_.Get<type>(entity); \
 } 
 
+#define IMPL_FUNC(type) \
+IMPL_QUERY_FUNC(type) \
+IMPL_HAS_FUNC(type) \
+IMPL_GET_FUNC(type) \
+
 class QuerierWrapper final {
 public:
     friend class SignalManagerWrapper;
 
     QuerierWrapper(ecs::Querier querier): querier_(querier) {}
 
-    IMPL_QUERY_FUNC(SpriteBundle)
-    IMPL_QUERY_FUNC(NodeTransform)
-    IMPL_QUERY_FUNC(RectTransform)
-    IMPL_QUERY_FUNC(Transform)
-    IMPL_QUERY_FUNC(Panel)
-    IMPL_QUERY_FUNC(Node)
+    // engine related
+    IMPL_FUNC(SpriteBundle)
+    IMPL_FUNC(RectTransform)
+    IMPL_FUNC(NodeTransform)
+    IMPL_FUNC(Transform)
+    IMPL_FUNC(Panel)
+    IMPL_FUNC(Node)
 
-    IMPL_HAS_FUNC(SpriteBundle)
-    IMPL_HAS_FUNC(NodeTransform)
-    IMPL_HAS_FUNC(RectTransform)
-    IMPL_HAS_FUNC(Transform)
-    IMPL_HAS_FUNC(Panel)
-    IMPL_HAS_FUNC(Node)
-
-    IMPL_GET_FUNC(SpriteBundle)
-    IMPL_GET_FUNC(NodeTransform)
-    IMPL_GET_FUNC(RectTransform)
-    IMPL_GET_FUNC(Transform)
-    IMPL_GET_FUNC(Panel)
-    IMPL_GET_FUNC(Node)
+    // game related
+    IMPL_FUNC(BackpackUIPanel)
+    IMPL_FUNC(Player)
 
 private:
     ecs::Querier querier_;
@@ -62,6 +59,7 @@ private:
 #undef IMPL_QUERY_FUNC
 #undef IMPL_HAS_FUNC
 #undef IMPL_GET_FUNC
+#undef IMPL_FUNC
 
 void BindQuerierWrapper(LuaScript&);
 void BindComponents(LuaScript&);

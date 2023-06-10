@@ -5,9 +5,6 @@
 #include "app/renderer.hpp"
 #include "game/types.hpp"
 
-/// @brief a tag component to point out player entity
-struct Player {};
-
 enum class Direction: uint8_t {
     None = 0x00,
     Up = 0x01,
