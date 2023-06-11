@@ -13,12 +13,12 @@ struct Script final {
 };
 
 //! @brief resources for sharing variable between lua
-struct LuaShareContext final {
+struct LUA_BIND_RESOURCE LuaShareContext final {
     sol::table context;
 };
 
 //! @brief resources for sharing variable between lua
-struct LuaEventContext final {
+struct LUA_BIND LuaEventContext final {
     sol::table context;
 };
 

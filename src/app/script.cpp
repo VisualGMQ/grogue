@@ -1,5 +1,5 @@
 #include "app/script.hpp"
-#include "luabind/luabind.hpp"
+#include "luabind.hpp"
 
 Script Script::Create(LuaScript&& lua) {
     lua_bind::BindLua(lua);

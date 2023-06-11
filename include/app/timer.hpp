@@ -45,7 +45,7 @@ class LUA_BIND Timer final {
 public:
     using TickFunc = std::function<void()>;
 
-    Timer(TimerHandle handle, Time::TimeType time, int loop = 0) : handle_(handle), dstTime_(time), loop_(loop) { }
+    Timer(TimerHandle handle, Time::TimeType time, TickFunc func, int loop = 0) : handle_(handle), dstTime_(time), func_(func), loop_(loop) { }
 
     Timer(const Timer&) = delete;
     Timer& operator=(const Timer&) = delete;

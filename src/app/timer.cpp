@@ -29,3 +29,9 @@ void TimerManager::UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources res
         t.second->Update(time);
     }
 }
+
+TimerHandle TimerManager::Create(Time::TimeType time, Timer::TickFunc func) {
+    auto handle = TimerHandle::Create();
+    storeNewItem(handle, std::unique_ptr<Timer>(new Timer(handle, time, func)));
+    return handle;
+}

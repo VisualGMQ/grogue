@@ -4,6 +4,7 @@ import os
 # TODO: regist static method/property
 # TODO: more human-readable lua hint
 # TODO: regist global function
+# TODO: bind class constructor
 
 LUA_BIND_TAG = "LUA_BIND"
 LUA_BIND_COMPONENT_TAG = "LUA_BIND_COMPONENT"
@@ -21,7 +22,7 @@ class LuaBindType:
     RESOURCES = 2
 
 class ClassInfo:
-    def __init__(self, name, namespace, properties, methods, bind_type):
+    def __init__(self, name: str, namespace: str, properties, methods, bind_type: LuaBindType):
         self.name = name
         self.properties = properties
         self.methods: dict[str, list] = {}
@@ -95,74 +96,103 @@ def get_name_with_namespace(name, classinfo_table: list[dict[str, ClassInfo]]) -
     for info in classinfo_table:
         if name in info.keys():
             return "{}::{}".format(info[name].namespace, name)
-    return None
+    return name
 
 # strip complex name to raw name(eg: `const Vector2&` -> `Vector2`)
-def strip_name(name: str) -> str:
+def strip_type_name(name: str) -> str:
     return name.replace('const ', '').replace('&', '').replace('mutable ', '').strip()
 
-def regist_type(name: str, info: ClassInfo):
+def generate_parameter_type_with_namespace(name: str, classinfo_table: list[dict[str, ClassInfo]]) -> str:
+    raw_name = strip_type_name(name)
+    name_with_namespace = get_name_with_namespace(raw_name, classinfo_table)
+    return name.replace(raw_name, name_with_namespace)
+
+def pack_parameters(method: dict, classinfo_table: list[dict[str, ClassInfo]]) -> str:
+    params: list = method['parameters']
+    result = ""
+    for i, param in enumerate(params):
+        param_type = generate_parameter_type_with_namespace(
+            param['type'] if param['name'].find('&') == -1 else param['type'] + '&', classinfo_table)
+        if param_type is None:
+            return None
+        result += param_type + ("," if i != len(params) -1 else "")
+    return result
+
+def pack_method_type_for_overload(class_name: str, class_name_with_namespace: str, method_name: str, method: dict, classinfo_table: list[dict[str, ClassInfo]]) -> str:
+    tmpl = "static_cast<{}({}::*)({}) {}>(&{}::{})"
+    packed_params = pack_parameters(method, classinfo_table)
+    if packed_params is None:
+        return None
+    rntType = generate_parameter_type_with_namespace(method['rtnType'], classinfo_table)
+    return tmpl.format(rntType, class_name_with_namespace, packed_params, 'const' if method['const'] else "", class_name_with_namespace, method_name)
+
+def pack_method(class_name: str, method_name: str):
+    return "&{}::{};".format(class_name, method_name)
+
+def pack_method_in_overload(variable_name: str, class_name: str, class_name_with_namespace: str, methods: list, method_name: str, method_name_in_lua: str, classinfo_table: list[dict[str, ClassInfo]]):
+    overload_str = ""
+    for m in methods:
+        cast_code = pack_method_type_for_overload(class_name, class_name_with_namespace, method_name, m, classinfo_table)
+        if cast_code is not None:
+            overload_str += cast_code + '\n,'
+    if overload_str == "":
+        return None
+    return "{}[\"{}\"] = sol::overload({})".format(variable_name, method_name_in_lua, overload_str[: len(overload_str) - 1])
+
+def generate_bind_method_code(variable_name: str, class_name: str, class_name_with_namespace, methods: dict[str, list], classinfo_table: list[dict[str, ClassInfo]]):
+    bind_code = ""
+    for method_name, method in methods.items():
+        method_name = method[0]['name']
+        method_name_in_lua = get_method_name_in_lua(method[0]['name'])
+        new_code = ""
+        # TODO: regist static function
+        if method_name_in_lua is None or method_name == class_name or method[0]['rtnType'].find(LUA_NOBIND_TAG) != -1 or method[0]['static']:   # pass all constructor and operator and static function
+            continue
+        if len(method) == 1:    # only one function, not exists overload
+            method = method[0]
+            bind_code += '{}[\"{}\"] = {}'.format(variable_name, method_name_in_lua, pack_method(class_name_with_namespace, method_name) + '\n')
+        else:   # function has overload
+            overload_method = pack_method_in_overload(variable_name, class_name, class_name_with_namespace, method, method_name, method_name_in_lua, classinfo_table)
+            if overload_method is not None:
+                bind_code += overload_method + ';\n'
+    return bind_code
+
+def regist_type(name: str, info: ClassInfo, classinfo_table: list[dict[str, ClassInfo]]):
     namespace: str = info.namespace
-    lower_name: str = (namespace if namespace is not None else "") + name.lower()
+    variable_name: str = (namespace if namespace is not None else "") + name.lower()
     name_without_namespace: str = name
     name: str = '{}::{}'.format(namespace, name)
-    cpp_code: str = "sol::usertype<{}> {} = script.lua.new_usertype<{}>(\"{}\");\n".format(name, lower_name, name, name_without_namespace)
+    cpp_code: str = "sol::usertype<{}> {} = script.lua.new_usertype<{}>(\"{}\");\n".format(name, variable_name, name, name_without_namespace)
     lua_comment: str = "---@class {}\n".format(name_without_namespace)
     # bind properties
     for prop in info.properties:
         prop_name = prop['name']
         if prop['static'] or prop_name.find(LUA_NOBIND_TAG) != -1:  # remove all static properties
             continue
-        new_code = "{}[\"{}\"] = &{}::{};".format(lower_name, prop_name, name, prop_name)
+        new_code = "{}[\"{}\"] = &{}::{};".format(variable_name, prop_name, name, prop_name)
         new_comment = "---@field {} {}".format(prop['name'], prop['type'])
         cpp_code += new_code + '\n'
         lua_comment += new_comment + '\n'
     # bind methods
-    for method_name, method in info.methods.items():
-        method_name = method[0]['name']
-        method_name_in_lua = get_method_name_in_lua(method[0]['name'])
-        # TODO: regist static function
-        if method_name_in_lua is None or method_name == name_without_namespace or method[0]['rtnType'].find(LUA_NOBIND_TAG) != -1 or method[0]['static']:   # pass all constructor and operator and static function
-            continue
-        if len(method) == 1:    # only one function, not exists overload
-            method = method[0]
-            new_code = "{}[\"{}\"] = &{}::{};".format(lower_name, method_name_in_lua, name, method_name)
-        else:   # function has overload
-            cast_tmpl = "static_cast<{}({}::*)({}) {}>(&{}::{})"
-            overload_methods = ""
-            for m in method:
-                params = m['parameters']
-                parameter_str = ""
-                for i, param in enumerate(params, 0):
-                    param_type = param['type'] if param['name'].find('&') == -1 else param['type'] + '&'
-                    parameter_str += param_type + ("," if i != len(params) -1 else "")
-
-                if parameter_str.find('&&') != -1: # don't bind function which has rvalue reference parameter
-                    continue
-                rtnType: str = m['rtnType']
-                overload = cast_tmpl.format(rtnType, name, parameter_str, 'const' if m['const'] else "", name, method_name)
-                overload_methods += overload + '\n'
-                new_code = "{}[\"{}\"] = sol::overload({});".format(lower_name, method_name_in_lua, overload)
-        # TODO generate more human-readable comment
-        new_comment = "---@field {} {}".format(method_name, "func")
-        cpp_code += new_code + '\n'
-        lua_comment += new_comment + '\n'
+    overload_str = generate_bind_method_code(variable_name, name_without_namespace, name, info.methods, classinfo_table) + '\n'
+    if overload_str is not None:
+        cpp_code += overload_str
     return cpp_code, lua_comment
 
-def generate_bind_onetype_code(classinfo_table: dict):
+def generate_bind_onetype_code(classinfo: dict, classinf_table: list[dict[str, list]]):
     cpp_code = ""
     lua_comment = ""
-    for name, info in classinfo_table.items():
-        new_code, new_comment = regist_type(name, info)
+    for name, info in classinfo.items():
+        new_code, new_comment = regist_type(name, info, classinfo_table)
         cpp_code += '\n' + new_code
         lua_comment += '\n' + new_comment
     return cpp_code, lua_comment
 
-def generate_bind_code(classinfo: list):
+def generate_bind_code(classinfo_table: list[dict[str, list]]):
     cpp_code = ""
     lua_comment = ""
-    for table in classinfo:
-        new_code, new_comment = generate_bind_onetype_code(table)
+    for table in classinfo_table:
+        new_code, new_comment = generate_bind_onetype_code(table, classinfo_table)
         cpp_code += '\n' + new_code
         lua_comment += '\n' + new_comment
     return cpp_code, lua_comment

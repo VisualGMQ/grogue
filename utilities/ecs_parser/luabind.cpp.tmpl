@@ -11,6 +11,19 @@ using ui::UIEventListener;
 using ui::EventType;
 
 void BindLua(LuaScript& script) {
+    // some special class you should bind them handly
+    sol::usertype<::LuaShareContext> context =
+        script.lua.new_usertype<::LuaShareContext>("ShareContext");
+    context["context"] = &::LuaShareContext::context;
+
+    sol::usertype<SignalManagerWrapper> signalMgr =
+        script.lua.new_usertype<SignalManagerWrapper>("SignalManager");
+    signalMgr["Raise"] = &SignalManagerWrapper::Raise;
+    signalMgr["Remove"] = &SignalManagerWrapper::Remove;
+    signalMgr["Regist"] = &SignalManagerWrapper::Regist;
+
+    // auto-generate bind codes
+
     ##BIND_CONTENT##
 }
 

@@ -1,12 +1,12 @@
-require("defs")
+-- require("defs")
 
 
 ---@param entity Entity
 ---@param cmds Commands
 ---@param res Resources
 function Startup(entity, cmds, res)
-    local signal = res:get_signal_manager();
-    signal:regist(1,
+    local signal = res:GetSignalManager();
+    signal:Regist(1,
         ---@param c Commands
         ---@param q Querier
         ---@param r Resources
@@ -15,7 +15,7 @@ function Startup(entity, cmds, res)
             print("regist function called") 
         end)
 
-    local context = res:get_share_context()
+    local context = res:GetShareContext()
     context.context = {
         msg = "hello",
     }
@@ -27,17 +27,17 @@ end
 ---@param res Resources
 ---@param events Events
 function Run(entity, cmds, querier, res, events)
-    local renderer = res:get_renderer();
-    renderer:set_drawcolor(Color.new(0, 200, 0, 255));
-    renderer:draw_rect(Rect.new(100, 200, 100, 50));
+    local renderer = res:GetRenderer();
+    renderer:SetDrawColor(Color.new(0, 200, 0, 255));
+    renderer:DrawRect(Rect.new(100, 200, 100, 50));
 
-    local mouse = res:get_mouse();
-    if mouse:left_btn():is_pressed() then
+    local mouse = res:GetMouse();
+    if mouse:LeftBtn():IsPressed() then
         local signal = res:get_signal_manager()
-        signal:raise(0, cmds, querier, res, events)
-        signal:raise(1, cmds, querier, res, events)
+        signal:Raise(0, cmds, querier, res, events)
+        signal:Raise(1, cmds, querier, res, events)
 
-        local context = res:get_share_context()
+        local context = res:GetShareContext()
         print(context.context.msg)
     end
 end

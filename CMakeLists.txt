@@ -46,8 +46,6 @@ set(LOWLEVEL_NAME lowlevel)
 aux_source_directory(src/core LOWLEVEL_SRC)
 aux_source_directory(src/app  LOWLEVEL_SRC)
 aux_source_directory(src/game LOWLEVEL_SRC)
-aux_source_directory(src/luabind LOWLEVEL_SRC)
-aux_source_directory(luabind LOWLEVEL_SRC)
 
 find_program(PYTHON python3)
 if (${PYTHON} MATCHES PYTHON-NOTFOUND)
@@ -61,12 +59,15 @@ endif()
 execute_process(
     COMMAND "${PIP} install" "-r utilities/ecs_parser/requirements.txt"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-message("-----------${PYTHON}-------------")
 execute_process(
     COMMAND ${PYTHON} "${CMAKE_SOURCE_DIR}/utilities/ecs_parser/parser.py"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+aux_source_directory(luabind LOWLEVEL_SRC)
+
+
 add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC})
+target_include_directories(${LOWLEVEL_NAME} PRIVATE luabind)
 
 add_custom_command(
     TARGET ${LOWLEVEL_NAME}
