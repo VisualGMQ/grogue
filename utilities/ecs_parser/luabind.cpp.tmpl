@@ -1,0 +1,18 @@
+#include "luabind.hpp"
+
+namespace lua_bind {
+
+#define BIND_QUERIER_FUNC(name) \
+querier["Query" #name] = &QuerierWrapper::Query ## name; \
+querier["Has" #name] = &QuerierWrapper::Has ## name; \
+querier["Get" #name] = &QuerierWrapper::Get ## name;
+
+using ui::UIEventListener;
+using ui::EventType;
+
+void BindLua(LuaScript& script) {
+    ##BIND_CONTENT##
+}
+
+}
+

@@ -50,18 +50,18 @@ aux_source_directory(src/luabind LOWLEVEL_SRC)
 aux_source_directory(luabind LOWLEVEL_SRC)
 
 find_program(PYTHON python3)
-if (PYTHON-NOTFOUND)
+if (${PYTHON} MATCHES PYTHON-NOTFOUND)
     find_program(PYTHON python)
-    if (PYTHON-NOTFOUND)
+    if (${PYTHON} MATCHES PYTHON-NOTFOUND)
         message(FATAL_ERROR "you must install python 3.0 and pip 3.0")
     endif()
 endif()
 
 # run python parser to generate luabind codes
-message("found pip and python")
 execute_process(
     COMMAND "${PIP} install" "-r utilities/ecs_parser/requirements.txt"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+message("-----------${PYTHON}-------------")
 execute_process(
     COMMAND ${PYTHON} "${CMAKE_SOURCE_DIR}/utilities/ecs_parser/parser.py"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

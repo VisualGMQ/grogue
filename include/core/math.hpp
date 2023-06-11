@@ -6,6 +6,7 @@
 #include <limits>
 #include <memory>
 #include <optional>
+#include "luabind_tag.hpp"
 
 //! \breif  if define this, will use std::numeric_limits<float>::epsilon() to compare floats. Or use ==
 #define GROGUE_MATH_FLOAT_COMPARE_USE_EPSILON
@@ -58,7 +59,7 @@ inline float Deg2Rad(float degree) {
 }
 
 //! @brief 3D vector which has x, y, z components
-class Vector3 {
+class LUA_BIND Vector3 {
 public:
     float x{}, y{}, z{};
 
@@ -185,7 +186,7 @@ inline Vector3 Normalize(const Vector3& v) {
 }
 
 //! @brief 2D vector which has x, y components
-class Vector2 {
+class LUA_BIND Vector2 {
 public:
     static const Vector2 Zero;  //!< @brief (0, 0)
     static const Vector2 XAxis; //!< @brief (1, 0)
@@ -326,7 +327,7 @@ inline float Length(const Vector2& v) {
     return std::sqrt(LengthSqrd(v));
 }
 
-struct Rect {
+struct LUA_BIND Rect {
     float x = 0, y = 0, w = 0, h = 0;
 
     Rect() = default;

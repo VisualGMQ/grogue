@@ -1,16 +1,19 @@
 import CppHeaderParser
 import os
 
-# TODO: change method/property name from aaBbCc to aa_bb_cc
 # TODO: regist static method/property
-# TODO: when regist function, return type/parameter type should add namespace prefix
 # TODO: more human-readable lua hint
-# TODO: generate ResourcesWrapper, CommandWrapper, EventWrapper, QuerierWrapper codes
+# TODO: regist global function
 
 LUA_BIND_TAG = "LUA_BIND"
 LUA_BIND_COMPONENT_TAG = "LUA_BIND_COMPONENT"
 LUA_BIND_RESOURCE_TAG = "LUA_BIND_RESOURCE"
 LUA_NOBIND_TAG = "LUA_NOBIND"
+
+COMMANDS_WRAPPER_INSERT_TAG = '##COMMANDS_WRAPPER_INSERT_TAG##'
+QUERIER_WRAPPER_INSERT_TAG = '##QUERIER_WRAPPER_INSERT_TAG##'
+RESOURCE_WRAPPER_INSERT_TAG = '##RESOURCE_WRAPPER_INSERT_TAG##'
+LUA_BIND_CONTENT_TAG = '##BIND_CONTENT##'
 
 class LuaBindType:
     NORMAL = 0
@@ -34,13 +37,13 @@ class ClassInfo:
 def parse_all_files(directories):
     parsed_files = {}
     for d in directories:
-        for root, ds, fs in os.walk(d):
+        for root, _, fs in os.walk(d):
             for f in fs:
                 fullname = os.path.join(root, f)
                 parsed_files[fullname] = CppHeaderParser.CppHeader(fullname)
     return parsed_files
 
-def create_classinfos(parsed_files):
+def create_classinfos(parsed_files) -> list[dict[str, list[ClassInfo]]]:
     classinfo_table = [{}, {}, {}]
     for file in parsed_files.values():
         for (name, value) in file.classes.items():
@@ -69,13 +72,42 @@ def create_classinfos(parsed_files):
                 classinfo_table[bind_type][info.name] = info
     return classinfo_table
 
+Operator2Lua = {
+    'operator==': '__eq',
+    'operator<': '__lt',
+    'operator%': '__mod',
+    'operator+': '__add',
+    'operator-': '__sub',
+    'operator*': '__mul',
+    'operator/': '__div',
+}
+
+def get_method_name_in_lua(name: str):
+    if name.find('operator') != -1:
+        if name in Operator2Lua:
+            return Operator2Lua[name]
+        else:
+            return None
+    else:
+        return name
+
+def get_name_with_namespace(name, classinfo_table: list[dict[str, ClassInfo]]) -> str:
+    for info in classinfo_table:
+        if name in info.keys():
+            return "{}::{}".format(info[name].namespace, name)
+    return None
+
+# strip complex name to raw name(eg: `const Vector2&` -> `Vector2`)
+def strip_name(name: str) -> str:
+    return name.replace('const ', '').replace('&', '').replace('mutable ', '').strip()
+
 def regist_type(name: str, info: ClassInfo):
-    namespace = info.namespace
-    lower_name = (namespace if namespace is not None else "") + name.lower()
-    name_without_namespace = name
-    name = '{}::{}'.format(namespace, name)
-    cpp_code = "sol::usertype<{}> {} = script.lua.new_usertype<{}>(\"{}\");\n".format(name, lower_name, name, name_without_namespace)
-    lua_comment = "---@class {}\n".format(name)
+    namespace: str = info.namespace
+    lower_name: str = (namespace if namespace is not None else "") + name.lower()
+    name_without_namespace: str = name
+    name: str = '{}::{}'.format(namespace, name)
+    cpp_code: str = "sol::usertype<{}> {} = script.lua.new_usertype<{}>(\"{}\");\n".format(name, lower_name, name, name_without_namespace)
+    lua_comment: str = "---@class {}\n".format(name_without_namespace)
     # bind properties
     for prop in info.properties:
         prop_name = prop['name']
@@ -88,12 +120,13 @@ def regist_type(name: str, info: ClassInfo):
     # bind methods
     for method_name, method in info.methods.items():
         method_name = method[0]['name']
+        method_name_in_lua = get_method_name_in_lua(method[0]['name'])
         # TODO: regist static function
-        if method_name == name_without_namespace or method[0]['rtnType'].find(LUA_NOBIND_TAG) != -1 or method_name.find('operator') != -1 or method[0]['static']:   # pass all constructor and operator and static function
+        if method_name_in_lua is None or method_name == name_without_namespace or method[0]['rtnType'].find(LUA_NOBIND_TAG) != -1 or method[0]['static']:   # pass all constructor and operator and static function
             continue
         if len(method) == 1:    # only one function, not exists overload
             method = method[0]
-            new_code = "{}[\"{}\"] = &{}::{};".format(lower_name, method_name.lower(), name, method_name)
+            new_code = "{}[\"{}\"] = &{}::{};".format(lower_name, method_name_in_lua, name, method_name)
         else:   # function has overload
             cast_tmpl = "static_cast<{}({}::*)({}) {}>(&{}::{})"
             overload_methods = ""
@@ -109,7 +142,7 @@ def regist_type(name: str, info: ClassInfo):
                 rtnType: str = m['rtnType']
                 overload = cast_tmpl.format(rtnType, name, parameter_str, 'const' if m['const'] else "", name, method_name)
                 overload_methods += overload + '\n'
-                new_code = "{}[\"{}\"] = sol::overload({});".format(lower_name, method_name.lower(), overload)
+                new_code = "{}[\"{}\"] = sol::overload({});".format(lower_name, method_name_in_lua, overload)
         # TODO generate more human-readable comment
         new_comment = "---@field {} {}".format(method_name, "func")
         cpp_code += new_code + '\n'
@@ -134,47 +167,85 @@ def generate_bind_code(classinfo: list):
         lua_comment += '\n' + new_comment
     return cpp_code, lua_comment
 
-BIND_LUA_CPP_TMPL = '''#include "luabind.hpp"
-namespace lua_bind {
+def generate_resource_wrapper_declare_code(resource_classinfo: dict[str, ClassInfo]):
+    codes = ""
+    for name, info in resource_classinfo.items():
+        codes += "{}::{}& Get{}() {{ return res_.Get<{}::{}>(); }}\n\t".format(info.namespace, name, name, info.namespace, name)
+    return codes
 
-using ui::UIEventListener;
-using ui::EventType;
+def generate_querier_wrapper_declare_code(component_classinfo: dict[str, ClassInfo]):
+    codes = ""
+    for name, info in component_classinfo.items():
+        codes += "IMPL_FUNC({}, {}::{});\n\t".format(name, info.namespace, name)
+    return codes
 
-void BindLua(LuaScript& script) {
-##CONTENT##
-}
+def generate_commands_wrapper_declare_code(component_classinfo: dict[str, ClassInfo]):
+    codes = ""
+    for name, info in component_classinfo.items():
+        codes += "IMPL_ADD_FUNC({}::{});\n\t".format(info.namespace, name)
+    return codes
 
-}'''
+def generate_resource_wrapper_bind_code(resource_classinfo: dict[str, ClassInfo]):
+    codes = 'sol::usertype<ResourcesWrapper> resources = script.lua.new_usertype<ResourcesWrapper>("Resources");\n'
+    for name, _ in resource_classinfo.items():
+        codes += 'resources["Get{}"] = &ResourcesWrapper::Get{};\n'.format(name, name)
+    return codes
 
-CONTENT_TAG = '##CONTENT##'
+def generate_querier_wrapper_bind_code(component_classinfo: dict[str, ClassInfo]):
+    codes = '''sol::usertype<QuerierWrapper> querier =
+        script.lua.new_usertype<QuerierWrapper>("Querier");
+    '''
+    for name, info in component_classinfo.items():
+        codes += 'BIND_QUERIER_FUNC({});\n'.format(name)
+    return codes
+
+def generate_commands_wrapper_bind_code(component_classinfo: dict[str, ClassInfo]):
+    codes = '''sol::usertype<CommandsWrapper> cmd = script.lua.new_usertype<CommandsWrapper>("Commands");
+    sol::overload(
+    {});
+    cmd["spawn"] = &CommandsWrapper::Spawn;
+    cmd["destroy_entity"] = &CommandsWrapper::DestroyEntity;\n'''
+
+    overload_code = ""
+    for name, info in component_classinfo.items():
+        overload_code += '\tstatic_cast<void(CommandsWrapper::*)(ecs::Entity, {}::{})>(&CommandsWrapper::Add),\n'.format(info.namespace, name)
+    overload_code = overload_code[:len(overload_code) - 2] + '\n'
+    return codes.format(overload_code)
+
+def generate_header_file(classinfo_table: list[dict[str, ClassInfo]]):
+    resource_wrapper_code = generate_resource_wrapper_declare_code(classinfo_table[LuaBindType.RESOURCES])
+    querier_wrapper_code = generate_querier_wrapper_declare_code(classinfo_table[LuaBindType.COMPONENT])
+    commands_wrapper_code = generate_commands_wrapper_declare_code(classinfo_table[LuaBindType.COMPONENT])
+    with open("./utilities/ecs_parser/luabind.hpp.tmpl") as f:
+        content = f.read()
+        content = content.replace(RESOURCE_WRAPPER_INSERT_TAG, resource_wrapper_code)
+        content = content.replace(COMMANDS_WRAPPER_INSERT_TAG, commands_wrapper_code)
+        content = content.replace(QUERIER_WRAPPER_INSERT_TAG, querier_wrapper_code)
+    with open("./luabind/luabind.hpp", 'w+') as f:
+        f.write(content)
+
+def generate_cpp_file(classinfo_table):
+    cpp_code, lua_comment = generate_bind_code(classinfo_table)
+    querier_impl_code = generate_querier_wrapper_bind_code(classinfo_table[LuaBindType.COMPONENT])
+    resource_impl_code = generate_resource_wrapper_bind_code(classinfo_table[LuaBindType.RESOURCES])
+    commands_impl_code = generate_commands_wrapper_bind_code(classinfo_table[LuaBindType.COMPONENT])
+    cpp_code += "{}\n\n{}\n\n{}".format(querier_impl_code, resource_impl_code, commands_impl_code)
+
+    with open("luabind/defs.lua", 'w+') as f:
+        f.write(lua_comment)
+
+    with open("./utilities/ecs_parser/luabind.cpp.tmpl") as f:
+        content = f.read()
+        with open("luabind/luabind.cpp", 'w+') as f2:
+            f2.write(content.replace(LUA_BIND_CONTENT_TAG, cpp_code))
 
 if __name__ == '__main__':
     directories = ["include/app", "include/core", "include/game"]
     parsed_files = parse_all_files(directories)
     classinfo_table = create_classinfos(parsed_files)
 
-    cpp_code, lua_comment = generate_bind_code(classinfo_table)
-
     if not os.path.exists("luabind"):
         os.mkdir("luabind")
 
-    with open("luabind/defs.lua", 'w+') as f:
-        f.write(lua_comment)
-
-    with open("luabind/luabind.hpp", 'w+') as f:
-        f.write('''#include "core/pch.hpp"
-#include "app/lua.hpp"
-#include "app/script.hpp"
-#include "game/types.hpp"
-#include "app/ui.hpp"
-
-namespace lua_bind {
-    void BindLua(LuaScript& script);
-}
-''')
-
-    with open("luabind/luabind.cpp", 'w+') as f:
-        f.write(BIND_LUA_CPP_TMPL.replace(CONTENT_TAG, cpp_code))
-
-    # print(cpp_code)
-    # print(lua_comment)
+    generate_header_file(classinfo_table)
+    generate_cpp_file(classinfo_table)
