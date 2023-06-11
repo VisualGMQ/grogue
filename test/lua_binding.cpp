@@ -11,13 +11,10 @@ void InitLuaScript(ecs::Commands& cmds, ecs::Resources res) {
     signalMgr.Regist(Func1, [](ecs::Commands&, ecs::Querier, ecs::Resources,
                                ecs::Events&) { LOGT("signaled"); });
     auto& luaMgr = res.Get<AssetsManager>().Lua();
-    auto parent = cmds.SpawnAndReturn<Node>(Node{});
-    auto child = cmds.SpawnAndReturn<Script, Node>(
+    auto parent = cmds.SpawnAndReturn<Script, Node>(
         Script::Create(luaMgr.CreateSolitary(
-            TestHelper::Instance().GetResourcePath() + "lua_script.lua")),
-        Node{});
-    HierarchyBuilder builder(cmds, parent);
-    builder.SetChilds({child});
+            TestHelper::Instance().GetResourcePath() + "lua_script.lua"))
+        ,Node{});
 }
 
 class Test final : public App {
@@ -26,8 +23,6 @@ public:
         auto& world = GetWorld();
         world.AddPlugins<DefaultPlugins>()
             .AddStartupSystem(InitLuaScript)
-            .AddSystem(RunScriptSystem)
-            .AddSystem(HierarchyRunScriptSystem)
             .AddSystem(ExitTrigger::DetectExitSystem);
     }
 };

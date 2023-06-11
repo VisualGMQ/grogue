@@ -14,7 +14,7 @@ public:
     HierarchyBuilder(ecs::Commands& cmds, ecs::Entity parent): cmds_(cmds), parent_(parent) {}
 
     //! @brief set entity childrens
-    ecs::Entity SetChilds(const std::initializer_list<ecs::Entity>& entities) {
+    ecs::Entity LUA_NOBIND SetChilds(const std::initializer_list<ecs::Entity>& entities) {
         cmds_.AddComponent<Node>(parent_, Node{std::nullopt, entities});
         for (auto entity : entities) {
             cmds_.AddComponent<Node>(entity, Node{parent_, {}});

@@ -5,7 +5,7 @@
 
 //! @brief a component for running lua script
 struct Script final {
-    LuaScript lua;
+    std::shared_ptr<LuaScript> lua;
     bool work = true;
     bool inited = false;
 
@@ -14,12 +14,12 @@ struct Script final {
 
 //! @brief resources for sharing variable between lua
 struct LUA_BIND_RESOURCE LuaShareContext final {
-    sol::table context;
+    sol::object context;
 };
 
 //! @brief resources for sharing variable between lua
 struct LUA_BIND LuaEventContext final {
-    sol::table context;
+    sol::object context;
 };
 
 void RunScriptSystem(ecs::Commands& cmd, ecs::Querier querier,

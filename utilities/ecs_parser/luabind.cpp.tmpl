@@ -2,6 +2,8 @@
 
 namespace lua_bind {
 
+SignalManagerWrapper ResourcesWrapper::GetSignalManager() { return res_.Get<SignalManager>(); }
+
 #define BIND_QUERIER_FUNC(name) \
 querier["Query" #name] = &QuerierWrapper::Query ## name; \
 querier["Has" #name] = &QuerierWrapper::Has ## name; \
@@ -10,21 +12,44 @@ querier["Get" #name] = &QuerierWrapper::Get ## name;
 using ui::UIEventListener;
 using ui::EventType;
 
+#define BindHandle(name) \
+{ \
+    sol::usertype<name> handle = script.lua.new_usertype<name>(#name); \
+    handle["IsValid"] = &::name::IsValid; \
+}
+
 void BindLua(LuaScript& script) {
     // some special class you should bind them handly
-    sol::usertype<::LuaShareContext> context =
-        script.lua.new_usertype<::LuaShareContext>("ShareContext");
-    context["context"] = &::LuaShareContext::context;
-
     sol::usertype<SignalManagerWrapper> signalMgr =
         script.lua.new_usertype<SignalManagerWrapper>("SignalManager");
     signalMgr["Raise"] = &SignalManagerWrapper::Raise;
     signalMgr["Remove"] = &SignalManagerWrapper::Remove;
     signalMgr["Regist"] = &SignalManagerWrapper::Regist;
 
+    BindHandle(FontHandle)
+    BindHandle(ImageHandle)
+    BindHandle(TimerHandle)
+
+    sol::usertype<MouseButton> mouseButton =
+        script.lua.new_usertype<MouseButton>("MouseButton");
+    mouseButton["IsPressed"] = &MouseButton::IsPressed;
+    mouseButton["IsReleased"] = &MouseButton::IsReleased;
+    mouseButton["IsPressing"] = &MouseButton::IsPressing;
+    mouseButton["IsReleasing"] = &MouseButton::IsReleasing;
+
+    sol::usertype<KeyButton> keyButton =
+        script.lua.new_usertype<KeyButton>("KeyButton");
+    keyButton["IsPressed"] = &KeyButton::IsPressed;
+    keyButton["IsReleased"] = &KeyButton::IsReleased;
+    keyButton["IsPressing"] = &KeyButton::IsPressing;
+    keyButton["IsReleasing"] = &KeyButton::IsReleasing;
+
+
     // auto-generate bind codes
 
     ##BIND_CONTENT##
+
+    resources["GetSignalManager"] = &ResourcesWrapper::GetSignalManager;
 }
 
 }

@@ -14,6 +14,8 @@
 
 namespace lua_bind {
 
+using std::function;
+
 #define IMPL_QUERY_FUNC(name, type) \
 std::vector<ecs::Entity> Query ## name() { \
     return querier_.Query<type>(); \
@@ -43,7 +45,7 @@ void Add(ecs::Entity entity, type elem) { \
     cmds_.AddComponent<type>(entity, std::move(elem)); \
 }
 
-struct LUA_BIND CommandsWrapper final {
+struct CommandsWrapper final {
 public:
     friend class SignalManagerWrapper;
 
@@ -61,7 +63,7 @@ private:
 using LuaEventContextReader = ecs::EventReader<::LuaEventContext>;
 using LuaEventContextWriter = ecs::EventWriter<::LuaEventContext>;
 
-class LUA_BIND EventsWrapper final {
+class EventsWrapper final {
 public:
     friend class SignalManagerWrapper;
 
@@ -80,7 +82,7 @@ private:
 };
 
 
-class LUA_BIND QuerierWrapper final {
+class QuerierWrapper final {
 public:
     friend class SignalManagerWrapper;
 
@@ -97,11 +99,13 @@ private:
 #undef IMPL_GET_FUNC
 #undef IMPL_FUNC
 
-class LUA_BIND ResourcesWrapper final {
+class ResourcesWrapper final {
 public:
     friend class SignalManagerWrapper;
 
     ResourcesWrapper(ecs::Resources res): res_(res) {}
+
+    SignalManagerWrapper GetSignalManager();
 
     ##RESOURCE_WRAPPER_INSERT_TAG##
 
@@ -109,7 +113,7 @@ private:
     ecs::Resources res_;
 };
 
-class LUA_BIND SignalManagerWrapper final {
+class SignalManagerWrapper final {
 public:
     using CallbackFunc = std::function<void(CommandsWrapper, QuerierWrapper, ResourcesWrapper, EventsWrapper)>;
 

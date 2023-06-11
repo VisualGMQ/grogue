@@ -15,7 +15,7 @@ function Startup(entity, cmds, res)
             print("regist function called") 
         end)
 
-    local context = res:GetShareContext()
+    local context = res:GetLuaShareContext()
     context.context = {
         msg = "hello",
     }
@@ -27,17 +27,18 @@ end
 ---@param res Resources
 ---@param events Events
 function Run(entity, cmds, querier, res, events)
+    -- print("running")
     local renderer = res:GetRenderer();
     renderer:SetDrawColor(Color.new(0, 200, 0, 255));
     renderer:DrawRect(Rect.new(100, 200, 100, 50));
 
     local mouse = res:GetMouse();
     if mouse:LeftBtn():IsPressed() then
-        local signal = res:get_signal_manager()
+        local signal = res:GetSignalManager()
         signal:Raise(0, cmds, querier, res, events)
         signal:Raise(1, cmds, querier, res, events)
 
-        local context = res:GetShareContext()
+        local context = res:GetLuaShareContext()
         print(context.context.msg)
     end
 end

@@ -83,9 +83,11 @@ Operator2Lua = {
     'operator/': '__div',
 }
 
-def get_method_name_in_lua(name: str):
+def get_method_name_in_lua(name: str, has_param: bool):
     if name.find('operator') != -1:
         if name in Operator2Lua:
+            if name == 'operator-':
+                return '__sub' if has_param else None
             return Operator2Lua[name]
         else:
             return None
@@ -142,11 +144,11 @@ def pack_method_in_overload(variable_name: str, class_name: str, class_name_with
 def generate_bind_method_code(variable_name: str, class_name: str, class_name_with_namespace, methods: dict[str, list], classinfo_table: list[dict[str, ClassInfo]]):
     bind_code = ""
     for method_name, method in methods.items():
-        method_name = method[0]['name']
-        method_name_in_lua = get_method_name_in_lua(method[0]['name'])
-        new_code = ""
+        m = method[0]
+        method_name = m['name']
+        method_name_in_lua = get_method_name_in_lua(m['name'], len(m['parameters']) != 0)
         # TODO: regist static function
-        if method_name_in_lua is None or method_name == class_name or method[0]['rtnType'].find(LUA_NOBIND_TAG) != -1 or method[0]['static']:   # pass all constructor and operator and static function
+        if method_name_in_lua is None or method_name == class_name  or method[0]['rtnType'].find(LUA_NOBIND_TAG) != -1 or method[0]['static']:   # pass all constructor and operator and static function
             continue
         if len(method) == 1:    # only one function, not exists overload
             method = method[0]
@@ -157,12 +159,31 @@ def generate_bind_method_code(variable_name: str, class_name: str, class_name_wi
                 bind_code += overload_method + ';\n'
     return bind_code
 
+def generate_constructor_type_code(class_name: str, class_name_with_namespace: str, method: dict, classinfo_table: list[dict[str, ClassInfo]]) -> str:
+    packed_param = pack_parameters(method, classinfo_table)
+    return "{}({})".format(class_name_with_namespace, packed_param)
+
+def generate_constructor_bind_code(class_name: str, class_name_with_namespace: str, methods: list[dict], classinfo_table: list[dict[str, ClassInfo]]) -> str:
+    cpp_code = ""
+    for i, method in enumerate(methods):
+        if method['deleted']:
+            return None
+        cpp_code += generate_constructor_type_code(class_name, class_name_with_namespace, method, classinfo_table)
+        if i != len(methods) - 1:
+            cpp_code += ','
+    return 'sol::constructors<{}>()'.format(cpp_code)
+
 def regist_type(name: str, info: ClassInfo, classinfo_table: list[dict[str, ClassInfo]]):
     namespace: str = info.namespace
     variable_name: str = (namespace if namespace is not None else "") + name.lower()
     name_without_namespace: str = name
     name: str = '{}::{}'.format(namespace, name)
-    cpp_code: str = "sol::usertype<{}> {} = script.lua.new_usertype<{}>(\"{}\");\n".format(name, variable_name, name, name_without_namespace)
+    constructor_code = None
+    if name_without_namespace in info.methods.keys():
+        code = generate_constructor_bind_code(name_without_namespace, name, info.methods[name_without_namespace], classinfo_table)
+        if code is not None and code.find("&&") == -1:
+            constructor_code = code 
+    cpp_code: str = "sol::usertype<{}> {} = script.lua.new_usertype<{}>(\"{}\"{});\n".format(name, variable_name, name, name_without_namespace, (', ' + constructor_code) if constructor_code is not None else '')
     lua_comment: str = "---@class {}\n".format(name_without_namespace)
     # bind properties
     for prop in info.properties:

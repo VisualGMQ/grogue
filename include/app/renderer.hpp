@@ -39,7 +39,7 @@ public:
     void DrawCircle(const math::Vector2& center, float radius, float subsection = 20);
     void DrawShape(const Shape&, const Transform&);
 
-    std::unique_ptr<TextTexture> GenTextTexture(const std::string& text, Font& font);
+    std::shared_ptr<TextTexture> GenTextTexture(const std::string& text, Font& font);
     std::unique_ptr<Image> GenTextImage(const std::string& text, Font& font);
     
     void SetClipArea(const math::Rect&);

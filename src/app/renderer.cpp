@@ -147,8 +147,8 @@ void Renderer::DrawShape(const Shape& shape, const Transform& transform) {
     }
 }
 
-std::unique_ptr<TextTexture> Renderer::GenTextTexture(const std::string& text, Font& font) {
-    return std::make_unique<TextTexture>(this, text, font);
+std::shared_ptr<TextTexture> Renderer::GenTextTexture(const std::string& text, Font& font) {
+    return std::make_shared<TextTexture>(this, text, font);
 }
 
 std::unique_ptr<Image> Renderer::GenTextImage(const std::string& text, Font& font) {
