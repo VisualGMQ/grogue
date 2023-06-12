@@ -47,14 +47,14 @@ float Length(const Vector2& v);
 //! @brief convert radians to degress
 //! @param radians 
 //! @return  degrees
-inline float Rad2Deg(float radians) {
+inline float LUA_BIND Rad2Deg(float radians) {
     return radians * 180.0 / PI;
 }
 
 //! @brief covert degress to radians
 //! @param degree 
 //! @return  radians
-inline float Deg2Rad(float degree) {
+inline float LUA_BIND Deg2Rad(float degree) {
     return degree * PI / 180.0;
 }
 
@@ -155,32 +155,32 @@ inline std::ostream& operator<<(std::ostream& stream, const Vector3& v) {
     return stream;
 }
 
-inline Vector3 Cross(const Vector3& v1, const Vector3& v2) {
+inline Vector3 LUA_BIND Cross(const Vector3& v1, const Vector3& v2) {
     return Vector3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z,
                    v1.x * v2.y - v1.y * v2.x);
 }
 
-inline float Dot(const Vector3& v1, const Vector3& v2) {
+inline float LUA_BIND Dot(const Vector3& v1, const Vector3& v2) {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
-inline float Distance(const Vector3& v1, const Vector3& v2) {
+inline float LUA_BIND Distance(const Vector3& v1, const Vector3& v2) {
     float dx = v1.x - v2.x;
     float dy = v1.y - v2.y;
     float dz = v1.z - v2.z;
     return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-inline float LengthSquare(const Vector3& v) {
+inline float LUA_BIND LengthSquare(const Vector3& v) {
     return Dot(v, v);
 }
 
-inline float Length(const Vector3& v) {
+inline float LUA_BIND Length(const Vector3& v) {
     return std::sqrt(LengthSquare(v));
 }
 
 //! @brief return a normalized vector. Don't change origin vector
-inline Vector3 Normalize(const Vector3& v) {
+inline Vector3 LUA_BIND Normalize(const Vector3& v) {
     float a = 1.0f / Length(v);
     return v * a;
 }
@@ -287,7 +287,7 @@ public:
 };
 
 //! @brief return a normalized vector. Don't change origin vector
-inline Vector2 Normalize(const Vector2& v) {
+inline Vector2 LUA_BIND Normalize(const Vector2& v) {
     float len = Length(v);
     if (FloatEq(len, 0)) {
         return Vector2::Zero;
@@ -305,25 +305,25 @@ inline std::ostream& operator<<(std::ostream& stream, const Vector2& v) {
     return stream;
 }
 
-inline float Cross(const Vector2& v1, const Vector2& v2) {
+inline float LUA_BIND Cross(const Vector2& v1, const Vector2& v2) {
     return v1.x * v2.y - v1.y * v2.x;
 }
 
-inline float Dot(const Vector2& v1, const Vector2& v2) {
+inline float LUA_BIND Dot(const Vector2& v1, const Vector2& v2) {
     return v1.x * v2.x + v1.y * v2.y;
 }
 
-inline float Distance(const Vector2& v1, const Vector2& v2) {
+inline float LUA_BIND Distance(const Vector2& v1, const Vector2& v2) {
     float dx = v1.x - v2.x;
     float dy = v1.y - v2.y;
     return std::sqrt(dx * dx + dy * dy);
 }
 
-inline float LengthSqrd(const Vector2& v) {
+inline float LUA_BIND LengthSqrd(const Vector2& v) {
     return Dot(v, v);
 }
 
-inline float Length(const Vector2& v) {
+inline float LUA_BIND Length(const Vector2& v) {
     return std::sqrt(LengthSqrd(v));
 }
 
@@ -423,18 +423,18 @@ private:
 //! @param v src vector
 //! @param radians angle in radians, in clockwise
 //! @return rotated vector
-inline Vector2 Rotate(const Vector2& v, float radians) {
+inline Vector2 LUA_BIND Rotate(const Vector2& v, float radians) {
     float c = std::cos(radians);
     float s = std::sin(radians);
 
     return Vector2(v.x * c - v.y * s, v.x * s + v.y * c);
 }
 
-inline Vector2 Scale(const Vector2& v, const Vector2& scale) {
+inline Vector2 LUA_BIND Scale(const Vector2& v, const Vector2& scale) {
     return Vector2(v.x * scale.x, v.y * scale.y);
 }
 
-inline Vector2 Translate(const Vector2& v, const Vector2& offset) {
+inline Vector2 LUA_BIND Translate(const Vector2& v, const Vector2& offset) {
     return Vector2(v.x + offset.x, v.y + offset.y);
 }
 

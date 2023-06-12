@@ -35,7 +35,7 @@ class ClassInfo:
                 self.methods[method_name] = [method]
         self.bind_type = bind_type
 
-def parse_all_files(directories):
+def parse_all_files(directories) -> dict[str, CppHeaderParser.CppHeader]:
     parsed_files = {}
     for d in directories:
         for root, _, fs in os.walk(d):
@@ -44,7 +44,28 @@ def parse_all_files(directories):
                 parsed_files[fullname] = CppHeaderParser.CppHeader(fullname)
     return parsed_files
 
-def create_classinfos(parsed_files) -> list[dict[str, list[ClassInfo]]]:
+def create_global_methodinfos(parsed_files: dict[str, CppHeaderParser.CppHeader]) -> dict[(str, str), list[CppHeaderParser.CppMethod]]:
+    methods: dict[(str, str), list[CppHeaderParser.CppMethod]] = {}
+    for file in parsed_files.values():
+        for method in file.functions:
+            if method['rtnType'].find(LUA_BIND_TAG) == -1:
+                continue
+            key = (method['name'], method['namespace'])
+            if key in methods:
+                methods[key].append(method)
+            else:
+                methods[key] = [method]
+    return methods
+
+def gather_namespaces(parsed_files: dict[str, CppHeaderParser.CppHeader]) -> list[str]:
+    namespaces = []
+    for file in parsed_files.values():
+        for namespace in file.namespaces:
+            if namespace not in namespaces:
+                namespaces.append(namespace)
+    return namespaces
+
+def create_classinfos(parsed_files: dict[str, CppHeaderParser.CppHeader]) -> list[dict[str, list[ClassInfo]]]:
     classinfo_table = [{}, {}, {}]
     for file in parsed_files.values():
         for (name, value) in file.classes.items():
@@ -118,7 +139,7 @@ def pack_parameters(method: dict, classinfo_table: list[dict[str, ClassInfo]]) -
         result += param_type + ("," if i != len(params) -1 else "")
     return result
 
-def pack_method_type_for_overload(class_name: str, class_name_with_namespace: str, method_name: str, method: dict, classinfo_table: list[dict[str, ClassInfo]]) -> str:
+def pack_class_method_type_for_overload(class_name_with_namespace: str, method_name: str, method: dict, classinfo_table: list[dict[str, ClassInfo]]) -> str:
     tmpl = "static_cast<{}({}::*)({}) {}>(&{}::{})"
     packed_params = pack_parameters(method, classinfo_table)
     if packed_params is None:
@@ -126,18 +147,37 @@ def pack_method_type_for_overload(class_name: str, class_name_with_namespace: st
     rntType = generate_parameter_type_with_namespace(method['rtnType'], classinfo_table)
     return tmpl.format(rntType, class_name_with_namespace, packed_params, 'const' if method['const'] else "", class_name_with_namespace, method_name)
 
+def pack_global_method_type_for_overload(namespace: str, method_name: str, method: dict, classinfo_table: list[dict[str, ClassInfo]]) -> str:
+    tmpl = "static_cast<{}(*)({})>(&{}::{})"
+    packed_params = pack_parameters(method, classinfo_table)
+    if packed_params is None:
+        return None
+    raw_rntType = method['rtnType'].replace(LUA_BIND_TAG, '')
+    rntType = generate_parameter_type_with_namespace(raw_rntType, classinfo_table)
+    return tmpl.format(rntType, packed_params, namespace, method_name)
+
 def pack_method(class_name: str, method_name: str):
     return "&{}::{};".format(class_name, method_name)
 
-def pack_method_in_overload(variable_name: str, class_name: str, class_name_with_namespace: str, methods: list, method_name: str, method_name_in_lua: str, classinfo_table: list[dict[str, ClassInfo]]):
+def pack_class_method_in_overload(class_name_with_namespace: str, methods: list, method_name: str, classinfo_table: list[dict[str, ClassInfo]]):
     overload_str = ""
     for m in methods:
-        cast_code = pack_method_type_for_overload(class_name, class_name_with_namespace, method_name, m, classinfo_table)
+        cast_code = pack_class_method_type_for_overload(class_name_with_namespace, method_name, m, classinfo_table)
         if cast_code is not None:
             overload_str += cast_code + '\n,'
     if overload_str == "":
         return None
-    return "{}[\"{}\"] = sol::overload({})".format(variable_name, method_name_in_lua, overload_str[: len(overload_str) - 1])
+    return overload_str[: len(overload_str) - 1]
+
+def pack_global_method_in_overload(namespace: str, methods: list, method_name: str, classinfo_table: list[dict[str, ClassInfo]]):
+    overload_str = ""
+    for m in methods:
+        cast_code = pack_global_method_type_for_overload(namespace, method_name, m, classinfo_table)
+        if cast_code is not None:
+            overload_str += cast_code + '\n,'
+    if overload_str == "":
+        return None
+    return overload_str[: len(overload_str) - 1]
 
 def generate_bind_method_code(variable_name: str, class_name: str, class_name_with_namespace, methods: dict[str, list], classinfo_table: list[dict[str, ClassInfo]]):
     bind_code = ""
@@ -152,7 +192,7 @@ def generate_bind_method_code(variable_name: str, class_name: str, class_name_wi
             method = method[0]
             bind_code += '{}[\"{}\"] = {}'.format(variable_name, method_name_in_lua, pack_method(class_name_with_namespace, method_name) + '\n')
         else:   # function has overload
-            overload_method = pack_method_in_overload(variable_name, class_name, class_name_with_namespace, method, method_name, method_name_in_lua, classinfo_table)
+            overload_method = "{}[\"{}\"] = sol::overload({})".format(variable_name, method_name_in_lua, pack_class_method_in_overload(class_name_with_namespace, method, method_name, classinfo_table))
             if overload_method is not None:
                 bind_code += overload_method + ';\n'
     return bind_code
@@ -254,12 +294,38 @@ def generate_header_file(classinfo_table: list[dict[str, ClassInfo]]):
     with open("./luabind/luabind.hpp", 'w+') as f:
         f.write(content)
 
-def generate_cpp_file(classinfo_table):
+def generate_global_method_bind_code(methods: dict[(str, str), list[CppHeaderParser.CppMethod]], clasinfo_table) -> str:
+    cpp_code = ""
+    for key, method_list in methods.items():
+        name = key[0]
+        namespace = key[1].replace(':', '')
+        if len(method_list) > 1:
+            packed_func = 'sol::overload({})'.format(pack_global_method_in_overload(namespace, method_list, name, classinfo_table))
+            if namespace != '':
+                cpp_code += 'namespace_{}["{}"] = {};\n'.format(namespace, name, packed_func)
+            else:
+                cpp_code += 'script.lua["{}"] = {};\n'.format(name, packed_func)
+        else:
+            if namespace != '':
+                cpp_code += 'namespace_{}["{}"] = {}::{};\n'.format(namespace, name, namespace, name)
+            else:
+                cpp_code += 'script.lua["{}"] = ::{};\n'.format(name, name)
+    return cpp_code
+
+def generate_namespace_bind_code(namespaces: list[str]) -> str:
+    cpp_code = ""
+    for namespace in namespaces:
+        cpp_code += 'auto namespace_{} = script.lua["{}"].get_or_create<sol::table>();\n'.format(namespace, namespace)
+    return cpp_code
+
+def generate_cpp_file(classinfo_table, methods):
     cpp_code, lua_comment = generate_bind_code(classinfo_table)
+    namespace_code = generate_namespace_bind_code(namespaces)
     querier_impl_code = generate_querier_wrapper_bind_code(classinfo_table[LuaBindType.COMPONENT])
     resource_impl_code = generate_resource_wrapper_bind_code(classinfo_table[LuaBindType.RESOURCES])
     commands_impl_code = generate_commands_wrapper_bind_code(classinfo_table[LuaBindType.COMPONENT])
-    cpp_code += "{}\n\n{}\n\n{}".format(querier_impl_code, resource_impl_code, commands_impl_code)
+    global_method_bind_code = generate_global_method_bind_code(methods, classinfo_table)
+    cpp_code = "{}\n{}\n{}\n{}\n\n{}\n\n{}".format(namespace_code, cpp_code, global_method_bind_code, querier_impl_code, resource_impl_code, commands_impl_code)
 
     with open("luabind/defs.lua", 'w+') as f:
         f.write(lua_comment)
@@ -271,11 +337,13 @@ def generate_cpp_file(classinfo_table):
 
 if __name__ == '__main__':
     directories = ["include/app", "include/core", "include/game"]
-    parsed_files = parse_all_files(directories)
+    parsed_files: dict[str, CppHeaderParser.CppHeader] = parse_all_files(directories)
     classinfo_table = create_classinfos(parsed_files)
+    methods = create_global_methodinfos(parsed_files)
+    namespaces = gather_namespaces(parsed_files)
 
     if not os.path.exists("luabind"):
         os.mkdir("luabind")
 
     generate_header_file(classinfo_table)
-    generate_cpp_file(classinfo_table)
+    generate_cpp_file(classinfo_table, methods)
