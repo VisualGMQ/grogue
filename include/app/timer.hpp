@@ -16,9 +16,9 @@ public:
     static uint32_t GetFPS() { return fps_; }
 
     Time();
-    Time(const Time&) = delete;
+    LUA_NOBIND Time(const Time&) = delete;
     Time(Time&&) = default;
-    Time& operator=(const Time&) = delete;
+    LUA_NOBIND Time& operator=(const Time&) = delete;
     Time& operator=(Time&&) = default;
 
     //! @brief get elapse time between two frame (in millisecond)

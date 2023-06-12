@@ -432,26 +432,6 @@ private:
 
     using DestroyFunc = void (*)(void *);
 
-    template <typename T>
-    struct RValueStaging final {
-    public:
-        static void Save(T &&value) {
-            value_ = std::move(value);
-            valid_ = true;
-        }
-
-        static bool Valid() { return valid_; }
-
-        static T &&Move() {
-            valid_ = false;
-            return std::move(value_);
-        }
-
-    private:
-        inline static T value_;
-        inline static bool valid_ = false;
-    };
-
     struct ResourceDestroyInfo {
         uint32_t index;
         DestroyFunc destroy;
@@ -496,14 +476,7 @@ private:
         info.index = IndexGetter::Get<T>();
         info.create = [](void) -> void * { return new T; };
         info.destroy = [](void *elem) { delete (T *)elem; };
-        if constexpr (std::is_reference_v<decltype(component)>) {
-            RValueStaging<T>::Save(std::move(component));
-            info.assign = [](void *elem) {
-                *((T *)elem) = RValueStaging<T>::Move();
-            };
-        } else {
-            info.assign = [=](void *elem) { *((T *)elem) = component; };
-        }
+        info.assign = [=, c = std::move(component)](void *elem) mutable { *((T *)elem) = std::move(c); };
         spawnInfo.push_back(info);
 
         if constexpr (sizeof...(Remains) != 0) {
@@ -802,7 +775,8 @@ inline void World::Update() {
     rootNodeEntity.clear();
     nodeEntities = querier.Query<Node>();
     for (auto entity : nodeEntities) {
-        if (!querier.Get<Node>(entity).parent) {
+        auto& node = querier.Get<Node>(entity);
+        if (!node.parent) {
             rootNodeEntity.push_back(entity);
         }
     }

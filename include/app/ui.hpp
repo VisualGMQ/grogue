@@ -31,12 +31,12 @@ struct LUA_BIND_COMPONENT RectTransform final {
 
 //! @brief component for ui which want to show a text on it
 struct /*LUA_BIND_COMPONENT*/ Text final {
-    std::unique_ptr<TextTexture> text;
+    std::shared_ptr<TextTexture> text;
     ColorBundle color;
     math::Vector2 offset;
 
-    static Text Create(std::unique_ptr<TextTexture>&& texture, const ColorBundle& color, const math::Vector2& offset) {
-        return Text{std::move(texture), color, offset};
+    static Text&& Create(std::shared_ptr<TextTexture>& texture, const ColorBundle& color, const math::Vector2& offset) {
+        return std::move(Text{texture, color, offset});
     }
 };
 
