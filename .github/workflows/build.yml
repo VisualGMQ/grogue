@@ -18,11 +18,11 @@ jobs:
 
       - name: Install Dependencies on Ubuntu
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install libsdl2-*
+        run: sudo apt-get update && sudo apt-get install libsdl2-* python3
       
       - name: Install Dependencies on MacOS
         if: runner.os == 'maxOS'
-        run: brew install sdl2 sdl2_mixer sdl2_net sdl2_image sdl2_ttf
+        run: brew install sdl2 sdl2_mixer sdl2_net sdl2_image sdl2_ttf python3
 
       - name: Pull Submodules
         run: git submodule update --init --recursive
@@ -41,26 +41,18 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        arch: [i686, x86_64]
+        arch: [x86_64]
     defaults:
         run:
           shell: msys2 {0}
     steps:
-      - name: Setup MSYS2 x86
-        uses: msys2/setup-msys2@v2
-        if: matrix.arch == 'i686'
-        with:
-          msystem: MINGW32
-          update: true
-          install: base-devel git gcc mingw-w64-${{matrix.arch}}-cmake mingw-w64-${{matrix.arch}}-gcc
-
       - name: Setup MSYS2 x64
         uses: msys2/setup-msys2@v2
         if: matrix.arch == 'x86_64'
         with:
           msystem: MINGW64
           update: true
-          install: base-devel git gcc mingw-w64-${{matrix.arch}}-cmake mingw-w64-${{matrix.arch}}-gcc
+          install: base-devel git gcc mingw-w64-${{matrix.arch}}-cmake mingw-w64-${{matrix.arch}}-gcc python3
 
       - name: Check out repository code
         uses: actions/checkout@v3

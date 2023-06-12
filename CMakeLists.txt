@@ -55,25 +55,33 @@ if (${PYTHON} MATCHES PYTHON-NOTFOUND)
     endif()
 endif()
 
+message("fount python3")
+
+find_program(PIP pip3)
+if (${PIP} MATCHES PIP-NOTFOUND)
+    find_program(PIP pip)
+    if (${PIP} MATCHES PIP-NOTFOUND)
+        message(FATAL_ERROR "you must install python 3.0 and pip 3.0")
+    endif()
+endif()
+
+message("fount pip3")
+
 # run python parser to generate luabind codes
-execute_process(
-    COMMAND "${PIP} install" "-r utilities/ecs_parser/requirements.txt"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-execute_process(
-    COMMAND ${PYTHON} "${CMAKE_SOURCE_DIR}/utilities/ecs_parser/parser.py"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-aux_source_directory(luabind LOWLEVEL_SRC)
-
-
-add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC})
-target_include_directories(${LOWLEVEL_NAME} PRIVATE luabind)
+file(GLOB_RECURSE CPP_INCLUDE_FILES *.hpp)
 
 add_custom_command(
-    TARGET ${LOWLEVEL_NAME}
-    PRE_BUILD
-    COMMAND ${PYTHON} "${CMAKE_SOURCE_DIR}/utilities/ecs_parser/parser.py"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+    OUTPUT ${CMAKE_SOURCE_DIR}/luabind/luabind.hpp ${CMAKE_SOURCE_DIR}/luabind/luabind.cpp ${CMAKE_SOURCE_DIR}/luabind/def.lua
+    COMMAND ${PIP} install -r utilities/ecs_parser/requirements.txt
+    COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/utilities/ecs_parser/parser.py
+    COMMENT "run parser to parse C++ header file, generate lua bind codes"
+    DEPENDS ./utilities/ecs_parser/parser.py ${CPP_INCLUDE_FILES}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    VERBATIM
+)
+
+add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CMAKE_SOURCE_DIR}/luabind/luabind.cpp ${CMAKE_SOURCE_DIR}/luabind/luabind.hpp ${CPP_INCLUDE_FILES})
+target_include_directories(${LOWLEVEL_NAME} PRIVATE luabind)
 
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
