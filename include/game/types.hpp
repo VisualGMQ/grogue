@@ -4,13 +4,13 @@
 #include "app/sprite.hpp"
 
 // entity's material
-struct Material final {
+struct LUA_BIND Material final {
     float opaque;   // in [0, 1]. 0 means transparent, 1 means opaque
     float solid;    // in [0, 1]. [0, 0.3) means gass, [0.3, 0.6) means liquid, [0.6, 1.0] mean solid
     float lumen;    // in [0, +inf). 0 means no emission.
 };
 
-struct MonsterProperty final {
+struct LUA_BIND MonsterProperty final {
     int strength;       // affect attack damage, bearing amount
     int intelligence;   // affect mp recover speed
     int outsight;       // affect find trap speed
@@ -21,24 +21,24 @@ struct MonsterProperty final {
     int mp;
 };
 
-struct MonsterMetaProperty final {
+struct LUA_BIND MonsterMetaProperty final {
     Material material;
     MonsterProperty basic; // basic property on level 0
     MonsterProperty max;   // max property, monster property can't beyond this property
 };
 
-struct MonsterInfo final {
+struct LUA_BIND MonsterInfo final {
     std::string_view race;
     Material material;
     MonsterProperty property;
     int level;
 };
 
-struct RaceAddition final {
+struct LUA_BIND RaceAddition final {
     MonsterProperty addition;
 };
 
-struct EntityProperty final {
+struct LUA_BIND EntityProperty final {
     float solid; //!< in [0, 100]
                  //!< - [0.0, 30): gass
                  //!< - [30, 60): liquid
@@ -77,7 +77,7 @@ struct Buff final {
 using ItemOpFunc = std::function<bool(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&)>;
 
 //! @brief game item
-struct Item final {
+struct LUA_BIND Item final {
     std::string nameID; //!< raw nameID in GameConfig
     int amount = 1;
     // std::string name; // new name for item
@@ -91,23 +91,24 @@ struct Item final {
     }
 };
 
-struct ItemInfo final {
+struct LUA_BIND ItemOperation {
+    std::string operate;
+    bool valid;
+};
+
+struct LUA_BIND ItemInfo final {
     std::string name;
     int weight;
-    struct Operation {
-        std::string operate;
-        bool valid;
-    };
-    std::vector<Operation> operations;
+    std::vector<ItemOperation> operations;
     SpriteBundle sprite;
 };
 
 //! @brief backpack component for monster
-struct Backpack final {
+struct LUA_BIND_COMPONENT Backpack final {
     std::vector<Item> items;
 };
 
-struct BackpackUIInfo final {
+struct LUA_BIND BackpackUIInfo final {
     int width;
     int height;
     int gridSize;
@@ -119,21 +120,22 @@ struct BackpackUIInfo final {
 };
 
 
+enum class TerrianType {
+    DryLand,
+    Water,
+};
 
 struct Terrian final {
-    enum class Type {
-        DryLand,
-        Water,
-    } type;
+    TerrianType type;
     EntityProperty property;
     SpriteBundle sprite;
 };
 
 //! @brief tag component for backpack panel UI
-struct BackpackUIPanel {};
+struct LUA_BIND_COMPONENT BackpackUIPanel {};
 
 /// @brief a tag component to point out player entity
-struct Player {};
+struct LUA_BIND_COMPONENT Player {};
 
 constexpr float SCALE = 2.0;
 

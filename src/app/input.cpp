@@ -1,8 +1,8 @@
 #include "app/input.hpp"
 
 Keyboard::Keyboard() {
-    for (int i = 0; i < SDL_NUM_SCANCODES; i++) {
-        buttons_[i].btn = static_cast<SDL_Scancode>(i);
+    for (int i = 0; i < Key::KEY_NUM; i++) {
+        buttons_[i].btn = static_cast<::Key>(i);
     }
 }
 
@@ -28,7 +28,7 @@ void Keyboard::UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources resourc
 
 void Keyboard::updateOneKey(const SDL_KeyboardEvent& event) {
     auto& btn = buttons_[event.keysym.scancode];
-    btn.lastState = btn.isPress;
+    btn.lastState = static_cast<::Key>(btn.isPress);
     if (event.type == SDL_KEYDOWN) {
         btn.isPress = true;
     }

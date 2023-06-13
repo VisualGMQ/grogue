@@ -18,5 +18,6 @@ endmacro()
 macro(CopyDefScript target_name)
     add_custom_command(
         TARGET ${target_name} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/luabind/defs.lua $<TARGET_FILE_DIR:${target_name}>)
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/luabind/defs.lua $<TARGET_FILE_DIR:${target_name}>
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/luabind/defs.lua ${CMAKE_SOURCE_DIR}/resources/script)
 endmacro()

@@ -6,12 +6,12 @@
 
 // some config data for auto-parse tool
 
-struct RaceProfDefPOD final {
+struct LUA_BIND RaceProfDefPOD final {
     std::vector<std::string> races;
     std::vector<std::string> professions;
 };
 
-struct MonsterPropertyRange final {
+struct LUA_BIND MonsterPropertyRange final {
     std::array<int, 2> hp;
     std::array<int, 2> mp;
     std::array<int, 2> strength;
@@ -22,24 +22,24 @@ struct MonsterPropertyRange final {
     std::array<int, 2> nutrition;
 };
 
-struct RacePOD final {
+struct LUA_BIND RacePOD final {
     std::string name;
     MonsterProperty basic;
     MonsterProperty max;
     std::vector<MonsterPropertyRange> professions;
 };
 
-struct TilesheetPOD final {
+struct LUA_BIND TilesheetPOD final {
     std::string name;
     int row, col;
 };
 
-struct SpritePOD final {
+struct LUA_BIND SpritePOD final {
     std::array<int, 4> color;
     TilesheetPOD tilesheet;
 };
 
-struct ItemPOD final {
+struct LUA_BIND ItemPOD final {
     std::string name;
     int weight;
     std::vector<std::string> operations;
@@ -106,7 +106,7 @@ ReflRegist(
         .Member(&BackpackUIInfo::margin, "margin")
 )
 
-class RaceProfDef final {
+class LUA_BIND RaceProfDef final {
 public:
     RaceProfDef(LuaManager&, const std::string& filename);
     const std::vector<std::string>& Races() const { return data_.races; }
@@ -118,7 +118,7 @@ private:
     bool valid_;
 };
 
-class RaceProfConfig final {
+class LUA_BIND RaceProfConfig final {
 public:
     RaceProfConfig(LuaManager&, const RaceProfDef& defs, const std::string& filename);
     bool Valid() const { return valid_; }
@@ -128,7 +128,7 @@ private:
     bool valid_;
 };
 
-class ItemConfig final {
+class LUA_BIND ItemConfig final {
 public:
     ItemConfig(LuaManager&, TilesheetManager&, const std::string& filename);
 
@@ -146,7 +146,7 @@ private:
     bool valid_;
 };
 
-class BackpackUIConfig final {
+class LUA_BIND BackpackUIConfig final {
 public:
     BackpackUIConfig(LuaManager&, const std::string& filename);
     const BackpackUIInfo& Info() const { return info_; }
@@ -160,13 +160,13 @@ private:
 };
 
 //! @brief contains all game config
-class GameConfig final {
+class LUA_BIND GameConfig final {
 public:
     explicit GameConfig(LuaManager&, TilesheetManager&, const std::string& configDir);
 
     auto& GetRaceProfDef() const { return *raceProfDef_; }
     auto& GetRaceProfConfig() const { return raceProfConfig_; }
-    auto& GetItemConfig() const { return itemConfig_; }
+    auto& GetItemConfig() const { return *itemConfig_; }
     auto& GetBackpackUIConfig() const { return *backpackUIConfig_; }
 
     //! @brief whether config init OK
@@ -174,7 +174,7 @@ public:
 
 private:
     std::unique_ptr<RaceProfDef> raceProfDef_;
-    std::vector<std::unique_ptr<RaceProfConfig>> raceProfConfig_;
+    std::vector<std::shared_ptr<RaceProfConfig>> raceProfConfig_;
     std::unique_ptr<ItemConfig> itemConfig_;
     std::unique_ptr<BackpackUIConfig> backpackUIConfig_;
     bool valid_;

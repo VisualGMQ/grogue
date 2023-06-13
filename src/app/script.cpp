@@ -17,7 +17,7 @@ void runOneScript(ecs::Entity entity, ecs::Commands& cmds, Script& script, ecs::
             auto func = script.lua->lua["Startup"];
             if (func.valid()) {
                 sol::protected_function f = func;
-                sol::protected_function_result result = f(entity, luaCmds, luaRes);
+                sol::protected_function_result result = f(entity, std::ref(luaCmds), std::ref(luaRes));
                 if (!result.valid()) {
                     sol::error err = result;
                     LOGE("[Lua Error]: ", err.what());
@@ -28,7 +28,7 @@ void runOneScript(ecs::Entity entity, ecs::Commands& cmds, Script& script, ecs::
         auto func = script.lua->lua["Run"];
         if (func.get_type() == sol::type::function) {
             sol::protected_function f = func;
-            sol::protected_function_result result = f(entity, luaCmds, luaQuerier, luaRes, luaEvents);
+            sol::protected_function_result result = f(entity, std::ref(luaCmds), std::ref(luaQuerier), std::ref(luaRes), std::ref(luaEvents));
             if (!result.valid()) {
                     sol::error err = result;
                     LOGE("[Lua Error]: ", err.what());

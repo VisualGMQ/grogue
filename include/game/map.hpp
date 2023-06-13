@@ -8,12 +8,12 @@
 #include "app/tilesheet.hpp"
 #include "app/renderer.hpp"
 
-struct MapTile final {
+struct LUA_BIND MapTile final {
     Terrian terrian;
     std::vector<Item> items;
 };
 
-struct Map final {
+struct LUA_BIND Map final {
     Map(int w, int h): tiles(w, h) {}
 
     math::HeapMatrix<MapTile> tiles;
@@ -21,7 +21,7 @@ struct Map final {
     std::vector<ecs::Entity> entities;   //!< moveable entities
 };
 
-struct MapManager final {
+struct LUA_BIND_RESOURCE MapManager final {
 public:
     void Add(std::shared_ptr<Map> map) { maps_.push_back(map); }
     const std::shared_ptr<Map>& GetCurrentMap() const { return maps_[currentIdx_]; }

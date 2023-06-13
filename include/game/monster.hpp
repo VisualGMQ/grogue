@@ -13,7 +13,8 @@ enum class Direction: uint8_t {
     Right = 0x08,
 };
 
-struct Monster final {
+//! @brief component for all monster(include player)
+struct LUA_BIND_COMPONENT Monster final {
     enum DirIdx {
         Right = 0,
         Up = 1,

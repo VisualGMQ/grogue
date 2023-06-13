@@ -13,6 +13,14 @@
 
 #define assertm(msg, expr) assert(((void)msg, (expr)))
 
+// fwd declarea luabind relate class
+namespace lua_bind {
+    class CommandsWrapper;
+    class QuerierWrapper;
+    class ResourcesWrapper;
+    class EventsWrapper;
+}
+
 namespace ecs {  // fwd declare
 
 using ComponentID = uint32_t;

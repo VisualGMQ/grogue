@@ -9,7 +9,7 @@ enum TestSignalFnc {
 void InitLuaScript(ecs::Commands& cmds, ecs::Resources res) {
     auto& signalMgr = res.Get<SignalManager>();
     signalMgr.Regist(Func1, [](ecs::Commands&, ecs::Querier, ecs::Resources,
-                               ecs::Events&) { LOGT("signaled"); });
+                               ecs::Events&, void*) { LOGT("signaled"); });
     auto& luaMgr = res.Get<AssetsManager>().Lua();
     auto parent = cmds.SpawnAndReturn<Script, Node>(
         Script::Create(luaMgr.CreateSolitary(

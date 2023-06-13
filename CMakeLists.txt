@@ -71,17 +71,17 @@ message("fount pip3")
 file(GLOB_RECURSE CPP_INCLUDE_FILES *.hpp)
 
 add_custom_command(
-    OUTPUT ${CMAKE_SOURCE_DIR}/luabind/luabind.hpp ${CMAKE_SOURCE_DIR}/luabind/luabind.cpp ${CMAKE_SOURCE_DIR}/luabind/def.lua
-    COMMAND ${PIP} install -r utilities/ecs_parser/requirements.txt
-    COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/utilities/ecs_parser/parser.py
+    OUTPUT ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CMAKE_BINARY_DIR}/luabind/luabind.cpp ${CMAKE_BINARY_DIR}/luabind/def.lua
+    COMMAND ${PIP} install -r utilities/luabind_parser/requirements.txt
+    COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/utilities/luabind_parser/parser.py "${CMAKE_BINARY_DIR}"
     COMMENT "run parser to parse C++ header file, generate lua bind codes"
-    DEPENDS ./utilities/ecs_parser/parser.py ${CPP_INCLUDE_FILES}
+    DEPENDS ./utilities/luabind_parser/parser.py ${CPP_INCLUDE_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     VERBATIM
 )
 
-add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CMAKE_SOURCE_DIR}/luabind/luabind.cpp ${CMAKE_SOURCE_DIR}/luabind/luabind.hpp ${CPP_INCLUDE_FILES})
-target_include_directories(${LOWLEVEL_NAME} PRIVATE luabind)
+add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CMAKE_BINARY_DIR}/luabind/luabind.cpp ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CPP_INCLUDE_FILES})
+target_include_directories(${LOWLEVEL_NAME} PRIVATE ${CMAKE_BINARY_DIR}/luabind)
 
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
@@ -139,15 +139,15 @@ else()
 endif()
 
 # auto format
-option(AUTO_FORMAT "should auto-format before build using clang-format?" ON)
-mark_as_advanced(FORCE AUTO_FORMAT)
-if (AUTO_FORMAT)
-    message("enable auto format")
-    add_custom_command(TARGET ${GAME_NAME} PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -P cmake/format.cmake
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                    COMMENT "start format")
-endif()
+# option(AUTO_FORMAT "should auto-format before build using clang-format?" ON)
+# mark_as_advanced(FORCE AUTO_FORMAT)
+# if (AUTO_FORMAT)
+#     message("enable auto format")
+#     add_custom_command(TARGET ${GAME_NAME} PRE_BUILD
+#                     COMMAND ${CMAKE_COMMAND} -P cmake/format.cmake
+#                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+#                     COMMENT "start format")
+# endif()
 
 
 # doc generate

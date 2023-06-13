@@ -8,9 +8,13 @@
 #include "app/sprite.hpp"
 #include "app/font.hpp"
 #include "app/ui.hpp"
-#include "game/types.hpp"
 #include "app/script.hpp"
 #include "app/timer.hpp"
+#include "game/types.hpp"
+#include "game/monster.hpp"
+#include "game/config.hpp"
+#include "game/map.hpp"
+#include "game/game.hpp"
 
 namespace lua_bind {
 
@@ -27,7 +31,7 @@ bool Has ## name(ecs::Entity entity) { \
 }
 
 #define IMPL_GET_FUNC(name, type) \
-auto Get ## name(ecs::Entity entity) { \
+auto& Get ## name(ecs::Entity entity) { \
     return querier_.Get<type>(entity); \
 } 
 
@@ -45,6 +49,11 @@ void Add(ecs::Entity entity, type elem) { \
     cmds_.AddComponent<type>(entity, std::move(elem)); \
 }
 
+using ecs::Commands;
+using ecs::Events;
+using ecs::Querier;
+using ecs::Resources;
+
 struct CommandsWrapper final {
 public:
     friend class SignalManagerWrapper;
@@ -55,6 +64,10 @@ public:
     void DestroyEntity(ecs::Entity entity) { cmds_.DestroyEntity(entity); }
 
     ##COMMANDS_WRAPPER_INSERT_TAG##
+
+    auto& Raw() {
+        return cmds_;
+    }
 
 private:
     ecs::Commands& cmds_;
@@ -77,6 +90,10 @@ public:
         return events_.Writer<::LuaEventContext>();
     }
 
+    auto& Raw() {
+        return events_;
+    }
+
 private:
     ecs::Events& events_;
 };
@@ -89,6 +106,10 @@ public:
     QuerierWrapper(ecs::Querier querier): querier_(querier) {}
 
     ##QUERIER_WRAPPER_INSERT_TAG##
+
+    auto Raw() {
+        return querier_;
+    }
 
 private:
     ecs::Querier querier_;
@@ -109,13 +130,17 @@ public:
 
     ##RESOURCE_WRAPPER_INSERT_TAG##
 
+    auto Raw() {
+        return res_;
+    }
+
 private:
     ecs::Resources res_;
 };
 
 class SignalManagerWrapper final {
 public:
-    using CallbackFunc = std::function<void(CommandsWrapper, QuerierWrapper, ResourcesWrapper, EventsWrapper)>;
+    using CallbackFunc = std::function<void(CommandsWrapper, QuerierWrapper, ResourcesWrapper, EventsWrapper, sol::object&)>;
 
     SignalManagerWrapper(SignalManager& raw): raw_(raw) {}
 
@@ -123,15 +148,15 @@ public:
         raw_.Remove(name);
     }
 
-    void Raise(uint32_t name, CommandsWrapper cmds, QuerierWrapper querier, ResourcesWrapper res, EventsWrapper events) {
-        raw_.Raise(name, cmds.cmds_, querier.querier_, res.res_, events.events_);
+    void Raise(uint32_t name, CommandsWrapper cmds, QuerierWrapper querier, ResourcesWrapper res, EventsWrapper events, sol::object& param) {
+        raw_.Raise(name, cmds.cmds_, querier.querier_, res.res_, events.events_, (void*)&param);
     }
 
     void Regist(uint32_t name, CallbackFunc func) {
         raw_.Regist(name, [=](ecs::Commands& cmds, ecs::Querier querier,
-                              ecs::Resources res, ecs::Events& events) {
+                              ecs::Resources res, ecs::Events& events, void* param) {
             func(CommandsWrapper(cmds), QuerierWrapper(querier),
-                 ResourcesWrapper(res), EventsWrapper(events));
+                 ResourcesWrapper(res), EventsWrapper(events), *((sol::object*)param));
         });
     }
 

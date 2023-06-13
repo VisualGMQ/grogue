@@ -28,17 +28,17 @@ void DetectKeyboardInputSystem(ecs::Commands&, ecs::Querier,
     auto& renderer = resources.Get<Renderer>();
     auto& keyboard = resources.Get<Keyboard>();
 
-    if (keyboard.Key(SDL_SCANCODE_W).IsPressing()) {
+    if (keyboard.Key(KEY_W).IsPressing()) {
         renderer.SetDrawColor({255, 0, 0});
     }
-    if (keyboard.Key(SDL_SCANCODE_W).IsReleasing()) {
+    if (keyboard.Key(KEY_W).IsReleasing()) {
         renderer.SetDrawColor({0, 255, 0});
     }
-    if (keyboard.Key(SDL_SCANCODE_W).IsPressed()) {
+    if (keyboard.Key(KEY_W).IsPressed()) {
         renderer.SetDrawColor({255, 255, 0});
         LOGT("pressed");
     }
-    if (keyboard.Key(SDL_SCANCODE_W).IsReleased()) {
+    if (keyboard.Key(KEY_W).IsReleased()) {
         renderer.SetDrawColor({0, 255, 255});
         LOGT("released");
     }

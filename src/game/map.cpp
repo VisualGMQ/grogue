@@ -1,8 +1,8 @@
 #include "game/map.hpp"
 
 std::shared_ptr<Map> GenDebugDemo(ecs::Resources resources, int w, int h) {
-    auto logicMap = math::HeapMatrix<Terrian::Type>(w, h);
-    logicMap.Fill(Terrian::Type::DryLand);
+    auto logicMap = math::HeapMatrix<TerrianType>(w, h);
+    logicMap.Fill(TerrianType::DryLand);
 
     std::shared_ptr<Map> map = std::make_shared<Map>(w, h);
 
@@ -29,8 +29,8 @@ std::shared_ptr<Map> GenDebugDemo(ecs::Resources resources, int w, int h) {
             };
 
             std::vector<Item> items;
-            for (auto& itemInfo : itemConfig->Items()) {
-                if (Random::Instance().RandRange(0, itemConfig->TotleWeight()) < itemInfo.second.weight) {
+            for (auto& itemInfo : itemConfig.Items()) {
+                if (Random::Instance().RandRange(0, itemConfig.TotleWeight()) < itemInfo.second.weight) {
                     Item item;
                     item.nameID = itemInfo.second.name;
                     items.push_back(item);
@@ -60,7 +60,7 @@ void DrawMapSystem(ecs::Commands& cmd, ecs::Querier queryer,
             renderer.DrawSprite(tile.terrian.sprite, transform);
 
             for (const auto& item : tile.items) {
-                const auto& info = gameConfig.GetItemConfig()->Items().at(item.nameID);
+                const auto& info = gameConfig.GetItemConfig().Items().at(item.nameID);
                 renderer.DrawSprite(info.sprite, transform);
             }
         }

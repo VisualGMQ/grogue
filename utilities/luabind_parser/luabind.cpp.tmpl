@@ -18,6 +18,21 @@ using ui::EventType;
     handle["IsValid"] = &::name::IsValid; \
 }
 
+#define BindEventReader(name) \
+{ \
+    sol::usertype<name> reader = script.lua.new_usertype<name>(#name); \
+    reader["Has"] = &name::Has; \
+    reader["Read"] = &name::Read; \
+    reader["Clear"] = &name::Clear; \
+}
+
+#define BindEventWriter(name, event_type) \
+{ \
+    sol::usertype<name> writer = script.lua.new_usertype<name>(#name); \
+    writer["Write"] = &name::Write; \
+    writer["WriteImmediate"] = sol::overload(static_cast<void(name::*)(const event_type&)>(&name::WriteImmediate)); \
+}
+
 void BindLua(LuaScript& script) {
     // some special class you should bind them handly
     sol::usertype<SignalManagerWrapper> signalMgr =
@@ -25,6 +40,9 @@ void BindLua(LuaScript& script) {
     signalMgr["Raise"] = &SignalManagerWrapper::Raise;
     signalMgr["Remove"] = &SignalManagerWrapper::Remove;
     signalMgr["Regist"] = &SignalManagerWrapper::Regist;
+
+    BindEventReader(LuaEventContextReader)
+    BindEventWriter(LuaEventContextWriter, LuaEventContext)
 
     BindHandle(FontHandle)
     BindHandle(ImageHandle)

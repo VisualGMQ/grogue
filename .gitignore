@@ -7,3 +7,4 @@ build
 doc-output
 wasm-build
 luabind
+resources/script/defs.lua

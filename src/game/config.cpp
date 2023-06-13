@@ -126,11 +126,13 @@ GameConfig::GameConfig(LuaManager& luaMgr, TilesheetManager& tsMgr, const std::s
     } else {
         for (const auto& race : raceProfDef_->Races()) {
             std::string filename = configDir + "race/" + race + ".lua";
-            auto config = std::make_unique<RaceProfConfig>(luaMgr, *raceProfDef_, filename);
+            auto config = std::make_shared<RaceProfConfig>(luaMgr, *raceProfDef_, filename);
             if (!config->Valid()) {
                 LOGE("read ", race , " config failed");
                 valid_ = false;
                 break;
+            } else {
+                raceProfConfig_.push_back(std::move(config));
             }
         }
     }
