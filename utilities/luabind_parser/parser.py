@@ -1,6 +1,7 @@
 import CppHeaderParser
 import os
 import sys
+import pickle
 
 # TODO: regist static method/property
 # TODO: more human-readable lua hint
@@ -356,7 +357,7 @@ def generate_header_file(classinfo_table: list[dict[str, ClassInfo]]):
         content = content.replace(RESOURCE_WRAPPER_INSERT_TAG, resource_wrapper_code)
         content = content.replace(COMMANDS_WRAPPER_INSERT_TAG, commands_wrapper_code)
         content = content.replace(QUERIER_WRAPPER_INSERT_TAG, querier_wrapper_code)
-    with open(OUTPUT_PATH + os.sep + "./luabind/luabind.hpp", 'w+') as f:
+    with open(OUTPUT_PATH + "./luabind/luabind.hpp", 'w+') as f:
         f.write(content)
 
 def generate_global_method_bind_code(methods: dict[(str, str), list[CppHeaderParser.CppMethod]], clasinfo_table) -> str:
@@ -404,12 +405,12 @@ def generate_impl_and_def_file(classinfo_table, methods, enums):
     global_method_bind_code = generate_global_method_bind_code(methods, classinfo_table)
     enum_defs_in_lua = generate_enum_defs_in_lua(enums)
 
-    with open(OUTPUT_PATH + os.sep + "luabind/defs.lua", 'w+') as f:
+    with open(OUTPUT_PATH + "./luabind/defs.lua", 'w+') as f:
         f.write('\n'.join([enum_defs_in_lua, lua_comment, lua_queirer_comment, lua_resource_comment, lua_command_comment, lua_events_comment]))
 
     with open("./utilities/luabind_parser/luabind.cpp.tmpl") as f:
         content = f.read()
-        with open(OUTPUT_PATH + os.sep + "luabind/luabind.cpp", 'w+') as f2:
+        with open(OUTPUT_PATH + "./luabind/luabind.cpp", 'w+') as f2:
             f2.write(content.replace(LUA_BIND_CONTENT_TAG, '\n'.join(
                 [namespace_code, cpp_code, global_method_bind_code, querier_impl_code, resource_impl_code, commands_impl_code, events_impl_code])))
 
@@ -421,8 +422,22 @@ if __name__ == '__main__':
     namespaces = gather_namespaces(parsed_files)
     enums = gather_global_enum_infos(parsed_files)
 
+    packed_data = (classinfo_table, methods, namespaces, enums)
+
+    dump_data_path = OUTPUT_PATH + "./dump.data"
+
+    if os.path.exists(dump_data_path):
+        with open(dump_data_path, "rb") as f:
+            old_data = f.read()
+            if old_data == pickle.dumps(packed_data, 1):
+                print("nothing to do")
+                exit(0)
+
     if not os.path.exists(OUTPUT_PATH + './' + "luabind"):
         os.mkdir(OUTPUT_PATH + './' + "luabind")
 
     generate_header_file(classinfo_table)
     generate_impl_and_def_file(classinfo_table, methods, enums)
+
+    with open(dump_data_path, "wb+") as f:
+        pickle.dump(packed_data, f, 1)
