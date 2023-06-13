@@ -17,6 +17,7 @@ RESOURCE_WRAPPER_INSERT_TAG = '##RESOURCE_WRAPPER_INSERT_TAG##'
 LUA_BIND_CONTENT_TAG = '##BIND_CONTENT##'
 
 OUTPUT_PATH = ('' if len(sys.argv) < 2  else sys.argv[1]).replace('\\', '/')
+SHOULD_FORCE = True if 'force' in sys.argv else False
 
 class LuaBindType:
     NORMAL = 0
@@ -426,12 +427,12 @@ if __name__ == '__main__':
 
     dump_data_path = OUTPUT_PATH + "./dump.data"
 
-    if os.path.exists(dump_data_path):
-        with open(dump_data_path, "rb") as f:
-            old_data = f.read()
-            if old_data == pickle.dumps(packed_data, 1):
-                print("nothing to do")
-                exit(0)
+    # if not SHOULD_FORCE and os.path.exists(dump_data_path):
+    #     with open(dump_data_path, "rb") as f:
+    #         old_data = f.read()
+    #         if old_data == pickle.dumps(packed_data, 1):
+    #             print("nothing to do")
+    #             exit(0)
 
     if not os.path.exists(OUTPUT_PATH + './' + "luabind"):
         os.mkdir(OUTPUT_PATH + './' + "luabind")

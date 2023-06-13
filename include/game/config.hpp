@@ -160,7 +160,7 @@ private:
 };
 
 //! @brief contains all game config
-class LUA_BIND GameConfig final {
+class LUA_BIND_RESOURCE GameConfig final {
 public:
     explicit GameConfig(LuaManager&, TilesheetManager&, const std::string& configDir);
 

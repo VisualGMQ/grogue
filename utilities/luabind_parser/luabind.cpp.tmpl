@@ -33,6 +33,19 @@ using ui::EventType;
     writer["WriteImmediate"] = sol::overload(static_cast<void(name::*)(const event_type&)>(&name::WriteImmediate)); \
 }
 
+#define BindHeapMatrix(type, name) \
+{ \
+    using mtype = math::HeapMatrix<type>; \
+    sol::usertype<mtype> matrix= script.lua.new_usertype<mtype>(#name); \
+    matrix["Fill"] = &mtype::Fill; \
+    matrix["Width"] = &mtype::Width; \
+    matrix["Height"] = &mtype::Height; \
+    matrix["Get"] = sol::overload(static_cast<type&(mtype::*)(int, int)>(&mtype::Get), \
+                                static_cast<const type&(mtype::*)(int, int) const>(&mtype::Get)); \
+    matrix["Set"] = sol::overload(static_cast<void(mtype::*)(int, int, type &)>(&mtype::Set)); \
+    matrix["IsInRange"] = &mtype::IsInRange; \
+}
+
 void BindLua(LuaScript& script) {
     // some special class you should bind them handly
     sol::usertype<SignalManagerWrapper> signalMgr =
@@ -40,6 +53,8 @@ void BindLua(LuaScript& script) {
     signalMgr["Raise"] = &SignalManagerWrapper::Raise;
     signalMgr["Remove"] = &SignalManagerWrapper::Remove;
     signalMgr["Regist"] = &SignalManagerWrapper::Regist;
+
+    BindHeapMatrix(MapTile, HeapMatrixMapTile)
 
     BindEventReader(LuaEventContextReader)
     BindEventWriter(LuaEventContextWriter, LuaEventContext)
@@ -62,6 +77,7 @@ void BindLua(LuaScript& script) {
     keyButton["IsPressing"] = &KeyButton::IsPressing;
     keyButton["IsReleasing"] = &KeyButton::IsReleasing;
 
+    script.lua.new_usertype<ecs::Entity>("Entity");
 
     // auto-generate bind codes
 

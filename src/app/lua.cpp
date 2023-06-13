@@ -4,6 +4,11 @@ LuaScript::LuaScript(LuaScriptHandle handle) : handle_(handle) {
     lua.open_libraries(sol::lib::base);
     lua.open_libraries(sol::lib::package);
     lua.open_libraries(sol::lib::debug);
+    lua.open_libraries(sol::lib::math);
+    lua.open_libraries(sol::lib::os);
+    lua.open_libraries(sol::lib::table);
+    lua.open_libraries(sol::lib::utf8);
+    lua.open_libraries(sol::lib::coroutine);
 }
 
 LuaScript::LuaScript(LuaScriptHandle handle, const std::string& str, bool isContent)

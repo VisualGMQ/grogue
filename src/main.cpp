@@ -97,14 +97,15 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
             auto backpackEntity = entities[0];
             auto& backpack = querier.Get<Backpack>(backpackEntity);
 
-            uint32_t* newItemCount = (uint32_t*)param;
+            // uint32_t* newItemCount = (uint32_t*)param;
+            uint32_t newItemCount = 1;
 
             auto& panel = querier.Get<ui::Panel>(entity);
             auto& node = querier.Get<Node>(entity);
             auto& backpackUIConfig =
                 resources.Get<GameConfig>().GetBackpackUIConfig().Info();
             // FIXME: we assume newItemCount == 1, will fix this later
-            int size = node.children.size() + *newItemCount - 1;
+            int size = node.children.size() + newItemCount - 1;
             int x = size % backpackUIConfig.col;
             int y = size / backpackUIConfig.col;
 
@@ -214,28 +215,6 @@ void DrawNearestItemPointer(ecs::Commands& cmd, ecs::Querier querier,
     }
 }
 
-void InputHandle(ecs::Commands& cmd, ecs::Querier querier,
-                 ecs::Resources resources, ecs::Events& events) {
-    auto& keyboard = resources.Get<Keyboard>();
-
-    auto entities = querier.Query<ecs::With<Player, Monster>>();
-    for (auto entity : entities) {
-        auto& monster = querier.Get<Monster>(entity);
-        PlayerMove(keyboard, monster);
-
-        if (keyboard.Key(KEY_SPACE).IsPressed() &&
-            querier.Has<Backpack>(entity)) {
-            auto& backpack = querier.Get<Backpack>(entity);
-            PickupItemOnTile(monster, backpack, cmd, querier, resources,
-                             events);
-        }
-    }
-
-    if (keyboard.Key(KEY_TAB).IsPressed()) {
-        ToggleBackpackUIPanel(querier, resources);
-    }
-}
-
 class GameApp final : public App {
 public:
     GameApp() {
@@ -244,7 +223,6 @@ public:
             .AddStartupSystem(LoadResourceSystem)
             .AddStartupSystem(StartupSystem)
             .AddSystem(DetectNearestItem)
-            // .AddSystem(InputHandle)
             .AddSystem(MonsterUpdate)
             .AddSystem(DrawMapSystem)
             .AddSystem(DrawMonsterSystem)

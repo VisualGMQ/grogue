@@ -61,8 +61,9 @@ inline float LUA_BIND Deg2Rad(float degree) {
 //! @brief 3D vector which has x, y, z components
 class LUA_BIND Vector3 {
 public:
-    float x{}, y{}, z{};
-
+    float x = 0;
+    float y = 0;
+    float z = 0;
 
     static const Vector3 Zero;  //!< @brief (0, 0, 0)
     static const Vector3 XAxis; //!< @breif (1, 0, 0)
@@ -192,7 +193,8 @@ public:
     static const Vector2 XAxis; //!< @brief (1, 0)
     static const Vector2 YAxis; //!< @brief (0, 1)
 
-    float x{}, y{};
+    float x = 0;
+    float y = 0;
 
     Vector2() {}
 
@@ -328,7 +330,10 @@ inline float LUA_BIND Length(const Vector2& v) {
 }
 
 struct LUA_BIND Rect {
-    float x = 0, y = 0, w = 0, h = 0;
+    float x = 0;
+    float y = 0;
+    float w = 0;
+    float h = 0;
 
     Rect() = default;
     Rect(float x, float y, float w, float h): x(x), y(y), w(w), h(h) {

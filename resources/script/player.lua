@@ -1,4 +1,5 @@
 require("defs")
+require("math")
 
 ---@param entity Entity
 ---@param cmds Commands
@@ -6,6 +7,56 @@ require("defs")
 function Startup(entity, cmds, res)
     print("startup")
 end
+
+
+
+---@param monster Monster
+---@param backack Backpack
+---@param cmd Commands
+---@param querier Querier
+---@param res Resources
+---@param events Events
+local function LuaPickupItemOnTile(monster, backpack, cmd, querier, res, events)
+    local PickupHalfRange = 100
+    local map = res:GetMapManager():GetCurrentMap()
+    local hover = res:GetNearestItemHover()
+
+    local x, y = math.floor(hover.position.x), math.floor(hover.position.y)
+    if map.tiles:IsInRange(x, y) and
+        not map.tiles:Get(x, y).items:empty() then
+        local items = map.tiles:Get(x, y).items
+        if items:empty() then
+            return;
+        end
+
+        backpack.items:add(items[items:size()])
+        items:erase(items:size())
+
+        local signalMgr = res:GetSignalManager()
+        signalMgr:Raise(0, cmd, querier, res, events, {})
+    end
+end
+
+---@param querier Querier
+---@param res Resources
+local function ToggleBackpackUIPanel(querier, res)
+    local entities = querier:QueryBackpackUIPanel()
+
+    if not entities:empty() then
+        local window = res:GetWindow()
+        ---@type RectTransform
+        local transform = querier:GetRectTransform(entities:at(1))
+        local y = transform.transform.localTransform.position.y
+
+        if y >= 0 and y < window:GetSize().y then
+            transform.transform.localTransform.position.y = window:GetSize().y
+        else
+            local info = res:GetGameConfig():GetBackpackUIConfig():Info()
+            transform.transform.localTransform.position.y = window:GetSize().y - info.height
+        end
+    end
+end
+
 
 ---@param entity Entity
 ---@param cmds Commands
@@ -28,11 +79,12 @@ function Run(entity, cmds, querier, res, events)
         if keyboard:Key(Key.KEY_SPACE):IsPressed() and
             querier:HasBackpack(entity) then
            local backpack = querier:GetBackpack(entity) 
-           PickupItemOnTile(monster, backpack, cmds:Raw(), querier:Raw(), res:Raw(), events:Raw())
+           -- PickupItemOnTile(monster, backpack, cmds:Raw(), querier:Raw(), res:Raw(), events:Raw())
+           LuaPickupItemOnTile(monster, backpack, cmds, querier, res, events)
         end
 
         if keyboard:Key(Key.KEY_TAB):IsPressed() then
-            ToggleBackpackUIPanel(querier:Raw(), res:Raw())
+            ToggleBackpackUIPanel(querier, res)
         end
 
         :: NEXT_LOOP ::
