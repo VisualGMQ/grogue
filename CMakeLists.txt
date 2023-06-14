@@ -68,7 +68,7 @@ endif()
 message("fount pip3")
 
 # run python parser to generate luabind codes
-file(GLOB_RECURSE CPP_INCLUDE_FILES *.hpp)
+file(GLOB_RECURSE CPP_INCLUDE_FILES ./include/*.hpp)
 
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CMAKE_BINARY_DIR}/luabind/luabind.cpp ${CMAKE_BINARY_DIR}/luabind/def.lua
