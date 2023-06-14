@@ -91,6 +91,7 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(TimerManager{})
         .SetResource(SignalManager{})
         .SetResource(LuaShareContext{})
+        .SetResource(physic::PhysicConfig{})
         .SetResource(DebugConfig{});
 
     auto* assets = world->GetResource<AssetsManager>();
@@ -103,9 +104,13 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(Mouse::UpdateSystem)
         .AddSystem(Time::UpdateSystem)
         .AddSystem(TimerManager::UpdateSystem)
-        // transform update
+        // script relate
         .AddSystem(RunScriptSystem)
         .AddSystem(HierarchyRunScriptSystem)
+        // physical relate
+        .AddSystem(physic::UpdateParticleSystem)
+        .AddSystem(physic::HierarchyUpdateParticleSystem)
+        // transform update
         .AddSystem(UpdateNodeTransformSystem)
         .AddSystem(UpdateRectTransformSystem)
         // ui event handle

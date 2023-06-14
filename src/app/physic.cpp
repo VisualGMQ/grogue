@@ -1,0 +1,339 @@
+#include "app/physic.hpp"
+
+namespace physic {
+
+//! @brief solve binary equation
+//! equation in:
+//! $$
+//! a_1 * x + b_1 * y = c_1
+//! a_2 * x + b_2 * y = c_2
+//! $$
+//! @return x, y
+inline std::optional<std::pair<float, float>> solveBinaryEquation(
+    float a1, float b1, float c1, float a2, float b2, float c2) {
+    float det = a1 * b2 - a2 * b1;
+    if (std::abs(det) <= 0.0000001) {
+        return std::nullopt;
+    }
+
+    return std::make_pair<float, float>((c1 * b2 - c2 * b1) / det,
+                                        (a1 * c2 - a2 * c1) / det);
+}
+
+std::optional<std::pair<float, float>> IntersectLine(const math::Vector2& s1,
+                                                     const math::Vector2& d1,
+                                                     const math::Vector2& s2,
+                                                     const math::Vector2& d2) {
+    if (IsLineParallel(d1, d2)) {
+        return std::nullopt;
+    }
+
+    auto s = s2 - s1;
+    return solveBinaryEquation(d1.x, -d2.x, s.x, d1.y, -d2.y, s.y);
+}
+
+std::optional<std::pair<float, float>> IntersectLineCircle(
+    const Circle& cir, const math::Vector2& s, const math::Vector2& d) {
+    auto q = s - cir.center;
+    float a = d.LengthSqrd();
+    float b = 2.0 * d.Dot(q);
+    float c = q.LengthSqrd() - cir.radius * cir.radius;
+    
+    float delta = b * b - 4.0 * a * c;
+    if (delta < 0) {
+        return std::nullopt;
+    } else if (delta == 0) {
+        float deltaSqrt = std::sqrt(delta);
+        float t = (-b + deltaSqrt) / (2.0 * a);
+        return std::pair(t, t);
+    } else {
+        float deltaSqrt = std::sqrt(delta);
+        return std::pair<float, float>((-b + deltaSqrt) / (2.0 * a), (-b - deltaSqrt) / (2.0 * a));
+    }
+}
+
+std::optional<std::pair<math::Vector2, math::Vector2>> IntersectCircle(const Circle& c1, const Circle& c2) {
+    if (!IsCircleIntersect(c1, c2)) {
+        return std::nullopt;
+    }
+
+    auto dir = c2.center - c1.center;
+    float lenSqrd = dir.LengthSqrd();
+
+    float cos = (lenSqrd + c1.radius * c1.radius - c2.radius * c2.radius) / (2.0 * c1.radius * std::sqrt(lenSqrd));
+    float sin = std::sqrt(1.0 - cos * cos);
+    math::Vector2 norm(1.0, 0.0);
+    if (std::abs(dir.x) > 0.000001) {
+        norm = math::Normalize(math::Vector2(-dir.y / dir.x, 1.0)) * sin * c1.radius;
+    }
+    math::Vector2 d = c1.center + math::Normalize(dir) * cos * c1.radius;
+
+    return std::make_pair<math::Vector2, math::Vector2>(d + c1.center + norm, d + c1.center - norm);
+}
+
+inline float Pt2LineDist(const math::Vector2& p, const math::Vector2& s, const math::Vector2& d) {
+    auto d2 = p - s;
+    float len = d2.Length();
+    if (len == 0) {
+        return true;
+    }
+
+    return std::abs(d2.Cross(d) / len);
+}
+
+bool IsCircleLineIntersect(const Circle& c, const math::Vector2& s, const math::Vector2& d) {
+    return Pt2LineDist(c.center, s, d) < c.radius;
+}
+
+bool IsLineParallel(const math::Vector2& v1, const math::Vector2& v2) {
+    return std::abs(v1.Cross(v2)) <= 0.0000001;
+}
+
+bool IsAABBIntersect(const AABB& a, const AABB& b) {
+    auto aMin = a.center - a.halfLen;
+    auto aMax = a.center + a.halfLen;
+    auto bMin = b.center - b.halfLen;
+    auto bMax = b.center + b.halfLen;
+    return !(aMax.x <= bMin.x || aMax.y <= bMin.y ||
+             bMax.x <= aMin.x || bMax.y <= aMin.y);
+}
+
+bool IsCircleIntersect(const Circle& a, const Circle& b) {
+    float rSum = a.radius + b.radius;
+    float rSub = a.radius - b.radius;
+    float lenSqrd = (a.center - b.center).LengthSqrd();
+    return lenSqrd < rSum * rSum && lenSqrd > rSub * rSub;
+}
+
+bool IsCircleAABBIntersect(const Circle& a, const AABB& b) {
+    auto nearestPt = NearestPtOnAABB(a.center, b);
+    return (nearestPt - a.center).LengthSqrd() < a.radius * a.radius;
+}
+
+math::Vector2 NearestPtOnAABB(const math::Vector2& pt, const AABB& aabb) {
+    auto min = aabb.center - aabb.halfLen;
+    auto max = aabb.center - aabb.halfLen;
+    return math::Vector2(pt.x > min.x && pt.x < max.x ? pt.x : (pt.x < min.x ? min.x : max.x),
+                         pt.y > min.y && pt.y < max.y ? pt.y : (pt.y < min.y ? min.y : max.y));
+}
+
+math::Vector2 NearestPtOnCircle(const math::Vector2& pt, const Circle& circle) {
+    return math::Normalize(pt - circle.center) * circle.radius + circle.center;
+}
+
+float NearestPtOnLine(const math::Vector2& p, const math::Vector2& s,
+                              const math::Vector2& d) {
+    return (p - s).Dot(d) / d.LengthSqrd();
+}
+
+//! @brief update one particle
+//! @param particle
+//! @param elapse elapsed time, in milliseconds
+void updateOneParticle(Particle& particle, Time::TimeType elapse) {
+    double t = elapse / 1000.0;
+
+    particle.acc += particle.force * particle.massInv;
+    particle.vel += particle.acc * t;
+    particle.pos = particle.pos + particle.vel * t + 0.5 * particle.acc * t * t;
+
+    particle.acc.Set(0, 0);
+    particle.force.Set(0, 0);
+}
+
+void UpdateParticleSystem(ecs::Commands&, ecs::Querier querier, ecs::Resources,
+                          ecs::Events&) {
+    auto entities = querier.Query<Particle>();
+    for (auto entity : entities) {
+        auto& particle = querier.Get<Particle>(entity);
+        updateOneParticle(particle, 33);
+    }
+
+    entities = querier.Query<RigidBody>();
+    for (auto entity : entities) {
+        auto& rigid = querier.Get<RigidBody>(entity);
+        updateOneParticle(rigid.particle, 33);
+    }
+}
+
+void HierarchyUpdateParticleSystem(std::optional<ecs::Entity>,
+                                   ecs::Entity entity, ecs::Commands&,
+                                   ecs::Querier querier, ecs::Resources,
+                                   ecs::Events&) {
+    if (!querier.Has<Particle>(entity) && !querier.Has<RigidBody>(entity)) {
+        return;
+    }
+
+    if (querier.Has<Particle>(entity)) {
+        auto& particle = querier.Get<Particle>(entity);
+        updateOneParticle(particle, 33);
+    }
+
+    if (querier.Has<RigidBody>(entity)) {
+        auto& rigid = querier.Get<RigidBody>(entity);
+        updateOneParticle(rigid.particle, 33);
+    }
+}
+
+// FIXME: use collide table or double dispatch to simplify code
+bool isShapeCollide(const Shape* const s1, const Shape* const s2) {
+    if (s1->GetType() == ShapeAABB) {
+        if (s2->GetType() == ShapeAABB) {
+            return IsAABBIntersect(*(AABB*)s1, *(AABB*)s2);
+        } else if (s2->GetType() == ShapeCircle) {
+            return IsCircleAABBIntersect(*(Circle*)s2, *(AABB*)s1);
+        }
+    } else if (s1->GetType() == ShapeCircle) {
+        if (s2->GetType() == ShapeAABB) {
+            return IsCircleAABBIntersect(*(Circle*)s1, *(AABB*)s2);
+        } else if (s2->GetType() == ShapeCircle) {
+            return IsCircleIntersect(*(Circle*)s1, *(Circle*)s2);
+        }
+    }
+}
+
+
+Manifold GenManifoldCircle(const Circle& c1, const Circle& c2) {
+    Manifold m;
+    m.contactNum = 1;
+    auto dir = c2.center - c1.center;
+    m.contacts[0].normal = math::Normalize(dir);
+    m.contacts[0].penetration = dir.Length();
+    return m;
+}
+
+std::array<math::Vector2, 4> getAABBPoints(const AABB& a) {
+    return {
+        a.center - a.halfLen,
+            a.center + math::Vector2(a.halfLen.x, -a.halfLen.y),
+            a.center + a.halfLen,
+            a.center + math::Vector2(-a.halfLen.x, a.halfLen.y),
+    };
+}
+
+Manifold GenManifoldCircleAABB(const Circle& c, const AABB& aabb) {
+    Manifold m;
+    auto pts = getAABBPoints(aabb);
+    for (int i = 0; i < 4; i++) {
+        if (m.contactNum >= 2) {
+            return m;
+        }
+
+        const auto& p11 = pts[i];
+        const auto& p12 = pts[(i + 1) % 4];
+        auto dir = p12 - p11;
+        auto intersectPts = IntersectLineCircle(c, p11, dir);
+        if (!intersectPts) continue;
+
+        auto [t1, t2] = intersectPts.value();
+
+        if (0 <= t1 && t1 <= 1) {
+            Contact contact;
+            contact.normal.Set(dir.y, -dir.x);
+            contact.point = p11 + t1 * dir;
+            contact.penetration = -contact.normal.Dot(math::Vector2(c.radius, c.radius) + aabb.halfLen) - contact.normal.Dot(aabb.halfLen - math::Vector2(c.radius, c.radius)) ;
+            m.contacts[m.contactNum] = contact;
+            m.contactNum ++;
+
+            if (m.contactNum >= 2) {
+                return m;
+            }
+        }
+
+        if (0 <= t2 && t2 <= 1) {
+            Contact contact;
+            contact.normal.Set(dir.y, -dir.x);
+            contact.point = p11 + t2 * dir;
+            contact.penetration = -contact.normal.Dot(math::Vector2(c.radius, c.radius) + aabb.halfLen) - contact.normal.Dot(aabb.halfLen - math::Vector2(c.radius, c.radius)) ;
+            m.contacts[m.contactNum] = contact;
+            m.contactNum ++;
+        }
+    }
+
+    return m;
+}
+
+Manifold GenManifoldAABB(const AABB& a, const AABB& b) {
+    Manifold m;
+    auto pts1 = getAABBPoints(a);
+    auto pts2 = getAABBPoints(b);
+    for (int i = 0; i < 4; i++) {
+        const auto& p11 = pts2[i];
+        const auto& p12 = pts2[(i + 1) % 4];
+
+        for (int j = 0; j < 4; j++) {
+            if (m.contactNum >= 2) {
+                return m;
+            }
+
+            const auto& p21 = pts1[j];
+            const auto& p22 = pts1[(j + 1) % 4];
+
+            auto d1 = p12 - p11;
+            auto d2 = p22 - p21;
+
+            auto intersectedPts = IntersectLine(p11, d1, p21, d2);
+            if (!intersectedPts) continue;
+
+            auto [t1, t2] = intersectedPts.value();
+            if (0 <= t1 && t1 <= 1) {
+                Contact contact;
+                contact.normal.Set(d1.y, -d1.x);
+                contact.point = p11 + t1 * d1;
+                contact.penetration = -contact.normal.Dot(a.halfLen + b.halfLen) - contact.normal.Dot((b.center - a.center)) ;
+                m.contacts[m.contactNum] = contact;
+                m.contactNum ++;
+
+                if (m.contactNum >= 2) {
+                    return m;
+                }
+            }
+
+            if (0 <= t2 && t2 <= 1) {
+                Contact contact;
+                contact.normal.Set(d1.y, -d1.x);
+                contact.point = p11 + t2 * d1;
+                contact.penetration = -contact.normal.Dot(a.halfLen + b.halfLen) - contact.normal.Dot((b.center - a.center)) ;
+                m.contacts[m.contactNum] = contact;
+                m.contactNum ++;
+            }
+        }
+    }
+    return m;
+}
+
+// FIXME: use collide table or double dispatch to simplify code
+Manifold doShapeCollide(Shape* s1, Shape* s2) {
+    Manifold m;
+    if (s1->GetType() == ShapeAABB) {
+        if (s2->GetType() == ShapeAABB) {
+            m = GenManifoldAABB(*(AABB*)s1, *(AABB*)s2);
+        } else if (s2->GetType() == ShapeCircle) {
+            m = GenManifoldCircleAABB(*(Circle*)s2, *(AABB*)s1);
+        }
+    } else if (s1->GetType() == ShapeCircle) {
+        if (s2->GetType() == ShapeAABB) {
+            m = GenManifoldCircleAABB(*(Circle*)s1, *(AABB*)s2);
+        } else if (s2->GetType() == ShapeCircle) {
+            m = GenManifoldCircle(*(Circle*)s1, *(Circle*)s2);
+        }
+    }
+
+    m.shape1 = s1;
+    m.shape2 = s2;
+    return m;
+}
+
+void doCollideSystem(std::vector<ecs::Entity>& entities,
+                     const math::Vector2& position) {
+    for (auto entity : entities) {
+    }
+}
+
+void DoCollideSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
+                     ecs::Events&) {}
+
+void HierarchyDoCollideSystem(std::optional<ecs::Entity>, ecs::Entity,
+                              ecs::Commands&, ecs::Querier, ecs::Resources,
+                              ecs::Events&) {}
+
+}  // namespace physic

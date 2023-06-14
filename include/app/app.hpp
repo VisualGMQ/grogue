@@ -15,6 +15,7 @@
 #include "app/assets.hpp"
 #include "app/signal.hpp"
 #include "app/script.hpp"
+#include "app/physic.hpp"
 
 // a resource to trigger application exit
 class ExitTrigger final {
