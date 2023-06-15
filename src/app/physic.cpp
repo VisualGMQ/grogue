@@ -112,9 +112,12 @@ bool IsCircleAABBIntersect(const Circle& a, const AABB& b) {
 
 math::Vector2 NearestPtOnAABB(const math::Vector2& pt, const AABB& aabb) {
     auto min = aabb.center - aabb.halfLen;
-    auto max = aabb.center - aabb.halfLen;
-    return math::Vector2(pt.x > min.x && pt.x < max.x ? pt.x : (pt.x < min.x ? min.x : max.x),
-                         pt.y > min.y && pt.y < max.y ? pt.y : (pt.y < min.y ? min.y : max.y));
+    auto max = aabb.center + aabb.halfLen;
+    if (pt.x > min.x && pt.x < max.y && pt.y > min.y && pt.y < max.x) {
+        return pt;
+    }
+    return math::Vector2(std::clamp<float>(pt.x, min.x, max.x),
+                         std::clamp<float>(pt.y, min.y, max.y));
 }
 
 math::Vector2 NearestPtOnCircle(const math::Vector2& pt, const Circle& circle) {
@@ -129,8 +132,12 @@ float NearestPtOnLine(const math::Vector2& p, const math::Vector2& s,
 //! @brief update one particle
 //! @param particle
 //! @param elapse elapsed time, in milliseconds
-void updateOneParticle(Particle& particle, Time::TimeType elapse) {
+void updateOneParticle(Particle& particle, Time::TimeType elapse, std::vector<ForceGenerator>& forceGens) {
     double t = elapse / 1000.0;
+
+    for (auto& generator : forceGens) {
+        generator(particle, elapse);
+    }
 
     particle.acc += particle.force * particle.massInv;
     particle.vel += particle.acc * t;
@@ -140,37 +147,20 @@ void updateOneParticle(Particle& particle, Time::TimeType elapse) {
     particle.force.Set(0, 0);
 }
 
-void UpdateParticleSystem(ecs::Commands&, ecs::Querier querier, ecs::Resources,
+void UpdateParticleSystem(ecs::Commands&, ecs::Querier querier, ecs::Resources res,
                           ecs::Events&) {
     auto entities = querier.Query<Particle>();
+    auto& physicConfig = res.Get<PhysicWorld>();
+
     for (auto entity : entities) {
         auto& particle = querier.Get<Particle>(entity);
-        updateOneParticle(particle, 33);
+        updateOneParticle(particle, 33, physicConfig.forceGenerators);
     }
 
     entities = querier.Query<RigidBody>();
     for (auto entity : entities) {
         auto& rigid = querier.Get<RigidBody>(entity);
-        updateOneParticle(rigid.particle, 33);
-    }
-}
-
-void HierarchyUpdateParticleSystem(std::optional<ecs::Entity>,
-                                   ecs::Entity entity, ecs::Commands&,
-                                   ecs::Querier querier, ecs::Resources,
-                                   ecs::Events&) {
-    if (!querier.Has<Particle>(entity) && !querier.Has<RigidBody>(entity)) {
-        return;
-    }
-
-    if (querier.Has<Particle>(entity)) {
-        auto& particle = querier.Get<Particle>(entity);
-        updateOneParticle(particle, 33);
-    }
-
-    if (querier.Has<RigidBody>(entity)) {
-        auto& rigid = querier.Get<RigidBody>(entity);
-        updateOneParticle(rigid.particle, 33);
+        updateOneParticle(rigid.particle, 33, physicConfig.forceGenerators);
     }
 }
 
@@ -189,6 +179,7 @@ bool isShapeCollide(const Shape* const s1, const Shape* const s2) {
             return IsCircleIntersect(*(Circle*)s1, *(Circle*)s2);
         }
     }
+    return false;
 }
 
 
@@ -213,42 +204,11 @@ std::array<math::Vector2, 4> getAABBPoints(const AABB& a) {
 Manifold GenManifoldCircleAABB(const Circle& c, const AABB& aabb) {
     Manifold m;
     auto pts = getAABBPoints(aabb);
-    for (int i = 0; i < 4; i++) {
-        if (m.contactNum >= 2) {
-            return m;
-        }
-
-        const auto& p11 = pts[i];
-        const auto& p12 = pts[(i + 1) % 4];
-        auto dir = p12 - p11;
-        auto intersectPts = IntersectLineCircle(c, p11, dir);
-        if (!intersectPts) continue;
-
-        auto [t1, t2] = intersectPts.value();
-
-        if (0 <= t1 && t1 <= 1) {
-            Contact contact;
-            contact.normal.Set(dir.y, -dir.x);
-            contact.point = p11 + t1 * dir;
-            contact.penetration = -contact.normal.Dot(math::Vector2(c.radius, c.radius) + aabb.halfLen) - contact.normal.Dot(aabb.halfLen - math::Vector2(c.radius, c.radius)) ;
-            m.contacts[m.contactNum] = contact;
-            m.contactNum ++;
-
-            if (m.contactNum >= 2) {
-                return m;
-            }
-        }
-
-        if (0 <= t2 && t2 <= 1) {
-            Contact contact;
-            contact.normal.Set(dir.y, -dir.x);
-            contact.point = p11 + t2 * dir;
-            contact.penetration = -contact.normal.Dot(math::Vector2(c.radius, c.radius) + aabb.halfLen) - contact.normal.Dot(aabb.halfLen - math::Vector2(c.radius, c.radius)) ;
-            m.contacts[m.contactNum] = contact;
-            m.contactNum ++;
-        }
-    }
-
+    auto nearestPt = NearestPtOnAABB(c.center, aabb);
+    m.contactNum = 1;
+    m.contacts[0].normal = c.center - nearestPt;
+    m.contacts[0].penetration = c.radius - m.contacts[0].normal.Length();
+    m.contacts[0].normal.Normalize();
     return m;
 }
 
@@ -259,6 +219,7 @@ Manifold GenManifoldAABB(const AABB& a, const AABB& b) {
     for (int i = 0; i < 4; i++) {
         const auto& p11 = pts2[i];
         const auto& p12 = pts2[(i + 1) % 4];
+        auto d1 = p12 - p11;
 
         for (int j = 0; j < 4; j++) {
             if (m.contactNum >= 2) {
@@ -268,31 +229,20 @@ Manifold GenManifoldAABB(const AABB& a, const AABB& b) {
             const auto& p21 = pts1[j];
             const auto& p22 = pts1[(j + 1) % 4];
 
-            auto d1 = p12 - p11;
             auto d2 = p22 - p21;
 
             auto intersectedPts = IntersectLine(p11, d1, p21, d2);
             if (!intersectedPts) continue;
 
             auto [t1, t2] = intersectedPts.value();
-            if (0 <= t1 && t1 <= 1) {
+            if (0 <= t1 && t1 <= 1 && 0 <= t2 && t2 <= 1) {
                 Contact contact;
-                contact.normal.Set(d1.y, -d1.x);
+                contact.normal.Set(d2.y, -d2.x);
+                contact.normal.Normalize();
                 contact.point = p11 + t1 * d1;
-                contact.penetration = -contact.normal.Dot(a.halfLen + b.halfLen) - contact.normal.Dot((b.center - a.center)) ;
-                m.contacts[m.contactNum] = contact;
-                m.contactNum ++;
-
-                if (m.contactNum >= 2) {
-                    return m;
-                }
-            }
-
-            if (0 <= t2 && t2 <= 1) {
-                Contact contact;
-                contact.normal.Set(d1.y, -d1.x);
-                contact.point = p11 + t2 * d1;
-                contact.penetration = -contact.normal.Dot(a.halfLen + b.halfLen) - contact.normal.Dot((b.center - a.center)) ;
+                auto centerDir = b.center - a.center;
+                auto maxDir = a.halfLen + b.halfLen;
+                contact.penetration = std::abs((maxDir - math::Vector2(std::abs(centerDir.x), std::abs(centerDir.y))).Dot(contact.normal));
                 m.contacts[m.contactNum] = contact;
                 m.contactNum ++;
             }
@@ -302,7 +252,7 @@ Manifold GenManifoldAABB(const AABB& a, const AABB& b) {
 }
 
 // FIXME: use collide table or double dispatch to simplify code
-Manifold doShapeCollide(Shape* s1, Shape* s2) {
+Manifold doShapeCollide(ecs::Entity e1, ecs::Entity e2, Shape* s1, Shape* s2) {
     Manifold m;
     if (s1->GetType() == ShapeAABB) {
         if (s2->GetType() == ShapeAABB) {
@@ -320,20 +270,125 @@ Manifold doShapeCollide(Shape* s1, Shape* s2) {
 
     m.shape1 = s1;
     m.shape2 = s2;
+    m.entity1 = e1;
+    m.entity2 = e2;
     return m;
 }
 
-void doCollideSystem(std::vector<ecs::Entity>& entities,
-                     const math::Vector2& position) {
-    for (auto entity : entities) {
+// for visual debugger, remove it to DebugSystem later
+void renderShape(Renderer& renderer, Shape* shape, const Color& color) {
+    renderer.SetDrawColor(color);
+    if (shape->GetType() == ShapeAABB) {
+        const AABB* aabb = (AABB*)(shape);
+        renderer.DrawRect(math::Rect{aabb->center.x - aabb->halfLen.x,
+                                        aabb->center.y - aabb->halfLen.y,
+                                        aabb->halfLen.x * 2.0f,
+                                        aabb->halfLen.y * 2.0f});
+    } else if (shape->GetType() == ShapeCircle) {
+        const Circle* c = (Circle*)(shape);
+        renderer.DrawCircle(c->center, c->radius, 30);
     }
 }
 
-void DoCollideSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
-                     ecs::Events&) {}
+std::vector<Manifold> doNarrowCollide(std::vector<ecs::Entity>& entities, std::vector<CollideShape*>& shapes, Renderer& renderer) {
+    std::vector<Manifold> manifolds;
 
-void HierarchyDoCollideSystem(std::optional<ecs::Entity>, ecs::Entity,
-                              ecs::Commands&, ecs::Querier, ecs::Resources,
-                              ecs::Events&) {}
+    for (int i = 0; i < shapes.size() - 1; i++) {
+        for (int j = i + 1; j < shapes.size(); j++) {
+            if (!isShapeCollide(shapes[i]->shape.get(), shapes[j]->shape.get())) {
+                continue;
+            }
+            auto& shape1 = shapes[i]->shape;
+            auto& shape2 = shapes[j]->shape;
+
+            Manifold manifold = doShapeCollide(entities[i], entities[j], shape1.get(), shape2.get());
+
+            if (manifold.contactNum > 0) {
+                manifold.shape1 = shape1.get();
+                manifold.shape2 = shape2.get();
+                manifolds.push_back(manifold);
+            }
+        }
+    }
+
+    for (auto shape : shapes)  {
+        renderShape(renderer, shape->shape.get(), Color{0, 255, 0});
+    }
+
+    return manifolds;
+}
+
+//! @brief handle collide on one side particle
+//! @param manifold 
+//! @param p 
+//! @param src is particle is src object(if false, we will reverse face normal)
+//! @param portion src object mass ratio
+void handleCollideToDyn(const Manifold& manifold, Particle& p, bool src, float ratio) {
+    math::Vector2 normal;
+    const Contact* contact = nullptr;
+    float penetration = 0.0;
+    if (manifold.contactNum == 1) {
+        contact = &manifold.contacts[0];
+    } else {
+        contact = manifold.contacts[0].penetration < manifold.contacts[1].penetration? &manifold.contacts[0] : &manifold.contacts[1];
+    }
+    p.pos += contact->normal * (src ? -1 : 1) * contact->penetration * ratio;
+}
+
+void handleCollide(std::vector<Manifold>& manifolds, ecs::Querier querier, Renderer& renderer) {
+    // for visual debugger, remove it to DebugSystem later
+    for (const auto& manifold : manifolds) {
+        renderShape(renderer, manifold.shape1, Color::Red);
+        renderShape(renderer, manifold.shape2, Color::Red);
+
+        for (int i = 0; i < manifold.contactNum; i++) {
+            const auto& contact = manifold.contacts[i];
+            renderer.SetDrawColor(Color::Blue);
+            renderer.DrawCircle(contact.point, 5);
+            renderer.DrawLine(contact.point, contact.point + contact.penetration * contact.normal);
+        }
+    }
+
+
+    for (auto& manifold : manifolds)  {
+        if (querier.Has<Particle>(manifold.entity1) && querier.Has<Particle>(manifold.entity2)) {
+            auto& p1 = querier.Get<Particle>(manifold.entity1);
+            auto& p2 = querier.Get<Particle>(manifold.entity2);
+
+            if (p1.massInv == 0 && p2.massInv == 0) {
+                return;
+            } else if (p1.massInv != 0 && p2.massInv!= 0) {
+                float ratio = p1.massInv / (p1.massInv + p2.massInv);
+                handleCollideToDyn(manifold, p1, true, ratio);
+                handleCollideToDyn(manifold, p2, false, 1.0 - ratio);
+            } else if (p1.massInv != 0) {
+                handleCollideToDyn(manifold, p1, true, 1.0);
+            } else {
+                handleCollideToDyn(manifold, p2, false, 1.0);
+            }
+        }
+    }
+}
+
+void doCollideSystem(ecs::Querier querier, ecs::Resources res) {
+    auto entities = querier.Query<CollideShape>();
+    std::vector<CollideShape*> shapes;
+    for (auto entity : entities) {
+        auto& shape = querier.Get<CollideShape>(entity);
+        if (querier.Has<Particle>(entity)) {
+            shape.shape->center = shape.shape->offset + querier.Get<Particle>(entity).pos;
+        }
+        shapes.push_back(&shape);
+    }
+
+    auto& renderer = res.Get<Renderer>();
+    auto manifolds = doNarrowCollide(entities, shapes, renderer);
+    handleCollide(manifolds, querier, renderer);
+}
+
+void DoCollideSystem(ecs::Commands&, ecs::Querier querier, ecs::Resources res,
+                     ecs::Events&) {
+    doCollideSystem(querier, res);
+}
 
 }  // namespace physic

@@ -2,23 +2,24 @@
 
 #include "core/pch.hpp"
 #include "app/timer.hpp"
+#include "app/renderer.hpp"
 
 namespace physic {
 
-using ForceGenerator = std::function<void(ecs::Entity)>;
-
-struct LUA_BIND_RESOURCE PhysicConfig final {
-    std::vector<ForceGenerator> forceGenerators;
-};
-
 //! @brief component for a single particle(has position, no rotation)
 struct LUA_BIND_COMPONENT Particle final {
+    float massInv = 1.0;  //!< @brief reciprocal of mass
     math::Vector2 pos;
     math::Vector2 vel;
     math::Vector2 acc;
     math::Vector2 force;
-    float massInv = 1.0;  //!< @brief reciprocal of mass
+
+    static Particle Create(const math::Vector2& pos, float massInv) {
+        return Particle{massInv, pos};
+    }
 };
+
+using ForceGenerator = std::function<void(Particle&, Time::TimeType)>;
 
 //! @brief component for a rigid body(has position, rotation)
 struct LUA_BIND_COMPONENT RigidBody final {
@@ -34,29 +35,31 @@ enum ShapeType {
 
 struct LUA_BIND Shape {
     Shape(ShapeType type): type_(type) {}
+    Shape(ShapeType type, const math::Vector2& offset): type_(type), offset(offset) {}
     virtual ~Shape() = default;
 
-    virtual math::Vector2 GetCenter() const = 0;
+    math::Vector2 GetCenter() const { return center; }
     ShapeType GetType() const { return type_; }
+
+    math::Vector2 center;
+    math::Vector2 offset;
 
 private:
     ShapeType type_;
 };
 
 struct LUA_BIND AABB final: public Shape {
-    math::Vector2 center;
     math::Vector2 halfLen = {1, 1};
 
     AABB(): Shape(ShapeType::ShapeAABB) {}
-    math::Vector2 GetCenter() const override { return center; }
+    AABB(const math::Vector2& offset, const math::Vector2& halfLen): Shape(ShapeType::ShapeAABB, offset), halfLen(halfLen) {}
 };
 
 struct LUA_BIND Circle final: public Shape {
-    math::Vector2 center;
     float radius = 1.0;
 
     Circle(): Shape(ShapeType::ShapeCircle) {}
-    math::Vector2 GetCenter() const override { return center; }
+    Circle(const math::Vector2& offset, float radius): Shape(ShapeType::ShapeCircle, offset), radius(radius) {}
 };
 
 struct Contact final {
@@ -69,6 +72,8 @@ struct Contact final {
 struct Manifold final {
     Shape* shape1 = nullptr;
     Shape* shape2 = nullptr;
+    ecs::Entity entity1 = 0;
+    ecs::Entity entity2 = 0;
     Contact contacts[2];    //!< in current code, max contact count is 2, but may change later
     size_t contactNum = 0;  //!< real contact count in `contacts`
 };
@@ -115,14 +120,13 @@ struct LUA_BIND_COMPONENT CollideShape final {
     std::shared_ptr<Shape> shape;
 };
 
+struct LUA_BIND_RESOURCE PhysicWorld final {
+    std::vector<ForceGenerator> forceGenerators;
+    std::vector<Manifold> manifolds;
+};
+
 void UpdateParticleSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
                           ecs::Events&);
-void HierarchyUpdateParticleSystem(std::optional<ecs::Entity>, ecs::Entity,
-                                   ecs::Commands&, ecs::Querier, ecs::Resources,
-                                   ecs::Events&);
-
 void DoCollideSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
                      ecs::Events&);
-void HierarchyDoCollideSystem(std::optional<ecs::Entity>, ecs::Entity, ecs::Commands&,
-                     ecs::Querier, ecs::Resources, ecs::Events&);
 }  // namespace physic

@@ -42,6 +42,7 @@ AddInteractiveTest(shapes shapes.cpp)
 AddInteractiveTest(hierarchy hierarchy.cpp)
 AddInteractiveTest(ui ui.cpp)
 AddInteractiveTest(lua_binding lua_binding.cpp)
+AddInteractiveTest(physics physics.cpp)
 
 CopyDefScript(lua_binding_test)
 CopyDLL(example_test)
