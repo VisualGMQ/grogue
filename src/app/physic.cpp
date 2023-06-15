@@ -187,8 +187,8 @@ Manifold GenManifoldCircle(const Circle& c1, const Circle& c2) {
     Manifold m;
     m.contactNum = 1;
     auto dir = c2.center - c1.center;
-    m.contacts[0].normal = math::Normalize(dir);
-    m.contacts[0].penetration = dir.Length();
+    m.contacts[0].normal =  math::Normalize(dir);
+    m.contacts[0].penetration = c2.radius + c1.radius - dir.Length();
     return m;
 }
 
@@ -206,7 +206,7 @@ Manifold GenManifoldCircleAABB(const Circle& c, const AABB& aabb) {
     auto pts = getAABBPoints(aabb);
     auto nearestPt = NearestPtOnAABB(c.center, aabb);
     m.contactNum = 1;
-    m.contacts[0].normal = c.center - nearestPt;
+    m.contacts[0].normal = nearestPt - c.center;
     m.contacts[0].penetration = c.radius - m.contacts[0].normal.Length();
     m.contacts[0].normal.Normalize();
     return m;
@@ -223,7 +223,7 @@ Manifold GenManifoldAABB(const AABB& a, const AABB& b) {
 
         for (int j = 0; j < 4; j++) {
             if (m.contactNum >= 2) {
-                return m;
+                break;
             }
 
             const auto& p21 = pts1[j];
@@ -242,36 +242,63 @@ Manifold GenManifoldAABB(const AABB& a, const AABB& b) {
                 contact.point = p11 + t1 * d1;
                 auto centerDir = b.center - a.center;
                 auto maxDir = a.halfLen + b.halfLen;
-                contact.penetration = std::abs((maxDir - math::Vector2(std::abs(centerDir.x), std::abs(centerDir.y))).Dot(contact.normal));
+                contact.penetration = std::abs((maxDir - math::Vector2(std::abs(centerDir.x), std::abs(centerDir.y))).Dot(contact.normal)) / 2.0;
                 m.contacts[m.contactNum] = contact;
                 m.contactNum ++;
             }
         }
     }
+
+    if (m.contactNum == 2 &&
+        m.contacts[0].normal == -m.contacts[1].normal) {
+        auto centerDir = b.center - a.center;
+        auto maxDir = a.halfLen + b.halfLen;
+        m.contacts[0].normal = math::Normalize(math::Vector2(-m.contacts[0].normal.y, m.contacts[0].normal.x));
+        if (m.contacts[0].normal.Dot(centerDir) < 0) {
+            m.contacts[0].normal = -m.contacts[0].normal;
+        }
+        m.contacts[0].penetration = std::abs((maxDir - math::Vector2(std::abs(centerDir.x), std::abs(centerDir.y))).Dot(m.contacts[0].normal)) / 2.0;
+        m.contacts[1].normal = m.contacts[0].normal;
+        m.contacts[1].penetration = m.contacts[0].penetration;
+    }
+
     return m;
 }
 
 // FIXME: use collide table or double dispatch to simplify code
 Manifold doShapeCollide(ecs::Entity e1, ecs::Entity e2, Shape* s1, Shape* s2) {
     Manifold m;
+
     if (s1->GetType() == ShapeAABB) {
         if (s2->GetType() == ShapeAABB) {
             m = GenManifoldAABB(*(AABB*)s1, *(AABB*)s2);
+            m.shape1 = s1;
+            m.shape2 = s2;
+            m.entity1 = e1;
+            m.entity2 = e2;
         } else if (s2->GetType() == ShapeCircle) {
             m = GenManifoldCircleAABB(*(Circle*)s2, *(AABB*)s1);
+            m.shape1 = s2;
+            m.shape2 = s1;
+            m.entity1 = e2;
+            m.entity2 = e1;
         }
     } else if (s1->GetType() == ShapeCircle) {
         if (s2->GetType() == ShapeAABB) {
             m = GenManifoldCircleAABB(*(Circle*)s1, *(AABB*)s2);
+            m.shape1 = s1;
+            m.shape2 = s2;
+            m.entity1 = e1;
+            m.entity2 = e2;
         } else if (s2->GetType() == ShapeCircle) {
             m = GenManifoldCircle(*(Circle*)s1, *(Circle*)s2);
+            m.shape1 = s1;
+            m.shape2 = s2;
+            m.entity1 = e1;
+            m.entity2 = e2;
         }
     }
 
-    m.shape1 = s1;
-    m.shape2 = s2;
-    m.entity1 = e1;
-    m.entity2 = e2;
     return m;
 }
 
@@ -293,7 +320,7 @@ void renderShape(Renderer& renderer, Shape* shape, const Color& color) {
 std::vector<Manifold> doNarrowCollide(std::vector<ecs::Entity>& entities, std::vector<CollideShape*>& shapes, Renderer& renderer) {
     std::vector<Manifold> manifolds;
 
-    for (int i = 0; i < shapes.size() - 1; i++) {
+    for (int i = 0; i < (int)shapes.size() - 1; i++) {
         for (int j = i + 1; j < shapes.size(); j++) {
             if (!isShapeCollide(shapes[i]->shape.get(), shapes[j]->shape.get())) {
                 continue;
@@ -304,8 +331,6 @@ std::vector<Manifold> doNarrowCollide(std::vector<ecs::Entity>& entities, std::v
             Manifold manifold = doShapeCollide(entities[i], entities[j], shape1.get(), shape2.get());
 
             if (manifold.contactNum > 0) {
-                manifold.shape1 = shape1.get();
-                manifold.shape2 = shape2.get();
                 manifolds.push_back(manifold);
             }
         }
@@ -323,7 +348,7 @@ std::vector<Manifold> doNarrowCollide(std::vector<ecs::Entity>& entities, std::v
 //! @param p 
 //! @param src is particle is src object(if false, we will reverse face normal)
 //! @param portion src object mass ratio
-void handleCollideToDyn(const Manifold& manifold, Particle& p, bool src, float ratio) {
+void handleCollideToDyn(Manifold& manifold, math::Vector2& p, const math::Vector2& other, bool src, float ratio) {
     math::Vector2 normal;
     const Contact* contact = nullptr;
     float penetration = 0.0;
@@ -332,7 +357,8 @@ void handleCollideToDyn(const Manifold& manifold, Particle& p, bool src, float r
     } else {
         contact = manifold.contacts[0].penetration < manifold.contacts[1].penetration? &manifold.contacts[0] : &manifold.contacts[1];
     }
-    p.pos += contact->normal * (src ? -1 : 1) * contact->penetration * ratio;
+
+    p += contact->normal * (src ? -1 : 1) * contact->penetration * ratio;
 }
 
 void handleCollide(std::vector<Manifold>& manifolds, ecs::Querier querier, Renderer& renderer) {
@@ -359,12 +385,12 @@ void handleCollide(std::vector<Manifold>& manifolds, ecs::Querier querier, Rende
                 return;
             } else if (p1.massInv != 0 && p2.massInv!= 0) {
                 float ratio = p1.massInv / (p1.massInv + p2.massInv);
-                handleCollideToDyn(manifold, p1, true, ratio);
-                handleCollideToDyn(manifold, p2, false, 1.0 - ratio);
+                handleCollideToDyn(manifold, p1.pos, p2.pos, true, ratio);
+                handleCollideToDyn(manifold, p2.pos, p1.pos, false, 1.0 - ratio);
             } else if (p1.massInv != 0) {
-                handleCollideToDyn(manifold, p1, true, 1.0);
+                handleCollideToDyn(manifold, p1.pos, p2.pos, true, 1.0);
             } else {
-                handleCollideToDyn(manifold, p2, false, 1.0);
+                handleCollideToDyn(manifold, p2.pos, p1.pos, false, 1.0);
             }
         }
     }

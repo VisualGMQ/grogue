@@ -9,6 +9,16 @@ void StartupSystem(ecs::Commands& commands, ecs::Resources res) {
     commands.Spawn<CollideShape, Particle>(CollideShape{std::make_shared<AABB>(
         math::Vector2::Zero, math::Vector2{50, 50})},
         Particle::Create(math::Vector2(100, 200), 1.0));
+    commands.Spawn<CollideShape, Particle>(CollideShape{std::make_shared<AABB>(
+        math::Vector2::Zero, math::Vector2{25, 50})},
+        Particle::Create(math::Vector2(200, 200), 1.0));
+    commands.Spawn<CollideShape, Particle>(CollideShape{std::make_shared<AABB>(
+        math::Vector2::Zero, math::Vector2{50, 25})},
+        Particle::Create(math::Vector2(200, 400), 1.0));
+    commands.Spawn<CollideShape, Particle>(CollideShape{std::make_shared<Circle>(
+        math::Vector2{300, 25}, 20)},
+        Particle::Create(math::Vector2(200, 400), 1.0));
+
     commands.Spawn<CollideShape, Particle, Moveable<0>>(
         CollideShape{std::make_shared<AABB>(math::Vector2::Zero,
                                             math::Vector2{50, 50})},
@@ -18,20 +28,32 @@ void StartupSystem(ecs::Commands& commands, ecs::Resources res) {
         CollideShape{std::make_shared<Circle>(math::Vector2::Zero, 50)},
         Particle::Create(math::Vector2(800, 200), 2.0),
         {});
+
+    auto& physicWorld = res.Get<PhysicWorld>();
+    physicWorld.forceGenerators.push_back([](Particle& p, Time::TimeType){
+        if (p.vel.LengthSqrd() > 0.000001) {
+            constexpr float FrictionFactor = 3.0;
+            p.force += -math::Normalize(p.vel) * 1.0 / p.massInv * FrictionFactor;
+        }
+    });
 }
 
 void UpdateSystem(ecs::Commands& commands, ecs::Querier querier, ecs::Resources res, ecs::Events&) {
-    auto& mouse = res.Get<Mouse>();
+    auto& key = res.Get<Keyboard>();
 
-    if (mouse.LeftBtn().IsPressing()) {
-        auto entity = querier.Query<Moveable<0>>()[0];
-        auto& p = querier.Get<Particle>(entity);
-        p.pos = mouse.Position();
+    auto entity = querier.Query<Moveable<0>>()[0];
+    auto& p = querier.Get<Particle>(entity);
+    if (key.Key(Key::KEY_A).IsPressing()) {
+        p.force.x -= 10;
     }
-    if (mouse.RightBtn().IsPressing()) {
-        auto entity = querier.Query<Moveable<1>>()[0];
-        auto& p = querier.Get<Particle>(entity);
-        p.pos = mouse.Position();
+    if (key.Key(Key::KEY_D).IsPressing()) {
+        p.force.x += 10;
+    }
+    if (key.Key(Key::KEY_W).IsPressing()) {
+        p.force.y -= 10;
+    }
+    if (key.Key(Key::KEY_S).IsPressing()) {
+        p.force.y += 10;
     }
 }
 

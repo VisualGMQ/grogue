@@ -148,8 +148,8 @@ public:
         raw_.Remove(name);
     }
 
-    void Raise(uint32_t name, CommandsWrapper cmds, QuerierWrapper querier, ResourcesWrapper res, EventsWrapper events, sol::object* param) {
-        raw_.Raise(name, cmds.cmds_, querier.querier_, res.res_, events.events_, (void*)param);
+    void Raise(uint32_t name, CommandsWrapper cmds, QuerierWrapper querier, ResourcesWrapper res, EventsWrapper events, sol::object param) {
+        raw_.Raise(name, cmds.cmds_, querier.querier_, res.res_, events.events_, (void*)&param);
     }
 
     void Regist(uint32_t name, CallbackFunc func) {

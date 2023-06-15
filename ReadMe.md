@@ -3,6 +3,10 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/dri0av5hvheh7o9r?svg=true)](https://ci.appveyor.com/project/VisualGMQ/grogue-32xuj)
 ![GitHub Workflow Status (with branch)](https://img.shields.io/github/actions/workflow/status/VisualGMQ/grogue/build.yml?branch=rewrite&label=clang%2B%2B&logo=ubuntu)
 
+Grogue是一个Roguelite游戏，借鉴了饥荒，CDDA。正在开发中。
+
+可以在[这里](https://visualgmq.github.io/projects/grogue-demo/grogue.html)试玩最新的网页版Grogue，每周日更新。[这里](https://visualgmq.github.io/grogue/)则是Grogue的开发日志，每周增加的功能将会显示在这里。
+
 更多内容，请看[Wiki部分](https://github.com/VisualGMQ/grogue/wiki)
 
 代码目前有一些Bug和缺陷，看[这里](./bug.md)

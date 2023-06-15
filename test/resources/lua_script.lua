@@ -37,7 +37,7 @@ function Run(entity, cmds, querier, res, events)
     local mouse = res:GetMouse();
     if mouse:LeftBtn():IsPressed() then
         local signal = res:GetSignalManager()
-        signal:Raise(0, cmds, querier, res, events)
+        signal:Raise(0, cmds, querier, res, events, {})
         signal:Raise(1, cmds, querier, res, events, {msg = "raised"})
 
         local context = res:GetLuaShareContext()

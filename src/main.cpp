@@ -4,6 +4,7 @@
 #include "game/monster.hpp"
 #include "game/signal_defs.hpp"
 #include "game/game.hpp"
+#include "game/input.hpp"
 
 struct Context {
     FontHandle font;
@@ -22,10 +23,21 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     LOGI("resources loaded");
 }
 
-enum GameState {
-    Menu,
-    Game,
-} state;
+void InitInputSystem(ecs::Commands& cmd, ecs::Resources res) {
+#if defined(GROGUE_PLATFORM_ANDROID) || defined(GROGUE_PLATFORM_APPLE) // Touch devices
+    InputPtr input = std::make_unique<TouchInput>();
+#else   // Keyboard devices
+    auto& luaMgr = res.Get<AssetsManager>().Lua();
+    auto lua = luaMgr.CreateSolitary("./resources/config/game_conf.lua");
+    sol::table keyboardConfig = lua.lua["Config"]["keyboard_input"];
+    std::unordered_map<std::string, Key> actions;
+    for (auto& [name, value] : keyboardConfig) {
+        actions[name.as<std::string>()] = static_cast<Key>(SDL_GetScancodeFromName(value.as<std::string>().c_str()));
+    }
+    InputPtr input = std::make_unique<KeyboardInput>(res.Get<Keyboard>(), std::move(actions));
+#endif
+    cmd.SetResource<InputPtr>(std::move(input));
+}
 
 void ReadConfigSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& luaMgr = resources.Get<AssetsManager>().Lua();
@@ -139,6 +151,7 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
 void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
     cmd.SetResource<NearestItemHover>(NearestItemHover{});
     ReadConfigSystem(cmd, resources);
+    InitInputSystem(cmd, resources);
     InitMapSystem(cmd, resources);
     InitMonstersSystem(cmd, resources);
     InitBackpackUISystem(cmd, resources);

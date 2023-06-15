@@ -19,8 +19,6 @@ struct LUA_BIND_COMPONENT Particle final {
     }
 };
 
-using ForceGenerator = std::function<void(Particle&, Time::TimeType)>;
-
 //! @brief component for a rigid body(has position, rotation)
 struct LUA_BIND_COMPONENT RigidBody final {
     Particle particle;
@@ -119,6 +117,8 @@ inline float NearestPtOnLine(const math::Vector2& p, const math::Vector2& s, con
 struct LUA_BIND_COMPONENT CollideShape final {
     std::shared_ptr<Shape> shape;
 };
+
+using ForceGenerator = std::function<void(Particle&, Time::TimeType)>;
 
 struct LUA_BIND_RESOURCE PhysicWorld final {
     std::vector<ForceGenerator> forceGenerators;
