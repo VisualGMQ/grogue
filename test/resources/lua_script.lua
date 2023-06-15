@@ -11,8 +11,10 @@ function Startup(entity, cmds, res)
         ---@param q Querier
         ---@param r Resources
         ---@param e Events
-        function (c, q, r, e)
+        ---@param p table
+        function (c, q, r, e, p)
             print("regist function called") 
+            print(p.msg)
         end)
 
     local context = res:GetLuaShareContext()
@@ -36,7 +38,7 @@ function Run(entity, cmds, querier, res, events)
     if mouse:LeftBtn():IsPressed() then
         local signal = res:GetSignalManager()
         signal:Raise(0, cmds, querier, res, events)
-        signal:Raise(1, cmds, querier, res, events)
+        signal:Raise(1, cmds, querier, res, events, {msg = "raised"})
 
         local context = res:GetLuaShareContext()
         print(context.context.msg)
