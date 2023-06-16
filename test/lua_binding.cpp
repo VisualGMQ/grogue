@@ -12,8 +12,7 @@ void InitLuaScript(ecs::Commands& cmds, ecs::Resources res) {
                                ecs::Events&, void*) { LOGT("signaled"); });
     auto& luaMgr = res.Get<AssetsManager>().Lua();
     auto parent = cmds.SpawnAndReturn<Script, Node>(
-        Script::Create(luaMgr.CreateSolitary(
-            TestHelper::Instance().GetResourcePath() + "lua_script.lua"))
+        Script::Create(luaMgr, TestHelper::Instance().GetResourcePath() + "lua_script.lua")
         ,Node{});
 }
 

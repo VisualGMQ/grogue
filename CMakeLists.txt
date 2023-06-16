@@ -6,6 +6,7 @@ project(
     grogue
     VERSION 0.1.0
     LANGUAGES CXX C
+    HOMEPAGE_URL https://visualgmq.github.io/grogue/
 )
 
 # fetch SDL under Windows
@@ -33,20 +34,7 @@ add_subdirectory(3rdlibs/lua)
 add_subdirectory(3rdlibs/sol)
 add_subdirectory(3rdlibs/expected)
 
-# some useful utiilities
-include(cmake/copydll.cmake)
-include(cmake/cppcheck.cmake)
-AttachCppCheck()
-
-# build game
-
-set(GAME_NAME ${PROJECT_NAME})
-set(LOWLEVEL_NAME lowlevel)
-
-aux_source_directory(src/core LOWLEVEL_SRC)
-aux_source_directory(src/app  LOWLEVEL_SRC)
-aux_source_directory(src/game LOWLEVEL_SRC)
-
+# find python to execute luabind parser
 find_program(PYTHON python3)
 if (${PYTHON} MATCHES PYTHON-NOTFOUND)
     find_program(PYTHON python)
@@ -80,6 +68,22 @@ add_custom_command(
     VERBATIM
 )
 
+
+# some useful utiilities
+include(cmake/copydll.cmake)
+include(cmake/cppcheck.cmake)
+AttachCppCheck()
+
+
+# build game
+
+set(GAME_NAME ${PROJECT_NAME})
+set(LOWLEVEL_NAME lowlevel)
+
+aux_source_directory(src/core LOWLEVEL_SRC)
+aux_source_directory(src/app  LOWLEVEL_SRC)
+aux_source_directory(src/game LOWLEVEL_SRC)
+
 add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CMAKE_BINARY_DIR}/luabind/luabind.cpp ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CPP_INCLUDE_FILES})
 target_include_directories(${LOWLEVEL_NAME} PRIVATE ${CMAKE_BINARY_DIR}/luabind)
 
@@ -93,7 +97,7 @@ if (NOT ${is_mingw_backend})
     target_precompile_headers(${LOWLEVEL_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include/core/pch.hpp)
 endif()
 
-# judge platform
+# check platform
 if (UNIX)
     target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_UNIX)
 elseif (WIN32)
@@ -114,20 +118,10 @@ target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
 
 CopyDLL(${GAME_NAME})
 
-# run parser.py to generate luabind codes
-find_program(PIP pip3)
-if (PIP-NOTFOUND)
-    find_program(PIP pip3)
-    if (PIP-NOTFOUND)
-        message(FATAL_ERROR "you must install python 3.0 and pip 3.0")
-    endif()
-endif()
-
-# emscripten special link
 if (NOT EMSCRIPTEN)
     target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua sol2 expected)
     CopyDefScript(${GAME_NAME})
-else()
+else() # emscripten special link
     message("-- build for wasm")
     set(USE_SDL "-sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_SDL_TTF=2 -sUSE_SDL_MIXER=2 -sSDL2_IMAGE_FORMATS=\"[\"png\", \"jpg\", \"bmp\"]\"" )
     set(PRELOAD "--preload-file resources --use-preload-plugins")
@@ -137,7 +131,6 @@ else()
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_SDL} ${PRELOAD} ${OTHER_FLAGS}")
     set(CMAKE_EXECUTABLE_SUFFIX .html)
     target_link_libraries(${LOWLEVEL_NAME} PUBLIC lua sol2 expected)
-    CopyResForWASM(${GAME_NAME})
 endif()
 
 # auto format
@@ -178,3 +171,36 @@ if (ENABLE_TEST AND NOT EMSCRIPTEN)
     enable_testing()
     add_subdirectory(test)
 endif()
+
+
+# pack game
+install(TARGETS ${GAME_NAME} RUNTIME DESTINATION install COMPONENT applications)
+install(DIRECTORY resources DESTINATION install)
+if (NOT EMSCRIPTEN)
+    set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+    include(InstallRequiredSystemLibraries)
+    install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION install)
+    if (WIN32) # it currently only works on Windows
+        install(FILES $<TARGET_FILE:SDL2::SDL2> $<TARGET_FILE:SDL2::IMAGE> $<TARGET_FILE:SDL2::TTF> $<TARGET_FILE:SDL2::MIXER>
+                DESTINATION install)
+    endif()
+else()
+    install(FILES ${CMAKE_BINARY_DIR}/${GAME_NAME}.data ${CMAKE_BINARY_DIR}/${GAME_NAME}.wasm ${CMAKE_BINARY_DIR}/${GAME_NAME}.js
+            DESTINATION ${CMAKE_BINARY_DIR}/install)
+endif()
+
+set(CPACK_PACKAGE_NAME "${GAME_NAME}")
+set(CPACK_SET_DESTDIR OFF)
+set(CPACK_PACKAGE_VENDOR "VisualGMQ")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A Roguelite game")
+set(CPACK_VERBATIM_VARIABLES YES)
+set(CPACK_OUTPUT_FILE_PREFIX "${CMAKE_BINARY_DIR}/_packages")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_CONTACT "2142587070@qq.com")
+
+# some options for NSIS(a Windows package tool), you need install [NSIS](https://nsis.sourceforge.io/)
+# set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/resources/install.bmp")
+set(CPACK_CREATE_DESKTOP_LINKS "${GAME_NAME} v${PROJECT_VERSION}")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "${GAME_NAME}")
+set(CPACK_PACKAGE_EXECUTABLES "${GAME_NAME}" "resourcecs/role.png")
+include(CPack)

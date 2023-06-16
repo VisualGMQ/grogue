@@ -73,8 +73,7 @@ void InitMonstersSystem(ecs::Commands& cmd, ecs::Resources resources) {
         SpriteBundle{Sprite::FromRegion(downTile.region), downTile.handle});
         cmd.Spawn<Monster, Player, Backpack, Script>(
             std::move(monster), Player{}, Backpack{},
-            Script::Create(
-                luaMgr.CreateSolitary("resources/script/player.lua")));
+            Script::Create(luaMgr, "resources/script/player.lua"));
 }
 
 void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {

@@ -9,7 +9,7 @@ struct Script final {
     bool work = true;
     bool inited = false;
 
-    static Script Create(LuaScript&& lua);
+    static Script Create(LuaManager& mgr, const std::string& filename);
 };
 
 //! @brief resources for sharing variable between lua
