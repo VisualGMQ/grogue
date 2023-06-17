@@ -23,6 +23,16 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
     LOGI("resources loaded");
 }
 
+void InitPhysicsSystem(ecs::Resources res) {
+    auto& physicWorld = res.Get<physic::PhysicWorld>();
+    physicWorld.forceGenerators.push_back([](physic::Particle& p, Time::TimeType){
+        if (p.vel.LengthSqrd() > 0.000001) {
+            constexpr float FrictionFactor = 3.0;
+            p.force += -math::Normalize(p.vel) * 1.0 / p.massInv * FrictionFactor;
+        }
+    });
+}
+
 void InitInputSystem(ecs::Commands& cmd, ecs::Resources res) {
 #if defined(GROGUE_PLATFORM_ANDROID) || defined(GROGUE_PLATFORM_APPLE) // Touch devices
     InputPtr input = std::make_unique<TouchInput>();
@@ -51,11 +61,11 @@ void ReadConfigSystem(ecs::Commands& cmd, ecs::Resources resources) {
     LOGI("config readed");
 }
 
-void InitMapSystem(ecs::Commands& cmd, ecs::Resources resources) {
+void InitMapSystem(ecs::Commands& cmds, ecs::Resources resources) {
     MapManager mapMgr;
-    mapMgr.Add(GenDebugDemo(resources, 32, 23));
+    mapMgr.Add(GenDebugDemo(cmds, resources, 32, 23));
 
-    cmd.SetResource<MapManager>(std::move(mapMgr));
+    cmds.SetResource<MapManager>(std::move(mapMgr));
 }
 
 void InitMonstersSystem(ecs::Commands& cmd, ecs::Resources resources) {
@@ -71,8 +81,10 @@ void InitMonstersSystem(ecs::Commands& cmd, ecs::Resources resources) {
         SpriteBundle{Sprite::FromRegion(rightTile.region), rightTile.handle},
         SpriteBundle{Sprite::FromRegion(upTile.region), upTile.handle},
         SpriteBundle{Sprite::FromRegion(downTile.region), downTile.handle});
-        cmd.Spawn<Monster, Player, Backpack, Script>(
+        cmd.Spawn<Monster, Player, Backpack, physic::Particle, physic::CollideShape, Script>(
             std::move(monster), Player{}, Backpack{},
+            physic::Particle::Create(math::Vector2::Zero, 1.0),
+            physic::CollideShape{std::make_shared<physic::AABB>(math::Vector2{16, 34}, math::Vector2{12, 12})},
             Script::Create(luaMgr, "resources/script/player.lua"));
 }
 
@@ -150,6 +162,7 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
 void StartupSystem(ecs::Commands& cmd, ecs::Resources resources) {
     cmd.SetResource<NearestItemHover>(NearestItemHover{});
     ReadConfigSystem(cmd, resources);
+    InitPhysicsSystem(resources);
     InitInputSystem(cmd, resources);
     InitMapSystem(cmd, resources);
     InitMonstersSystem(cmd, resources);
@@ -166,19 +179,20 @@ void DetectNearestItem(ecs::Commands& cmd, ecs::Querier querier,
 
     auto entity = entities[0];
     auto& monster = querier.Get<Monster>(entity);
+    auto& particle = querier.Get<physic::Particle>(entity);
     auto& nearestItem = resources.Get<NearestItemHover>();
 
     constexpr float PickupHalfRange = 100;
     auto& map = resources.Get<MapManager>().GetCurrentMap();
+    auto monsterPos = particle.pos;
     math::Rect pickupArea =
-        math::Rect::Create(monster.position.x - PickupHalfRange,
-                           monster.position.y - PickupHalfRange,
+        math::Rect::Create(monsterPos.x - PickupHalfRange,
+                           monsterPos.y - PickupHalfRange,
                            PickupHalfRange * 2.0, PickupHalfRange * 2.0);
     pickupArea = math::Rect::Create(
         pickupArea.x / MapTileRealSize, pickupArea.y / MapTileRealSize,
         pickupArea.w / MapTileRealSize, pickupArea.h / MapTileRealSize);
     // FIXME: monster should use it's center position
-    auto monsterPos = monster.position;
     int left = std::ceil(pickupArea.x);
     int bottom = std::ceil(pickupArea.y);
     int right =
@@ -192,7 +206,8 @@ void DetectNearestItem(ecs::Commands& cmd, ecs::Querier querier,
         for (int y = bottom; y < top; y++) {
             math::Vector2 tileCenter((x + 0.5) * MapTileRealSize,
                                      (y + 0.5) * MapTileRealSize);
-            auto& tile = map->tiles.Get(x, y);
+            auto tileEntity = map->tiles.Get(x, y);
+            auto& tile = querier.Get<MapTile>(tileEntity);
             double distSqrd = math::LengthSqrd(tileCenter - monsterPos);
             if (!tile.items.empty() && distSqrd < minDistSqrd &&
                 distSqrd <= PickupHalfRange * PickupHalfRange) {
@@ -235,7 +250,6 @@ public:
             .AddStartupSystem(LoadResourceSystem)
             .AddStartupSystem(StartupSystem)
             .AddSystem(DetectNearestItem)
-            .AddSystem(MonsterUpdate)
             .AddSystem(DrawMapSystem)
             .AddSystem(DrawMonsterSystem)
             .AddSystem(DrawNearestItemPointer)

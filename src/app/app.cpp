@@ -91,7 +91,7 @@ void DefaultPlugins::Build(ecs::World* world) {
         .SetResource(TimerManager{})
         .SetResource(SignalManager{})
         .SetResource(LuaShareContext{})
-        .SetResource(physic::PhysicWorld{})
+        .SetResource(physic::PhysicWorld{physic::Grid(32, 32, 1024 / 32 + 1, 720 / 32 + 1)})
         .SetResource(DebugConfig{});
 
     auto* assets = world->GetResource<AssetsManager>();
@@ -108,8 +108,10 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(RunScriptSystem)
         .AddSystem(HierarchyRunScriptSystem)
         // physical relate
+        .AddSystem(physic::UpdatePos2Particle)
         .AddSystem(physic::UpdateParticleSystem)
         .AddSystem(physic::DoCollideSystem)
+        .AddSystem(physic::UpdatePos2Entity)
         // transform update
         .AddSystem(UpdateNodeTransformSystem)
         .AddSystem(UpdateRectTransformSystem)

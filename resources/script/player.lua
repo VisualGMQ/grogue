@@ -22,9 +22,9 @@ local function LuaPickupItemOnTile(monster, backpack, cmd, querier, res, events)
     local hover = res:GetNearestItemHover()
 
     local x, y = math.floor(hover.position.x), math.floor(hover.position.y)
-    if map.tiles:IsInRange(x, y) and
-        not map.tiles:Get(x, y).items:empty() then
-        local items = map.tiles:Get(x, y).items
+
+    if map.tiles:IsInRange(x, y) then
+        local items = querier:GetMapTile(map.tiles:Get(x, y)).items
         if items:empty() then
             return;
         end
@@ -73,8 +73,9 @@ function Run(entity, cmds, querier, res, events)
             goto NEXT_LOOP
         end
         local monster = querier:GetMonster(entity)
+        local particle = querier:GetParticle(entity)
 
-        PlayerMove(keyboard, monster)
+        PlayerMove(keyboard, monster, particle)
 
         if keyboard:Key(Key.KEY_SPACE):IsPressed() and
             querier:HasBackpack(entity) then

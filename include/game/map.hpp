@@ -7,8 +7,9 @@
 #include "app/sprite.hpp"
 #include "app/tilesheet.hpp"
 #include "app/renderer.hpp"
+#include "app/physic.hpp"
 
-struct LUA_BIND MapTile final {
+struct LUA_BIND_COMPONENT MapTile final {
     Terrian terrian;
     std::vector<Item> items;
 };
@@ -16,9 +17,9 @@ struct LUA_BIND MapTile final {
 struct LUA_BIND Map final {
     Map(int w, int h): tiles(w, h) {}
 
-    math::HeapMatrix<MapTile> tiles;
+    math::HeapMatrix<ecs::Entity> tiles;
     std::vector<ecs::Entity> items;    //!< seperate items that not on grid
-    std::vector<ecs::Entity> entities;   //!< moveable entities
+    std::vector<ecs::Entity> monsters;   //!< moveable entities
 };
 
 struct LUA_BIND_RESOURCE MapManager final {
@@ -34,7 +35,7 @@ private:
 constexpr int MapTileSize = 16;
 constexpr int MapTileRealSize = MapTileSize * SCALE;
 
-std::shared_ptr<Map> GenDebugDemo(ecs::Resources resources, int w, int h);
+std::shared_ptr<Map> GenDebugDemo(ecs::Commands& cmds, ecs::Resources resources, int w, int h);
 
 void DrawMapSystem(ecs::Commands& cmd, ecs::Querier queryer,
                    ecs::Resources resources, ecs::Events& events);

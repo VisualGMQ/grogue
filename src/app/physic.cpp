@@ -141,6 +141,9 @@ void updateOneParticle(Particle& particle, Time::TimeType elapse, std::vector<Fo
 
     particle.acc += particle.force * particle.massInv;
     particle.vel += particle.acc * t;
+    if (particle.vel.LengthSqrd() <= 0.00001) {
+        particle.vel.Set(0, 0);
+    }
     particle.pos = particle.pos + particle.vel * t + 0.5 * particle.acc * t * t;
 
     particle.acc.Set(0, 0);
@@ -161,6 +164,43 @@ void UpdateParticleSystem(ecs::Commands&, ecs::Querier querier, ecs::Resources r
     for (auto entity : entities) {
         auto& rigid = querier.Get<RigidBody>(entity);
         updateOneParticle(rigid.particle, 33, physicConfig.forceGenerators);
+    }
+}
+
+void updateOnePos(ecs::Entity entity, ecs::Querier querier, const math::Vector2& pos) {
+    if (querier.Has<Transform>(entity)) {
+        auto& transform = querier.Get<Transform>(entity);
+        transform.position = pos;
+    }
+    if (querier.Has<NodeTransform>(entity)) {
+        auto& transform = querier.Get<NodeTransform>(entity);
+        transform.localTransform.position += pos - transform.globalTransform.position;
+    }
+}
+
+void UpdatePos2Entity(ecs::Commands&, ecs::Querier querier, ecs::Resources,
+                      ecs::Events&) {
+    auto entities = querier.Query<ecs::With<Particle, ecs::Option<Transform>, ecs::Option<NodeTransform>>>();
+    for (auto entity : entities) {
+        auto& particle = querier.Get<Particle>(entity);
+        updateOnePos(entity, querier, particle.pos);
+    }
+}
+
+void UpdatePos2Particle(ecs::Commands&, ecs::Querier querier, ecs::Resources,
+                        ecs::Events&) {
+    auto entities = querier.Query<ecs::With<Particle, ecs::Option<Transform>, ecs::Option<NodeTransform>>>();
+    for (auto entity : entities) {
+        auto& particle = querier.Get<Particle>(entity);
+
+        if (querier.Has<Transform>(entity)) {
+            auto& transform = querier.Get<Transform>(entity);
+            particle.pos = transform.position;
+        }
+        if (querier.Has<NodeTransform>(entity)) {
+            auto& transform = querier.Get<NodeTransform>(entity);
+            particle.pos = transform.globalTransform.position;
+        }
     }
 }
 
@@ -317,8 +357,10 @@ void renderShape(Renderer& renderer, Shape* shape, const Color& color) {
     }
 }
 
-std::vector<Manifold> doNarrowCollide(std::vector<ecs::Entity>& entities, std::vector<CollideShape*>& shapes, Renderer& renderer) {
-    std::vector<Manifold> manifolds;
+void doCollideEachOther(std::vector<Manifold>& resultManifolds, std::vector<ecs::Entity>& entities, std::vector<CollideShape*>& shapes, Renderer& renderer) {
+    for (auto& shape : shapes) {
+        renderShape(renderer, shape->shape.get(), Color{0, 255, 0});
+    }
 
     for (int i = 0; i < (int)shapes.size() - 1; i++) {
         for (int j = i + 1; j < shapes.size(); j++) {
@@ -331,16 +373,10 @@ std::vector<Manifold> doNarrowCollide(std::vector<ecs::Entity>& entities, std::v
             Manifold manifold = doShapeCollide(entities[i], entities[j], shape1.get(), shape2.get());
 
             if (manifold.contactNum > 0) {
-                manifolds.push_back(manifold);
+                resultManifolds.push_back(std::move(manifold));
             }
         }
     }
-
-    for (auto shape : shapes)  {
-        renderShape(renderer, shape->shape.get(), Color{0, 255, 0});
-    }
-
-    return manifolds;
 }
 
 //! @brief handle collide on one side particle
@@ -392,6 +428,18 @@ void handleCollide(std::vector<Manifold>& manifolds, ecs::Querier querier, Rende
             } else {
                 handleCollideToDyn(manifold, p2.pos, p1.pos, false, 1.0);
             }
+        } else if (querier.Has<Particle>(manifold.entity1) && !querier.Has<Particle>(manifold.entity2)) {
+            auto& p = querier.Get<Particle>(manifold.entity1);
+            auto& c = querier.Get<CollideShape>(manifold.entity2);
+            if (p.massInv != 0) {
+                handleCollideToDyn(manifold, p.pos, c.shape->center, true, 1.0);
+            }
+        } else if (!querier.Has<Particle>(manifold.entity1) && querier.Has<Particle>(manifold.entity2)) {
+            auto& p = querier.Get<Particle>(manifold.entity2);
+            auto& c = querier.Get<CollideShape>(manifold.entity1);
+            if (p.massInv != 0) {
+                handleCollideToDyn(manifold, p.pos, c.shape->center, false, 1.0);
+            }
         }
     }
 }
@@ -403,18 +451,63 @@ void doCollideSystem(ecs::Querier querier, ecs::Resources res) {
         auto& shape = querier.Get<CollideShape>(entity);
         if (querier.Has<Particle>(entity)) {
             shape.shape->center = shape.shape->offset + querier.Get<Particle>(entity).pos;
+        } else {
+            shape.shape->center = shape.shape->offset;
         }
         shapes.push_back(&shape);
     }
 
     auto& renderer = res.Get<Renderer>();
-    auto manifolds = doNarrowCollide(entities, shapes, renderer);
+    std::vector<Manifold> manifolds;
+    doCollideEachOther(manifolds, entities, shapes, renderer);
     handleCollide(manifolds, querier, renderer);
 }
 
 void DoCollideSystem(ecs::Commands&, ecs::Querier querier, ecs::Resources res,
                      ecs::Events&) {
     doCollideSystem(querier, res);
+}
+
+void Grid::Add(ecs::Entity entity, const math::Rect& rect) {
+    auto [hori, vert] = CalcContainedRange(rect);
+
+    for (int x = hori.first; x < hori.second; x++) {
+        for (int y = vert.first; y < vert.second; y++) {
+            grid_.Get(x, y).push_back(entity);
+        }
+    }
+}
+
+void Grid::Change(ecs::Entity entity, const math::Rect& oldRect,
+                    const math::Rect& newRect) {
+    Remove(entity, oldRect);
+    Add(entity, newRect);
+}
+
+void Grid::Remove(ecs::Entity entity, const math::Rect& rect) {
+    auto [hori, vert] = CalcContainedRange(rect);
+
+    for (int x = hori.first; x < hori.second; x++) {
+        for (int y = vert.first; y < vert.second; y++) {
+            auto& grid = grid_.Get(x, y);
+            for (auto& entity : grid) {
+                if (entity == entity) {
+                    std::swap(entity, grid.back());
+                    grid.pop_back();
+                    break;
+                }
+            }
+        }
+    }
+}
+
+std::pair<std::pair<size_t, size_t>, std::pair<size_t, size_t>>
+Grid::CalcContainedRange(const math::Rect& rect) {
+    return {{std::max<size_t>(rect.x / cellW_, 0),
+             std::min<size_t>((rect.x + rect.w) / cellW_, grid_.Width())},
+            {std::max<size_t>(rect.y / cellH_, 0),
+             std::min<size_t>((rect.y + rect.h) / cellH_, grid_.Height())}
+    };
 }
 
 }  // namespace physic

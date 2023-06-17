@@ -3,6 +3,8 @@
 #include "core/pch.hpp"
 #include "app/timer.hpp"
 #include "app/renderer.hpp"
+#include "app/transform.hpp"
+#include "app/scene.hpp"
 
 namespace physic {
 
@@ -114,13 +116,51 @@ inline math::Vector2 NearestPtOnCircle(const math::Vector2& pt, const Circle& ci
 inline float NearestPtOnLine(const math::Vector2& p, const math::Vector2& s, const math::Vector2& d);
 
 //! @brief component for collide shape
+
+LUA_BIND;
+enum CollideUsage {
+    Collide = 0x01,     //<! @brief collide with others, handle collide manifold
+    Listener = 0x02,    //<! @brief collide with others without handle collide manifold
+    Both = 0x03,
+};
+
 struct LUA_BIND_COMPONENT CollideShape final {
     std::shared_ptr<Shape> shape;
+    CollideUsage usage = CollideUsage::Collide;
 };
 
 using ForceGenerator = std::function<void(Particle&, Time::TimeType)>;
 
+class Grid final {
+public:
+    Grid(int cellW, int cellH, int col, int row)
+        : grid_(col, row), cellW_(cellW), cellH_(cellH), maxW_(cellW * col), maxH_(cellH * row)  {
+        assert(cellW > 0 && cellH > 0 && col > 0 && row > 0);
+    }
+
+    void Add(ecs::Entity, const math::Rect& rect);
+    void Change(ecs::Entity, const math::Rect& oldRect,
+                const math::Rect& newRect);
+    void Remove(ecs::Entity, const math::Rect& rect);
+
+    bool IsInGrid(const math::Rect& rect) {
+        return math::Rect(0, 0, maxW_, maxH_).IsIntersect(rect);
+    }
+
+    std::pair<std::pair<size_t, size_t>, std::pair<size_t, size_t>> CalcContainedRange(const math::Rect& r);
+
+    auto& GetGrid() { return grid_; }
+
+private:
+    math::HeapMatrix<std::vector<ecs::Entity>> grid_;
+    uint32_t cellW_;
+    uint32_t cellH_;
+    uint32_t maxW_;
+    uint32_t maxH_;
+};
+
 struct LUA_BIND_RESOURCE PhysicWorld final {
+    Grid grid;
     std::vector<ForceGenerator> forceGenerators;
     std::vector<Manifold> manifolds;
 };
@@ -129,4 +169,9 @@ void UpdateParticleSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
                           ecs::Events&);
 void DoCollideSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
                      ecs::Events&);
+
+void UpdatePos2Particle(ecs::Commands&, ecs::Querier, ecs::Resources,
+                        ecs::Events&);
+void UpdatePos2Entity(ecs::Commands&, ecs::Querier, ecs::Resources,
+                      ecs::Events&);
 }  // namespace physic

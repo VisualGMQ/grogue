@@ -404,7 +404,7 @@ public:
         return datas_.get()[x + y * w_];
     }
 
-    void Set(int x, int y, T& t) {
+    void Set(int x, int y, const T& t) {
         assert(x + y * w_ < w_ * h_ && x >= 0 && y >= 0);
         datas_.get()[x + y * w_] = t;
     }

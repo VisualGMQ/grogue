@@ -56,6 +56,7 @@ EndDeclareParseFunc()
 DeclareParseFunc(ItemPOD)
     Field(name, std::string)
     Field(weight, int)
+    Field(architecture, bool)
     DynArrayField(operations, std::string)
     ObjField(sprite, SpritePOD)
     ObjField(material, Material)
@@ -186,6 +187,8 @@ ItemConfig::ItemConfig(LuaManager& luaMgr, TilesheetManager& tsMgr, const std::s
                 for (const auto& operation : pod.value().operations) {
                     info.operations.push_back({operation, true});
                 }
+
+                info.architecture = pod.value().architecture;
 
                 auto& tilesheet = tsMgr.Find(pod.value().sprite.tilesheet.name);
                 auto tile = tilesheet.Get(pod.value().sprite.tilesheet.col, pod.value().sprite.tilesheet.row);

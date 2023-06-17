@@ -42,7 +42,7 @@ using ui::EventType;
     matrix["Height"] = &mtype::Height; \
     matrix["Get"] = sol::overload(static_cast<type&(mtype::*)(int, int)>(&mtype::Get), \
                                 static_cast<const type&(mtype::*)(int, int) const>(&mtype::Get)); \
-    matrix["Set"] = sol::overload(static_cast<void(mtype::*)(int, int, type &)>(&mtype::Set)); \
+    matrix["Set"] = sol::overload(static_cast<void(mtype::*)(int, int, const type &)>(&mtype::Set)); \
     matrix["IsInRange"] = &mtype::IsInRange; \
 }
 
@@ -55,6 +55,7 @@ void BindLua(LuaScript& script) {
     signalMgr["Regist"] = &SignalManagerWrapper::Regist;
 
     BindHeapMatrix(MapTile, HeapMatrixMapTile)
+    BindHeapMatrix(ecs::Entity, HeapMatrixEntity)
 
     BindEventReader(LuaEventContextReader)
     BindEventWriter(LuaEventContextWriter, LuaEventContext)

@@ -4,6 +4,7 @@
 #include "app/sprite.hpp"
 #include "app/renderer.hpp"
 #include "game/types.hpp"
+#include "app/physic.hpp"
 
 enum class Direction: uint8_t {
     None = 0x00,
@@ -25,12 +26,9 @@ struct LUA_BIND_COMPONENT Monster final {
     DirIdx curSpriteIdx = DirIdx::Down;
     Direction direction;
 
-    math::Vector2 velocity; // TODO: move it to physics later
-    math::Vector2 position; // TODO: move it to physics later
-
     static Monster CreateMonster(const SpriteBundle& right, const SpriteBundle& up, const SpriteBundle& down);
 
-    void Move(const math::Vector2& vel);
+    void Monster::Move(const math::Vector2& vel);
 };
 
 

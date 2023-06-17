@@ -99,6 +99,7 @@ struct LUA_BIND ItemOperation {
 struct LUA_BIND ItemInfo final {
     std::string name;
     int weight;
+    bool architecture;
     std::vector<ItemOperation> operations;
     SpriteBundle sprite;
 };

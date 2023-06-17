@@ -678,6 +678,10 @@ public:
         return *((T *)world_.entities_[entity][index]);
     }
 
+    bool Alive(Entity entity) {
+        return world_.entities_.find(entity) != world_.entities_.end();
+    }
+
 private:
     World &world_;
 

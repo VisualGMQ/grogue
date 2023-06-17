@@ -43,6 +43,7 @@ struct LUA_BIND ItemPOD final {
     std::string name;
     int weight;
     std::vector<std::string> operations;
+    bool architecture = true;
     SpritePOD sprite;
     Material material;
 };
@@ -94,6 +95,7 @@ ReflRegist(
         .Member(&ItemPOD::weight, "weight")
         .Member(&ItemPOD::operations, "operations")
         .Member(&ItemPOD::material, "material")
+        .Member(&ItemPOD::architecture, "architecture")
         .Member(&ItemPOD::sprite, "sprite")
 )
 
