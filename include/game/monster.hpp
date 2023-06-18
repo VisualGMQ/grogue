@@ -28,7 +28,7 @@ struct LUA_BIND_COMPONENT Monster final {
 
     static Monster CreateMonster(const SpriteBundle& right, const SpriteBundle& up, const SpriteBundle& down);
 
-    void Monster::Move(const math::Vector2& vel);
+    void Move(const math::Vector2& vel);
 };
 
 

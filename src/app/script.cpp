@@ -3,7 +3,7 @@
 
 Script Script::Create(LuaManager& mgr, const std::string& filename) {
     auto lua = mgr.CreateSolitary();
-    lua.lua.do_string("package.path = package.path .. \"./resources/script/defs.lua\"");
+    lua.lua.do_string("package.path = package.path .. \";./resources/script/defs.lua\"");
     lua_bind::BindLua(lua);
     lua.lua.do_file(filename);
     return std::move(Script{std::make_shared<LuaScript>(std::move(lua))});

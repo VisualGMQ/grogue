@@ -434,12 +434,12 @@ if __name__ == '__main__':
 
     dump_data_path = OUTPUT_PATH + "dump.data"
 
-    # if not SHOULD_FORCE and os.path.exists(dump_data_path):
-    #     with open(dump_data_path, "rb") as f:
-    #         old_data = f.read()
-    #         if old_data == pickle.dumps(packed_data, 1):
-    #             print("--- luabind parser: nothing to do")
-    #             exit(0)
+    if not SHOULD_FORCE and os.path.exists(dump_data_path):
+        with open(dump_data_path, "rb") as f:
+            old_data = f.read()
+            if old_data == pickle.dumps(packed_data, 1):
+                print("--- luabind parser: nothing to do")
+                exit(0)
 
     print("--- luabind parser parsing....")
 

@@ -59,12 +59,12 @@ message("fount pip3")
 file(GLOB_RECURSE CPP_INCLUDE_FILES ./include/*.hpp)
 
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CMAKE_BINARY_DIR}/luabind/luabind.cpp ${CMAKE_BINARY_DIR}/luabind/def.lua
+    OUTPUT ${CMAKE_BINARY_DIR}/luabind/luabind.hpp 
     COMMAND ${PIP} install -r utilities/luabind_parser/requirements.txt
     COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/utilities/luabind_parser/parser.py "${CMAKE_BINARY_DIR}"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "run parser to parse C++ header file, generate lua bind codes"
     DEPENDS ./utilities/luabind_parser/parser.py ${CPP_INCLUDE_FILES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     VERBATIM
 )
 
@@ -84,7 +84,7 @@ aux_source_directory(src/core LOWLEVEL_SRC)
 aux_source_directory(src/app  LOWLEVEL_SRC)
 aux_source_directory(src/game LOWLEVEL_SRC)
 
-add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CMAKE_BINARY_DIR}/luabind/luabind.cpp ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CPP_INCLUDE_FILES})
+add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CMAKE_BINARY_DIR}/luabind/luabind.cpp ${CPP_INCLUDE_FILES})
 target_include_directories(${LOWLEVEL_NAME} PRIVATE ${CMAKE_BINARY_DIR}/luabind)
 
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
@@ -116,11 +116,10 @@ endif()
 add_executable(${GAME_NAME} ./src/main.cpp)
 target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
 
-CopyDLL(${GAME_NAME})
-
 if (NOT EMSCRIPTEN)
     target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua sol2 expected)
     CopyDefScript(${GAME_NAME})
+    CopyDLL(${GAME_NAME})
 else() # emscripten special link
     message("-- build for wasm")
     set(USE_SDL "-sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_SDL_TTF=2 -sUSE_SDL_MIXER=2 -sSDL2_IMAGE_FORMATS=\"[\"png\", \"jpg\", \"bmp\"]\"" )

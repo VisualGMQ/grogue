@@ -63,6 +63,9 @@ jobs:
       - name: Pull Submodules
         run: git submodule update --init --recursive
 
+      - name: Parse Cpp Header
+        run: python ${{github.workspace}}/utilities/luabind_parser/parser.py cmake-build force
+
       - name: Configure CMake
         run: cmake -S . -B cmake-build -DFETCH_SDL=ON -DAUTO_FORMAT=OFF
 
