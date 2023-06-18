@@ -27,7 +27,7 @@ void InitPhysicsSystem(ecs::Resources res) {
     auto& physicWorld = res.Get<physic::PhysicWorld>();
     physicWorld.forceGenerators.push_back([](physic::Particle& p, Time::TimeType){
         if (p.vel.LengthSqrd() > 0.000001) {
-            constexpr float FrictionFactor = 3.0;
+            constexpr float FrictionFactor = 6.0;
             p.force += -math::Normalize(p.vel) * 1.0 / p.massInv * FrictionFactor;
         }
     });

@@ -19,17 +19,17 @@ inline void LUA_BIND PlayerMove(Keyboard& keyboard, Monster& monster, physic::Pa
     if (keyboard.Key(KEY_D).IsPressing() ||
         keyboard.Key(KEY_A).IsPressing()) {
         if (keyboard.Key(KEY_D).IsPressing()) {
-            particle.force.Set(10.0, 0.0);
+            particle.vel += math::Vector2(SPEED, 0.0);
         } else {
-            particle.force.Set(-10.0, 0.0);
+            particle.vel += math::Vector2(-SPEED, 0.0);
         }
     }
     if (keyboard.Key(KEY_W).IsPressing() ||
         keyboard.Key(KEY_S).IsPressing()) {
         if (keyboard.Key(KEY_S).IsPressing()) {
-            particle.force.Set(0.0, 10.0);
+            particle.vel += math::Vector2(0.0, SPEED);
         } else {
-            particle.force.Set(0.0, -10.0);
+            particle.vel += math::Vector2(0.0, -SPEED);
         }
     }
 

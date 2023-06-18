@@ -357,9 +357,11 @@ void renderShape(Renderer& renderer, Shape* shape, const Color& color) {
     }
 }
 
-void doCollideEachOther(std::vector<Manifold>& resultManifolds, std::vector<ecs::Entity>& entities, std::vector<CollideShape*>& shapes, Renderer& renderer) {
-    for (auto& shape : shapes) {
-        renderShape(renderer, shape->shape.get(), Color{0, 255, 0});
+void doCollideEachOther(std::vector<Manifold>& resultManifolds, std::vector<ecs::Entity>& entities, std::vector<CollideShape*>& shapes, Renderer& renderer, bool showDebugShape) {
+    if (showDebugShape) {
+        for (auto& shape : shapes) {
+            renderShape(renderer, shape->shape.get(), Color{0, 255, 0});
+        }
     }
 
     for (int i = 0; i < (int)shapes.size() - 1; i++) {
@@ -384,7 +386,7 @@ void doCollideEachOther(std::vector<Manifold>& resultManifolds, std::vector<ecs:
 //! @param p 
 //! @param src is particle is src object(if false, we will reverse face normal)
 //! @param portion src object mass ratio
-void handleCollideToDyn(Manifold& manifold, math::Vector2& p, const math::Vector2& other, bool src, float ratio) {
+void handleCollideToDyn(Manifold& manifold, Particle& p, const math::Vector2& other, bool src, float ratio) {
     math::Vector2 normal;
     const Contact* contact = nullptr;
     float penetration = 0.0;
@@ -394,20 +396,24 @@ void handleCollideToDyn(Manifold& manifold, math::Vector2& p, const math::Vector
         contact = manifold.contacts[0].penetration < manifold.contacts[1].penetration? &manifold.contacts[0] : &manifold.contacts[1];
     }
 
-    p += contact->normal * (src ? -1 : 1) * contact->penetration * ratio;
+    p.pos += contact->normal * (src ? -1 : 1) * contact->penetration * ratio;
+    math::Vector2 tangent(std::abs(-contact->normal.y), std::abs(contact->normal.x));
+    p.vel = p.vel.Dot(tangent) * tangent;
 }
 
-void handleCollide(std::vector<Manifold>& manifolds, ecs::Querier querier, Renderer& renderer) {
+void handleCollide(std::vector<Manifold>& manifolds, ecs::Querier querier, Renderer& renderer, bool showDebugShape) {
     // for visual debugger, remove it to DebugSystem later
-    for (const auto& manifold : manifolds) {
-        renderShape(renderer, manifold.shape1, Color::Red);
-        renderShape(renderer, manifold.shape2, Color::Red);
+    if (showDebugShape) {
+        for (const auto& manifold : manifolds) {
+            renderShape(renderer, manifold.shape1, Color::Red);
+            renderShape(renderer, manifold.shape2, Color::Red);
 
-        for (int i = 0; i < manifold.contactNum; i++) {
-            const auto& contact = manifold.contacts[i];
-            renderer.SetDrawColor(Color::Blue);
-            renderer.DrawCircle(contact.point, 5);
-            renderer.DrawLine(contact.point, contact.point + contact.penetration * contact.normal);
+            for (int i = 0; i < manifold.contactNum; i++) {
+                const auto& contact = manifold.contacts[i];
+                renderer.SetDrawColor(Color::Blue);
+                renderer.DrawCircle(contact.point, 5);
+                renderer.DrawLine(contact.point, contact.point + contact.penetration * contact.normal);
+            }
         }
     }
 
@@ -421,24 +427,24 @@ void handleCollide(std::vector<Manifold>& manifolds, ecs::Querier querier, Rende
                 return;
             } else if (p1.massInv != 0 && p2.massInv!= 0) {
                 float ratio = p1.massInv / (p1.massInv + p2.massInv);
-                handleCollideToDyn(manifold, p1.pos, p2.pos, true, ratio);
-                handleCollideToDyn(manifold, p2.pos, p1.pos, false, 1.0 - ratio);
+                handleCollideToDyn(manifold, p1, p2.pos, true, ratio);
+                handleCollideToDyn(manifold, p2, p1.pos, false, 1.0 - ratio);
             } else if (p1.massInv != 0) {
-                handleCollideToDyn(manifold, p1.pos, p2.pos, true, 1.0);
+                handleCollideToDyn(manifold, p1, p2.pos, true, 1.0);
             } else {
-                handleCollideToDyn(manifold, p2.pos, p1.pos, false, 1.0);
+                handleCollideToDyn(manifold, p2, p1.pos, false, 1.0);
             }
         } else if (querier.Has<Particle>(manifold.entity1) && !querier.Has<Particle>(manifold.entity2)) {
             auto& p = querier.Get<Particle>(manifold.entity1);
             auto& c = querier.Get<CollideShape>(manifold.entity2);
             if (p.massInv != 0) {
-                handleCollideToDyn(manifold, p.pos, c.shape->center, true, 1.0);
+                handleCollideToDyn(manifold, p, c.shape->center, true, 1.0);
             }
         } else if (!querier.Has<Particle>(manifold.entity1) && querier.Has<Particle>(manifold.entity2)) {
             auto& p = querier.Get<Particle>(manifold.entity2);
             auto& c = querier.Get<CollideShape>(manifold.entity1);
             if (p.massInv != 0) {
-                handleCollideToDyn(manifold, p.pos, c.shape->center, false, 1.0);
+                handleCollideToDyn(manifold, p, c.shape->center, false, 1.0);
             }
         }
     }
@@ -459,8 +465,9 @@ void doCollideSystem(ecs::Querier querier, ecs::Resources res) {
 
     auto& renderer = res.Get<Renderer>();
     std::vector<Manifold> manifolds;
-    doCollideEachOther(manifolds, entities, shapes, renderer);
-    handleCollide(manifolds, querier, renderer);
+    auto& debug = res.Get<DebugConfig>();
+    doCollideEachOther(manifolds, entities, shapes, renderer, debug.showPhysicDebugInfo);
+    handleCollide(manifolds, querier, renderer, debug.showPhysicDebugInfo);
 }
 
 void DoCollideSystem(ecs::Commands&, ecs::Querier querier, ecs::Resources res,

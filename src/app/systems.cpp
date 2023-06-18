@@ -3,6 +3,7 @@
 #include "app/scene.hpp"
 #include "app/sprite.hpp"
 #include "app/ui.hpp"
+#include "app/input.hpp"
 
 void ResetRenderStateSystem(ecs::Commands& cmd, ecs::Querier querier,
                         ecs::Resources res, ecs::Events& events) {
@@ -144,3 +145,13 @@ void UpdateRectTransformSystem(std::optional<ecs::Entity>, ecs::Entity entity,
     }
 }
 
+void ToggleDebugMode(std::optional<ecs::Entity>, ecs::Entity,
+                    ecs::Commands&, ecs::Querier, ecs::Resources res,
+                    ecs::Events&) {
+    auto& keybord = res.Get<Keyboard>();
+    if (keybord.Key(Key::KEY_P).IsPressed()) {
+        auto& debug = res.Get<DebugConfig>();
+        debug.showAnchor = !debug.showAnchor;
+        debug.showPhysicDebugInfo = !debug.showPhysicDebugInfo;
+    }
+}

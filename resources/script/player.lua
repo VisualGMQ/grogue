@@ -16,7 +16,7 @@ end
 ---@param querier Querier
 ---@param res Resources
 ---@param events Events
-local function LuaPickupItemOnTile(monster, backpack, cmd, querier, res, events)
+local function PickupItemOnTile(monster, backpack, cmd, querier, res, events)
     local PickupHalfRange = 100
     local map = res:GetMapManager():GetCurrentMap()
     local hover = res:GetNearestItemHover()
@@ -24,13 +24,24 @@ local function LuaPickupItemOnTile(monster, backpack, cmd, querier, res, events)
     local x, y = math.floor(hover.position.x), math.floor(hover.position.y)
 
     if map.tiles:IsInRange(x, y) then
-        local items = querier:GetMapTile(map.tiles:Get(x, y)).items
+        local tile = map.tiles:Get(x, y)
+        local items = querier:GetMapTile(tile).items
         if items:empty() then
             return;
         end
 
         backpack.items:add(items[items:size()])
         items:erase(items:size())
+
+        if items:empty() then
+            cmd:RemoveCollideShape(tile) 
+        end
+
+        for _, item in pairs(items) do
+            print(item)
+            local tile = querier:GetMapTile(item)
+            print(tile)
+        end
 
         local signalMgr = res:GetSignalManager()
         signalMgr:Raise(0, cmd, querier, res, events, {})
@@ -81,7 +92,7 @@ function Run(entity, cmds, querier, res, events)
             querier:HasBackpack(entity) then
            local backpack = querier:GetBackpack(entity) 
            -- PickupItemOnTile(monster, backpack, cmds:Raw(), querier:Raw(), res:Raw(), events:Raw())
-           LuaPickupItemOnTile(monster, backpack, cmds, querier, res, events)
+           PickupItemOnTile(monster, backpack, cmds, querier, res, events)
         end
 
         if keyboard:Key(Key.KEY_TAB):IsPressed() then

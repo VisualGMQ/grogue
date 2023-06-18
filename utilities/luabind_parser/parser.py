@@ -333,6 +333,7 @@ def generate_commands_wrapper_bind_code(component_classinfo: dict[str, ClassInfo
     codes = '''sol::usertype<CommandsWrapper> cmd = script.lua.new_usertype<CommandsWrapper>("Commands");
     sol::overload(
     {});
+    {}
     cmd["Spawn"] = &CommandsWrapper::Spawn;
     cmd["DestroyEntity"] = &CommandsWrapper::DestroyEntity;
     cmd["Raw"] = &CommandsWrapper::Raw;\n'''
@@ -347,17 +348,23 @@ def generate_commands_wrapper_bind_code(component_classinfo: dict[str, ClassInfo
     for name, info in component_classinfo.items():
         overload_code += '\tstatic_cast<void(CommandsWrapper::*)(ecs::Entity, {}::{})>(&CommandsWrapper::Add),\n'.format(info.namespace, name)
     overload_code = overload_code[:len(overload_code) - 2] + '\n'
-    return codes.format(overload_code), lua_defs
+
+    remove_component_code = ""
+    for name, info in component_classinfo.items():
+        remove_component_code += 'cmd["Remove{}"] = &CommandsWrapper::DestroyComponent<{}::{}>;\n\t'.format(name, info.namespace, name);
+    return codes.format(overload_code, remove_component_code), lua_defs
 
 def generate_header_file(classinfo_table: list[dict[str, ClassInfo]]):
     resource_wrapper_code = generate_resource_wrapper_declare_code(classinfo_table[LuaBindType.RESOURCES])
     querier_wrapper_code = generate_querier_wrapper_declare_code(classinfo_table[LuaBindType.COMPONENT])
     commands_wrapper_code = generate_commands_wrapper_declare_code(classinfo_table[LuaBindType.COMPONENT])
+
     with open("./utilities/luabind_parser/luabind.hpp.tmpl") as f:
         content = f.read()
         content = content.replace(RESOURCE_WRAPPER_INSERT_TAG, resource_wrapper_code)
         content = content.replace(COMMANDS_WRAPPER_INSERT_TAG, commands_wrapper_code)
         content = content.replace(QUERIER_WRAPPER_INSERT_TAG, querier_wrapper_code)
+
     with open(OUTPUT_PATH + "luabind/luabind.hpp", 'w+') as f:
         f.write(content)
 
@@ -427,12 +434,12 @@ if __name__ == '__main__':
 
     dump_data_path = OUTPUT_PATH + "dump.data"
 
-    if not SHOULD_FORCE and os.path.exists(dump_data_path):
-        with open(dump_data_path, "rb") as f:
-            old_data = f.read()
-            if old_data == pickle.dumps(packed_data, 1):
-                print("--- luabind parser: nothing to do")
-                exit(0)
+    # if not SHOULD_FORCE and os.path.exists(dump_data_path):
+    #     with open(dump_data_path, "rb") as f:
+    #         old_data = f.read()
+    #         if old_data == pickle.dumps(packed_data, 1):
+    #             print("--- luabind parser: nothing to do")
+    #             exit(0)
 
     print("--- luabind parser parsing....")
 

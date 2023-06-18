@@ -47,6 +47,10 @@ class SignalManagerWrapper;
 #define IMPL_ADD_FUNC(type) \
 void Add(ecs::Entity entity, type elem) { \
     cmds_.AddComponent<type>(entity, std::move(elem)); \
+} \
+template <> \
+void DestroyComponent<type>(ecs::Entity entity) { \
+    cmds_.DestroyComponent<type>(entity); \
 }
 
 using ecs::Commands;
@@ -62,6 +66,9 @@ public:
 
     ecs::Entity Spawn() { return cmds_.SpawnAndReturn(); }
     void DestroyEntity(ecs::Entity entity) { cmds_.DestroyEntity(entity); }
+
+    template <typename T>
+    void DestroyComponent(ecs::Entity entity);
 
     ##COMMANDS_WRAPPER_INSERT_TAG##
 

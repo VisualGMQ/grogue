@@ -99,6 +99,7 @@ void DefaultPlugins::Build(ecs::World* world) {
         new ImageManager(*world->GetResource<Renderer>()));
 
     world->SetResource(TilesheetManager{assets->Image(), assets->Lua()})
+        .AddSystem(ToggleDebugMode)
         .AddSystem(EventUpdateSystem)
         .AddSystem(Keyboard::UpdateSystem)
         .AddSystem(Mouse::UpdateSystem)
