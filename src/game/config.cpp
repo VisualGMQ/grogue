@@ -69,6 +69,15 @@ DeclareParseFunc(BackpackUIInfo)
     Field(padding, int)
     Field(margin, int)
 EndDeclareParseFunc()
+
+DeclareParseFunc(MiscGameConfig)
+    Field(key_left, std::string)
+    Field(key_right, std::string)
+    Field(key_up, std::string)
+    Field(key_down, std::string)
+    Field(max_speed, float)
+EndDeclareParseFunc()
+
 // clang-format on
 
 // config class
@@ -148,6 +157,21 @@ GameConfig::GameConfig(LuaManager& luaMgr, TilesheetManager& tsMgr, const std::s
     if (valid_) {
         backpackUIConfig_ = std::make_unique<BackpackUIConfig>(luaMgr, configDir + "backpack_ui.lua");
         if (!backpackUIConfig_->Valid()) {
+            valid_ = false;
+        }
+    }
+
+    if (valid_) {
+        auto lua = luaMgr.CreateSolitary(configDir + "game_conf.lua");
+        auto root = lua.lua.get<std::optional<sol::table>>("Config");
+        if (root) {
+            auto conf = ParseMiscGameConfig(root.value());
+            if (!conf) {
+                valid_ = false;
+            } else {
+                misc_ = conf.value();
+            }
+        } else {
             valid_ = false;
         }
     }

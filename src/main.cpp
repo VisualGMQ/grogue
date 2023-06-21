@@ -37,13 +37,12 @@ void InitInputSystem(ecs::Commands& cmd, ecs::Resources res) {
 #if defined(GROGUE_PLATFORM_ANDROID) || defined(GROGUE_PLATFORM_APPLE) // Touch devices
     InputPtr input = std::make_unique<TouchInput>();
 #else   // Keyboard devices
-    auto& luaMgr = res.Get<AssetsManager>().Lua();
-    auto lua = luaMgr.CreateSolitary("./resources/config/game_conf.lua");
-    sol::table keyboardConfig = lua.lua["Config"]["keyboard_input"];
+    auto& config = res.Get<GameConfig>().GetMiscGameConfig();
     std::unordered_map<std::string, Key> actions;
-    for (auto& [name, value] : keyboardConfig) {
-        actions[name.as<std::string>()] = static_cast<Key>(SDL_GetScancodeFromName(value.as<std::string>().c_str()));
-    }
+    actions["key_left"] = static_cast<Key>(SDL_GetKeyFromName(config.key_left.c_str()));
+    actions["key_right"] = static_cast<Key>(SDL_GetKeyFromName(config.key_right.c_str()));
+    actions["key_up"] = static_cast<Key>(SDL_GetKeyFromName(config.key_up.c_str()));
+    actions["key_down"] = static_cast<Key>(SDL_GetKeyFromName(config.key_down.c_str()));
     InputPtr input = std::make_unique<KeyboardInput>(res.Get<Keyboard>(), std::move(actions));
 #endif
     cmd.SetResource<InputPtr>(std::move(input));

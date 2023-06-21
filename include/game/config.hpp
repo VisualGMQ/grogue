@@ -48,6 +48,14 @@ struct LUA_BIND ItemPOD final {
     Material material;
 };
 
+struct LUA_BIND MiscGameConfig final {
+    std::string key_left;
+    std::string key_right;
+    std::string key_up;
+    std::string key_down;
+    float max_speed;
+};
+
 // reflect datas
 
 ReflRegist(
@@ -106,6 +114,15 @@ ReflRegist(
         .Member(&BackpackUIInfo::gridSize, "gridSize")
         .Member(&BackpackUIInfo::padding, "padding")
         .Member(&BackpackUIInfo::margin, "margin")
+)
+
+ReflRegist(
+    refl::Class<MiscGameConfig>("MiscGameConfig")
+        .Member(&MiscGameConfig::key_left, "key_left")
+        .Member(&MiscGameConfig::key_right, "key_right")
+        .Member(&MiscGameConfig::key_up, "key_up")
+        .Member(&MiscGameConfig::key_down, "key_down")
+        .Member(&MiscGameConfig::max_speed, "max_speed")
 )
 
 class LUA_BIND RaceProfDef final {
@@ -170,6 +187,7 @@ public:
     auto& GetRaceProfConfig() const { return raceProfConfig_; }
     auto& GetItemConfig() const { return *itemConfig_; }
     auto& GetBackpackUIConfig() const { return *backpackUIConfig_; }
+    auto& GetMiscGameConfig() const { return misc_; }
 
     //! @brief whether config init OK
     operator bool() const { return valid_; }
@@ -179,5 +197,6 @@ private:
     std::vector<std::shared_ptr<RaceProfConfig>> raceProfConfig_;
     std::unique_ptr<ItemConfig> itemConfig_;
     std::unique_ptr<BackpackUIConfig> backpackUIConfig_;
+    MiscGameConfig misc_;
     bool valid_;
 };
