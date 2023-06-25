@@ -106,7 +106,17 @@ struct LUA_BIND ItemInfo final {
 
 //! @brief backpack component for monster
 struct LUA_BIND_COMPONENT Backpack final {
-    std::vector<Item> items;
+    std::vector<Item> items;    //<! the item in backpack
+
+    Item leftHand;  //<! the item on the left hand
+    Item rightHand; //<! the item on the right hand
+};
+
+//! @brief a cache to save which object mouse grabing(like item from backpack)
+struct LUA_BIND_RESOURCE MouseGrabCache {
+    std::optional<Item> item;   //<! @brief the item
+    std::optional<ecs::Entity> entity; //<! @brief the item entity
+    bool isGrabJustnow = false; //<! @brief is grab at same frame
 };
 
 struct LUA_BIND BackpackUIInfo final {
