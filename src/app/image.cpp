@@ -4,11 +4,11 @@
 Image::Image(ImageHandle handle, Renderer& renderer, const std::string& filename)
     : handle_(handle) {
     texture_ = IMG_LoadTexture(renderer.renderer_, filename.c_str());
-    SDL_SetTextureBlendMode(texture_, SDL_BlendMode::SDL_BLENDMODE_BLEND);
     if (!texture_) {
         LOGE("texture " + filename + " load failed: " + IMG_GetError());
         ImageHandle::Destroy(handle_);
     } else {
+        SDL_SetTextureBlendMode(texture_, SDL_BlendMode::SDL_BLENDMODE_BLEND);
         SDL_QueryTexture(texture_, nullptr, nullptr, &w_, &h_);
     }
 }

@@ -130,7 +130,7 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
             auto& panel = querier.Get<ui::Panel>(entity);
             auto& node = querier.Get<Node>(entity);
 
-            sol::table& tbl = ((sol::object*)(param))->as<sol::table>();
+            sol::table tbl = ((sol::object*)(param))->as<sol::table>();
             if (int piledIdx = tbl.get_or("piledIdx", -1); piledIdx != -1) {
                 auto& text = querier.Get<ui::Text>(node.children[piledIdx - 1]);
                 text.text->SetText("x" + std::to_string(backpack.items[piledIdx - 1].amount));

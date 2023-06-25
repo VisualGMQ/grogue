@@ -35,8 +35,8 @@ struct LUA_BIND_COMPONENT Text final {
     ColorBundle color;
     math::Vector2 offset;
 
-    static Text Create(std::shared_ptr<TextTexture>& texture, const ColorBundle& color, const math::Vector2& offset) {
-        return Text{texture, color, offset};
+    static Text Create(std::shared_ptr<TextTexture>&& texture, const ColorBundle& color, const math::Vector2& offset) {
+        return Text{std::move(texture), color, offset};
     }
 };
 
