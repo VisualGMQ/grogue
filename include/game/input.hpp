@@ -3,7 +3,7 @@
 #include "core/pch.hpp"
 #include "app/input.hpp"
 
-struct InputActionState final {
+struct LUA_BIND InputActionState final {
     enum State {
         Unknown,
         Pressed,
@@ -12,7 +12,7 @@ struct InputActionState final {
         Releasing,
     };
 
-    InputActionState(State state): state_(state) {}
+    LUA_NOBIND InputActionState(State state): state_(state) {}
 
     bool IsPressed() const { return state_ == Pressed;}
     bool IsPressing() const { return state_ == Pressing; }
@@ -20,22 +20,20 @@ struct InputActionState final {
     bool IsReleasing() const { return state_ == Releasing; }
 
 private:
-    State state_;
+    State state_ = State::Unknown;
 };
 
 //! @brief an input wrapper for hidding different between keyboard and touch devices
-class Input {
+class RawInput {
 public:
     virtual InputActionState GetActionState(const std::string& action) const = 0;
     virtual math::Vector2 Axis() const = 0;
 
-    virtual ~Input() = default;
+    virtual ~RawInput() = default;
 };
 
-using InputPtr = std::unique_ptr<Input>;
-
 //! @brief  input for keyboard devices
-class KeyboardInput : public Input {
+class KeyboardInput : public RawInput {
 public:
     KeyboardInput(Keyboard& keyboard, std::unordered_map<std::string, Key>&& actions): keyboard_(keyboard), actions_(std::move(actions)) {}
     KeyboardInput(Keyboard& keyboard, const std::unordered_map<std::string, Key>& actions): keyboard_(keyboard), actions_(actions) {}
@@ -49,7 +47,28 @@ private:
 };
 
 //! @brief  input for touchable devices(like Phone)
-class TouchInput : public Input {
+class TouchInput : public RawInput {
     InputActionState GetActionState(const std::string& action) const override;
     math::Vector2 Axis() const override;
+};
+
+
+//! @brief a wrapper for RawInput, used for bind in Lua
+class LUA_BIND_RESOURCE Input final {
+public:
+    LUA_NOBIND Input() = default;
+    LUA_NOBIND Input(std::unique_ptr<RawInput>&& input): input_(std::move(input)) {}
+
+    InputActionState  GetActionState(const std::string& action) const {
+        Assert(input_, "input is nullptr");
+        return input_->GetActionState(action);
+    }
+
+    math::Vector2 Axis() const {
+        Assert(input_, "input is nullptr");
+        return input_->Axis();
+    }
+
+private:
+    std::unique_ptr<RawInput> input_;
 };

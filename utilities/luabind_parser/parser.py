@@ -221,7 +221,7 @@ def generate_constructor_type_code(class_name: str, class_name_with_namespace: s
 def generate_constructor_bind_code(class_name: str, class_name_with_namespace: str, methods: list[dict], classinfo_table: list[dict[str, ClassInfo]]) -> str:
     cpp_code = ""
     for i, method in enumerate(methods):
-        if method['deleted']:
+        if method['deleted'] or method['rtnType'] == LUA_NOBIND_TAG:
             return None
         cpp_code += generate_constructor_type_code(class_name, class_name_with_namespace, method, classinfo_table)
         if i != len(methods) - 1:

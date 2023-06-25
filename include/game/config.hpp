@@ -3,6 +3,7 @@
 #include "core/pch.hpp"
 #include "app/config_parse.hpp"
 #include "app/tilesheet.hpp"
+#include "app/font.hpp"
 
 // some config data for auto-parse tool
 
@@ -49,11 +50,11 @@ struct LUA_BIND ItemPOD final {
 };
 
 struct LUA_BIND MiscGameConfig final {
-    std::string key_left;
-    std::string key_right;
-    std::string key_up;
-    std::string key_down;
+    std::unordered_map<std::string, std::string> actions;
+
     float max_speed;
+    FontHandle ui_font;
+    int ui_font_size;
 };
 
 // reflect datas
@@ -118,11 +119,10 @@ ReflRegist(
 
 ReflRegist(
     refl::Class<MiscGameConfig>("MiscGameConfig")
-        .Member(&MiscGameConfig::key_left, "key_left")
-        .Member(&MiscGameConfig::key_right, "key_right")
-        .Member(&MiscGameConfig::key_up, "key_up")
-        .Member(&MiscGameConfig::key_down, "key_down")
+        .Member(&MiscGameConfig::actions, "actions")
         .Member(&MiscGameConfig::max_speed, "max_speed")
+        .Member(&MiscGameConfig::ui_font, "ui_font")
+        .Member(&MiscGameConfig::ui_font_size, "ui_font_size")
 )
 
 class LUA_BIND RaceProfDef final {
@@ -181,7 +181,7 @@ private:
 //! @brief contains all game config
 class LUA_BIND_RESOURCE GameConfig final {
 public:
-    explicit GameConfig(LuaManager&, TilesheetManager&, const std::string& configDir);
+    GameConfig(LuaManager&, FontManager&, TilesheetManager&, const std::string& configDir, const std::string& resDir);
 
     auto& GetRaceProfDef() const { return *raceProfDef_; }
     auto& GetRaceProfConfig() const { return raceProfConfig_; }

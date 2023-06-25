@@ -71,11 +71,8 @@ DeclareParseFunc(BackpackUIInfo)
 EndDeclareParseFunc()
 
 DeclareParseFunc(MiscGameConfig)
-    Field(key_left, std::string)
-    Field(key_right, std::string)
-    Field(key_up, std::string)
-    Field(key_down, std::string)
     Field(max_speed, float)
+    Field(ui_font_size, int)
 EndDeclareParseFunc()
 
 // clang-format on
@@ -128,7 +125,7 @@ RaceProfConfig::RaceProfConfig(LuaManager& mgr, const RaceProfDef& defs, const s
     }
 }
 
-GameConfig::GameConfig(LuaManager& luaMgr, TilesheetManager& tsMgr, const std::string& configDir): valid_(true) {
+GameConfig::GameConfig(LuaManager& luaMgr, FontManager& fontMgr, TilesheetManager& tsMgr, const std::string& configDir, const std::string& resDir): valid_(true) {
     raceProfDef_ = std::make_unique<RaceProfDef>(luaMgr, configDir + "race/" + "definitions.lua");
     if (!raceProfDef_->Valid()) {
         LOGE("definition.lua config read failed!");
@@ -170,6 +167,19 @@ GameConfig::GameConfig(LuaManager& luaMgr, TilesheetManager& tsMgr, const std::s
                 valid_ = false;
             } else {
                 misc_ = conf.value();
+
+                // parse all actions
+                auto actions = root.value().get<sol::table>("actions");
+                if (actions.valid()) {
+                    for (const auto& [key, value] : actions) {
+                        misc_.actions[key.as<std::string>()] = value.as<std::string>();
+                    }
+                } else {
+                    LOGW("[Config]: no actions defined in game_conf.lua, did you forget?");
+                }
+
+                auto uiFontPath = resDir + root.value().get<std::string>("ui_font");
+                misc_.ui_font = fontMgr.Load(uiFontPath, misc_.ui_font_size);
             }
         } else {
             valid_ = false;

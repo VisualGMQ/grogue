@@ -35,23 +35,28 @@ void InitPhysicsSystem(ecs::Resources res) {
 
 void InitInputSystem(ecs::Commands& cmd, ecs::Resources res) {
 #if defined(GROGUE_PLATFORM_ANDROID) || defined(GROGUE_PLATFORM_APPLE) // Touch devices
-    InputPtr input = std::make_unique<TouchInput>();
+    std::unique_ptr<RawInput> input = std::make_unique<TouchInput>();
 #else   // Keyboard devices
     auto& config = res.Get<GameConfig>().GetMiscGameConfig();
     std::unordered_map<std::string, Key> actions;
-    actions["key_left"] = static_cast<Key>(SDL_GetKeyFromName(config.key_left.c_str()));
-    actions["key_right"] = static_cast<Key>(SDL_GetKeyFromName(config.key_right.c_str()));
-    actions["key_up"] = static_cast<Key>(SDL_GetKeyFromName(config.key_up.c_str()));
-    actions["key_down"] = static_cast<Key>(SDL_GetKeyFromName(config.key_down.c_str()));
-    InputPtr input = std::make_unique<KeyboardInput>(res.Get<Keyboard>(), std::move(actions));
+    for (auto& [key, value] : config.actions) {
+        auto sdlKey = SDL_GetScancodeFromName(value.c_str());
+        if (sdlKey != SDL_SCANCODE_UNKNOWN) {
+            actions[key] = static_cast<Key>(sdlKey);
+        } else {
+            LOGW("[Config]: your action ", value, "don't correspond to a SDL key. Please check it in game_conf.lua");
+        }
+    }
+    std::unique_ptr<RawInput> input = std::make_unique<KeyboardInput>(res.Get<Keyboard>(), std::move(actions));
 #endif
-    cmd.SetResource<InputPtr>(std::move(input));
+    cmd.SetResource<Input>(Input(std::move(input)));
 }
 
 void ReadConfigSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& luaMgr = resources.Get<AssetsManager>().Lua();
+    auto& fontMgr = resources.Get<AssetsManager>().Font();
     auto& tilesheetMgr = resources.Get<TilesheetManager>();
-    GameConfig config(luaMgr, tilesheetMgr, "./resources/config/");
+    GameConfig config(luaMgr, fontMgr, tilesheetMgr, "./resources/config/", "./resources/");
     if (!config) {
         LOGF("Load config in ./resources/config failed!!! Game can't start!!!");
         exit(1);
@@ -118,12 +123,20 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
             if (entities.empty()) return;
             auto backpackEntity = entities[0];
             auto& backpack = querier.Get<Backpack>(backpackEntity);
-
+            
             // uint32_t* newItemCount = (uint32_t*)param;
             uint32_t newItemCount = 1;
 
             auto& panel = querier.Get<ui::Panel>(entity);
             auto& node = querier.Get<Node>(entity);
+
+            sol::table& tbl = ((sol::object*)(param))->as<sol::table>();
+            if (int piledIdx = tbl.get_or("piledIdx", -1); piledIdx != -1) {
+                auto& text = querier.Get<ui::Text>(node.children[piledIdx - 1]);
+                text.text->SetText("x" + std::to_string(backpack.items[piledIdx - 1].amount));
+                return;
+            }
+
             auto& backpackUIConfig =
                 resources.Get<GameConfig>().GetBackpackUIConfig().Info();
             // FIXME: we assume newItemCount == 1, will fix this later
@@ -133,15 +146,21 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
 
             const auto& item = backpack.items.back();
             const auto& itemConfig =
-    resources.Get<GameConfig>().GetItemConfig().Items(); auto it =
-    itemConfig.find(backpack.items.back().nameID); if (it == itemConfig.end()) {
+                resources.Get<GameConfig>().GetItemConfig().Items();
+            auto it = itemConfig.find(backpack.items.back().nameID);
+            if (it == itemConfig.end()) {
                 LOGW("item ", item.nameID, " don't in config file");
                 return;
             }
             const auto& itemInfo = it->second;
 
+            auto& gameConfig = resources.Get<GameConfig>().GetMiscGameConfig();
+
+            auto& renderer = resources.Get<Renderer>();
+            auto& font = resources.Get<AssetsManager>().Font().Get(gameConfig.ui_font);
+
             node.children.push_back(cmds.SpawnImmediateAndReturn<Node,
-    ui::Panel, ui::RectTransform, ui::Image>( Node {entity}, ui::Panel::Create(
+    ui::Panel, ui::RectTransform, ui::Image, ui::Text>( Node {entity}, ui::Panel::Create(
                     ui::ColorBundle::CreatePureColor(Color{70, 70, 70}),
                     ui::ColorBundle::CreatePureColor(Color::Black)),
                 ui::RectTransform{
@@ -154,7 +173,8 @@ void InitBackpackUISystem(ecs::Commands& cmd, ecs::Resources resources) {
                                                       y))},
                     math::Vector2(backpackUIConfig.gridSize,
                                   backpackUIConfig.gridSize)},
-                    ui::Image::FromSpriteBundle(itemInfo.sprite)));
+                    ui::Image::FromSpriteBundle(itemInfo.sprite),
+                    ui::Text::Create(std::make_shared<TextTexture>(&renderer, font), ui::ColorBundle::CreatePureColor(Color::White), math::Vector2(0, 16))));
         });
 }
 

@@ -16,6 +16,9 @@ const Color* selectColor(const math::Rect& rect, const math::Vector2& mousePos, 
 }
 
 void drawText(Renderer& renderer, Text& text, const NodeTransform& transform, const Color& color) {
+    if (!text.text || !text.text->GetImage()) {
+        return;
+    }
     renderer.SetDrawColor(color);
     Transform drawTrans = transform.globalTransform;
     drawTrans.position += text.offset * drawTrans.scale;
