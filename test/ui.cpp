@@ -10,30 +10,28 @@ void CreateUISystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& font = fontMgr.Get(fontHandle);
 
     // a label
-    cmd.Spawn<Node, ui::RectTransform, ui::Label>(
+    cmd.Spawn<Node, ui::RectTransform, ui::Panel, ui::Text>(
         Node{},
         ui::RectTransform{NodeTransform{Transform::FromPosition({100, 200})},
                           math::Vector2(100, 25)},
-        ui::Label::Create(ui::Text::Create(
+        ui::Panel::Create(std::nullopt, std::nullopt),
+        ui::Text::Create(
             renderer.GenTextTexture("this is label", font),
             ui::ColorBundle::Create(Color::Black, Color::White, Color::Green),
-            {})));
+            {}));
 
     // a button with text
     cmd.Spawn<Node, ui::RectTransform, ui::Panel, ui::Text, ui::Interaction>(
         Node{},
-        ui::RectTransform{NodeTransform{Transform::FromPosition({400, 200})},
-                          math::Vector2(100, 50)},
-        ui::Panel::Create(
-            ui::ColorBundle::Create(Color::White, Color::Green, Color::Blue),
-            ui::ColorBundle::CreatePureColor(Color::Black)),
+        ui::RectTransform{NodeTransform{Transform::FromPosition({100, 400})},
+                          math::Vector2(100, 25)},
+        ui::Panel::Create(std::nullopt, std::nullopt),
         ui::Text::Create(renderer.GenTextTexture("button", font),
                          ui::ColorBundle::CreatePureColor(Color::Black), {}),
         ui::Interaction::Create(
             [](ecs::Entity, ecs::Commands&, ecs::Querier, ecs::Resources,
                ecs::Events&) { LOGT("button click"); },
             nullptr, nullptr)
-
     );
 
     auto tilesheet = tilesheetMgr.LoadFromConfig(

@@ -71,53 +71,6 @@ inline void tryClipArea(ecs::Entity entity, ecs::Querier querier, Renderer& rend
     }
 }
 
-void HierarchyRenderLabelSystem(std::optional<ecs::Entity> parent, ecs::Entity entity,
-                                ecs::Commands& cmds, ecs::Querier querier,
-                                ecs::Resources res, ecs::Events& events) {
-    if (parent && !isChildrenInParent(parent.value(), entity, querier)) {
-        return;
-    }
-
-    if (!querier.Has<RectTransform>(entity) || !querier.Has<Label>(entity)) {
-        return;
-    }
-
-    tryResetUIRenderStateAtRoot(parent, entity, querier, res);
-
-    auto& renderer = res.Get<Renderer>();
-    if (parent) {
-        tryClipArea(parent.value(), querier, renderer);
-    }
-
-    if (parent && querier.Has<RectTransform>(parent.value()) &&
-        querier.Has<Panel>(parent.value())) {
-        auto& parentTrans = querier.Get<RectTransform>(parent.value());
-        auto& panel = querier.Get<Panel>(parent.value());
-        auto rect = rectTransform2Rect(parentTrans);
-        if (panel.clipChildren) {
-            math::Rect clipRect = rect;
-            // border will not clip
-            clipRect.x += 1;
-            clipRect.y += 1;
-            clipRect.w -= 2;
-            clipRect.h -= 2;
-            renderer.SetClipArea(clipRect);
-        } else {
-            renderer.SetDefaultClipArea();
-        }
-    }
-
-    auto& transform = querier.Get<RectTransform>(entity);
-    auto& label = querier.Get<Label>(entity);
-    auto& fontMgr = res.Get<AssetsManager>().Font();
-    auto& mouse = res.Get<Mouse>();
-
-    auto rect = rectTransform2Rect(transform);
-    auto color = selectColor(rect, mouse.Position(), events, label.text.color);
-
-    drawText(renderer, label.text, transform.transform, *color);
-}
-
 void HierarchyRenderPanelSystem(std::optional<ecs::Entity> parent,
                                 ecs::Entity entity, ecs::Commands& cmds,
                                 ecs::Querier querier, ecs::Resources res,
@@ -161,15 +114,18 @@ void HierarchyRenderPanelSystem(std::optional<ecs::Entity> parent,
     auto& mouse = res.Get<Mouse>();
     auto rect = rectTransform2Rect(transform);
 
-    auto contentColor =
-        selectColor(rect, mouse.Position(), events, panel.contentColor);
-    auto borderColor =
-        selectColor(rect, mouse.Position(), events, panel.borderColor);
-
-    renderer.SetDrawColor(*contentColor);
-    renderer.FillRect(rect);
-    renderer.SetDrawColor(*borderColor);
-    renderer.DrawRect(rect);
+    if (panel.contentColor) {
+        auto contentColor =
+            selectColor(rect, mouse.Position(), events, panel.contentColor.value());
+        renderer.SetDrawColor(*contentColor);
+        renderer.FillRect(rect);
+    }
+    if (panel.borderColor) {
+        auto borderColor =
+            selectColor(rect, mouse.Position(), events, panel.borderColor.value());
+        renderer.SetDrawColor(*borderColor);
+        renderer.DrawRect(rect);
+    }
 
     if (querier.Has<Image>(entity)) {
         auto& image = querier.Get<Image>(entity);

@@ -126,7 +126,6 @@ void DefaultPlugins::Build(ecs::World* world) {
         .AddSystem(HierarchyRenderShapeSystem)
         // ui render
         .AddSystem(ui::HierarchyRenderPanelSystem)
-        .AddSystem(ui::HierarchyRenderLabelSystem)
         // reset render state for next frame
         .AddSystem(ResetRenderStateSystem);
     world->GetResource<Renderer>()->imageManager_ = &assets->Image();

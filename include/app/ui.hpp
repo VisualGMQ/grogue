@@ -30,7 +30,7 @@ struct LUA_BIND_COMPONENT RectTransform final {
 };
 
 //! @brief component for ui which want to show a text on it
-struct /*LUA_BIND_COMPONENT*/ Text final {
+struct LUA_BIND_COMPONENT Text final {
     std::shared_ptr<TextTexture> text;
     ColorBundle color;
     math::Vector2 offset;
@@ -65,24 +65,13 @@ struct LUA_BIND_COMPONENT Image final {
     }
 };
 
-//! @brief component for label
-struct Label final {
-    Text text;
-
-    static Label Create(Text&& text) {
-        Label label;
-        label.text = std::move(text);
-        return label;
-    }
-};
-
 //! @brief component for panel
 struct LUA_BIND_COMPONENT Panel final {
-    ColorBundle contentColor;
-    ColorBundle borderColor;
+    std::optional<ColorBundle> contentColor;
+    std::optional<ColorBundle> borderColor;
     bool clipChildren = true;    // if children exceed panel area, clip them
 
-    static Panel Create(const ColorBundle& content, const ColorBundle& border) {
+    static Panel Create(const std::optional<ColorBundle>& content, const std::optional<ColorBundle>& border) {
         Panel panel;
         panel.contentColor = content;
         panel.borderColor = border;
@@ -171,8 +160,6 @@ private:
     std::array<UIEventListener, static_cast<size_t>(EventType::NUM)> events_;
 };
 
-void HierarchyRenderLabelSystem(std::optional<ecs::Entity>, ecs::Entity, ecs::Commands&,
-                        ecs::Querier, ecs::Resources, ecs::Events&);
 void HierarchyRenderPanelSystem(std::optional<ecs::Entity>, ecs::Entity, ecs::Commands&,
                         ecs::Querier, ecs::Resources, ecs::Events&);
 void HierarchyHandleUIEventSystem(std::optional<ecs::Entity>, ecs::Entity, ecs::Commands&,
