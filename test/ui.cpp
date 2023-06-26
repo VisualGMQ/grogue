@@ -73,16 +73,13 @@ void CreateUISystem(ecs::Commands& cmd, ecs::Resources resources) {
     math::Vector2 ImageSize(float(PanelWidth) / tilesheet.Col() - padding,
                             float(PanelHeight) / tilesheet.Row() - padding);
 
-    HierarchyBuilder builder(cmd, panel);
-
     std::vector<ecs::Entity> children;
 
     for (int x = 0; x < tilesheet.Col(); x++) {
         for (int y = 0; y < tilesheet.Row(); y++) {
             auto tile = tilesheet.Get(x, y);
             auto entity = cmd.SpawnAndReturn(
-                Node{
-            },
+                Node{},
                 ui::RectTransform{NodeTransform{Transform::FromPosition(
                                       {(ImageSize.x + padding) * x,
                                        (ImageSize.y + padding) * y})},
@@ -104,7 +101,7 @@ void CreateUISystem(ecs::Commands& cmd, ecs::Resources resources) {
         }
     }
 
-    builder.SetChilds(children);
+    cmd.ChangeHierarchy(panel).Append(children);
 }
 
 class Test : public App {

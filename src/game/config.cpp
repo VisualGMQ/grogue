@@ -3,6 +3,12 @@
 // generate parse funcs
 
 // clang-format off
+using math::Vector2;
+DeclareParseFunc(Vector2)
+    Field(x, float)
+    Field(y, float)
+EndDeclareParseFunc();
+
 DeclareParseFunc(MonsterProperty)
     Field(hp, int)
     Field(mp, int)

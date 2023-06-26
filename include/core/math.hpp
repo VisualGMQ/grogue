@@ -197,6 +197,7 @@ public:
     float y = 0;
 
     Vector2() {}
+    explicit Vector2(float value): x(value), y(value) {}
 
     Vector2(float vx, float vy) : x(vx), y(vy) {}
 

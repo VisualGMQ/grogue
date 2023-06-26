@@ -125,11 +125,15 @@ struct LUA_BIND BackpackUIInfo final {
     int gridSize;
     int padding;
     int margin;
+    math::Vector2 left_hand_position;
+    math::Vector2 right_hand_position;
 
     int row; //!< calculate, not load from config
     int col; //!< calculate, not load from config
 };
 
+//! @brief a tag component to point out ui root node
+struct LUA_BIND_COMPONENT UIRoot {};
 
 enum class TerrianType {
     DryLand,
@@ -144,11 +148,24 @@ struct Terrian final {
 
 //! @brief tag component for backpack panel UI
 struct LUA_BIND_COMPONENT BackpackUIPanel {};
+//! @brief tag component for left hand ui panel
+struct LUA_BIND_COMPONENT LeftHandUIPanel {};
+//! @brief tag component for right hand ui panel
+struct LUA_BIND_COMPONENT RightHandUIPanel {};
 
 /// @brief a tag component to point out player entity
 struct LUA_BIND_COMPONENT Player {};
 
 constexpr float SCALE = 2.0;
+
+//! @brief parameter pack for BackpackUIPanelUpdate signal
+struct BackpackUIPanelUpdateParam {
+    enum class Type {
+        Pile,
+        NewItem,
+    } type;
+    int value;
+};
 
 // reflect
 

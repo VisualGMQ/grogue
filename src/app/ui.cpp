@@ -38,7 +38,7 @@ inline math::Rect rectTransform2Rect(const RectTransform& transform) {
 void tryResetUIRenderStateAtRoot(std::optional<ecs::Entity> parent,
                               ecs::Entity entity, ecs::Querier querier,
                               ecs::Resources res) {
-    if (!parent && querier.Has<RectTransform>(entity)) {
+    if ((!parent || !querier.Has<Panel>(parent.value())) && querier.Has<RectTransform>(entity)) {
         auto& renderer = res.Get<Renderer>();
         renderer.SetDefaultClipArea();
     }

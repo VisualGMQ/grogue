@@ -115,6 +115,8 @@ ReflRegist(
         .Member(&BackpackUIInfo::gridSize, "gridSize")
         .Member(&BackpackUIInfo::padding, "padding")
         .Member(&BackpackUIInfo::margin, "margin")
+        .Member(&BackpackUIInfo::left_hand_position, "left_hand_position")
+        .Member(&BackpackUIInfo::right_hand_position, "right_hand_position")
 )
 
 ReflRegist(
@@ -123,6 +125,12 @@ ReflRegist(
         .Member(&MiscGameConfig::max_speed, "max_speed")
         .Member(&MiscGameConfig::ui_font, "ui_font")
         .Member(&MiscGameConfig::ui_font_size, "ui_font_size")
+)
+
+ReflRegist(
+    refl::Class<math::Vector2>("Vector2")
+    .Member(&math::Vector2::x, "x")
+    .Member(&math::Vector2::y, "y")
 )
 
 class LUA_BIND RaceProfDef final {

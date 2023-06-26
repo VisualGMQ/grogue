@@ -7,55 +7,6 @@ require("math")
 function Startup(entity, cmds, res)
 end
 
-
-
----@param monster Monster
----@param backack Backpack
----@param cmd Commands
----@param querier Querier
----@param res Resources
----@param events Events
-local function PickupItemOnTile(monster, backpack, cmd, querier, res, events)
-    local map = res:GetMapManager():GetCurrentMap()
-    local hover = res:GetNearestItemHover()
-
-    local x, y = math.floor(hover.position.x), math.floor(hover.position.y)
-
-    if map.tiles:IsInRange(x, y) then
-        local tile = map.tiles:Get(x, y)
-        local items = querier:GetMapTile(tile).items
-        if items:empty() then
-            return;
-        end
-
-        local newItem = items[items:size()]
-
-        local cantPileup = true
-        local piledIdx = nil
-        for idx, item in pairs(backpack.items) do
-            if item.nameID == newItem.nameID then
-                item.amount = item.amount + 1
-                piledIdx = idx
-                cantPileup = false
-            end
-        end
-
-        local signalMgr = res:GetSignalManager()
-        if cantPileup then
-            backpack.items:add(newItem)
-            signalMgr:Raise(0, cmd, querier, res, events, { newItemNum = 1 })
-        else
-            signalMgr:Raise(0, cmd, querier, res, events, { piledIdx = piledIdx})
-        end
-
-        items:erase(items:size())
-
-        if items:empty() then
-            cmd:RemoveCollideShape(tile) 
-        end
-    end
-end
-
 ---@param querier Querier
 ---@param res Resources
 local function ToggleBackpackUIPanel(querier, res)
@@ -99,7 +50,7 @@ function Run(entity, cmds, querier, res, events)
         if input:GetActionState("pickup"):IsPressed() and
             querier:HasBackpack(entity) then
            local backpack = querier:GetBackpack(entity) 
-           PickupItemOnTile(monster, backpack, cmds, querier, res, events)
+           PickupTileOneItem(backpack, cmds:Raw(), querier:Raw(), res:Raw(), events:Raw())
         end
 
         if input:GetActionState("toggle_backpack_ui"):IsPressed() then

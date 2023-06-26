@@ -13,11 +13,8 @@ struct LUA_BIND_RESOURCE NearestItemHover {
     math::Vector2 position;
 };
 
-inline void LUA_BIND PlayerMove(const Input& input, Monster& monster, physic::Particle& particle) {
-    constexpr float SPEED = 50;
+void LUA_BIND PlayerMove(const Input& input, Monster& monster, physic::Particle& particle);
 
-    auto axis = input.Axis();
-    particle.vel = math::Vector2(axis.x * SPEED, -axis.y * SPEED);
+void LUA_BIND PickupTileOneItem(Backpack&, ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
 
-    monster.Move(particle.vel);
-}
+void PutItemIntoBackpack(Backpack&, const Item&, ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);

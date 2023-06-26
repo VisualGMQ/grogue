@@ -4,11 +4,9 @@
 
 void CreateEntities(ecs::Commands& cmd, ecs::Resources resources) {
     auto center = math::Vector2(0, 0);
-    ecs::Entity root = cmd.SpawnAndReturn<Shape, NodeTransform>(Shape::CreateRect(center, math::Vector2(200, 200), Color::Red), NodeTransform{});
-    HierarchyBuilder(cmd, root).SetChilds(
-        {
-            cmd.SpawnAndReturn<Shape, NodeTransform>(Shape::CreateRect(center, math::Vector2(150, 150), Color::Green), NodeTransform{})
-        }
+    ecs::Entity root = cmd.SpawnAndReturn<Node, Shape, NodeTransform>(Node{}, Shape::CreateRect(center, math::Vector2(200, 200), Color::Red), NodeTransform{});
+    cmd.ChangeHierarchy(root).Add(
+        cmd.SpawnAndReturn<Node, Shape, NodeTransform>(Node{}, Shape::CreateRect(center, math::Vector2(150, 150), Color::Green), NodeTransform{})
     );
 
     cmd.SetResource<ecs::Entity>(std::move(root));
