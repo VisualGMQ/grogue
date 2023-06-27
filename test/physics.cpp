@@ -6,6 +6,8 @@ template <int N>
 struct Moveable { };
 
 void StartupSystem(ecs::Commands& commands, ecs::Resources res) {
+    res.Get<DebugConfig>().showPhysicDebugInfo = true;
+
     commands.Spawn<CollideShape, Particle>(CollideShape{std::make_shared<AABB>(
         math::Vector2::Zero, math::Vector2{50, 50})},
         Particle::Create(math::Vector2(100, 200), 1.0));

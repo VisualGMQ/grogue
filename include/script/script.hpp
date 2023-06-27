@@ -12,16 +12,6 @@ struct Script final {
     static Script Create(LuaManager& mgr, const std::string& filename);
 };
 
-//! @brief resources for sharing variable between lua
-struct LUA_BIND_RESOURCE LuaShareContext final {
-    sol::object context;
-};
-
-//! @brief resources for sharing variable between lua
-struct LUA_BIND LuaEventContext final {
-    sol::object context;
-};
-
 void RunScriptSystem(ecs::Commands& cmd, ecs::Querier querier,
                     ecs::Resources resources, ecs::Events& events);
 

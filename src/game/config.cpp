@@ -68,12 +68,16 @@ DeclareParseFunc(ItemPOD)
     ObjField(material, Material)
 EndDeclareParseFunc()
 
+using math::Vector2;
+
 DeclareParseFunc(BackpackUIInfo)
     Field(width, int)
     Field(height, int)
     Field(gridSize, int)
     Field(padding, int)
     Field(margin, int)
+    ObjField(left_hand_position, Vector2)
+    ObjField(right_hand_position, Vector2)
 EndDeclareParseFunc()
 
 DeclareParseFunc(MiscGameConfig)

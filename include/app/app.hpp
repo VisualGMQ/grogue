@@ -14,11 +14,21 @@
 #include "app/ui.hpp"
 #include "app/assets.hpp"
 #include "app/signal.hpp"
-#include "app/script.hpp"
 #include "app/physic.hpp"
 
+//! @brief resources for sharing variable between lua
+struct LUA_BIND_RESOURCE LuaShareContext final {
+    sol::object context;
+};
+
+//! @brief resources for sharing variable between lua
+struct LUA_BIND LuaEventContext final {
+    sol::object context;
+};
+
+
 // a resource to trigger application exit
-class ExitTrigger final {
+class LUA_BIND_RESOURCE ExitTrigger final {
 public:
     bool ShouldExit() const { return shouldExit_; }
 

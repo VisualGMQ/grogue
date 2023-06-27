@@ -64,6 +64,14 @@ void EventUpdateSystem(ecs::Commands& cmd, ecs::Querier querier,
     }
 }
 
+
+extern void RunScriptSystem(ecs::Commands& cmd, ecs::Querier querier,
+                    ecs::Resources resources, ecs::Events& events);
+
+extern void HierarchyRunScriptSystem(std::optional<ecs::Entity>, ecs::Entity,
+                           ecs::Commands&, ecs::Querier, ecs::Resources,
+                           ecs::Events&);
+
 void DefaultPlugins::Build(ecs::World* world) {
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_TIMER |
                  SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) != 0) {

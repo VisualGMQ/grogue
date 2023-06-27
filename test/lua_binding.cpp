@@ -1,4 +1,5 @@
 #include "app/app.hpp"
+#include "script/script.hpp"
 #include "core/pch.hpp"
 #include "test_helper.hpp"
 

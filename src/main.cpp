@@ -5,6 +5,7 @@
 #include "game/map.hpp"
 #include "game/monster.hpp"
 #include "game/signal_defs.hpp"
+#include "script/script.hpp"
 
 struct Context {
     FontHandle font;
@@ -211,7 +212,7 @@ void UpdateBackpackItemCallback(ecs::Commands& cmds, ecs::Querier querier, ecs::
                               math::Vector2(backpackUIConfig.gridSize,
                                             backpackUIConfig.gridSize)},
             ui::Image::FromSpriteBundle(itemInfo.sprite),
-            ui::Text::Create(std::make_shared<TextTexture>(&renderer, font),
+            ui::Text::Create(std::make_shared<TextTexture>(&renderer, item.amount > 1 ? std::to_string(item.amount) : "", font),
                              ui::ColorBundle::CreatePureColor(Color::White),
                              math::Vector2(0, 16)),
             ui::Interaction::Create(OnGrabByMouse, nullptr, nullptr)));

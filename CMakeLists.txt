@@ -85,7 +85,8 @@ set(GAME_NAME ${PROJECT_NAME})
 set(LOWLEVEL_NAME lowlevel)
 set(LUABIND_NAME luabind)
 set(GAMELIB_NAME gamelib)
-set(GROGUELIB_NAME grogue_lowlevel)
+set(GROGUE_LOWLEVELLIB_NAME grogue_lowlevel)
+set(GROGUELIB_NAME grogue_game)
 
 aux_source_directory(src/core LOWLEVEL_SRC)
 aux_source_directory(src/app  LOWLEVEL_SRC)
@@ -124,13 +125,17 @@ add_library(${GAMELIB_NAME} STATIC ${GAMELIB_SRC})
 target_link_libraries(${GAMELIB_NAME} PUBLIC ${LOWLEVEL_NAME})
 
 # compile lua bind code
-add_library(${LUABIND_NAME} STATIC ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CMAKE_BINARY_DIR}/luabind/luabind.cpp)
+aux_source_directory(src/script SCRIPT_SRC)
+add_library(${LUABIND_NAME} STATIC ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CMAKE_BINARY_DIR}/luabind/luabind.cpp ${SCRIPT_SRC})
 target_link_libraries(${LUABIND_NAME} PUBLIC ${LOWLEVEL_NAME} ${GAMELIB_NAME})
 target_include_directories(${LUABIND_NAME} PRIVATE ${CMAKE_BINARY_DIR}/luabind)
 
 # gather all library together
+add_library(${GROGUE_LOWLEVELLIB_NAME} INTERFACE)
+target_link_libraries(${GROGUE_LOWLEVELLIB_NAME} INTERFACE ${LOWLEVEL_NAME} ${LUABIND_NAME})
+
 add_library(${GROGUELIB_NAME} INTERFACE)
-target_link_libraries(${GROGUELIB_NAME} INTERFACE ${LOWLEVEL_NAME} ${LUABIND_NAME} ${GAMELIB_NAME})
+target_link_libraries(${GROGUELIB_NAME} INTERFACE ${GROGUE_LOWLEVELLIB_NAME} ${GAMELIB_NAME})
 
 # compile game
 add_executable(${GAME_NAME} ./src/main.cpp)
