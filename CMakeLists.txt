@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# if (WIN32)
+#     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+# endif()
+
 project(
     grogue
     VERSION 0.1.0
@@ -79,13 +83,14 @@ AttachCppCheck()
 
 set(GAME_NAME ${PROJECT_NAME})
 set(LOWLEVEL_NAME lowlevel)
+set(LUABIND_NAME luabind)
+set(GAMELIB_NAME gamelib)
+set(GROGUELIB_NAME grogue_lowlevel)
 
 aux_source_directory(src/core LOWLEVEL_SRC)
 aux_source_directory(src/app  LOWLEVEL_SRC)
-aux_source_directory(src/game LOWLEVEL_SRC)
 
-add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CMAKE_BINARY_DIR}/luabind/luabind.cpp ${CPP_INCLUDE_FILES})
-target_include_directories(${LOWLEVEL_NAME} PRIVATE ${CMAKE_BINARY_DIR}/luabind)
+add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CPP_INCLUDE_FILES})
 
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
@@ -113,8 +118,23 @@ else()
     target_compile_definitions(${LOWLEVEL_NAME} PUBLIC GROGUE_PLATFORM_UNKNOWN)
 endif()
 
+# compile game layer library
+aux_source_directory(src/game GAMELIB_SRC)
+add_library(${GAMELIB_NAME} STATIC ${GAMELIB_SRC})
+target_link_libraries(${GAMELIB_NAME} PUBLIC ${LOWLEVEL_NAME})
+
+# compile lua bind code
+add_library(${LUABIND_NAME} STATIC ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CMAKE_BINARY_DIR}/luabind/luabind.cpp)
+target_link_libraries(${LUABIND_NAME} PUBLIC ${LOWLEVEL_NAME} ${GAMELIB_NAME})
+target_include_directories(${LUABIND_NAME} PRIVATE ${CMAKE_BINARY_DIR}/luabind)
+
+# gather all library together
+add_library(${GROGUELIB_NAME} INTERFACE)
+target_link_libraries(${GROGUELIB_NAME} INTERFACE ${LOWLEVEL_NAME} ${LUABIND_NAME} ${GAMELIB_NAME})
+
+# compile game
 add_executable(${GAME_NAME} ./src/main.cpp)
-target_link_libraries(${GAME_NAME} PRIVATE ${LOWLEVEL_NAME})
+target_link_libraries(${GAME_NAME} PRIVATE ${GROGUELIB_NAME})
 
 if (NOT EMSCRIPTEN)
     target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua sol2 expected)

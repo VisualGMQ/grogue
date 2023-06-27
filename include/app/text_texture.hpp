@@ -5,7 +5,7 @@
 
 class Renderer;
 
-class TextTexture final {
+class LUA_BIND TextTexture final {
 public:
     TextTexture(Renderer* renderer, Font& font) : renderer_(renderer), font_(font) {}
 

@@ -46,6 +46,10 @@ using ui::EventType;
     matrix["IsInRange"] = &mtype::IsInRange; \
 }
 
+}
+
+using namespace lua_bind;
+
 void BindLua(LuaScript& script) {
     // some special class you should bind them handly
     sol::usertype<SignalManagerWrapper> signalMgr =
@@ -85,7 +89,5 @@ void BindLua(LuaScript& script) {
     ##BIND_CONTENT##
 
     resources["GetSignalManager"] = &ResourcesWrapper::GetSignalManager;
-}
-
 }
 

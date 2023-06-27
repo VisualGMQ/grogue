@@ -13,3 +13,13 @@ ItemOperationManager::ItemOperationManager() {
     datas_["use"] = Use;
     datas_["drop"] = Drop;
 }
+
+bool Use(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&) {
+    // TODO: not finish
+    return false;
+}
+
+bool Drop(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&) {
+    // TODO: not finish
+    return false;
+}

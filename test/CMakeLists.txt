@@ -3,7 +3,7 @@ IsMinGWBackend(is_mingw_backend)
 macro(AddTest name files)
     add_executable(${name}_test ${files})    
     target_include_directories(${name}_test PRIVATE ./ ${CMAKE_BINARY_DIR})
-    target_link_libraries(${name}_test PRIVATE ${LOWLEVEL_NAME})
+    target_link_libraries(${name}_test PRIVATE ${GROGUELIB_NAME})
     add_test(NAME ${name}
              COMMAND $<TARGET_FILE:${name}_test>)
 endmacro()

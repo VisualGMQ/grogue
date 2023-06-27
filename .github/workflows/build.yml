@@ -27,6 +27,9 @@ jobs:
       - name: Pull Submodules
         run: git submodule update --init --recursive
 
+      - name: make cmake dir
+        run: mkir cmake-build
+
       - name: Parse Cpp Header
         run: python ${{github.workspace}}/utilities/luabind_parser/parser.py cmake-build force
 
@@ -62,6 +65,9 @@ jobs:
 
       - name: Pull Submodules
         run: git submodule update --init --recursive
+
+      - name: create cmake dir
+        run: mkir cmake-build
 
       - name: Parse Cpp Header
         run: python ${{github.workspace}}/utilities/luabind_parser/parser.py cmake-build force
