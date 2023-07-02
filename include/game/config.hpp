@@ -59,6 +59,7 @@ struct LUA_BIND MiscGameConfig final {
 
 // reflect datas
 
+/*
 ReflRegist(
     refl::Class<RaceProfDefPOD>("RaceProfPOD")
         .Member(&RaceProfDefPOD::races, "races")
@@ -208,3 +209,4 @@ private:
     MiscGameConfig misc_;
     bool valid_;
 };
+*/

@@ -1,5 +1,6 @@
 #include "app/tilesheet.hpp"
 
+/*
 ReflRegist(
 refl::Class<Margin>("Margin")
     .Member(&Margin::top, "top")
@@ -22,6 +23,7 @@ refl::Class<TilesheetConfig>("TilesheetDesc")
     .Member(&TilesheetConfig::col, "col")
     .Member(&TilesheetConfig::spacing, "spacing")
 )
+*/
 
 // clang-format off
 DeclareParseFunc(Margin)

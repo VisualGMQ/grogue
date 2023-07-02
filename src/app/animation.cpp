@@ -7,10 +7,12 @@ struct FrameConfig final {
     std::string interpolation;
 };
 
+/*
 ReflRegist(refl::Class<FrameConfig>("FrameConfig")
                .Member(&FrameConfig::time, "time")
                .Member(&FrameConfig::value, "value")
                .Member(&FrameConfig::interpolation, "interpolation"))
+*/
 
 // clang-format off
 DeclareParseFunc(FrameConfig)

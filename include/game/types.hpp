@@ -169,6 +169,7 @@ struct BackpackUIPanelUpdateParam {
 
 // reflect
 
+/*
 ReflRegist(
     refl::Class<Material>("Material")
         .Member(&Material::opaque, "opaque")
@@ -187,3 +188,4 @@ ReflRegist(
     .Member(&MonsterProperty::agility, "agility")
     .Member(&MonsterProperty::nutrition, "nutrition")
 );
+*/

@@ -10,193 +10,132 @@
 //! @namespace refl
 namespace refl {
 
-//! @addtogroup dynamic-reflection
-//! @{
-//! @brief a very small dynamic reflection framework, only use for POD and can
-//! only reflect public member variables
-
-template <typename Tuple, typename Func, size_t N>
-struct _tuple_processor {
-    inline static void _tuple_process(Tuple &t, Func &f) {
-        _tuple_processor<Tuple, Func, N - 1>::_tuple_process(t, f);
-        f(std::get<N - 1>(t));
-    }
-
-    inline static void _tuple_process_const(const Tuple &t, Func &f) {
-        _tuple_processor<Tuple, Func, N - 1>::_tuple_process(t, f);
-        f(std::get<N - 1>(t));
-    }
+template <typename T>
+struct TypeInfoBase {
+    using classType = T;
 };
 
-template <typename Tuple, typename Func>
-struct _tuple_processor<Tuple, Func, 1> {
-    inline static void _tuple_process(Tuple &t, Func &f) { f(std::get<0>(t)); }
+//! @brief function information
+//! @tparam Ret return type
+//! @tparam Class if function is class member function, give the class type, or give void
+//! @tparam ...Params function parameters
+template <typename Ret, typename Class, typename... Params>
+struct FuncInfo {
+    static constexpr bool isStatic = false;
+    using returnType = Ret;
+    using params = std::tuple<Params...>;
+    using classType = Class;
+    using pointerType = Ret(Class::*)(Params...);
 
-    inline static void _tuple_process_const(const Tuple &t, Func &f) {
-        f(std::get<0>(t));
-    }
+    explicit constexpr FuncInfo(const std::string_view name, const pointerType ptr): name(name), pointer(ptr) {}
+
+    const pointerType pointer;
+    const std::string_view name;
 };
 
-//! @brief a help function to travese std::tuple, for elems need to be change
-//! @tparam ...Args will be auto-derivated
-//! @tparam Func will be auto-deriveted
-//! @param t the traversed tuple
-//! @param f a function like `void(auto& elem)` which elem is member of t
-//! @sa tuple_for_each_const
-template <typename... Args, typename Func>
-void tuple_for_each(std::tuple<Args...> &t, Func &f) {
-    _tuple_processor<decltype(t), Func, sizeof...(Args)>::_tuple_process(t, f);
+// specialization for non-member function 
+template <typename Ret, typename... Params>
+struct FuncInfo<Ret, void, Params...> {
+    static constexpr bool isStatic = true;
+    using returnType = Ret;
+    using params = std::tuple<Params...>;
+    using classType = void;
+    using pointerType = Ret(*)(Params...);
+
+    explicit constexpr FuncInfo(const std::string_view name, const pointerType ptr): name(name), pointer(ptr) {}
+
+    const pointerType pointer;
+    const std::string_view name;
 };
 
-//! @brief a help function to travese std::tuple, for elems not need to be change
-//! @tparam ...Args will be auto-derivated
-//! @tparam Func will be auto-deriveted
-//! @param t the traversed tuple
-//! @param f a function like `void(const auto& elem)` which elem is member of t
-//! @sa tuple_for_each
-template <typename... Args, typename Func>
-void tuple_for_each_const(const std::tuple<Args...> &t, Func &f) {
-    _tuple_processor<decltype(t), Func, sizeof...(Args)>::_tuple_process_const(
-        t, f);
+//! @brief variable information
+//! @tparam Type variable type
+//! @tparam Class if variable is class member, give the class type, or give void
+template <typename Type, typename Class>
+struct VariableInfo {
+    static constexpr bool isStatic = false;
+    using type = Type;
+    using classType = Class;
+
+    using pointerType = Type Class::*;
+
+    explicit constexpr VariableInfo(std::string_view name, const pointerType ptr): name(name), pointer(ptr) {}
+
+    const pointerType pointer;
+    const std::string_view name;
 };
 
-//! @brief class member variable information, contain the member pointer and member name
-//! @tparam T member type
-//! @tparam PointerT member pointer type
-template <typename T, typename PointerT>
-class MemberInfo {
-public:
-    using type = T;
-    using pointer_t = PointerT;
+// specialize for non-member variable 
+template <typename Type>
+struct VariableInfo<Type, void> {
+    static constexpr bool isStatic = true;
+    using type = Type;
+    using classType = void;
 
-    constexpr MemberInfo(pointer_t pointer, std::string_view name)
-        : pointer(pointer), name(name) {}
+    using pointerType = Type*;
 
-    //! @brief get member name, can use in compile-time
-    //! @return a literal name string
-    constexpr std::string_view Name() const { return name; }
+    explicit constexpr VariableInfo(std::string_view name, const pointerType ptr): name(name), pointer(ptr) {}
 
-    //! @brief get member variable pointer, use `classInstance.*(pointer)` to access instance member variable
-    //! @return the memeber variable pointer
-    constexpr auto Pointer() const { return pointer; }
-
-private:
-    pointer_t pointer;       //!< @brief member variable pointer, use `classInstance.*(pointer)` to access instance member variable
-    std::string_view name;  //!< @brief member name
+    const pointerType pointer;
+    const std::string_view name;
 };
 
-//! @brief class informat, contain all reflected member vairbales information
-//! @tparam ClassType class type
-//! @tparam ...Types class member types
-template <typename ClassType, typename... Types>
-class ClassInfo final {
-public:
-    //! @brief class type
-    using type = ClassType;
+template <typename... Attrs>
+struct AttrList {};
 
-    constexpr ClassInfo(std::string_view name, std::tuple<Types...> t)
-        : name_(name), members_(t) {}
-    constexpr ClassInfo(std::string_view name) : name_(name) {}
+//! @brief field information(member/non-member function, variable)
+//! @tparam Attr some custom attribute binding on this field
+//! @tparam T 
+template <typename AttrList, typename T>
+struct FieldInfo: public VariableInfo<T, void> {
+    using attrs = AttrList;
+    using pointerType = T*;
 
-    //! @brief reflect member variable and generate a new ClassInfo conatine the member
-    //! @tparam T member variable pointer type
-    //! @param member member variable pointer
-    //! @param name member variable name
-    //! @return a new ClassInfo which append the member info at the end
-    template <typename T>
-    constexpr auto Member(T member, std::string_view name) {
-        using RetT = std::decay<std::invoke_result_t<T, ClassType>>;
-        return ClassInfo<ClassType, Types..., MemberInfo<RetT, T>>(
-            name_, std::tuple_cat(members_, std::make_tuple(MemberInfo<RetT, T>{
-                                                member, name})));
-    }
-
-    //! @brief get class name
-    //! @return class name literal string
-    constexpr std::string_view Name() const { return name_; }
-
-    //! @brief query whether has a member variable
-    //! @param name member vairbale name
-    //! @return 
-    constexpr bool HasMember(std::string_view name) const {
-        return hasMember<0>(name);
-    }
-
-    //! @brief get all reflected member vairbales in this class
-    //! @return a tuple which contains all member variables
-    constexpr const auto &GetMembers() const { return members_; }
-
-    //! @brief pass a function f to visit all reflected class member variable,
-    //! for variabel need change
-    //! @tparam F function type, will auto-deriveted normally
-    //! @param f function-object like `void(auto& elem)`
-    template <typename F>
-    void VisitMembers(const F &f) {
-        tuple_for_each(members_, f);
-    }
-
-    //! @brief pass a function f to visit all reflected class member variable,
-    //! for variable don't need change
-    //! @tparam F function type, will auto-deriveted normally
-    //! @param f function-object like `void(auto& elem)`
-    template <typename F>
-    void VisitMembers(F &f) const {
-        tuple_for_each_const(members_, f);
-    }
-
-private:
-    std::string_view name_;
-    std::tuple<Types...> members_;
-
-    template <size_t N>
-    constexpr bool hasMember(std::string_view name) const {
-        if constexpr (std::tuple_size_v<decltype(members_)> == N) {
-            return false;
-        } else {
-            if (std::get<N>(members_).Name() == name) {
-                return true;
-            } else {
-                return hasMember<N + 1>(name);
-            }
-        }
-    }
+    explicit constexpr FieldInfo(const std::string_view name, const pointerType ptr): VariableInfo<T, void>(name, ptr) { }
 };
 
-//! @brief a help function to create a empty class
-//! @tparam ClassType class type
-//! @param name class name
-//! @return 
-template <typename ClassType>
-constexpr auto Class(std::string_view name) {
-    return ClassInfo<ClassType>(name);
-}
+// specialize for non-member function
+template <typename AttrList, typename Ret, typename... Params>
+struct FieldInfo<AttrList, Ret(Params...)>: public FuncInfo<Ret, void, Params...> {
+    using attrs = AttrList;
+    using pointerType = Ret(*)(Params...);
 
-//! @brief a help class to save reflected class
-//! @tparam ClassType class type
-template <typename ClassType>
+    explicit constexpr FieldInfo(const std::string_view name, const pointerType ptr): FuncInfo<Ret, void, Params...>(name, ptr) { }
+};
+
+// specialize for member function
+template <typename AttrList, typename Ret, typename Class, typename... Params>
+struct FieldInfo<AttrList, Ret(Class::*)(Params...)>: public FuncInfo<Ret, Class, Params...> {
+    using attrs = AttrList;
+
+    using pointerType = Ret(Class::*)(Params...);
+
+    explicit constexpr FieldInfo(const std::string_view name, const pointerType ptr): FuncInfo<Ret, Class, Params...>(name, ptr) { }
+};
+
+// specialize for member variable
+template <typename AttrList, typename Type, typename Class>
+struct FieldInfo<AttrList, Type(Class::*)>: public VariableInfo<Type, Class> {
+    using attrs = AttrList;
+
+    using pointerType = Type Class::*;
+
+    explicit constexpr FieldInfo(const std::string_view name, const pointerType ptr): VariableInfo<Type, Class>(name, ptr) { }
+};
+
+template <typename T>
 struct TypeInfo;
 
-//! @brief a help macro to reflect a POD
-//!
-//! use this to refect a class as following:
-//! @snippet ./test/refl.cpp Reflect Class
-#define ReflRegist(x)                    \
-    namespace refl {                     \
-    template <>                          \
-    struct TypeInfo<decltype(x)::type> { \
-        constexpr static auto info = x;  \
-    };                                   \
-    }
+// some helper macros for reflect class more easier
 
-//! @brief get a reflected class
-//! @tparam T class type
-//! @return ClassInfo<...> which contain class information
-//! @sa ClassInfo
-template <typename T>
-constexpr decltype(TypeInfo<T>::info) GetClass() {
-    return TypeInfo<T>::info;
-}
+#define REFL_CLASS(clazz) \
+template <> \
+struct refl::TypeInfo<clazz>: public TypeInfoBase<clazz> { \
+    static constexpr auto info = std::tuple{
 
-//! @}
+#define FIELD(name, type) refl::FieldInfo<void, decltype(type)>(name, type)
+#define ATTR_FIELD(attrs, name, type) refl::FieldInfo<attrs, decltype(type)>(name, type)
+
+#define REFL_END() };};
 
 }  // namespace refl

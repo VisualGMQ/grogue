@@ -9,3 +9,4 @@ wasm-build
 luabind
 resources/script/defs.lua
 imgui.ini
+utilities/cpp_parser/build
