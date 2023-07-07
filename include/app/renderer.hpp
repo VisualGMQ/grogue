@@ -13,7 +13,7 @@
 class Image;
 class ImageManager;
 
-class LUA_BIND_RESOURCE Renderer final {
+class [[refl, luabind("res")]] Renderer final {
 public:
     friend class Image;
     friend class DefaultPlugins;

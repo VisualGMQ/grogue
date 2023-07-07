@@ -6,7 +6,6 @@
 #include <limits>
 #include <memory>
 #include <optional>
-#include "luabind_tag.hpp"
 
 //! \breif  if define this, will use std::numeric_limits<float>::epsilon() to compare floats. Or use ==
 #define GROGUE_MATH_FLOAT_COMPARE_USE_EPSILON
@@ -47,19 +46,19 @@ float Length(const Vector2& v);
 //! @brief convert radians to degress
 //! @param radians 
 //! @return  degrees
-inline float LUA_BIND Rad2Deg(float radians) {
+inline float [[refl, luabind]] Rad2Deg(float radians) {
     return radians * 180.0 / PI;
 }
 
 //! @brief covert degress to radians
 //! @param degree 
 //! @return  radians
-inline float LUA_BIND Deg2Rad(float degree) {
+inline float [[refl, luabind]] Deg2Rad(float degree) {
     return degree * PI / 180.0;
 }
 
 //! @brief 3D vector which has x, y, z components
-class LUA_BIND Vector3 {
+class [[refl, luabind]] Vector3 {
 public:
     float x = 0;
     float y = 0;
@@ -156,38 +155,38 @@ inline std::ostream& operator<<(std::ostream& stream, const Vector3& v) {
     return stream;
 }
 
-inline Vector3 LUA_BIND Cross(const Vector3& v1, const Vector3& v2) {
+inline Vector3 [[refl, luabind]] Cross(const Vector3& v1, const Vector3& v2) {
     return Vector3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z,
                    v1.x * v2.y - v1.y * v2.x);
 }
 
-inline float LUA_BIND Dot(const Vector3& v1, const Vector3& v2) {
+inline float [[refl, luabind]] Dot(const Vector3& v1, const Vector3& v2) {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
-inline float LUA_BIND Distance(const Vector3& v1, const Vector3& v2) {
+inline float [[refl, luabind]] Distance(const Vector3& v1, const Vector3& v2) {
     float dx = v1.x - v2.x;
     float dy = v1.y - v2.y;
     float dz = v1.z - v2.z;
     return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-inline float LUA_BIND LengthSquare(const Vector3& v) {
+inline float [[refl, luabind]] LengthSquare(const Vector3& v) {
     return Dot(v, v);
 }
 
-inline float LUA_BIND Length(const Vector3& v) {
+inline float [[refl, luabind]] Length(const Vector3& v) {
     return std::sqrt(LengthSquare(v));
 }
 
 //! @brief return a normalized vector. Don't change origin vector
-inline Vector3 LUA_BIND Normalize(const Vector3& v) {
+inline Vector3 [[refl, luabind]] Normalize(const Vector3& v) {
     float a = 1.0f / Length(v);
     return v * a;
 }
 
 //! @brief 2D vector which has x, y components
-class LUA_BIND Vector2 {
+class [[refl, luabind]] Vector2 {
 public:
     static const Vector2 Zero;  //!< @brief (0, 0)
     static const Vector2 XAxis; //!< @brief (1, 0)
@@ -290,7 +289,7 @@ public:
 };
 
 //! @brief return a normalized vector. Don't change origin vector
-inline Vector2 LUA_BIND Normalize(const Vector2& v) {
+inline Vector2 [[refl, luabind]] Normalize(const Vector2& v) {
     float len = Length(v);
     if (FloatEq(len, 0)) {
         return Vector2::Zero;
@@ -308,29 +307,29 @@ inline std::ostream& operator<<(std::ostream& stream, const Vector2& v) {
     return stream;
 }
 
-inline float LUA_BIND Cross(const Vector2& v1, const Vector2& v2) {
+inline float [[refl, luabind]] Cross(const Vector2& v1, const Vector2& v2) {
     return v1.x * v2.y - v1.y * v2.x;
 }
 
-inline float LUA_BIND Dot(const Vector2& v1, const Vector2& v2) {
+inline float [[refl, luabind]] Dot(const Vector2& v1, const Vector2& v2) {
     return v1.x * v2.x + v1.y * v2.y;
 }
 
-inline float LUA_BIND Distance(const Vector2& v1, const Vector2& v2) {
+inline float [[refl, luabind]] Distance(const Vector2& v1, const Vector2& v2) {
     float dx = v1.x - v2.x;
     float dy = v1.y - v2.y;
     return std::sqrt(dx * dx + dy * dy);
 }
 
-inline float LUA_BIND LengthSqrd(const Vector2& v) {
+inline float [[refl, luabind]] LengthSqrd(const Vector2& v) {
     return Dot(v, v);
 }
 
-inline float LUA_BIND Length(const Vector2& v) {
+inline float [[refl, luabind]] Length(const Vector2& v) {
     return std::sqrt(LengthSqrd(v));
 }
 
-struct LUA_BIND Rect {
+struct [[refl, luabind]] Rect {
     float x = 0;
     float y = 0;
     float w = 0;
@@ -429,18 +428,18 @@ private:
 //! @param v src vector
 //! @param radians angle in radians, in clockwise
 //! @return rotated vector
-inline Vector2 LUA_BIND Rotate(const Vector2& v, float radians) {
+inline Vector2 [[refl, luabind]] Rotate(const Vector2& v, float radians) {
     float c = std::cos(radians);
     float s = std::sin(radians);
 
     return Vector2(v.x * c - v.y * s, v.x * s + v.y * c);
 }
 
-inline Vector2 LUA_BIND Scale(const Vector2& v, const Vector2& scale) {
+inline Vector2 [[refl, luabind]] Scale(const Vector2& v, const Vector2& scale) {
     return Vector2(v.x * scale.x, v.y * scale.y);
 }
 
-inline Vector2 LUA_BIND Translate(const Vector2& v, const Vector2& offset) {
+inline Vector2 [[refl, luabind]] Translate(const Vector2& v, const Vector2& offset) {
     return Vector2(v.x + offset.x, v.y + offset.y);
 }
 

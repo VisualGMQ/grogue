@@ -3,7 +3,7 @@
 #include "core/pch.hpp"
 #include "app/input.hpp"
 
-struct LUA_BIND InputActionState final {
+struct [[refl, luabind]] InputActionState final {
     enum State {
         Unknown,
         Pressed,
@@ -54,7 +54,7 @@ class TouchInput : public RawInput {
 
 
 //! @brief a wrapper for RawInput, used for bind in Lua
-class LUA_BIND_RESOURCE Input final {
+class [[refl, luabind("res")]] Input final {
 public:
     LUA_NOBIND Input() = default;
     LUA_NOBIND Input(std::unique_ptr<RawInput>&& input): input_(std::move(input)) {}

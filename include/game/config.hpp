@@ -7,12 +7,12 @@
 
 // some config data for auto-parse tool
 
-struct LUA_BIND RaceProfDefPOD final {
+struct [[refl, luabind]] RaceProfDefPOD final {
     std::vector<std::string> races;
     std::vector<std::string> professions;
 };
 
-struct LUA_BIND MonsterPropertyRange final {
+struct [[refl, luabind]] MonsterPropertyRange final {
     std::array<int, 2> hp;
     std::array<int, 2> mp;
     std::array<int, 2> strength;
@@ -23,24 +23,24 @@ struct LUA_BIND MonsterPropertyRange final {
     std::array<int, 2> nutrition;
 };
 
-struct LUA_BIND RacePOD final {
+struct [[refl, luabind]] RacePOD final {
     std::string name;
     MonsterProperty basic;
     MonsterProperty max;
     std::vector<MonsterPropertyRange> professions;
 };
 
-struct LUA_BIND TilesheetPOD final {
+struct [[refl, luabind]] TilesheetPOD final {
     std::string name;
     int row, col;
 };
 
-struct LUA_BIND SpritePOD final {
+struct [[refl, luabind]] SpritePOD final {
     std::array<int, 4> color;
     TilesheetPOD tilesheet;
 };
 
-struct LUA_BIND ItemPOD final {
+struct [[refl, luabind]] ItemPOD final {
     std::string name;
     int weight;
     std::vector<std::string> operations;
@@ -49,7 +49,7 @@ struct LUA_BIND ItemPOD final {
     Material material;
 };
 
-struct LUA_BIND MiscGameConfig final {
+struct [[refl, luabind]] MiscGameConfig final {
     std::unordered_map<std::string, std::string> actions;
 
     float max_speed;
@@ -134,7 +134,7 @@ ReflRegist(
     .Member(&math::Vector2::y, "y")
 )
 
-class LUA_BIND RaceProfDef final {
+class [[refl, luabind]] RaceProfDef final {
 public:
     RaceProfDef(LuaManager&, const std::string& filename);
     const std::vector<std::string>& Races() const { return data_.races; }
@@ -146,7 +146,7 @@ private:
     bool valid_;
 };
 
-class LUA_BIND RaceProfConfig final {
+class [[refl, luabind]] RaceProfConfig final {
 public:
     RaceProfConfig(LuaManager&, const RaceProfDef& defs, const std::string& filename);
     bool Valid() const { return valid_; }
@@ -156,7 +156,7 @@ private:
     bool valid_;
 };
 
-class LUA_BIND ItemConfig final {
+class [[refl, luabind]] ItemConfig final {
 public:
     ItemConfig(LuaManager&, TilesheetManager&, const std::string& filename);
 
@@ -174,7 +174,7 @@ private:
     bool valid_;
 };
 
-class LUA_BIND BackpackUIConfig final {
+class [[refl, luabind]] BackpackUIConfig final {
 public:
     BackpackUIConfig(LuaManager&, const std::string& filename);
     const BackpackUIInfo& Info() const { return info_; }
@@ -188,7 +188,7 @@ private:
 };
 
 //! @brief contains all game config
-class LUA_BIND_RESOURCE GameConfig final {
+class [[refl, luabind("res")]] GameConfig final {
 public:
     GameConfig(LuaManager&, FontManager&, TilesheetManager&, const std::string& configDir, const std::string& resDir);
 

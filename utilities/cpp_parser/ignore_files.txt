@@ -1,0 +1,10 @@
+./include/core/ecs.hpp
+./include/core/log.hpp
+./include/core/assert.hpp
+./include/core/singleton.hpp
+./include/core/sparse_sets.hpp
+./include/core/memory_manager.hpp
+./include/core/pch.hpp
+./include/core/refl.hpp
+./include/core/debugbreak.hpp
+./include/core/utility.hpp

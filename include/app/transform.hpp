@@ -2,7 +2,7 @@
 
 #include "core/math.hpp"
 
-LUA_BIND;
+[[refl, luabind]];
 enum Flip {
     None = 0,
     Horizontal = 0x01,
@@ -10,7 +10,7 @@ enum Flip {
     Both = 0x03,
 };
 
-struct LUA_BIND_COMPONENT Transform final {
+struct [[refl, luabind(comp)]] Transform final {
     math::Vector2 position = math::Vector2::Zero;
     float rotation = 0;  // in degress
     math::Vector2 scale = {1, 1};

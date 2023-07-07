@@ -11,7 +11,7 @@ struct Vertex final {
 
 //! @brief data for SDL_RenderGeometryRaw
 //! @note the size of colors and positions must be same
-struct LUA_BIND Shape final {
+struct [[refl, luabind]] Shape final {
     std::vector<Vertex> vertices;
     std::optional<std::vector<uint32_t>> indices;
 

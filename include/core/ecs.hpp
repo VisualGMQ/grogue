@@ -14,7 +14,7 @@
 #define assertm(msg, expr) assert(((void)msg, (expr)))
 
 // fwd declarea luabind relate class
-namespace lua_bind {
+namespace [[refl, luabind]] {
     class CommandsWrapper;
     class QuerierWrapper;
     class ResourcesWrapper;
@@ -32,7 +32,7 @@ using Entity = uint32_t;
 //! @note maybe you think component shouldn't in ecs.hpp,
 //!        but for supporting herarchy in ecs, we must put it here(for
 //!        HierarchyUpdateSystem)
-struct LUA_BIND_COMPONENT Node final {
+struct [[refl, luabind(comp)]] Node final {
     std::optional<ecs::Entity>
         parent;  //!< parent node, std::nullopt means this node is root
     std::vector<ecs::Entity> children;
@@ -542,7 +542,7 @@ inline void HierarchyAddChild(ecs::Entity parent, ecs::Entity child, ecs::Querie
 
 
 
-class LUA_BIND HierarchyChanger final {
+class [[refl, luabind]] HierarchyChanger final {
 public:
     friend class Commands;
 

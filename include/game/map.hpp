@@ -9,12 +9,12 @@
 #include "app/renderer.hpp"
 #include "app/physic.hpp"
 
-struct LUA_BIND_COMPONENT MapTile final {
+struct [[refl, luabind(comp)]] MapTile final {
     Terrian terrian;
     std::vector<Item> items;
 };
 
-struct LUA_BIND Map final {
+struct [[refl, luabind]] Map final {
     Map(int w, int h): tiles(w, h) {}
 
     math::HeapMatrix<ecs::Entity> tiles;
@@ -22,7 +22,7 @@ struct LUA_BIND Map final {
     std::vector<ecs::Entity> monsters;   //!< moveable entities
 };
 
-struct LUA_BIND_RESOURCE MapManager final {
+struct [[refl, luabind("res")]] MapManager final {
 public:
     void Add(std::shared_ptr<Map> map) { maps_.push_back(map); }
     const std::shared_ptr<Map>& GetCurrentMap() const { return maps_[currentIdx_]; }

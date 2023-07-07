@@ -11,7 +11,7 @@
 
 namespace ui {
 
-struct LUA_BIND_COMPONENT ColorBundle final {
+struct [[refl, luabind(comp)]] ColorBundle final {
     Color normal, hover, press;
 
     static ColorBundle Create(const Color& normal, const Color& hover, const Color& press) {
@@ -24,13 +24,13 @@ struct LUA_BIND_COMPONENT ColorBundle final {
 };
 
 //! @brief component for ui rect
-struct LUA_BIND_COMPONENT RectTransform final {
+struct [[refl, luabind(comp)]] RectTransform final {
     NodeTransform transform;
     math::Vector2 size;
 };
 
 //! @brief component for ui which want to show a text on it
-struct LUA_BIND_COMPONENT Text final {
+struct [[refl, luabind(comp)]] Text final {
     std::shared_ptr<TextTexture> text;
     ColorBundle color;
     math::Vector2 offset;
@@ -41,7 +41,7 @@ struct LUA_BIND_COMPONENT Text final {
 };
 
 //! @brief component for ui which want to show a background image on it
-struct LUA_BIND_COMPONENT Image final {
+struct [[refl, luabind(comp)]] Image final {
     ImageHandle image;
     math::Rect region;
     ColorBundle color = {Color::White};
@@ -66,7 +66,7 @@ struct LUA_BIND_COMPONENT Image final {
 };
 
 //! @brief component for panel
-struct LUA_BIND_COMPONENT Panel final {
+struct [[refl, luabind(comp)]] Panel final {
     std::optional<ColorBundle> contentColor;
     std::optional<ColorBundle> borderColor;
     bool clipChildren = true;    // if children exceed panel area, clip them
@@ -80,7 +80,7 @@ struct LUA_BIND_COMPONENT Panel final {
 };
 
 //! @brief component for ui which want to show a scrolbar and scroll it's content
-struct LUA_BIND_COMPONENT Scrollbar final {
+struct [[refl, luabind(comp)]] Scrollbar final {
     float min;
     float max;
     float value;
@@ -126,7 +126,7 @@ private:
     std::array<bool, static_cast<size_t>(EventType::NUM)> events;
 };
 
-struct LUA_BIND UIEventListener {
+struct [[refl, luabind]] UIEventListener {
     using ListenerFunc = std::function<void(ecs::Entity, ecs::Commands&, ecs::Querier,
                        ecs::Resources, ecs::Events&)>;
 
@@ -139,7 +139,7 @@ struct LUA_BIND UIEventListener {
 };
 
 //! @brief component for ui interaction
-struct LUA_BIND_COMPONENT Interaction final {
+struct [[refl, luabind(comp)]] Interaction final {
     UIEventListener& Get(EventType type) {
         return events_[static_cast<size_t>(type)];
     }

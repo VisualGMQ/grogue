@@ -12,7 +12,7 @@ class LuaScript;
 
 using LuaScriptHandle = Handle<LuaScript>;
 
-class LUA_BIND LuaScript final {
+class [[refl, luabind]] LuaScript final {
 public:
     friend class LuaManager;
     sol::state lua;
@@ -45,7 +45,7 @@ private:
 };
 
 //! @brief manage `LuaScript`
-class LUA_BIND_RESOURCE LuaManager final : public ResourceManager<LuaScript> {
+class [[refl, luabind("res")]] LuaManager final : public ResourceManager<LuaScript> {
 public:
     //! @brief create a `LuaScript` and load from lua file, will auto destroy when app quit
     //! @return the `Handle` to `LuaScript`

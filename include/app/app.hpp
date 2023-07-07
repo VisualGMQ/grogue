@@ -17,18 +17,18 @@
 #include "app/physic.hpp"
 
 //! @brief resources for sharing variable between lua
-struct LUA_BIND_RESOURCE LuaShareContext final {
+struct [[refl, luabind("res")]] LuaShareContext final {
     sol::object context;
 };
 
 //! @brief resources for sharing variable between lua
-struct LUA_BIND LuaEventContext final {
+struct [[refl, luabind]] LuaEventContext final {
     sol::object context;
 };
 
 
 // a resource to trigger application exit
-class LUA_BIND_RESOURCE ExitTrigger final {
+class [[refl, luabind("res")]] ExitTrigger final {
 public:
     bool ShouldExit() const { return shouldExit_; }
 

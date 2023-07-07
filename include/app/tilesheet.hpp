@@ -15,11 +15,11 @@ struct Fourway final {
 
 using Margin = Fourway<uint32_t>;
 
-struct LUA_BIND Spacing final {
+struct [[refl, luabind]] Spacing final {
     uint32_t x, y;
 };
 
-class LUA_BIND Tilesheet final {
+class [[refl, luabind]] Tilesheet final {
 public:
     Tilesheet(ImageManager&, ImageHandle, uint32_t col, uint32_t row,
               const Margin& margin = Margin::Zero(),
@@ -53,7 +53,7 @@ private:
 };
 
 
-struct LUA_BIND TilesheetConfig final {
+struct [[refl, luabind]] TilesheetConfig final {
     std::string filename;
     std::string name;
     uint32_t row, col;
@@ -61,7 +61,7 @@ struct LUA_BIND TilesheetConfig final {
     Spacing spacing = {0, 0};
 };
 
-class LUA_BIND_RESOURCE TilesheetManager final {
+class [[refl, luabind("res")]] TilesheetManager final {
 public:
     TilesheetManager(ImageManager&, LuaManager&);
     Tilesheet& CreateFromImage(

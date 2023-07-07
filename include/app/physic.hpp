@@ -10,7 +10,7 @@
 namespace physic {
 
 //! @brief component for a single particle(has position, no rotation)
-struct LUA_BIND_COMPONENT Particle final {
+struct [[refl, luabind(comp)]] Particle final {
     float massInv = 1.0;  //!< @brief reciprocal of mass
     math::Vector2 pos;
     math::Vector2 vel;
@@ -23,7 +23,7 @@ struct LUA_BIND_COMPONENT Particle final {
 };
 
 //! @brief component for a rigid body(has position, rotation)
-struct LUA_BIND_COMPONENT RigidBody final {
+struct [[refl, luabind(comp)]] RigidBody final {
     Particle particle;
     float rotation;
     float angVel;   //!< @brief angular velocity
@@ -34,7 +34,7 @@ enum ShapeType {
     ShapeCircle,
 };
 
-struct LUA_BIND Shape {
+struct [[refl, luabind]] Shape {
     Shape(ShapeType type): type_(type) {}
     Shape(ShapeType type, const math::Vector2& offset): type_(type), offset(offset) {}
     virtual ~Shape() = default;
@@ -49,14 +49,14 @@ private:
     ShapeType type_;
 };
 
-struct LUA_BIND AABB final: public Shape {
+struct [[refl, luabind]] AABB final: public Shape {
     math::Vector2 halfLen = {1, 1};
 
     AABB(): Shape(ShapeType::ShapeAABB) {}
     AABB(const math::Vector2& offset, const math::Vector2& halfLen): Shape(ShapeType::ShapeAABB, offset), halfLen(halfLen) {}
 };
 
-struct LUA_BIND Circle final: public Shape {
+struct [[refl, luabind]] Circle final: public Shape {
     float radius = 1.0;
 
     Circle(): Shape(ShapeType::ShapeCircle) {}
@@ -118,14 +118,14 @@ inline float NearestPtOnLine(const math::Vector2& p, const math::Vector2& s, con
 
 //! @brief component for collide shape
 
-LUA_BIND;
+[[refl, luabind]];
 enum CollideUsage {
     Collide = 0x01,     //<! @brief collide with others, handle collide manifold
     Listener = 0x02,    //<! @brief collide with others without handle collide manifold
     Both = 0x03,
 };
 
-struct LUA_BIND_COMPONENT CollideShape final {
+struct [[refl, luabind(comp)]] CollideShape final {
     std::shared_ptr<Shape> shape;
     CollideUsage usage = CollideUsage::Collide;
 };
@@ -160,7 +160,7 @@ private:
     uint32_t maxH_;
 };
 
-struct LUA_BIND_RESOURCE PhysicWorld final {
+struct [[refl, luabind("res")]] PhysicWorld final {
     Grid grid;
     std::vector<ForceGenerator> forceGenerators;
     std::vector<Manifold> manifolds;

@@ -3,7 +3,7 @@
 #include "core/pch.hpp"
 #include "core/math.hpp"
 
-class LUA_BIND_RESOURCE Window final {
+class [[refl, luabind("res")]] Window final {
 public:
     friend class Renderer;
 

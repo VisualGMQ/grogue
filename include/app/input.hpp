@@ -6,8 +6,7 @@
 #include "app/fwd.hpp"
 
 // copied from SDL_SCANCODE
-LUA_BIND;
-enum Key {
+enum [[refl, luabind]] Key {
     KEY_UNKNOWN = 0,
     KEY_A = 4,
     KEY_B = 5,
@@ -273,7 +272,7 @@ struct Button {
 
 using KeyButton = Button<Key>;
 
-class LUA_BIND_RESOURCE Keyboard {
+class [[refl, luabind("res")]] Keyboard {
 public:
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
 
@@ -288,7 +287,7 @@ private:
 
 using MouseButton = Button<uint8_t>;
 
-class LUA_BIND_RESOURCE Mouse {
+class [[refl, luabind("res")]] Mouse {
 public:
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
 

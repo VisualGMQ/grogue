@@ -8,13 +8,13 @@
 #include "game/signal_defs.hpp"
 #include "game/input.hpp"
 
-struct LUA_BIND_RESOURCE NearestItemHover {
+struct [[refl, luabind("res")]] NearestItemHover {
     bool valid = false;
     math::Vector2 position;
 };
 
-void LUA_BIND PlayerMove(const Input& input, Monster& monster, physic::Particle& particle);
+void [[refl, luabind]] PlayerMove(const Input& input, Monster& monster, physic::Particle& particle);
 
-void LUA_BIND PickupTileOneItem(Backpack&, ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
+void [[refl, luabind]] PickupTileOneItem(Backpack&, ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
 
 void PutItemIntoBackpack(Backpack&, const Item&, ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);

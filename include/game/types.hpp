@@ -4,13 +4,13 @@
 #include "app/sprite.hpp"
 
 // entity's material
-struct LUA_BIND Material final {
+struct [[refl, luabind]] Material final {
     float opaque;   // in [0, 1]. 0 means transparent, 1 means opaque
     float solid;    // in [0, 1]. [0, 0.3) means gass, [0.3, 0.6) means liquid, [0.6, 1.0] mean solid
     float lumen;    // in [0, +inf). 0 means no emission.
 };
 
-struct LUA_BIND MonsterProperty final {
+struct [[refl, luabind]] MonsterProperty final {
     int strength;       // affect attack damage, bearing amount
     int intelligence;   // affect mp recover speed
     int outsight;       // affect find trap speed
@@ -21,24 +21,24 @@ struct LUA_BIND MonsterProperty final {
     int mp;
 };
 
-struct LUA_BIND MonsterMetaProperty final {
+struct [[refl, luabind]] MonsterMetaProperty final {
     Material material;
     MonsterProperty basic; // basic property on level 0
     MonsterProperty max;   // max property, monster property can't beyond this property
 };
 
-struct LUA_BIND MonsterInfo final {
+struct [[refl, luabind]] MonsterInfo final {
     std::string_view race;
     Material material;
     MonsterProperty property;
     int level;
 };
 
-struct LUA_BIND RaceAddition final {
+struct [[refl, luabind]] RaceAddition final {
     MonsterProperty addition;
 };
 
-struct LUA_BIND EntityProperty final {
+struct [[refl, luabind]] EntityProperty final {
     float solid; //!< in [0, 100]
                  //!< - [0.0, 30): gass
                  //!< - [30, 60): liquid
@@ -77,7 +77,7 @@ struct Buff final {
 using ItemOpFunc = std::function<bool(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&)>;
 
 //! @brief game item
-struct LUA_BIND Item final {
+struct [[refl, luabind]] Item final {
     std::string nameID; //!< raw nameID in GameConfig
     int amount = 1;
     // std::string name; // new name for item
@@ -91,12 +91,12 @@ struct LUA_BIND Item final {
     }
 };
 
-struct LUA_BIND ItemOperation {
+struct [[refl, luabind]] ItemOperation {
     std::string operate;
     bool valid;
 };
 
-struct LUA_BIND ItemInfo final {
+struct [[refl, luabind]] ItemInfo final {
     std::string name;
     int weight;
     bool architecture;
@@ -105,7 +105,7 @@ struct LUA_BIND ItemInfo final {
 };
 
 //! @brief backpack component for monster
-struct LUA_BIND_COMPONENT Backpack final {
+struct [[refl, luabind(comp)]] Backpack final {
     std::vector<Item> items;    //<! the item in backpack
 
     Item leftHand;  //<! the item on the left hand
@@ -113,13 +113,13 @@ struct LUA_BIND_COMPONENT Backpack final {
 };
 
 //! @brief a cache to save which object mouse grabing(like item from backpack)
-struct LUA_BIND_RESOURCE MouseGrabCache {
+struct [[refl, luabind("res")]] MouseGrabCache {
     std::optional<Item> item;   //<! @brief the item
     std::optional<ecs::Entity> entity; //<! @brief the item entity
     bool isGrabJustnow = false; //<! @brief is grab at same frame
 };
 
-struct LUA_BIND BackpackUIInfo final {
+struct [[refl, luabind]] BackpackUIInfo final {
     int width;
     int height;
     int gridSize;
@@ -133,7 +133,7 @@ struct LUA_BIND BackpackUIInfo final {
 };
 
 //! @brief a tag component to point out ui root node
-struct LUA_BIND_COMPONENT UIRoot {};
+struct [[refl, luabind(comp)]] UIRoot {};
 
 enum class TerrianType {
     DryLand,
@@ -147,14 +147,14 @@ struct Terrian final {
 };
 
 //! @brief tag component for backpack panel UI
-struct LUA_BIND_COMPONENT BackpackUIPanel {};
+struct [[refl, luabind(comp)]] BackpackUIPanel {};
 //! @brief tag component for left hand ui panel
-struct LUA_BIND_COMPONENT LeftHandUIPanel {};
+struct [[refl, luabind(comp)]] LeftHandUIPanel {};
 //! @brief tag component for right hand ui panel
-struct LUA_BIND_COMPONENT RightHandUIPanel {};
+struct [[refl, luabind(comp)]] RightHandUIPanel {};
 
 /// @brief a tag component to point out player entity
-struct LUA_BIND_COMPONENT Player {};
+struct [[refl, luabind(comp)]] Player {};
 
 constexpr float SCALE = 2.0;
 

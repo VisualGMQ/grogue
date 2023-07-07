@@ -12,7 +12,7 @@ class Font;
 
 using FontHandle = Handle<Font>;
 
-class LUA_BIND Font final {
+class [[refl, luabind]] Font final {
 public:
     friend class FontManager;
     friend class Renderer;
@@ -40,7 +40,7 @@ private:
     }
 };
 
-class LUA_BIND_RESOURCE FontManager final : public ResourceManager<Font> {
+class [[refl, luabind("res")]] FontManager final : public ResourceManager<Font> {
 public:
     FontHandle Load(const std::string& filename, int ptsize);
 };

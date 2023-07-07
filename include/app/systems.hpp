@@ -30,7 +30,7 @@ void ToggleDebugMode(std::optional<ecs::Entity>, ecs::Entity,
                     ecs::Commands&, ecs::Querier, ecs::Resources,
                     ecs::Events&);
 
-struct LUA_BIND_COMPONENT DebugConfig {
+struct [[refl, luabind(comp)]] DebugConfig {
     bool showAnchor = false;
     bool showPhysicDebugInfo = false;
 };
