@@ -6,6 +6,12 @@ class ACCESS_TYPE:
     PROTECTED = 1
     PRIVATE = 2
 
+class Constructor:
+    def __init__(self, class_name, parameters, attrs):
+        self.class_name = class_name
+        self.parameters = parameters
+        self.attrs = attrs
+
 class Function:
     def __init__(self, name, return_type, parameters, is_static, attrs):
         self.name = name
@@ -34,13 +40,17 @@ class Namespace:
 class Class:
     def __init__(self,
                 name: str,
-                variables: tuple[list[Variable], list[Variable], list[Variable]],
-                functions: tuple[list[Variable], list[Variable], list[Variable]],
-                namespaces: list[Namespace]) -> None:
+                variables: list[Variable],
+                constructors: list[Constructor],
+                functions: list[Function],
+                namespaces: list[Namespace],
+                attribtues: list[str]) -> None:
         self.name = name
         self.variables = variables
+        self.constructors = constructors
         self.functions = functions
         self.namespaces = namespaces
+        self.attributes = attribtues
 
 class Enum:
     def __init__(self, namespaces: list[Namespace], name: str, values: list[tuple[str, int]], is_class: bool, owned_class: Class):
@@ -50,6 +60,9 @@ class Enum:
         self.is_class = is_class
         self.owned_class = owned_class
 
+def shouldParseMember(node, source_code: list[str]) -> bool:
+    line_number = node.location.line - 1
+    return line_number in range(0, len(source_code)) and 'norefl' not in source_code[line_number]
 
 # use regex to find attribute(not walk AST tree because libclang will discard all no-support attributes)
 def ParseAttrsFromSourceCode(line_number: int, source_code: list[str]) -> list[str]:
@@ -63,13 +76,41 @@ def ParseAttrsFromSourceCode(line_number: int, source_code: list[str]) -> list[s
                 attributes.append(attr.strip())
     return attributes
 
+def ParseConstructors(class_decl: clang.cindex.Cursor, source_code: list[str]) -> list[Function]:
+    constructors = []
+    for child_node in class_decl.get_children():
+        if child_node.kind == clang.cindex.CursorKind.CONSTRUCTOR:
+            attributes = ParseAttrsFromSourceCode(child_node)
+            if 'norefl' in attributes:
+                continue
+
+            name = child_node.spelling
+            parameters = []
+
+            for arg_node in child_node.get_arguments():
+                arg_type = arg_node.type.spelling
+                arg_name = arg_node.spelling
+                parameters.append((arg_type, arg_name))
+
+            constructors.append(Constructor(name, parameters, attributes))
+    return constructors
+
+def findOverloadList(name, funcs: list[list[Function]]) -> list[Function]:
+    for func in funcs:
+        if func[0].name == name:
+            return func
+    return None
+
 def ParseMemberFunctions(class_decl: clang.cindex.Cursor, source_code: list[str]) -> list[Function]:
     member_functions = []
     for child_node in class_decl.get_children():
         if child_node.kind == clang.cindex.CursorKind.CXX_METHOD:
+            attributes = ParseAttrsFromSourceCode(child_node)
+            if 'norefl' in attributes:
+                continue
+
             name = child_node.spelling
             return_type = child_node.result_type.spelling
-            child_node.result_type
             parameters = []
             is_static = bool(child_node.is_static_method())
 
@@ -78,9 +119,12 @@ def ParseMemberFunctions(class_decl: clang.cindex.Cursor, source_code: list[str]
                 arg_name = arg_node.spelling
                 parameters.append((arg_type, arg_name))
 
-            attributes = ParseAttrsFromSourceCode(child_node.location.line - 1, source_code)
-
-            member_functions.append(Function(name, return_type, parameters, is_static, attributes))
+            funcList = findOverloadList(name, member_functions)
+            func = Function(name, return_type, parameters, is_static, attributes)
+            if funcList is not None:
+                funcList.append(func)
+            else:
+                member_functions.append([func])
     return member_functions
 
 
@@ -90,14 +134,16 @@ def ParseMemberVariables(class_decl: clang.cindex.Cursor, source_code: list[str]
         if (child_node.kind == clang.cindex.CursorKind.VAR_DECL or \
             child_node.kind == clang.cindex.CursorKind.FIELD_DECL) and \
             child_node.access_specifier == clang.cindex.AccessSpecifier.PUBLIC:
+            attributes = ParseAttrsFromSourceCode(child_node)
+            if 'norefl' not in attributes:
+                continue
+
             var_type = child_node.type.spelling
             var_name = child_node.spelling
             var_default_value = None
             is_static = child_node.storage_class == clang.cindex.StorageClass.STATIC
 
             is_constexpr = True if source_code[child_node.location.line - 1].find('constexpr') != -1 else False
-
-            attributes = ParseAttrsFromSourceCode(child_node.location.line - 1, source_code)
 
             for child_node2 in child_node.get_children():
                 if child_node2.kind == clang.cindex.CursorKind.CXX_UNARY_EXPR and child_node2.opcode == clang.cindex.UnaryOperatorCode.IMPLICIT_CAST:
@@ -131,6 +177,20 @@ def ExtractNamespace(tu, source_code):
         namespaces.append(namespace)
     return namespaces
 
+def ParseAttrsFromSourceCode(node):
+    with open(node.location.file.name, "r") as f:
+        line = ""
+        for _ in range(0, node.location.line):
+            line = f.readline()
+        attributes = []
+        matchObj = re.findall(r'\[\[(.*?)\]\]', line);
+        for m in matchObj:
+            attrs = m.split(',')
+            for attr in attrs:
+                attributes.append(attr.strip())
+        return attributes
+
+
 def ExtractClasses(tu, source_code: list[str]):
     # Find all class declarations in the file
     class_decls = [node for node in tu.cursor.walk_preorder() if node.kind == clang.cindex.CursorKind.CLASS_DECL]
@@ -140,15 +200,18 @@ def ExtractClasses(tu, source_code: list[str]):
     for class_decl in class_decls:
         class_name = class_decl.spelling
 
+        if class_decl.access_specifier == clang.cindex.AccessSpecifier.INVALID:
+            continue
+
         # parse attributes:
-        attributes = []
-        line_num = class_decl.location.line - 1
-        if line_num in range(0, len(source_code)):
-            attributes = ParseAttrsFromSourceCode(class_decl.location.line - 1, source_code)
+        attributes = ParseAttrsFromSourceCode(class_decl)
 
         # special ruler for class:
         if 'refl' not in attributes:
             continue
+
+        # parse constructors:
+        constructors = ParseConstructors(class_decl, source_code)
 
         # parse member functions:
         member_functions = ParseMemberFunctions(class_decl, source_code)
@@ -156,7 +219,7 @@ def ExtractClasses(tu, source_code: list[str]):
         # parse member variables:
         member_variables = ParseMemberVariables(class_decl, source_code)
 
-        classes.append((class_name, member_functions, member_variables, attributes))
+        classes.append(Class(class_name, member_variables, constructors, member_functions, None, attributes))
 
     return classes
 
@@ -170,21 +233,29 @@ def ExtractGlobalFunctions(tu, source_code):
             continue
 
         # parse attributes:
-        attributes = ParseAttrsFromSourceCode(line_num, source_code)
+        attributes = ParseAttrsFromSourceCode(child)
 
         # special ruler for global functions:
-        if 'refl' not in attributes:
+        if 'luabind' not in attributes:
             continue
 
         name = child.spelling
         return_type = child.result_type.spelling
         parameters = [(p.type.spelling, p.spelling) for p in child.get_arguments()]
         is_static = child.storage_class == clang.cindex.StorageClass.STATIC
-        functions.append(Function(name, return_type, parameters, is_static, attributes))
+
+        funcList = findOverloadList(name, functions)
+        func = Function(name, return_type, parameters, is_static, attributes)
+        if funcList is not None:
+            funcList.append(func)
+        else:
+            functions.append([func])
+
     return functions
 
 class CodeInfo:
-    def __init__(self, classes: list[Class], global_functions: list[Function], namespaces: list[Namespace]) -> None:
+    def __init__(self, file: str, classes: list[Class], global_functions: list[Function], namespaces: list[Namespace]) -> None:
+        self.file = file
         self.classes = classes
         self.global_functions = global_functions
         self.namespaces = namespaces
@@ -199,7 +270,7 @@ def ParseHeaderFile(filename: str) -> CodeInfo:
     classes = ExtractClasses(tu, source_code)
     namespaces = ExtractNamespace(tu, source_code)
     functions = ExtractGlobalFunctions(tu, source_code)
-    return CodeInfo(classes, functions, namespaces)
+    return CodeInfo(filename, classes, functions, namespaces)
 
 
 # example
@@ -215,23 +286,30 @@ if __name__ == '__main__':
 
     for clazz in classes:
         print("functions:")
-        for func in clazz[1]:
-            print(func.name)
-            print(func.return_type)
-            print(func.parameters)
-            print(func.is_static)
+        for func_list in clazz.functions:
+            if len(func_list) == 1:
+                print(func_list[0].name)
+            else:
+                print("overload:")
+                print(func_list[0].name)
+            for func in func_list:
+                print(func.return_type)
+                print(func.parameters)
+                print(func.is_static)
+
         print("variables:")
-        for var in clazz[2]:
+        for var in clazz.variables:
             print(var.type)
             print(var.name)
             print(var.default_value)
             print(var.is_static)
             print(var.is_constexpr)
-        for attr in clazz[3]:
+        for attr in clazz.attributes:
             print(attr)
 
-    for func in functions:
-        print(func.name)
-        print(func.return_type)
-        print(func.parameters)
-        print(func.is_static)
+    for func_list in functions:
+        for func in func_list:
+            print(func.name)
+            print(func.return_type)
+            print(func.parameters)
+            print(func.is_static)

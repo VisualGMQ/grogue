@@ -20,7 +20,14 @@ enum class ClassSimpleEnum {
 
 class [[refl, luabind, config]] Room {
 public:
+    Room(int) {}
+
     static Person* add_person(const qq::test::Person** person)
+    {
+        // do stuff
+    }
+
+    static Person* add_person(int)
     {
         // do stuff
     }
@@ -33,8 +40,8 @@ private:
     Person* people_in_room;
 };
 
-void GlobalFunction();
-static inline void GlobalFunctionWithImpl() {}
+void [[luabind]] GlobalFunction();
+static inline void [[luabind]] GlobalFunctionWithImpl() {}
 
 }
 
