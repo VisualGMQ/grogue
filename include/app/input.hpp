@@ -272,7 +272,7 @@ struct Button {
 
 using KeyButton = Button<Key>;
 
-class [[refl, luabind("res")]] Keyboard {
+class [[refl, luabind(res)]] Keyboard {
 public:
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
 
@@ -287,7 +287,7 @@ private:
 
 using MouseButton = Button<uint8_t>;
 
-class [[refl, luabind("res")]] Mouse {
+class [[refl, luabind(res)]] Mouse {
 public:
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources, ecs::Events&);
 

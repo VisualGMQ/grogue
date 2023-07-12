@@ -12,7 +12,7 @@ struct [[refl, luabind]] InputActionState final {
         Releasing,
     };
 
-    LUA_NOBIND InputActionState(State state): state_(state) {}
+    [[luanobind]] InputActionState(State state): state_(state) {}
 
     bool IsPressed() const { return state_ == Pressed;}
     bool IsPressing() const { return state_ == Pressing; }
@@ -54,10 +54,10 @@ class TouchInput : public RawInput {
 
 
 //! @brief a wrapper for RawInput, used for bind in Lua
-class [[refl, luabind("res")]] Input final {
+class [[refl, luabind(res)]] Input final {
 public:
-    LUA_NOBIND Input() = default;
-    LUA_NOBIND Input(std::unique_ptr<RawInput>&& input): input_(std::move(input)) {}
+    [[luanobind]] Input() = default;
+    [[luanobind]] Input(std::unique_ptr<RawInput>&& input): input_(std::move(input)) {}
 
     InputActionState  GetActionState(const std::string& action) const {
         Assert(input_, "input is nullptr");

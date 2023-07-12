@@ -160,7 +160,7 @@ private:
     uint32_t maxH_;
 };
 
-struct [[refl, luabind("res")]] PhysicWorld final {
+struct [[refl, luabind(res)]] PhysicWorld final {
     Grid grid;
     std::vector<ForceGenerator> forceGenerators;
     std::vector<Manifold> manifolds;

@@ -1,3 +1,5 @@
+#include <cmath>
+
 namespace qq::test {
 
 class Person {
@@ -40,7 +42,7 @@ private:
     Person* people_in_room;
 };
 
-void [[luabind]] GlobalFunction();
+void [[luabind]] GlobalFunction() {}
 static inline void [[luabind]] GlobalFunctionWithImpl() {}
 
 }

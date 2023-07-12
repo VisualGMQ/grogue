@@ -40,7 +40,7 @@ private:
     }
 };
 
-class [[refl, luabind("res")]] FontManager final : public ResourceManager<Font> {
+class [[refl, luabind(res)]] FontManager final : public ResourceManager<Font> {
 public:
     FontHandle Load(const std::string& filename, int ptsize);
 };

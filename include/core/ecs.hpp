@@ -546,7 +546,7 @@ class [[refl, luabind]] HierarchyChanger final {
 public:
     friend class Commands;
 
-    LUA_NOBIND explicit HierarchyChanger(Entity target, World& world): world_(world), target_(target) {}
+    [[luanobind]] explicit HierarchyChanger(Entity target, World& world): world_(world), target_(target) {}
 
     auto& Remove(ecs::Entity entity, std::optional<size_t> idx) {
         cmds_.push_back(Cmd{Cmd::Type::Remove, entity, idx});
@@ -566,7 +566,7 @@ public:
     }
 
 private:
-    struct LUA_NOBIND Cmd {
+    struct [[luanobind]] Cmd {
         enum class Type {
             Add,
             Remove,

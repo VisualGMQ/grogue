@@ -43,7 +43,7 @@ private:
     }
 };
 
-class [[refl, luabind("res")]] ImageManager final : public ResourceManager<Image> {
+class [[refl, luabind(res)]] ImageManager final : public ResourceManager<Image> {
 public:
     ImageManager(Renderer&);
     ImageHandle Load(const std::string& filename);

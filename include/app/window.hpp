@@ -3,7 +3,7 @@
 #include "core/pch.hpp"
 #include "core/math.hpp"
 
-class [[refl, luabind("res")]] Window final {
+class [[refl, luabind(res)]] Window final {
 public:
     friend class Renderer;
 
@@ -17,7 +17,7 @@ public:
 
     math::Vector2 GetSize() const;
 
-    SDL_Window* LUA_NOBIND Raw() const { return window_; }
+    SDL_Window* [[luanobind]] Raw() const { return window_; }
 
 private:
     SDL_Window* window_ = nullptr;

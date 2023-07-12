@@ -17,7 +17,7 @@ def GetCodeInfo(filename: str):
     global CodeInfos
     CodeInfos.append(chp.ParseHeaderFile(filename))
 
-def GenerateCode(code_info: list[chp.CodeInfo]) -> str:
+def GenerateCode(code_info: list[chp.CodeInfo]) -> tuple[str, str]:
     refl_code = GenerateClassBindCode(code_info)
     classbind_code = GenerateLuabindCode(code_info)
     
@@ -47,7 +47,7 @@ void BindLua(sol::state& lua) {{
     for info in code_info:
         for clazz in info.classes:
             if 'luabind' in clazz.attributes or \
-                'luabind("res")' in clazz.attributes or \
+                'luabind(res)' in clazz.attributes or \
                 'luabind("comp)' in clazz.attributes:
                 classbind_code += "\tluabind::BindClass<{}>(lua, \"{}\")\n".format(clazz.name, clazz.name)
 
@@ -72,7 +72,7 @@ ReflClass({}) {{
 
     fields_code = ""
     for var in clazz.variables:
-        if len(clazz.variables.attributes) > 0:
+        if len(var.attributes) > 0:
             fields_code += "\n\t\tAttrField(Attrs({}), \"{}\", &{}::{}),".format(', '.join(var.attributes), var.name, clazz.name, var.name)
         else:
             fields_code += "\n\t\tField(\"{}\", &{}::{}),".format(var.name, clazz.name, var.name)
@@ -93,7 +93,6 @@ ReflClass({}) {{
     
     return fmt_code.format(clazz.name, constructor_code, fields_code)
 
-
 def GenerateGlobalFunctionBindCode(code_info: list[chp.CodeInfo]) -> str:
     result = ""
     for info in code_info:
@@ -106,7 +105,7 @@ def GenerateGlobalFunctionBindCode(code_info: list[chp.CodeInfo]) -> str:
                                                                      ','.join(map(lambda func: "static_cast<{}(*)({})>(&{})".format(
                                                                         func.return_type,
                                                                         ','.join(list(map(lambda param: param[0], func.parameters))),
-                                                                        func.name
+                                                                        '::{}::{}'.format('::'.join(func.namespaces), func.name)
                                                                      ), func_list)))
     return result
 

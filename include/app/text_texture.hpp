@@ -14,7 +14,7 @@ public:
         SetText(text);
     }
 
-    const std::unique_ptr<Image>& LUA_NOBIND GetImage() const { return image_; }
+    const std::unique_ptr<Image>& [[luanobind]] GetImage() const { return image_; }
     void SetText(const std::string& text);
     const std::string& GetText() const { return text_; }
 

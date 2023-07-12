@@ -4,7 +4,7 @@
 #include "app/manager.hpp"
 
 //! @brief a resource that make you get time elapse between two frame
-class [[refl, luabind("res")]] Time final {
+class [[refl, luabind(res)]] Time final {
 public:
     using TimeType = uint64_t;
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
@@ -16,9 +16,9 @@ public:
     static uint32_t GetFPS() { return fps_; }
 
     Time();
-    LUA_NOBIND Time(const Time&) = delete;
+    [[luanobind]] Time(const Time&) = delete;
     Time(Time&&) = default;
-    LUA_NOBIND Time& operator=(const Time&) = delete;
+    [[luanobind]] Time& operator=(const Time&) = delete;
     Time& operator=(Time&&) = default;
 
     //! @brief get elapse time between two frame (in millisecond)
@@ -90,7 +90,7 @@ private:
     Time::TimeType dstTime_;
 };
 
-class [[refl, luabind("res")]] TimerManager : public ResourceManager<Timer> {
+class [[refl, luabind(res)]] TimerManager : public ResourceManager<Timer> {
 public:
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
                         ecs::Events&);

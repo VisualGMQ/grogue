@@ -22,7 +22,7 @@ struct [[refl, luabind]] Map final {
     std::vector<ecs::Entity> monsters;   //!< moveable entities
 };
 
-struct [[refl, luabind("res")]] MapManager final {
+struct [[refl, luabind(res)]] MapManager final {
 public:
     void Add(std::shared_ptr<Map> map) { maps_.push_back(map); }
     const std::shared_ptr<Map>& GetCurrentMap() const { return maps_[currentIdx_]; }

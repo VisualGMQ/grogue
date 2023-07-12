@@ -36,7 +36,7 @@ private:
     }
 };
 
-class [[refl, luabind("res")]] BGMManager final : public ResourceManager<BGM> {
+class [[refl, luabind(res)]] BGMManager final : public ResourceManager<BGM> {
 public:
     BGMHandle Load(const std::string& filename);
 };

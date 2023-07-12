@@ -188,7 +188,7 @@ private:
 };
 
 //! @brief contains all game config
-class [[refl, luabind("res")]] GameConfig final {
+class [[refl, luabind(res)]] GameConfig final {
 public:
     GameConfig(LuaManager&, FontManager&, TilesheetManager&, const std::string& configDir, const std::string& resDir);
 

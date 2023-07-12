@@ -45,7 +45,7 @@ private:
 };
 
 //! @brief manage `LuaScript`
-class [[refl, luabind("res")]] LuaManager final : public ResourceManager<LuaScript> {
+class [[refl, luabind(res)]] LuaManager final : public ResourceManager<LuaScript> {
 public:
     //! @brief create a `LuaScript` and load from lua file, will auto destroy when app quit
     //! @return the `Handle` to `LuaScript`

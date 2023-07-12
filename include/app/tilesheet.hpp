@@ -61,7 +61,7 @@ struct [[refl, luabind]] TilesheetConfig final {
     Spacing spacing = {0, 0};
 };
 
-class [[refl, luabind("res")]] TilesheetManager final {
+class [[refl, luabind(res)]] TilesheetManager final {
 public:
     TilesheetManager(ImageManager&, LuaManager&);
     Tilesheet& CreateFromImage(

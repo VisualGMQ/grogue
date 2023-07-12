@@ -9,7 +9,7 @@
 //! @addtogroup resource-manager
 //! @{
 
-class [[refl, luabind("res")]] AssetsManager final {
+class [[refl, luabind(res)]] AssetsManager final {
 public:
     friend class DefaultPlugins;
 

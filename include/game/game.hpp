@@ -8,7 +8,7 @@
 #include "game/signal_defs.hpp"
 #include "game/input.hpp"
 
-struct [[refl, luabind("res")]] NearestItemHover {
+struct [[refl, luabind(res)]] NearestItemHover {
     bool valid = false;
     math::Vector2 position;
 };

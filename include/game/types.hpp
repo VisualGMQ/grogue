@@ -113,7 +113,7 @@ struct [[refl, luabind(comp)]] Backpack final {
 };
 
 //! @brief a cache to save which object mouse grabing(like item from backpack)
-struct [[refl, luabind("res")]] MouseGrabCache {
+struct [[refl, luabind(res)]] MouseGrabCache {
     std::optional<Item> item;   //<! @brief the item
     std::optional<ecs::Entity> entity; //<! @brief the item entity
     bool isGrabJustnow = false; //<! @brief is grab at same frame
