@@ -1,7 +1,15 @@
 import cpp_header_parser as chp
 import os
+import re
 
 CodeInfos: list[chp.CodeInfo] = []
+
+class LuabindAttrs:
+    def __init__(self):
+        self.is_component = False
+        self.is_resources = False
+        self.is_nobind = False
+        self.change_name = None
 
 def ApplyOnEachFile(dirname: str, ignore_filenames: list[str], func):
     for dirpath, _, filenames in os.walk(dirname):
@@ -46,15 +54,50 @@ void BindLua(sol::state& lua) {{
     classbind_code = ""
     for info in code_info:
         for clazz in info.classes:
-            if 'luabind' in clazz.attributes or \
-                'luabind(res)' in clazz.attributes or \
-                'luabind("comp)' in clazz.attributes:
-                classbind_code += "\tluabind::BindClass<{}>(lua, \"{}\")\n".format(clazz.name, clazz.name)
+            attr = ConvertLuabindAttr2ReflAttr(clazz.attributes, False)
+            bind_name = clazz.name
+            if attr.change_name is not None:
+                bind_name = attr.change_name[0]
+            if not attr.is_nobind:
+                classbind_code += "\tluabind::BindClass<{}>(lua, \"{}\")\n".format(clazz.name, bind_name)
 
     global_func_code = GenerateGlobalFunctionBindCode(code_info)
 
     return luabind_code.format(classbind_code + "\n" + global_func_code)
 
+def ConvertLuabindAttr2ReflAttr(attrs: list[str], default_bind: bool) -> LuabindAttrs:
+    bind_attrs = LuabindAttrs();
+    bind_attrs.is_nobind = not default_bind
+    for attr in attrs:
+        if attr == "luanobind":
+            bind_attrs.is_nobind = True
+            continue
+        if attr == "luabind":
+            bind_attrs.is_nobind = False
+            continue
+        match_group = re.match("luabind\((.*?)\)", attr)
+        if match_group is None:
+            continue
+        for content in match_group.groups():
+            bind_attrs.is_nobind = False
+            if content[0] == '"':
+                bind_attrs.change_name = [content[1 : len(content) - 1], None]
+                bind_attrs.change_name[1] = "LuaBindName<char, {}>".format(', '.join(list(map(lambda c: "'{}'".format(c), bind_attrs.change_name[0]))))
+            else:
+                if content == "comp":
+                    bind_attrs.is_component = True
+                elif content == "res":
+                    bind_attrs.is_resources = True
+
+    return bind_attrs
+
+def ConvertBindAttr2Str(attr: LuabindAttrs) -> str:
+    result = ""
+    if attr.change_name is not None:
+        result += attr.change_name[1] + ", "
+    if attr.is_nobind:
+        result += "LuaNoBind, "
+    return result
 
 def GenerateReflClassCode(clazz: chp.Class) -> str:
     fmt_code = """
@@ -73,14 +116,16 @@ ReflClass({}) {{
     fields_code = ""
     for var in clazz.variables:
         if len(var.attributes) > 0:
-            fields_code += "\n\t\tAttrField(Attrs({}), \"{}\", &{}::{}),".format(', '.join(var.attributes), var.name, clazz.name, var.name)
+            attr_str = ConvertBindAttr2Str(ConvertLuabindAttr2ReflAttr(var.attributes, True))
+            fields_code += "\n\t\tAttrField(Attrs({}), \"{}\", &{}::{}),".format(attr_str, var.name, clazz.name, var.name)
         else:
             fields_code += "\n\t\tField(\"{}\", &{}::{}),".format(var.name, clazz.name, var.name)
     for func_list in clazz.functions:
         if len(func_list) == 1:
             func = func_list[0]
             if len(func.attributes) > 0:
-                fields_code += "\n\t\tAttrField(Attrs({}), \"{}\", &{}::{}),".format(', '.join(func.attributes), func.name, clazz.name, func.name)
+                attr_str = ConvertBindAttr2Str(ConvertLuabindAttr2ReflAttr(func.attributes, True))
+                fields_code += "\n\t\tAttrField(Attrs({}), \"{}\", &{}::{}),".format(attr_str, func.name, clazz.name, func.name)
             else:
                 fields_code += "\n\t\tField(\"{}\", {}{}::{}),".format(func.name, '&' if not func.is_static else '', clazz.name, func.name)
         else:
