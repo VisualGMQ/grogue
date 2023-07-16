@@ -4,17 +4,17 @@ InputActionState KeyboardInput::GetActionState(const std::string& action) const 
     if (auto it = actions_.find(action); it != actions_.end()) {
         auto key = keyboard_.Key(it->second);
         if (key.IsPressed()) {
-            return InputActionState(InputActionState::Pressed);
+            return InputActionState(State::Pressed);
         } else if (key.IsReleased()) {
-            return InputActionState(InputActionState::Released);
+            return InputActionState(State::Released);
         } else if (key.IsPressing()) {
-            return InputActionState(InputActionState::Pressing);
+            return InputActionState(State::Pressing);
         } else {
-            return InputActionState(InputActionState::Releasing);
+            return InputActionState(State::Releasing);
         }
     } else {
         LOGW("[Input]: can't find action ", action, ", did you define it in game_conf.lua?");
-        return InputActionState(InputActionState::Unknown);
+        return InputActionState(State::Unknown);
     }
 }
 

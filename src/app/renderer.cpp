@@ -1,6 +1,5 @@
 #include "app/renderer.hpp"
 #include "app/image.hpp"
-#include "app/renderer.hpp"
 
 Renderer::Renderer(Window& window, FontManager& fontManager)
     : fontManager_(&fontManager) {

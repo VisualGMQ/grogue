@@ -1,9 +1,9 @@
 #pragma once
 
 #include "core/pch.hpp"
-#include "app/config_parse.hpp"
 #include "app/tilesheet.hpp"
 #include "app/font.hpp"
+#include "game/types.hpp"
 
 // some config data for auto-parse tool
 
@@ -53,86 +53,9 @@ struct [[refl, luabind]] MiscGameConfig final {
     std::unordered_map<std::string, std::string> actions;
 
     float max_speed;
-    FontHandle ui_font;
+    [[norefl]] FontHandle ui_font;
     int ui_font_size;
 };
-
-// reflect datas
-
-/*
-ReflRegist(
-    refl::Class<RaceProfDefPOD>("RaceProfPOD")
-        .Member(&RaceProfDefPOD::races, "races")
-        .Member(&RaceProfDefPOD::professions, "professions")
-)
-
-ReflRegist(
-    refl::Class<MonsterPropertyRange>("MonsterPropertyRange")
-        .Member(&MonsterPropertyRange::hp, "hp")
-        .Member(&MonsterPropertyRange::mp, "mp")
-        .Member(&MonsterPropertyRange::strength, "strength")
-        .Member(&MonsterPropertyRange::intelligence, "intelligence")
-        .Member(&MonsterPropertyRange::outsight, "outsight")
-        .Member(&MonsterPropertyRange::constitution, "constitution")
-        .Member(&MonsterPropertyRange::agility, "agility")
-        .Member(&MonsterPropertyRange::nutrition, "nutrition")
-)
-
-ReflRegist(
-    refl::Class<RacePOD>("RacePOD")
-        .Member(&RacePOD::name, "name")
-        .Member(&RacePOD::basic, "basic")
-        .Member(&RacePOD::max, "max")
-        .Member(&RacePOD::professions, "professions")
-)
-
-ReflRegist(
-    refl::Class<TilesheetPOD>("TilesheetPOD")
-        .Member(&TilesheetPOD::name, "name")
-        .Member(&TilesheetPOD::row, "row")
-        .Member(&TilesheetPOD::col, "col")
-)
-
-ReflRegist(
-    refl::Class<SpritePOD>("SpritePOD")
-        .Member(&SpritePOD::color, "color")
-        .Member(&SpritePOD::tilesheet, "tilesheet")
-)
-
-ReflRegist(
-    refl::Class<ItemPOD>("ItemPOD")
-        .Member(&ItemPOD::name, "name")
-        .Member(&ItemPOD::weight, "weight")
-        .Member(&ItemPOD::operations, "operations")
-        .Member(&ItemPOD::material, "material")
-        .Member(&ItemPOD::architecture, "architecture")
-        .Member(&ItemPOD::sprite, "sprite")
-)
-
-ReflRegist(
-    refl::Class<BackpackUIInfo>("BakpackUIInfo")
-        .Member(&BackpackUIInfo::width, "width")
-        .Member(&BackpackUIInfo::height, "height")
-        .Member(&BackpackUIInfo::gridSize, "gridSize")
-        .Member(&BackpackUIInfo::padding, "padding")
-        .Member(&BackpackUIInfo::margin, "margin")
-        .Member(&BackpackUIInfo::left_hand_position, "left_hand_position")
-        .Member(&BackpackUIInfo::right_hand_position, "right_hand_position")
-)
-
-ReflRegist(
-    refl::Class<MiscGameConfig>("MiscGameConfig")
-        .Member(&MiscGameConfig::actions, "actions")
-        .Member(&MiscGameConfig::max_speed, "max_speed")
-        .Member(&MiscGameConfig::ui_font, "ui_font")
-        .Member(&MiscGameConfig::ui_font_size, "ui_font_size")
-)
-
-ReflRegist(
-    refl::Class<math::Vector2>("Vector2")
-    .Member(&math::Vector2::x, "x")
-    .Member(&math::Vector2::y, "y")
-)
 
 class [[refl, luabind]] RaceProfDef final {
 public:
@@ -199,7 +122,7 @@ public:
     auto& GetMiscGameConfig() const { return misc_; }
 
     //! @brief whether config init OK
-    operator bool() const { return valid_; }
+    bool Valid() const { return valid_; }
 
 private:
     std::unique_ptr<RaceProfDef> raceProfDef_;
@@ -209,4 +132,3 @@ private:
     MiscGameConfig misc_;
     bool valid_;
 };
-*/

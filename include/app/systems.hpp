@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/ecs.hpp"
-#include "core/luabind_tag.hpp"
 
 void ResetRenderStateSystem(ecs::Commands& cmd, ecs::Querier querier,
                         ecs::Resources resources, ecs::Events& events);
@@ -30,7 +29,7 @@ void ToggleDebugMode(std::optional<ecs::Entity>, ecs::Entity,
                     ecs::Commands&, ecs::Querier, ecs::Resources,
                     ecs::Events&);
 
-struct [[refl, luabind(comp)]] DebugConfig {
+struct [[refl, luabind(res)]] DebugConfig {
     bool showAnchor = false;
     bool showPhysicDebugInfo = false;
 };

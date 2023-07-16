@@ -4,9 +4,15 @@
 #include "app/handle.hpp"
 #include "core/pch.hpp"
 #include "core/math.hpp"
+#include "core/refl.hpp"
 
 class Image;
 using ImageHandle = Handle<Image>;
+
+ReflClass(ImageHandle) {
+    Constructors();
+    Fields()
+};
 
 struct [[refl, luabind]] Color {
     uint8_t r, g, b, a;

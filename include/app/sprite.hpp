@@ -40,7 +40,7 @@ struct [[refl, luabind(comp)]] SpriteBundle final {
     bool visiable = true;
 };
 
-struct SpriteBundleSolitary final {
+struct [[refl, luabind]] SpriteBundleSolitary final {
     Sprite sprite;
     Image& image;
     Flip flip = Flip::None;

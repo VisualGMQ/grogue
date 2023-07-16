@@ -3,10 +3,11 @@
 #include "core/pch.hpp"
 #include "app/manager.hpp"
 
+using TimeType = uint64_t;
+
 //! @brief a resource that make you get time elapse between two frame
 class [[refl, luabind(res)]] Time final {
 public:
-    using TimeType = uint64_t;
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
                              ecs::Events&);
     static void SetFPS(uint32_t fps) {
@@ -40,12 +41,13 @@ private:
 class Timer;
 using TimerHandle = Handle<Timer>;
 
+using TickFunc = std::function<void()>;
+
 //! @brief a timer that tirge function when reach time
 class [[refl, luabind]] Timer final {
 public:
-    using TickFunc = std::function<void()>;
 
-    Timer(TimerHandle handle, Time::TimeType time, TickFunc func, int loop = 0) : handle_(handle), dstTime_(time), func_(func), loop_(loop) { }
+    Timer(TimerHandle handle, TimeType time, TickFunc func, int loop = 0) : handle_(handle), dstTime_(time), func_(func), loop_(loop) { }
 
     Timer(const Timer&) = delete;
     Timer& operator=(const Timer&) = delete;
@@ -86,8 +88,8 @@ private:
     TickFunc func_ = nullptr;
     int loop_ = 0;
     bool isTicking_ = false;
-    Time::TimeType curTime_{};
-    Time::TimeType dstTime_;
+    TimeType curTime_{};
+    TimeType dstTime_;
 };
 
 class [[refl, luabind(res)]] TimerManager : public ResourceManager<Timer> {
@@ -95,7 +97,7 @@ public:
     static void UpdateSystem(ecs::Commands&, ecs::Querier, ecs::Resources,
                         ecs::Events&);
 
-    TimerHandle Create(Time::TimeType time, Timer::TickFunc func);
+    TimerHandle Create(TimeType time, TickFunc func);
 };
 
 //! @}

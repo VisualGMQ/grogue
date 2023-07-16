@@ -9,17 +9,9 @@
 
 #include "log.hpp"
 #include "sparse_sets.hpp"
-#include "luabind_tag.hpp"
 
 #define assertm(msg, expr) assert(((void)msg, (expr)))
 
-// fwd declarea luabind relate class
-namespace [[refl, luabind]] {
-    class CommandsWrapper;
-    class QuerierWrapper;
-    class ResourcesWrapper;
-    class EventsWrapper;
-}
 
 namespace ecs {  // fwd declare
 

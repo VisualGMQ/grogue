@@ -3,15 +3,16 @@
 #include "core/pch.hpp"
 #include "app/input.hpp"
 
-struct [[refl, luabind]] InputActionState final {
-    enum State {
-        Unknown,
-        Pressed,
-        Pressing,
-        Released,
-        Releasing,
-    };
+enum State {
+    Unknown,
+    Pressed,
+    Pressing,
+    Released,
+    Releasing,
+};
 
+struct [[refl, luabind]] InputActionState final {
+    
     [[luanobind]] InputActionState(State state): state_(state) {}
 
     bool IsPressed() const { return state_ == Pressed;}

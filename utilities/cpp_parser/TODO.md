@@ -1,6 +1,10 @@
 # 未完成的事情：
 
-* 含有右值引用参数的函数不应该被绑定到Lua（会产生编译错误）
 * overload函数加上attributes
-* 对Lua绑定的Querier/Commands/Resources/Events没有代码生成
-* 自动生成auto-parser代码
+* 对Lua绑定的Events没有代码生成
+* enum的反射，绑定enum
+* 生成Lua提示文件defs.lua
+
+# 缺陷，暂时可以将就，以后可以弥补上的
+
+* 类中类/枚举的解析和反射，绑定

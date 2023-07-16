@@ -27,7 +27,7 @@ void LoadResourceSystem(ecs::Commands& cmd, ecs::Resources resources) {
 void InitPhysicsSystem(ecs::Resources res) {
     auto& physicWorld = res.Get<physic::PhysicWorld>();
     physicWorld.forceGenerators.push_back(
-        [](physic::Particle& p, Time::TimeType) {
+        [](physic::Particle& p, TimeType) {
             if (p.vel.LengthSqrd() > 0.000001) {
                 constexpr float FrictionFactor = 6.0;
                 p.force +=
@@ -65,7 +65,7 @@ void ReadConfigSystem(ecs::Commands& cmd, ecs::Resources resources) {
     auto& tilesheetMgr = resources.Get<TilesheetManager>();
     GameConfig config(luaMgr, fontMgr, tilesheetMgr, "./resources/config/",
                       "./resources/");
-    if (!config) {
+    if (!config.Valid()) {
         LOGF("Load config in ./resources/config failed!!! Game can't start!!!");
         exit(1);
     }

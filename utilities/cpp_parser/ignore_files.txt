@@ -8,5 +8,6 @@
 ./include/core/refl.hpp
 ./include/core/debugbreak.hpp
 ./include/core/utility.hpp
-./include/script/luabind.hpp"
-./include/script/script.hpp"
+./include/core/serialize.hpp
+./include/script/luabind.hpp
+./include/script/script.hpp

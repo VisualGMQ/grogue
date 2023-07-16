@@ -13,6 +13,12 @@
 class Image;
 class ImageManager;
 
+// class Window;
+// class FontManager;
+// class SpriteBundle;
+// class SpriteBundleSolitary;
+// class Transform;
+
 class [[refl, luabind(res)]] Renderer final {
 public:
     friend class Image;

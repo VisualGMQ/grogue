@@ -132,7 +132,7 @@ float NearestPtOnLine(const math::Vector2& p, const math::Vector2& s,
 //! @brief update one particle
 //! @param particle
 //! @param elapse elapsed time, in milliseconds
-void updateOneParticle(Particle& particle, Time::TimeType elapse, std::vector<ForceGenerator>& forceGens) {
+void updateOneParticle(Particle& particle, TimeType elapse, std::vector<ForceGenerator>& forceGens) {
     double t = elapse / 1000.0;
 
     for (auto& generator : forceGens) {

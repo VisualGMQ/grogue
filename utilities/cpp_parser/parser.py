@@ -10,6 +10,8 @@ class LuabindAttrs:
         self.is_nobind = False
         self.change_name = None
 
+GenerateFilenames = ["ecs_wrapper.hpp", "refl-codes.hpp", "luabind.cpp", "ecs_wrapper_refl.hpp"]
+
 def ParseAllFileUnderDir(dirname: str, ignore_filenames: list[str], func) -> list[chp.CodeInfo]:
     codeinfos = []
     for dirpath, _, filenames in os.walk(dirname):
@@ -36,11 +38,11 @@ class ECSWrapperCodes:
         self.querier_has = ""
         self.resource_get = ""
 
-def GenerateCode(code_info: list[chp.CodeInfo]) -> tuple[str, str]:
-    refl_code = GenerateClassBindCode(code_info)
+def GenerateCode(code_info: list[chp.CodeInfo]) -> tuple[dict[str, str], str]:
+    refl_code_dict = GenerateClassBindCode(code_info)
     classbind_code = GenerateLuabindCode(code_info)
     
-    return refl_code, classbind_code
+    return refl_code_dict, classbind_code
 
 def GenerateECSWrapperCode(code_info: list[chp.CodeInfo]) -> ECSWrapperCodes:
     wrapper_codes = ECSWrapperCodes()
@@ -83,39 +85,39 @@ def GenerateOneClassWrapperCode(classinfo: chp.Class, refl_attrs: LuabindAttrs) 
     return wrapper_code
 
 
-def GenerateClassBindCode(code_info: list[chp.CodeInfo]) -> str:
-    result = ""
-    header_files = "#include \"core/refl.hpp\""
+def GenerateClassBindCode(code_info: list[chp.CodeInfo]) -> dict[str, str]:
+    code_dict = {}
     for info in code_info:
-        header_files += "\n#include \"{}\"".format(info.file.replace("./include/", ""))
         for class_info in info.classes:
             code = GenerateReflClassCode(class_info)
-            result += code + "\n"
-    return header_files + "\n" + result
+            if class_info.filename in code_dict.keys():
+                code_dict[class_info.filename] += "\n" + code
+            else:
+                code_dict[class_info.filename] = '#pragma once\n#include "core/refl.hpp"\n#include "{}"' \
+                                                    .format(class_info.filename
+                                                                .replace("./include/", '')
+                                                                .replace(output_dir, '')) + '\n' + code
+        
+    return code_dict
 
 def GenerateLuabindCode(code_info: list[chp.CodeInfo]) -> str:
-    luabind_code = """
-#include \"script/luabind.hpp\"
-#include \"refl-codes.hpp\"
-
-void BindLua(sol::state& lua) {{
-{}
-}}
-"""
-
     classbind_code = ""
     for info in code_info:
         for clazz in info.classes:
             attr = ConvertLuabindAttr2ReflAttr(clazz.attributes, False)
+            class_name_with_namespace = GetNamespacePrefixStr(clazz.namespaces) + clazz.name
             bind_name = clazz.name
             if attr.change_name is not None:
                 bind_name = attr.change_name[0]
             if not attr.is_nobind:
-                classbind_code += "\tluabind::BindClass<{}>(lua, \"{}\")\n".format(clazz.name, bind_name)
+                classbind_code += "\tluabind::BindClass<{}>(lua, \"{}\");\n".format(class_name_with_namespace, bind_name)
 
     global_func_code = GenerateGlobalFunctionBindCode(code_info)
 
-    return luabind_code.format(classbind_code + "\n" + global_func_code)
+    return classbind_code + "\n" + global_func_code
+
+def GetNamespacePrefixStr(namespaces: list[str]) -> str:
+    return "::" if len(namespaces) == 0 else '::{}::'.format('::'.join(namespaces))
 
 def ConvertLuabindAttr2ReflAttr(attrs: list[str], default_bind: bool) -> LuabindAttrs:
     bind_attrs = LuabindAttrs();
@@ -134,7 +136,7 @@ def ConvertLuabindAttr2ReflAttr(attrs: list[str], default_bind: bool) -> Luabind
             bind_attrs.is_nobind = False
             if content[0] == '"':
                 bind_attrs.change_name = [content[1 : len(content) - 1], None]
-                bind_attrs.change_name[1] = "LuaBindName<char, {}>".format(', '.join(list(map(lambda c: "'{}'".format(c), bind_attrs.change_name[0]))))
+                bind_attrs.change_name[1] = "luabind::LuaBindName<char, {}>".format(', '.join(list(map(lambda c: "'{}'".format(c), bind_attrs.change_name[0]))))
             else:
                 if content == "comp":
                     bind_attrs.is_component = True
@@ -148,47 +150,67 @@ def ConvertBindAttr2Str(attr: LuabindAttrs) -> str:
     if attr.change_name is not None:
         result += attr.change_name[1] + ", "
     if attr.is_nobind:
-        result += "LuaNoBind, "
-    return result
+        result += "luabind::LuaNoBind, "
+    return result[:-2] if len(result) > 0 else result
 
 def GenerateReflClassCode(clazz: chp.Class) -> str:
     fmt_code = """
+{}
+
 ReflClass({}) {{
     Constructors({})
     Fields({})
 }};
+
 """
+
+    clazz_name = GetNamespacePrefixStr(clazz.namespaces) + clazz.name
 
     constructor_code = ""
     for ctor in clazz.constructors:
+        if ctor.is_deleted_method:
+            continue
         params = ', '.join(list(map(lambda param: param[0], ctor.parameters)))
-        code = "{}({})".format(ctor.class_name, params)
+        code = "{}({})".format(clazz_name, params)
         constructor_code += code + ', '
+    constructor_code = constructor_code[0: -2]
 
     fields_code = ""
     for var in clazz.variables:
+        if var.is_static:   # FIXME: currently can't reflect static variable
+            continue
         if len(var.attributes) > 0:
             attr_str = ConvertBindAttr2Str(ConvertLuabindAttr2ReflAttr(var.attributes, True))
-            fields_code += "\n\t\tAttrField(Attrs({}), \"{}\", &{}::{}),".format(attr_str, var.name, clazz.name, var.name)
+            fields_code += "\n\t\tAttrField(Attrs({}), \"{}\", &{}::{}),".format(attr_str, var.name, clazz_name, var.name)
         else:
-            fields_code += "\n\t\tField(\"{}\", &{}::{}),".format(var.name, clazz.name, var.name)
+            fields_code += "\n\t\tField(\"{}\", &{}::{}),".format(var.name, clazz_name, var.name)
+
     for func_list in clazz.functions:
         if len(func_list) == 1:
             func = func_list[0]
+            if func.is_deleted_method:
+                continue
             if len(func.attributes) > 0:
                 attr_str = ConvertBindAttr2Str(ConvertLuabindAttr2ReflAttr(func.attributes, True))
-                fields_code += "\n\t\tAttrField(Attrs({}), \"{}\", &{}::{}),".format(attr_str, func.name, clazz.name, func.name)
+                fields_code += "\n\t\tAttrField(Attrs({}), \"{}\", &{}::{}),".format(attr_str, func.name, clazz_name, func.name)
             else:
-                fields_code += "\n\t\tField(\"{}\", {}{}::{}),".format(func.name, '&' if not func.is_static else '', clazz.name, func.name)
+                fields_code += "\n\t\tField(\"{}\", {}{}::{}),".format(func.name, '&' if not func.is_static else '', clazz_name, func.name)
         else:
-            pointer = "&{}::{}".format(clazz.name, func_list[0].name)
-            fields_code += "\n\t\tOverload(\"{}\", {})".format(func_list[0].name,
-                            ', '.join(map(lambda func: "static_cast<{}({}::*)({})>({})".format(func.return_type, clazz.name, 
-                                ','.join(list(map(lambda param: param[0], func.parameters)))
-                                , pointer), func_list)
-                            ))
+            if func_list[0].is_static: # FIXME: can't relfection static overload function
+                continue
+            pointer = "&{}::{}".format(clazz_name, func_list[0].name)
+            fields_code += "\n\t\tOverload(\"{}\", {}),".format(func_list[0].name,
+                            ', '.join(['static_cast<{}({}::*)({}){}>({})'.format(
+                                func.return_type, clazz_name,
+                                ','.join([param[0] for param in func.parameters]),
+                                'const' if func.is_const_method else '',
+                                pointer
+                            ) for func in func_list if not func.is_deleted_method]))
     
-    return fmt_code.format(clazz.name, constructor_code, fields_code)
+    return fmt_code.format('' if len(clazz.namespaces) == 0 else 'using namespace ::{};'.format('::'.join(clazz.namespaces)),
+                           clazz_name,
+                           constructor_code,
+                           fields_code[:-1])
 
 def GenerateGlobalFunctionBindCode(code_info: list[chp.CodeInfo]) -> str:
     result = ""
@@ -196,13 +218,13 @@ def GenerateGlobalFunctionBindCode(code_info: list[chp.CodeInfo]) -> str:
         for func_list in info.global_functions:
             if len(func_list) == 1:
                 func = func_list[0]
-                result += "\tlua[\"{}\"] = &{}\n".format(func.name, func.name)
+                result += "\tlua[\"{}\"] = &{};\n".format(func.name, func.name)
             else:
-                result += "\tlua[\"{}\"] = sol::overload({})\n".format(func_list[0].name,
+                result += "\tlua[\"{}\"] = sol::overload({});\n".format(func_list[0].name,
                                                                      ','.join(map(lambda func: "static_cast<{}(*)({})>(&{})".format(
                                                                         func.return_type,
                                                                         ','.join(list(map(lambda param: param[0], func.parameters))),
-                                                                        '::{}::{}'.format('::'.join(func.namespaces), func.name)
+                                                                        GetNamespacePrefixStr(func.namespaces) + func.name
                                                                      ), func_list)))
     return result
 
@@ -211,11 +233,12 @@ def tryCreateDir(dir: str):
         os.mkdir(dir)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("please give me a output directory")
-        sys.exit(1)
+    # if len(sys.argv) != 2:
+    #     print("please give me a output directory")
+    #     sys.exit(1)
 
-    output_dir = sys.argv[1]
+    # output_dir = sys.argv[1]
+    output_dir = "./cmake-build/gen_codes"
     if output_dir[-1] != '/' and output_dir[-1] != '\\':
         output_dir += '/'
     print("output directory: {}".format(output_dir))
@@ -235,34 +258,68 @@ if __name__ == '__main__':
 
     tryCreateDir(output_dir)
 
-    print("generating ecs wrapper code...")
+    # wrapper_code_info = GetCodeInfo(output_dir + "ecs_wrapper.hpp")
+    # codeinfos.append(wrapper_code_info)
+
+    # generate reflection codes
+    print('generating refl codes...')
+    refl_code_dict, luabind_code = GenerateCode(codeinfos)
+
+    convertPath2Relate = lambda filename: filename.replace('./include/', '').replace(output_dir, '').replace("/", "_").replace("\\", "_").replace('.hpp', '') + '_refl.hpp'
+
+    all_include_filenames = []
+
+    for filename, code in refl_code_dict.items():
+        filename = convertPath2Relate(filename)
+        all_include_filenames.append(filename)
+        with open(output_dir + filename, "w+") as f:
+            f.write(code)
+
+    all_include_file_str = '\n'.join(['#include "{}"'.format(f) for f in all_include_filenames if f != "ecs_wrapper_refl.hpp"])
+
+    # generate 
     ecs_wrapper_code = GenerateECSWrapperCode(codeinfos)
+
+    # generate ecs wrapper code
+    print("generating ecs wrapper code...")
     template_code = ""
     with open("./utilities/cpp_parser/bind_template/ecs_wrapper.hpp", "r+") as f:
         template_code = f.read()
     with open(output_dir + "ecs_wrapper.hpp", "w+") as f:
-        template_code = template_code.replace('{{ DECL_ADD_COMP }}', ecs_wrapper_code.commands_add)
-        template_code = template_code.replace('{{ DECL_DESTROY_COMP }}', ecs_wrapper_code.commands_destroy)
-        template_code = template_code.replace('{{ DECL_RES }}', ecs_wrapper_code.resource_get)
-        template_code = template_code.replace('{{ DECL_QUERIER_QUERY }}', ecs_wrapper_code.querier_query)
-        template_code = template_code.replace('{{ DECL_QUERIER_GET }}', ecs_wrapper_code.querier_get)
-        template_code = template_code.replace('{{ DECL_QUERIER_HAS }}', ecs_wrapper_code.querier_has)
+        template_code = template_code.replace('{{ DECL_ADD_COMP }}', ecs_wrapper_code.commands_add) \
+                                     .replace('{{ DECL_DESTROY_COMP }}', ecs_wrapper_code.commands_destroy) \
+                                     .replace('{{ DECL_RES }}', ecs_wrapper_code.resource_get) \
+                                     .replace('{{ DECL_QUERIER_QUERY }}', ecs_wrapper_code.querier_query) \
+                                     .replace('{{ DECL_QUERIER_GET }}', ecs_wrapper_code.querier_get) \
+                                     .replace('{{ DECL_QUERIER_HAS }}', ecs_wrapper_code.querier_has) \
+                                     .replace('{{ INCLUDE_FILES }}', all_include_file_str)
         f.write(template_code)   
 
-    # parse generated esc wrapper code
+    # generate ecs wrapper code
     wrapper_code_info = GetCodeInfo(output_dir + "ecs_wrapper.hpp")
-    codeinfos.append(wrapper_code_info)
+    wrapper_code_refl_code, ecs_luabind_code = GenerateCode([wrapper_code_info])
+    for filename, code in wrapper_code_refl_code.items():
+        filename = convertPath2Relate(filename)
+        all_include_filenames.append(filename)
+        with open(output_dir + filename, "w+") as f:
+            f.write(code)
 
-    print('generating refl codes...')
-    refl_code, luabind_code = GenerateCode(codeinfos)
-    with open(output_dir + "refl-codes.hpp", "w+") as f:
-        f.write(refl_code)
+    luabind_code += '\n' + ecs_luabind_code
 
+    # generate luabind codes
     print('generating luabind codes...')
+
+    bind_code = """
+#pragma once
+#include \"script/luabind.hpp\"
+#include \"ecs_wrapper_refl.hpp\"
+{}
+
+void BindLua(sol::state& lua) {{
+{}
+}}
+"""
+
+    luabind_code = bind_code.format(all_include_file_str, luabind_code)
     with open(output_dir + "luabind.cpp", "w+") as f:
         f.write(luabind_code)
-
-    # print('generating auto-parse codes...')
-    # code = GenerateParserCode(CodeInfos)
-    # with open("./auto-parse/parser.hpp", "w+") as f:
-    #     f.write(code)

@@ -1,26 +1,5 @@
 #include "app/animation.hpp"
-
-// data for config parse
-struct FrameConfig final {
-    uint32_t time;
-    uint32_t value;
-    std::string interpolation;
-};
-
-/*
-ReflRegist(refl::Class<FrameConfig>("FrameConfig")
-               .Member(&FrameConfig::time, "time")
-               .Member(&FrameConfig::value, "value")
-               .Member(&FrameConfig::interpolation, "interpolation"))
-*/
-
-// clang-format off
-DeclareParseFunc(FrameConfig)
-    Field(time, uint32_t)
-    Field(value, uint32_t)
-    Field(interpolation, std::string)
-EndDeclareParseFunc()
-// clang-format on
+#include "app_animation_refl.hpp"
 
 AnimatedClip<float> parseAnimFromArray(const sol::table& table) {
     std::vector<Frame<float>> frames;
@@ -30,7 +9,7 @@ AnimatedClip<float> parseAnimFromArray(const sol::table& table) {
             return nullptr;
         }
 
-        auto config = ParseFrameConfig(frame.second.as<sol::table>());
+        auto config = serialize::DeserializeFromLua<FrameConfig>(frame.second.as<sol::table>());
         InterpFunc<float> func;
         if (config.value().interpolation == "linear") {
             func = math::Lerp<float>;

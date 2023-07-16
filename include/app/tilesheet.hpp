@@ -4,16 +4,24 @@
 #include "app/lua.hpp"
 #include "core/pch.hpp"
 #include "app/sprite.hpp"
-#include "app/config_parse.hpp"
+#include "app/fwd.hpp"
 
-template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-struct Fourway final {
-    static Fourway Zero() { return {0, 0, 0, 0}; };
+struct Margin final {
+    static Margin Zero() { return {0, 0, 0, 0}; };
 
-    T left, right, top, bottom;
+    uint32_t left, right, top, bottom;
 };
 
-using Margin = Fourway<uint32_t>;
+ReflClass(Margin) {
+    Constructors()
+    Fields(
+        Field("left", &Margin::left),
+        Field("right", &Margin::right),
+        Field("top", &Margin::top),
+        Field("bottom", &Margin::bottom)
+    )
+};
+
 
 struct [[refl, luabind]] Spacing final {
     uint32_t x, y;

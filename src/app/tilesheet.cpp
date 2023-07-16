@@ -1,52 +1,5 @@
 #include "app/tilesheet.hpp"
-
-/*
-ReflRegist(
-refl::Class<Margin>("Margin")
-    .Member(&Margin::top, "top")
-    .Member(&Margin::left, "left")
-    .Member(&Margin::right, "right")
-    .Member(&Margin::bottom, "bottom")
-)
-
-ReflRegist(
-refl::Class<Spacing>("Spacing")
-    .Member(&Spacing::x, "x")
-    .Member(&Spacing::y, "y")
-)
-
-ReflRegist(
-refl::Class<TilesheetConfig>("TilesheetDesc")
-    .Member(&TilesheetConfig::filename, "filename")
-    .Member(&TilesheetConfig::name, "name")
-    .Member(&TilesheetConfig::row, "row")
-    .Member(&TilesheetConfig::col, "col")
-    .Member(&TilesheetConfig::spacing, "spacing")
-)
-*/
-
-// clang-format off
-DeclareParseFunc(Margin)
-    Field(left, uint32_t)
-    Field(right, uint32_t)
-    Field(top, uint32_t)
-    Field(bottom, uint32_t)
-EndDeclareParseFunc()
-
-DeclareParseFunc(Spacing)
-    Field(x, uint32_t)
-    Field(y, uint32_t)
-EndDeclareParseFunc()
-
-DeclareParseFunc(TilesheetConfig)
-    Field(filename, std::string)
-    Field(name, std::string)
-    Field(row, uint32_t)
-    Field(col, uint32_t)
-    ObjField(margin, Margin)
-    ObjField(spacing, Spacing)
-EndDeclareParseFunc()
-// clang-format on
+#include "app_tilesheet_refl.hpp"
 
 Tilesheet Tilesheet::Null;
 
@@ -108,7 +61,7 @@ Tilesheet& TilesheetManager::LoadFromConfig(const std::string& configFilename) {
     auto lua = luaManager_->CreateSolitary(configFilename);
     auto table = lua.lua.get<sol::table>("Config");
 
-    auto config = ParseTilesheetConfig(table);
+    auto config = serialize::DeserializeFromLua<TilesheetConfig>(table);
 
     std::string filename = configFilename.substr(0, configFilename.find_last_of('/') + 1) + config.value().filename.substr(config.value().filename.find_last_of('/'));
 

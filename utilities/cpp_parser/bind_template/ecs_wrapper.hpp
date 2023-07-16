@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/ecs.hpp"
-#include "luabind/refl-codes.hpp"
+{{ INCLUDE_FILES }}
 
 #define DECL_CMDS_ADD_COMP(name, clazz) \
 void Add ## name (ecs::Entity entity, clazz & comp) { \
@@ -39,7 +39,7 @@ private:
 
 #define DECL_RES_GET(name, clazz) \
 clazz& Get ## name () { \
-    res_.Get<clazz>(); \
+    return res_.Get<clazz>(); \
 }
 
 class [[refl, luabind]] ResourcesWrapper final {
@@ -57,31 +57,39 @@ private:
 
 #define DECL_QUERIER_QUERY(name, clazz) \
 std::vector<ecs::Entity> Query ## name () { \
-    return res_.Query<clazz>(); \
+    return querier_.Query<clazz>(); \
 }
 
 #define DECL_QUERIER_GET(name, clazz) \
 auto& Get ## name (ecs::Entity entity) { \
-    return res_.Get<clazz>(entity); \
+    return querier_.Get<clazz>(entity); \
 }
 
 #define DECL_QUERIER_HAS(name, clazz) \
 bool Has ## name (ecs::Entity entity) { \
-    return res_.Has<clazz>(entity); \
+    return querier_.Has<clazz>(entity); \
 }
 
-class [[refl, luabind]] QueriesWrapper final {
+class [[refl, luabind]] QuerierWrapper final {
 public:
-    [[norefl]] QueriesWrapper(ecs::Queries& queries): queries_(queries) {}
+    [[norefl]] QuerierWrapper(ecs::Querier& querier): querier_(querier) {}
 
     {{ DECL_QUERIER_QUERY }}
     {{ DECL_QUERIER_GET }}
     {{ DECL_QUERIER_HAS }}
 
 private:
-    ecs::Queries& queries_;
+    ecs::Querier& querier_;
 };
 
 #undef DECL_QUERIER_QUERY
 #undef DECL_QUERIER_GET
 #undef DECL_QUERIER_HAS
+
+class [[refl, luabind]] EventsWrapper final {
+public:
+    [[norefl]] EventsWrapper(ecs::Events& events): events_(events) {}
+
+private:
+    ecs::Events& events_;
+};

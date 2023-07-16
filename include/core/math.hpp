@@ -95,6 +95,8 @@ public:
 
     Vector3 operator*(float k) const { return Vector3(k * x, k * y, k * z); }
 
+    Vector3 operator*(const Vector3& v) const { return {v.x * x, v.y * y, v.z * z}; }
+
     Vector3 operator/(float k) const {
         assert(std::numeric_limits<float>::epsilon() < std::abs(k));
         float a = 1.0f / k;
@@ -136,8 +138,6 @@ public:
         this->y = y;
         this->z = z;
     }
-
-    Vector3 operator*(const Vector3& v) { return {v.x * x, v.y * y, v.z * z}; }
 
     //! @brief normalize vector itself. Use global `Normalize` function to return a normalized vector
     //! @sa Normalize

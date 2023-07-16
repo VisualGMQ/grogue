@@ -1,22 +1,23 @@
 #include "script/script.hpp"
-#include "luabind.hpp"
+#include "script/luabind.hpp"
+#include "ecs_wrapper.hpp"
 
-extern void BindLua(LuaScript&);
+extern void BindLua(sol::state&);
 
 Script Script::Create(LuaManager& mgr, const std::string& filename) {
     auto lua = mgr.CreateSolitary();
     lua.lua.do_string("package.path = package.path .. \";./resources/script/defs.lua\"");
-    BindLua(lua);
+    BindLua(lua.lua);
     lua.lua.do_file(filename);
     return std::move(Script{std::make_shared<LuaScript>(std::move(lua))});
 }
 
 void runOneScript(ecs::Entity entity, ecs::Commands& cmds, Script& script, ecs::Resources res, ecs::Querier querier, ecs::Events& events) {
     if (script.work) {
-        lua_bind::ResourcesWrapper luaRes(res);
-        lua_bind::CommandsWrapper luaCmds(cmds);
-        lua_bind::QuerierWrapper luaQuerier(querier);
-        lua_bind::EventsWrapper luaEvents(events);
+        ::ResourcesWrapper luaRes(res);
+        ::CommandsWrapper luaCmds(cmds);
+        ::QuerierWrapper luaQuerier(querier);
+        ::EventsWrapper luaEvents(events);
         if (!script.inited) {
             script.inited = true;
             auto func = script.lua->lua["Startup"];

@@ -6,6 +6,7 @@
 #include "app/transform.hpp"
 #include "app/scene.hpp"
 #include "app/systems.hpp"
+#include "core/math.hpp"
 
 namespace physic {
 
@@ -29,14 +30,14 @@ struct [[refl, luabind(comp)]] RigidBody final {
     float angVel;   //!< @brief angular velocity
 };
 
-enum ShapeType {
+enum [[refl]] ShapeType {
     ShapeAABB,
     ShapeCircle,
 };
 
 struct [[refl, luabind]] Shape {
-    Shape(ShapeType type): type_(type) {}
-    Shape(ShapeType type, const math::Vector2& offset): type_(type), offset(offset) {}
+    Shape(physic::ShapeType type): type_(type) {}
+    Shape(physic::ShapeType type, const math::Vector2& offset): type_(type), offset(offset) {}
     virtual ~Shape() = default;
 
     math::Vector2 GetCenter() const { return center; }
@@ -130,7 +131,7 @@ struct [[refl, luabind(comp)]] CollideShape final {
     CollideUsage usage = CollideUsage::Collide;
 };
 
-using ForceGenerator = std::function<void(Particle&, Time::TimeType)>;
+using ForceGenerator = std::function<void(Particle&, TimeType)>;
 
 class Grid final {
 public:

@@ -4,7 +4,6 @@
 #include "app/lua.hpp"
 #include "app/sprite.hpp"
 #include "app/timer.hpp"
-#include "app/config_parse.hpp"
 #include "core/ecs.hpp"
 #include "core/math.hpp"
 #include "core/pch.hpp"
@@ -25,22 +24,22 @@ public:
     friend class AnimPlayer;
 
     template <typename U>
-    friend Frame<U> CreateBasicPropFrame(U, Time::TimeType, InterpFunc<U>);
+    friend Frame<U> CreateBasicPropFrame(U, TimeType, InterpFunc<U>);
 
-    friend Frame<Tile> CreateTileFrame(Time::TimeType time, const Tile& tile);
+    friend Frame<Tile> CreateTileFrame(TimeType time, const Tile& tile);
 
     auto Duration() const { return time_; }
 
     const T& Value() const { return value_; }
 
 private:
-    Time::TimeType time_;
+    TimeType time_;
     T value_;
     InterpFunc<T> interpolation_;
 };
 
 template <typename T>
-Frame<T> CreateBasicPropFrame(T value, Time::TimeType time,
+Frame<T> CreateBasicPropFrame(T value, TimeType time,
                               InterpFunc<T> func = math::Lerp<T>) {
     Frame<T> frame;
     frame.time_ = time;
@@ -167,7 +166,7 @@ public:
 private:
     T property_;
     AnimatedClip<T> clip_;
-    Time::TimeType curTime_ = 0;
+    TimeType curTime_ = 0;
     uint32_t frameIndex_ = 0;
     bool isPlaying_ = false;
     int loop_ = 0;
@@ -275,4 +274,11 @@ private:
         }
         return true;
     }
+};
+
+// data for config parse
+struct [[refl]] FrameConfig final {
+    uint32_t time;
+    uint32_t value;
+    std::string interpolation;
 };

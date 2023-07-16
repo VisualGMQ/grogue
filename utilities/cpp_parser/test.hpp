@@ -34,6 +34,10 @@ public:
         // do stuff
     }
 
+    auto& GetPerson() const { return p; }
+
+    auto& operator=(const Room&) = delete;
+
     static Person p;
 
     static constexpr int ConstInst = 123;

@@ -8,19 +8,22 @@ class ACCESS_TYPE:
     PRIVATE = 2
 
 class Constructor:
-    def __init__(self, class_name, parameters, attrs):
+    def __init__(self, class_name, parameters, attrs, is_deleted_method: bool):
         self.class_name = class_name
         self.parameters = parameters
         self.attrs = attrs
+        self.is_deleted_method = is_deleted_method
 
 class Function:
-    def __init__(self, name: str, return_type: str, parameters: list[tuple[str, str]], is_static: bool, attrs: list[str], namespaces: list[str]):
+    def __init__(self, name: str, return_type: str, parameters: list[tuple[str, str]], is_static: bool, is_const_method: bool, attrs: list[str], namespaces: list[str], is_deleted_method: bool):
         self.name = name
         self.return_type = return_type
         self.parameters = parameters
         self.is_static = is_static
         self.attributes = attrs
         self.namespaces = namespaces
+        self.is_const_method = is_const_method
+        self.is_deleted_method = is_deleted_method
 
 class Variable:
     def __init__(self, ty: str, name: str, default_value: str | None, is_static: bool, is_constexpr: bool, attrs: list[str]):
@@ -34,12 +37,14 @@ class Variable:
 class Class:
     def __init__(self,
                 name: str,
+                filename: str,
                 variables: list[Variable],
                 constructors: list[Constructor],
                 functions: list[list[Function]],
                 namespaces: list[str],
                 attribtues: list[str]) -> None:
         self.name = name
+        self.filename = filename
         self.variables = variables
         self.constructors = constructors
         self.functions = functions
@@ -91,7 +96,7 @@ def ParseConstructor(node: clang.cindex.Cursor, source_code: list[str]) -> Const
         arg_name = arg_node.spelling
         parameters.append((arg_type, arg_name))
 
-    return Constructor(name, parameters, attributes)
+    return Constructor(name, parameters, attributes, node.is_deleted_method())
 
 def ParseMemberFunction(node: clang.cindex.Cursor, source_code: list[str]) -> Function | None:
     if node.is_pure_virtual_method():
@@ -103,23 +108,29 @@ def ParseMemberFunction(node: clang.cindex.Cursor, source_code: list[str]) -> Fu
 
     name = node.spelling
     return_type = node.result_type.spelling
+    node.is_const_method()
     parameters = []
     is_static = bool(node.is_static_method())
+    is_const_method = node.is_const_method()
 
     for arg_node in node.get_arguments():
         arg_type = arg_node.type.spelling
         arg_name = arg_node.spelling
         parameters.append((arg_type, arg_name))
 
-    return Function(name, return_type, parameters, is_static, attributes, [])
+    return Function(name, return_type, parameters, is_static, is_const_method, attributes, [], node.is_deleted_method())
 
-def ParseMemberVariable(node: clang.cindex.Cursor, source_code: list[str]) -> Variable | None:
+def ParseMemberVariable(node: clang.cindex.Cursor, source_code: list[str], filename: str) -> Variable | None:
     attributes = ParseAttrsFromSourceCode(node)
     if 'norefl' in attributes:
         return None
 
     var_type = node.type.spelling
     var_name = node.spelling
+
+    if var_type.strip()[-1] == '&': # any reference type can't has a member pointer
+        return None
+
     var_default_value = None
     is_static = node.storage_class == clang.cindex.StorageClass.STATIC
 
@@ -131,7 +142,10 @@ def ParseMemberVariable(node: clang.cindex.Cursor, source_code: list[str]) -> Va
 
     return Variable(var_type, var_name, var_default_value, is_static, is_constexpr, attributes)
 
-def ExtractClass(class_decl: clang.cindex.Cursor, namespaces: list[str], source_code: list[str]) -> Class | None:
+def ExtractClass(filename: str, class_decl: clang.cindex.Cursor, namespaces: list[str], source_code: list[str]) -> Class | None:
+    if class_decl.location.file.name.find(filename) == -1:
+        return None
+
     class_name = class_decl.spelling
 
     if class_decl.availability != clang.cindex.AvailabilityKind.AVAILABLE:
@@ -167,14 +181,14 @@ def ExtractClass(class_decl: clang.cindex.Cursor, namespaces: list[str], source_
                     functions.append([function])
         elif node.kind == clang.cindex.CursorKind.VAR_DECL or \
              node.kind == clang.cindex.CursorKind.FIELD_DECL:
-            variable = ParseMemberVariable(node, source_code)
+            variable = ParseMemberVariable(node, source_code, filename)
             if variable is not None:
                 variables.append(variable)
 
-    return Class(class_name, variables, constructors, functions, copy.deepcopy(namespaces), attributes)
+    return Class(class_name, filename, variables, constructors, functions, copy.deepcopy(namespaces), attributes)
 
-def ExtractGlobalFunction(node: clang.cindex.Cursor, namespaces: list[str], source_code: list[str]) -> Function | None:
-    if node.is_pure_virtual_method():
+def ExtractGlobalFunction(node: clang.cindex.Cursor, namespaces: list[str], source_code: list[str], filename: str) -> Function | None:
+    if node.is_pure_virtual_method() or node.location.file.name.find(filename) == -1:
         return None
 
     # parse attributes:
@@ -188,10 +202,14 @@ def ExtractGlobalFunction(node: clang.cindex.Cursor, namespaces: list[str], sour
     return_type = node.result_type.spelling
     parameters = [(p.type.spelling, p.spelling) for p in node.get_arguments()]
     is_static = node.storage_class == clang.cindex.StorageClass.STATIC
+    is_const_method = node.is_const_method()
 
-    return Function(name, return_type, parameters, is_static, attributes, namespaces)
+    return Function(name, return_type, parameters, is_static, is_const_method, attributes, namespaces, False)
 
-def ExtractGlobalEnum(node: clang.cindex.Cursor, namespaces: list[str], source_code: list[str]) -> Enum:
+def ExtractGlobalEnum(node: clang.cindex.Cursor, namespaces: list[str], source_code: list[str], filename: str) -> Enum | None:
+    if node.location.file.name.find(filename) == -1:
+        return None
+
     name = node.spelling
     enum_type = node.enum_type.spelling
 
@@ -216,11 +234,11 @@ def RecurseExtractCodeInfo(parent: clang.cindex.Cursor, source_code, filename: s
             new_namespaces.append(node.spelling)
             RecurseExtractCodeInfo(node, source_code, filename, copy.deepcopy(new_namespaces), classes, global_functions, enums)
         elif node.kind == clang.cindex.CursorKind.CLASS_DECL or node.kind == clang.cindex.CursorKind.STRUCT_DECL:
-            classinfo = ExtractClass(node, copy.deepcopy(namespaces), source_code)
+            classinfo = ExtractClass(filename, node, copy.deepcopy(namespaces), source_code)
             if classinfo is not None:
                 classes.append(classinfo)
         elif node.kind == clang.cindex.CursorKind.FUNCTION_DECL:
-            function = ExtractGlobalFunction(node, copy.deepcopy(namespaces), source_code)
+            function = ExtractGlobalFunction(node, copy.deepcopy(namespaces), source_code, filename)
             if function is not None:
                 overload = findOverloadList(function.name, global_functions)
                 if overload is not None:
@@ -228,8 +246,9 @@ def RecurseExtractCodeInfo(parent: clang.cindex.Cursor, source_code, filename: s
                 else:
                     global_functions.append([function])
         elif node.kind == clang.cindex.CursorKind.ENUM_DECL:
-            enum = ExtractGlobalEnum(node, copy.deepcopy(namespaces), source_code)
-            enums.append(enum)
+            enum = ExtractGlobalEnum(node, copy.deepcopy(namespaces), source_code, filename)
+            if enum is not None:
+                enums.append(enum)
 
 def ExtractCodeInfoUnderNamespace(node, source_code: list[str], filename: str) -> CodeInfo:
     classes = []
@@ -240,7 +259,15 @@ def ExtractCodeInfoUnderNamespace(node, source_code: list[str], filename: str) -
 
 def ParseHeaderFile(filename: str) -> CodeInfo:
     index = clang.cindex.Index.create()
-    tu = index.parse(filename, args=['-std=c++17'])
+    tu = index.parse(filename, args=['-std=c++17',
+                                    '-I./include',
+                                    # '-ID:/Code/grogue/3rdlibs/sol',
+                                    # '-ID:/Code/grogue/3rdlibs/lua/include',
+                                    # '-ID:/Code/3rdlibs/SDL2-2.0.22-VC/include',
+                                    # '-ID:/Code/3rdlibs/SDL2_ttf-2.20.0-VC/include',
+                                    # '-ID:/Code/3rdlibs/SDL2_mixer-2.6.2-VC/include',
+                                    # '-ID:/Code/3rdlibs/SDL2_image-2.6.0-VC/include',
+                                    ])
     source_code = ''
     with open(tu.spelling) as f:
         source_code = f.readlines()
@@ -256,6 +283,7 @@ if __name__ == '__main__':
     functions = codeinfo.global_functions
 
     for clazz in classes:
+        print("class filename: ", clazz.filename)
         print("functions:")
         for func_list in clazz.functions:
             if len(func_list) == 1:

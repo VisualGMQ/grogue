@@ -91,9 +91,12 @@ set(GROGUELIB_NAME grogue_game)
 aux_source_directory(src/core LOWLEVEL_SRC)
 aux_source_directory(src/app  LOWLEVEL_SRC)
 
-add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CPP_INCLUDE_FILES})
+set(CODE_GENERATE_DIR ${CMAKE_BINARY_DIR}/gen_codes)
+file(GLOB GENERATED_FILES ${CODE_GENERATE_DIR}/*.hpp ${CODE_GENERATE_DIR}/*.cpp)
 
-target_include_directories(${LOWLEVEL_NAME} PUBLIC include)
+add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CPP_INCLUDE_FILES} ${GENERATED_FILES})
+
+target_include_directories(${LOWLEVEL_NAME} PUBLIC include ${CODE_GENERATE_DIR})
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
 if (MSVC)
     target_compile_options(${LOWLEVEL_NAME} PUBLIC /bigobj)
@@ -125,10 +128,10 @@ add_library(${GAMELIB_NAME} STATIC ${GAMELIB_SRC})
 target_link_libraries(${GAMELIB_NAME} PUBLIC ${LOWLEVEL_NAME})
 
 # compile lua bind code
+
 aux_source_directory(src/script SCRIPT_SRC)
-add_library(${LUABIND_NAME} STATIC ${CMAKE_BINARY_DIR}/luabind/luabind.hpp ${CMAKE_BINARY_DIR}/luabind/luabind.cpp ${SCRIPT_SRC})
+add_library(${LUABIND_NAME} STATIC ${GENERATED_FILES} ${SCRIPT_SRC})
 target_link_libraries(${LUABIND_NAME} PUBLIC ${LOWLEVEL_NAME} ${GAMELIB_NAME})
-target_include_directories(${LUABIND_NAME} PRIVATE ${CMAKE_BINARY_DIR}/luabind)
 
 # gather all library together
 add_library(${GROGUE_LOWLEVELLIB_NAME} INTERFACE)
@@ -143,7 +146,7 @@ target_link_libraries(${GAME_NAME} PRIVATE ${GROGUELIB_NAME})
 
 if (NOT EMSCRIPTEN)
     target_link_libraries(${LOWLEVEL_NAME} PUBLIC SDL2 SDL2_image SDL2_ttf SDL2_mixer lua sol2 expected)
-    CopyDefScript(${GAME_NAME})
+    # CopyDefScript(${GAME_NAME})
     CopyDLL(${GAME_NAME})
 else() # emscripten special link
     message("-- build for wasm")
