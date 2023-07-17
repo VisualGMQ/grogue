@@ -119,8 +119,7 @@ inline float NearestPtOnLine(const math::Vector2& p, const math::Vector2& s, con
 
 //! @brief component for collide shape
 
-[[refl, luabind]];
-enum CollideUsage {
+enum [[refl, luabind]] CollideUsage {
     Collide = 0x01,     //<! @brief collide with others, handle collide manifold
     Listener = 0x02,    //<! @brief collide with others without handle collide manifold
     Both = 0x03,

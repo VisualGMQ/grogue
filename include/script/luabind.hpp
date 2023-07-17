@@ -205,7 +205,12 @@ template <typename T>
 void BindClass(sol::state& lua, std::string_view name) {
     sol::usertype<T> usertype;
     using ClassInfo = refl::TypeInfo<T>;
-    usertype = std::move(_CtorBindHelper<T, typename refl::Filter<_HasNoRValueRefParamInFunc, typename ClassInfo::constructors>::type>::BindAndCreate(name, lua));
+    using filted_constructors = typename refl::Filter<_HasNoRValueRefParamInFunc, typename ClassInfo::constructors>::type;
+    if constexpr(filted_constructors::size > 0) {
+        usertype = std::move(_CtorBindHelper<T, filted_constructors>::BindAndCreate(name, lua));
+    } else {
+        usertype = std::move(lua.new_usertype<T>(name));
+    }
     _bindFields<ClassInfo>(usertype);
 }
 

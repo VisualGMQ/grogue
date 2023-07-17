@@ -61,6 +61,7 @@ message("fount pip3")
 
 # detect compile
 IsMSVCBackend(is_msvc_backend)
+IsMinGWBackend(is_mingw_backend)
 
 # run python parser to generate luabind codes
 file(GLOB_RECURSE CPP_INCLUDE_FILES ./include/*.hpp)
@@ -104,9 +105,10 @@ aux_source_directory(src/core LOWLEVEL_SRC)
 aux_source_directory(src/app  LOWLEVEL_SRC)
 
 set(CODE_GENERATE_DIR ${CMAKE_BINARY_DIR}/gen_codes)
-file(GLOB AUTO_GENERATED_FILES ${CODE_GENERATE_DIR}/*.hpp ${CODE_GENERATE_DIR}/*.cpp)
+# file(GLOB AUTO_GENERATED_FILES ${CODE_GENERATE_DIR}/*.hpp ${CODE_GENERATE_DIR}/*.cpp)
+file(GLOB AUTO_GENERATED_INCLUDES ${CODE_GENERATE_DIR}/*.hpp)
 
-add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CPP_INCLUDE_FILES} ${AUTO_GENERATED_FILES})
+add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CPP_INCLUDE_FILES} ${AUTO_GENERATED_INCLUDES})
 
 add_dependencies(${LOWLEVEL_NAME} GenerateCode)
 
@@ -115,7 +117,9 @@ target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
 if (is_msvc_backend)
     target_compile_options(${LOWLEVEL_NAME} PUBLIC /bigobj)
 else()
-    target_compile_options(${LOWLEVEL_NAME} PUBLIC "-Wa,-mbig-obj")
+    # if (is_mingw_backend)
+    #     target_compile_options(${LOWLEVEL_NAME} PUBLIC "-Wa,-mbig-obj")
+    # endif()
 endif()
 
 if (NOT is_mingw_backend)
@@ -144,9 +148,8 @@ add_library(${GAMELIB_NAME} STATIC ${GAMELIB_SRC})
 target_link_libraries(${GAMELIB_NAME} PUBLIC ${LOWLEVEL_NAME})
 
 # compile lua bind code
-
 aux_source_directory(src/script SCRIPT_SRC)
-add_library(${LUABIND_NAME} STATIC ${AUTO_GENERATED_FILES} ${SCRIPT_SRC})
+add_library(${LUABIND_NAME} STATIC ${CODE_GENERATE_DIR}/luabind.cpp ${SCRIPT_SRC})
 target_link_libraries(${LUABIND_NAME} PUBLIC ${LOWLEVEL_NAME} ${GAMELIB_NAME})
 
 # gather all library together

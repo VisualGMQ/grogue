@@ -2,8 +2,7 @@
 
 #include "core/math.hpp"
 
-[[refl, luabind]];
-enum Flip {
+enum [[refl, luabind]] Flip {
     None = 0,
     Horizontal = 0x01,
     Vertical = 0x02,

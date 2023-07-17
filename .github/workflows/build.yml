@@ -18,23 +18,20 @@ jobs:
 
       - name: Install Dependencies on Ubuntu
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install libsdl2-* python3
+        run: sudo apt-get update && sudo apt-get install build-essential  libsdl2-* python3 llvm 
       
       - name: Install Dependencies on MacOS
         if: runner.os == 'maxOS'
-        run: brew install sdl2 sdl2_mixer sdl2_net sdl2_image sdl2_ttf python3
+        run: brew install sdl2 sdl2_mixer sdl2_net sdl2_image sdl2_ttf python3 llvm
 
       - name: Pull Submodules
         run: git submodule update --init --recursive
 
-      - name: make cmake dir
-        run: mkir cmake-build
-
       - name: Configure CMake
-        run: cmake -S . -B cmake-build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        run: cmake -S . -B cmake-build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cmake --build cmake-build --config $BUILD_TYPE
+        run: cmake --build cmake-build
 
       - name: Run Unittests
         run: cd cmake-build && ctest -j8 -C Debug -L NoInteractive --output-on-failure 
@@ -55,7 +52,7 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: base-devel git gcc mingw-w64-${{matrix.arch}}-cmake mingw-w64-${{matrix.arch}}-gcc python3
+          install: base-devel git gcc mingw-w64-${{matrix.arch}}-cmake mingw-w64-${{matrix.arch}}-gcc python3 llvm
 
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -63,14 +60,8 @@ jobs:
       - name: Pull Submodules
         run: git submodule update --init --recursive
 
-      - name: create cmake dir
-        run: mkir cmake-build
-
-      - name: Parse Cpp Header
-        run: python ${{github.workspace}}/utilities/luabind_parser/parser.py cmake-build force
-
       - name: Configure CMake
-        run: cmake -S . -B cmake-build -DFETCH_SDL=ON -DAUTO_FORMAT=OFF
+        run: cmake -S . -B cmake-build -DFETCH_SDL=ON -DAUTO_FORMAT=OFF -DCMAKE_BUILD_TYPE=Release
 
       - name: Build CMake
         run: cmake --build cmake-build
