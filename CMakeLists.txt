@@ -59,19 +59,31 @@ endif()
 
 message("fount pip3")
 
+# detect compile
+IsMSVCBackend(is_msvc_backend)
+
 # run python parser to generate luabind codes
 file(GLOB_RECURSE CPP_INCLUDE_FILES ./include/*.hpp)
 
+# execute_process(
+#     COMMAND ${PIP} install -r ${CMAKE_SOURCE_DIR}/utilities/cpp_parser/requirements.txt
+#     COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/utilities/cpp_parser/parser.py "${CMAKE_BINARY_DIR}/gen_codes"
+#     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+# )
+
+set(WATCHED_FILE ${CPP_INCLUDE_FILES})
+set(GENERATED_FILE ${CMAKE_BINARY_DIR}/gen_codes/luabind.cpp)
+
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/luabind/luabind.hpp 
-    COMMAND ${PIP} install -r utilities/luabind_parser/requirements.txt
-    COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/utilities/luabind_parser/parser.py "${CMAKE_BINARY_DIR}"
+    OUTPUT ${GENERATED_FILE}
+    COMMAND ${PIP} install -r ${CMAKE_SOURCE_DIR}/utilities/cpp_parser/requirements.txt
+    COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/utilities/cpp_parser/parser.py ${CMAKE_BINARY_DIR}/gen_codes
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "run parser to parse C++ header file, generate lua bind codes"
-    DEPENDS ./utilities/luabind_parser/parser.py ${CPP_INCLUDE_FILES}
-    VERBATIM
+    DEPENDS ${WATCHED_FILE}
+    COMMENT "auto generate refl&luabind code..."
 )
 
+add_custom_target(GenerateCode DEPENDS ${GENERATED_FILE})
 
 # some useful utiilities
 include(cmake/copydll.cmake)
@@ -92,17 +104,21 @@ aux_source_directory(src/core LOWLEVEL_SRC)
 aux_source_directory(src/app  LOWLEVEL_SRC)
 
 set(CODE_GENERATE_DIR ${CMAKE_BINARY_DIR}/gen_codes)
-file(GLOB GENERATED_FILES ${CODE_GENERATE_DIR}/*.hpp ${CODE_GENERATE_DIR}/*.cpp)
+file(GLOB AUTO_GENERATED_FILES ${CODE_GENERATE_DIR}/*.hpp ${CODE_GENERATE_DIR}/*.cpp)
 
-add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CPP_INCLUDE_FILES} ${GENERATED_FILES})
+add_library(${LOWLEVEL_NAME} STATIC ${LOWLEVEL_SRC} ${CPP_INCLUDE_FILES} ${AUTO_GENERATED_FILES})
+
+add_dependencies(${LOWLEVEL_NAME} GenerateCode)
 
 target_include_directories(${LOWLEVEL_NAME} PUBLIC include ${CODE_GENERATE_DIR})
 target_compile_features(${LOWLEVEL_NAME} PUBLIC cxx_std_17)
-if (MSVC)
+if (is_msvc_backend)
     target_compile_options(${LOWLEVEL_NAME} PUBLIC /bigobj)
+else()
+    target_compile_options(${LOWLEVEL_NAME} PUBLIC "-Wa,-mbig-obj")
 endif()
 
-if (NOT ${is_mingw_backend})
+if (NOT is_mingw_backend)
     target_precompile_headers(${LOWLEVEL_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include/core/pch.hpp)
 endif()
 
@@ -130,7 +146,7 @@ target_link_libraries(${GAMELIB_NAME} PUBLIC ${LOWLEVEL_NAME})
 # compile lua bind code
 
 aux_source_directory(src/script SCRIPT_SRC)
-add_library(${LUABIND_NAME} STATIC ${GENERATED_FILES} ${SCRIPT_SRC})
+add_library(${LUABIND_NAME} STATIC ${AUTO_GENERATED_FILES} ${SCRIPT_SRC})
 target_link_libraries(${LUABIND_NAME} PUBLIC ${LOWLEVEL_NAME} ${GAMELIB_NAME})
 
 # gather all library together
@@ -210,8 +226,10 @@ if (NOT EMSCRIPTEN)
     include(InstallRequiredSystemLibraries)
     install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION ${INSTALL_DIR})
     if (WIN32) # it currently only works on Windows
-        install(FILES $<TARGET_FILE:SDL2::SDL2> $<TARGET_FILE:SDL2::IMAGE> $<TARGET_FILE:SDL2::TTF> $<TARGET_FILE:SDL2::MIXER>
-                DESTINATION ${INSTALL_DIR})
+        if (is_msvc_backend)
+            install(FILES $<TARGET_FILE:SDL2::SDL2> $<TARGET_FILE:SDL2::IMAGE> $<TARGET_FILE:SDL2::TTF> $<TARGET_FILE:SDL2::MIXER>
+                    DESTINATION ${INSTALL_DIR})
+        endif()
     endif()
 else()
     install(FILES ${CMAKE_BINARY_DIR}/${GAME_NAME}.data ${CMAKE_BINARY_DIR}/${GAME_NAME}.wasm ${CMAKE_BINARY_DIR}/${GAME_NAME}.js

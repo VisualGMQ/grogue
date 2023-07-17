@@ -18,6 +18,13 @@ struct DeserialPath {
     }
 };
 
+// fwd declare
+template <typename T>
+std::optional<T> _deserializeFromLua(const sol::object& lua, DeserialPath& path);
+
+template <size_t Idx, typename T, typename... Types>
+void _deserializeField(T& value, const sol::table& lua, std::tuple<Types...> fields, DeserialPath& path);
+
 //! @brief serialize class to lua
 //! @tparam T  the class you want to serialize
 //! @return the serialized lua code, please write then into lua file
@@ -25,89 +32,6 @@ template <typename T>
 std::vector<uint8_t> SerializeToLua() {
     // TODO: not finish
     return {};
-}
-
-//! @brief descrialize class from lua file
-//! @tparam T  the class you want to deserialize
-//! @param lua 
-//! @return the class instance, failed will return std::nullopt
-template <typename T>
-std::optional<T> DeserializeFromLua(sol::object& lua) {
-    DeserialPath path;
-    return _deserializeFromLua<T>(lua, path);
-}
-
-template <typename T>
-std::optional<T> _deserializeFromLua(sol::object& lua, DeserialPath& path) {
-    if constexpr (std::is_class_v<T> && !_isSerialDirectly<T>()) {
-        using typeinfo = refl::TypeInfo<T>;
-        if (lua.get_type() == sol::type::table) {
-            T value;
-            _deserializeField<0>(value, lua.as<sol::table>(), typeinfo::fields, path);
-            return value;
-        } else {
-            LOGW("[Lua Config Parser]: try to parse a non-table lua node to a class. Path: ", path.ToString());
-            return std::nullopt;
-        }
-    } else {
-        if constexpr (_isVector<T>::value) {
-            using inner_type = _isVector<T>::value_type;
-            std::vector<inner_type> values;
-            sol::table table = lua.as<sol::table>();
-            for (auto& elem : table) {
-                auto elem_value = _deserializeFromLua<inner_type>(elem.second, path);
-                if (elem_value.has_value()) {
-                    values.push_back(elem_value.value());
-                } else {
-                    LOGW("[Lua Config Parser]: parse std::vector<T> failed. Path: ", path.ToString());
-                    return std::nullopt;
-                }
-            }
-            return values;
-        } else if constexpr (_isArray<T>::value) {
-            using inner_type = _isArray<T>::value_type;
-            constexpr size_t require_size = _isArray<T>::size;
-            sol::table table = lua.as<sol::table>();
-            if (table.size() <require_size) {
-                LOGW("[Lua Config Parser]: parse std::array failed, require ", require_size, " elements but has ", table.size(), ". Path: ", path.ToString());
-                return std::nullopt;
-            } else {
-                std::array<inner_type, require_size> datas;
-                int i = 0;
-                for (auto& elem : table) {
-                    auto elem_value = _deserializeFromLua<inner_type>(elem.second, path);
-                    if (elem_value.has_value()) {
-                        datas[i++] = elem_value.value();
-                    } else {
-                        LOGW("[Lua Config Parser]: parse std::array element failed. Path: ", path.ToString());
-                        return std::nullopt;
-                    }
-                }
-                return datas;
-            }
-        } else if constexpr (_isUnorderedMap<T>::value) {
-            using key = _isUnorderedMap<T>::key;
-            using type = _isUnorderedMap<T>::type;
-            std::unordered_map<key, type> result;
-            sol::table table = lua.as<sol::table>();
-            for (auto& elem : table) {
-                auto first = _deserializeFromLua<key>(elem.first, path);
-                if (!first) {
-                    LOGW("[Lua Config Parser]: parse std::unordered_map key element failed. Path: ", path.ToString());
-                    return std::nullopt;
-                }
-                auto second = _deserializeFromLua<type>(elem.second, path);
-                if (!second) {
-                    LOGW("[Lua Config Parser]: parse std::unordered_map value element failed. Path: ", path.ToString());
-                    return std::nullopt;
-                }
-                result[first.value()] = second.value();
-            }
-            return result;
-        } else {
-            return lua.as<T>();
-        }
-    }
 }
 
 inline bool _canSerialDirectly(const sol::object& lua) {
@@ -155,7 +79,6 @@ struct _isUnorderedMap<std::unordered_map<Key, T, Hash, KeyEqual, Allocator>> {
     using type = T;
 };
 
-
 template <typename T>
 constexpr bool _isSerialDirectly() {
     return std::is_arithmetic_v<T> ||
@@ -166,25 +89,14 @@ constexpr bool _isSerialDirectly() {
 }
 
 template <size_t Idx, typename T, typename... Types>
-void _deserializeField(T& value, sol::table& lua, std::tuple<Types...> fields, DeserialPath& path) {
-    auto field = std::get<Idx>(fields);
-    using field_info = std::tuple_element_t<Idx, std::tuple<Types...>>;
-    if constexpr (std::is_member_function_pointer_v<field_info::pointerType>) {
-        return;
-    } else {
-        return _realDeserializeField<Idx>(value, lua, fields, path);
-    }
-}
-
-template <size_t Idx, typename T, typename... Types>
-void _realDeserializeField(T& value, sol::table& lua, std::tuple<Types...> fields, DeserialPath& path) {
+void _realDeserializeField(T& value, const sol::table& lua, std::tuple<Types...> fields, DeserialPath& path) {
     auto field = std::get<Idx>(fields);
     using field_info = std::tuple_element_t<Idx, std::tuple<Types...>>;
     path.path.push_back(std::string(field.name.data()));
     auto lua_field = lua[field.name];
     if (lua_field.valid()) {
-        if constexpr (_isSerialDirectly<field_info::type>()) {
-            auto field_value = _deserializeFromLua<field_info::type>(lua_field.get<sol::object>(), path);
+        if constexpr (_isSerialDirectly<typename field_info::type>()) {
+            auto field_value = _deserializeFromLua<typename field_info::type>(lua_field.template get<sol::object>(), path);
             if (field_value) {
                 value.*field.pointer = field_value.value();
             } else {
@@ -193,7 +105,7 @@ void _realDeserializeField(T& value, sol::table& lua, std::tuple<Types...> field
             }
         } else {
             if (lua_field.get_type() == sol::type::table) {
-                auto field_value = _deserializeFromLua<field_info::type>(lua_field.get<sol::table>(), path);
+                auto field_value = _deserializeFromLua<typename field_info::type>(lua_field.template get<sol::table>(), path);
                 if (field_value) {
                     value.*field.pointer = field_value.value();
                 } else {
@@ -207,6 +119,101 @@ void _realDeserializeField(T& value, sol::table& lua, std::tuple<Types...> field
     if constexpr (Idx < sizeof...(Types) - 1) {
         _deserializeField<Idx + 1>(value, lua, fields, path);
     }
+}
+
+template <size_t Idx, typename T, typename... Types>
+void _deserializeField(T& value, const sol::table& lua, std::tuple<Types...> fields, DeserialPath& path) {
+    auto field = std::get<Idx>(fields);
+    using field_info = std::tuple_element_t<Idx, std::tuple<Types...>>;
+    if constexpr (std::is_member_function_pointer_v<typename field_info::pointerType>) {
+        return;
+    } else {
+        return _realDeserializeField<Idx>(value, lua, fields, path);
+    }
+}
+
+template <typename T>
+std::optional<T> _deserializeFromLua(const sol::object& lua, DeserialPath& path) {
+    if constexpr (std::is_class_v<T> && !_isSerialDirectly<T>()) {
+        using typeinfo = refl::TypeInfo<T>;
+        if (lua.get_type() == sol::type::table) {
+            T value;
+            _deserializeField<0>(value, lua.as<sol::table>(), typeinfo::fields, path);
+            return value;
+        } else {
+            LOGW("[Lua Config Parser]: try to parse a non-table lua node to a class. Path: ", path.ToString());
+            return std::nullopt;
+        }
+    } else {
+        if constexpr (_isVector<T>::value) {
+            using inner_type = typename _isVector<T>::value_type;
+            std::vector<inner_type> values;
+            sol::table table = lua.as<sol::table>();
+            for (auto& elem : table) {
+                auto elem_value = _deserializeFromLua<inner_type>(elem.second, path);
+                if (elem_value.has_value()) {
+                    values.push_back(elem_value.value());
+                } else {
+                    LOGW("[Lua Config Parser]: parse std::vector<T> failed. Path: ", path.ToString());
+                    return std::nullopt;
+                }
+            }
+            return values;
+        } else if constexpr (_isArray<T>::value) {
+            using inner_type = typename _isArray<T>::value_type;
+            constexpr size_t require_size = _isArray<T>::size;
+            sol::table table = lua.as<sol::table>();
+            if (table.size() <require_size) {
+                LOGW("[Lua Config Parser]: parse std::array failed, require ", require_size, " elements but has ", table.size(), ". Path: ", path.ToString());
+                return std::nullopt;
+            } else {
+                std::array<inner_type, require_size> datas;
+                int i = 0;
+                for (auto& elem : table) {
+                    auto elem_value = _deserializeFromLua<inner_type>(elem.second, path);
+                    if (elem_value.has_value()) {
+                        datas[i++] = elem_value.value();
+                    } else {
+                        LOGW("[Lua Config Parser]: parse std::array element failed. Path: ", path.ToString());
+                        return std::nullopt;
+                    }
+                }
+                return datas;
+            }
+        } else if constexpr (_isUnorderedMap<T>::value) {
+            using key = typename _isUnorderedMap<T>::key;
+            using type = typename _isUnorderedMap<T>::type;
+            std::unordered_map<key, type> result;
+            sol::table table = lua.as<sol::table>();
+            for (auto& elem : table) {
+                auto first = _deserializeFromLua<key>(elem.first, path);
+                if (!first) {
+                    LOGW("[Lua Config Parser]: parse std::unordered_map key element failed. Path: ", path.ToString());
+                    return std::nullopt;
+                }
+                auto second = _deserializeFromLua<type>(elem.second, path);
+                if (!second) {
+                    LOGW("[Lua Config Parser]: parse std::unordered_map value element failed. Path: ", path.ToString());
+                    return std::nullopt;
+                }
+                result[first.value()] = second.value();
+            }
+            return result;
+        } else {
+            return lua.as<T>();
+        }
+    }
+}
+
+
+//! @brief descrialize class from lua file
+//! @tparam T  the class you want to deserialize
+//! @param lua 
+//! @return the class instance, failed will return std::nullopt
+template <typename T>
+std::optional<T> DeserializeFromLua(const sol::object& lua) {
+    DeserialPath path;
+    return _deserializeFromLua<T>(lua, path);
 }
 
 }

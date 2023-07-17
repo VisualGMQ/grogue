@@ -26,6 +26,9 @@ public:
         cmds_.DestroyEntity(entity);
     }
 
+    auto& Raw() { return cmds_; }
+    auto& Raw() const { return cmds_; }
+
     {{ DECL_ADD_COMP }}
     {{ DECL_DESTROY_COMP }}
 
@@ -45,6 +48,9 @@ clazz& Get ## name () { \
 class [[refl, luabind]] ResourcesWrapper final {
 public:
     [[norefl]] ResourcesWrapper(ecs::Resources& res): res_(res) {}
+
+    auto& Raw() { return res_; }
+    auto& Raw() const { return res_; }
 
     {{ DECL_RES }}
 
@@ -74,6 +80,9 @@ class [[refl, luabind]] QuerierWrapper final {
 public:
     [[norefl]] QuerierWrapper(ecs::Querier& querier): querier_(querier) {}
 
+    auto& Raw() { return querier_; }
+    auto& Raw() const { return querier_; }
+
     {{ DECL_QUERIER_QUERY }}
     {{ DECL_QUERIER_GET }}
     {{ DECL_QUERIER_HAS }}
@@ -89,6 +98,9 @@ private:
 class [[refl, luabind]] EventsWrapper final {
 public:
     [[norefl]] EventsWrapper(ecs::Events& events): events_(events) {}
+
+    auto& Raw() { return events_; }
+    auto& Raw() const { return events_; }
 
 private:
     ecs::Events& events_;

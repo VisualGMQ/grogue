@@ -39,7 +39,7 @@ class ECSWrapperCodes:
         self.resource_get = ""
 
 def GenerateCode(code_info: list[chp.CodeInfo]) -> tuple[dict[str, str], str]:
-    refl_code_dict = GenerateClassBindCode(code_info)
+    refl_code_dict = GenerateReflCode(code_info)
     classbind_code = GenerateLuabindCode(code_info)
     
     return refl_code_dict, classbind_code
@@ -85,7 +85,7 @@ def GenerateOneClassWrapperCode(classinfo: chp.Class, refl_attrs: LuabindAttrs) 
     return wrapper_code
 
 
-def GenerateClassBindCode(code_info: list[chp.CodeInfo]) -> dict[str, str]:
+def GenerateReflCode(code_info: list[chp.CodeInfo]) -> dict[str, str]:
     code_dict = {}
     for info in code_info:
         for class_info in info.classes:
@@ -97,24 +97,47 @@ def GenerateClassBindCode(code_info: list[chp.CodeInfo]) -> dict[str, str]:
                                                     .format(class_info.filename
                                                                 .replace("./include/", '')
                                                                 .replace(output_dir, '')) + '\n' + code
+        for enum_info in info.enums:
+            code = GenerateReflEnumCode(enum_info)
+
+            if enum_info.filename in code_dict.keys():
+                code_dict[enum_info.filename] += "\n" + code
+            else:
+                code_dict[enum_info.filename] = '#pragma once\n#include "core/refl.hpp"\n#include "{}"' \
+                                                    .format(enum_info.filename
+                                                                .replace("./include/", '')
+                                                                .replace(output_dir, '')) + '\n' + code
+
         
     return code_dict
 
 def GenerateLuabindCode(code_info: list[chp.CodeInfo]) -> str:
-    classbind_code = ""
+    bind_code = ""
     for info in code_info:
         for clazz in info.classes:
             attr = ConvertLuabindAttr2ReflAttr(clazz.attributes, False)
+            if attr.is_nobind:
+                continue
             class_name_with_namespace = GetNamespacePrefixStr(clazz.namespaces) + clazz.name
             bind_name = clazz.name
             if attr.change_name is not None:
                 bind_name = attr.change_name[0]
+            bind_code += "\tluabind::BindClass<{}>(lua, \"{}\");\n".format(class_name_with_namespace, bind_name)
+        for enum in info.enums:
+            attr = ConvertLuabindAttr2ReflAttr(enum.attributes, False)
+            if attr.is_nobind:
+                continue
+            name_with_namespace = GetNamespacePrefixStr(enum.namespaces) + enum.name
+            bind_name = enum.name
+            if attr.change_name is not None:
+                bind_name = attr.change_name[0]
             if not attr.is_nobind:
-                classbind_code += "\tluabind::BindClass<{}>(lua, \"{}\");\n".format(class_name_with_namespace, bind_name)
+                bind_code += "\tluabind::BindEnum<{}>(lua, \"{}\");\n".format(name_with_namespace, bind_name)
+
 
     global_func_code = GenerateGlobalFunctionBindCode(code_info)
 
-    return classbind_code + "\n" + global_func_code
+    return bind_code + "\n" + global_func_code
 
 def GetNamespacePrefixStr(namespaces: list[str]) -> str:
     return "::" if len(namespaces) == 0 else '::{}::'.format('::'.join(namespaces))
@@ -212,12 +235,33 @@ ReflClass({}) {{
                            constructor_code,
                            fields_code[:-1])
 
+
+def GenerateReflEnumCode(info: chp.Enum):
+    fmt = '''
+ReflEnum({}, int) {{
+    EnumValues(
+        {}
+    )
+}};
+'''
+    class_name = '::'.join(info.namespaces) + '::' + info.name
+    values = ''
+    for value in info.values:
+        values += 'EnumValue("{}", {}::{}),\n'.format(value[0], class_name, value[0])
+
+    values = values if len(values) == 0 else values[0: -2]
+
+    return fmt.format(class_name, values)
+
 def GenerateGlobalFunctionBindCode(code_info: list[chp.CodeInfo]) -> str:
     result = ""
     for info in code_info:
         for func_list in info.global_functions:
             if len(func_list) == 1:
                 func = func_list[0]
+                attrs = ConvertLuabindAttr2ReflAttr(func.attributes, False)
+                if attrs.is_nobind:
+                    continue
                 result += "\tlua[\"{}\"] = &{};\n".format(func.name, func.name)
             else:
                 result += "\tlua[\"{}\"] = sol::overload({});\n".format(func_list[0].name,
@@ -233,12 +277,11 @@ def tryCreateDir(dir: str):
         os.mkdir(dir)
 
 if __name__ == '__main__':
-    # if len(sys.argv) != 2:
-    #     print("please give me a output directory")
-    #     sys.exit(1)
+    if len(sys.argv) != 2:
+        print("please give me a output directory")
+        sys.exit(1)
 
-    # output_dir = sys.argv[1]
-    output_dir = "./cmake-build/gen_codes"
+    output_dir = sys.argv[1]
     if output_dir[-1] != '/' and output_dir[-1] != '\\':
         output_dir += '/'
     print("output directory: {}".format(output_dir))

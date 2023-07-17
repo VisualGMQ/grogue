@@ -52,12 +52,14 @@ class Class:
         self.attributes = attribtues
 
 class Enum:
-    def __init__(self, ty: str, name: str, values: list[tuple[str, int]], is_class: bool, namespaces: list[str]):
+    def __init__(self, ty: str, name: str, filename: str, values: list[tuple[str, int]], is_class: bool, namespaces: list[str], attributes: list[str]):
         self.name = name
         self.values = values
         self.is_class = is_class
         self.namespaces = namespaces
         self.type = ty
+        self.filename = filename
+        self.attributes = attributes
 
 def shouldParseMember(node, source_code: list[str]) -> bool:
     line_number = node.location.line - 1
@@ -155,7 +157,7 @@ def ExtractClass(filename: str, class_decl: clang.cindex.Cursor, namespaces: lis
     attributes = ParseAttrsFromSourceCode(class_decl)
 
     # special ruler for class:
-    if 'refl' not in attributes:
+    if 'refl' not in attributes or 'norefl' in attributes:
         return None
 
     constructors = []
@@ -195,7 +197,7 @@ def ExtractGlobalFunction(node: clang.cindex.Cursor, namespaces: list[str], sour
     attributes = ParseAttrsFromSourceCode(node)
 
     # special ruler for global functions:
-    if 'luabind' not in attributes:
+    if 'refl' not in attributes or 'norefl' in attributes:
         return None
 
     name = node.spelling
@@ -213,12 +215,19 @@ def ExtractGlobalEnum(node: clang.cindex.Cursor, namespaces: list[str], source_c
     name = node.spelling
     enum_type = node.enum_type.spelling
 
+    # parse attributes:
+    attributes = ParseAttrsFromSourceCode(node)
+
+    # special ruler for global functions:
+    if 'refl' not in attributes or 'norefl' in attributes:
+        return None
+
     fields = []
     for child in node.get_children():
         if child.kind == clang.cindex.CursorKind.ENUM_CONSTANT_DECL:
             fields.append((child.spelling, child.enum_value))
 
-    return Enum(enum_type, name, fields, False, namespaces)
+    return Enum(enum_type, name, filename, fields, False, namespaces, attributes)
 
 class CodeInfo:
     def __init__(self, file: str, classes: list[Class], global_functions: list[list[Function]], enums: list[Enum]) -> None:
@@ -261,12 +270,6 @@ def ParseHeaderFile(filename: str) -> CodeInfo:
     index = clang.cindex.Index.create()
     tu = index.parse(filename, args=['-std=c++17',
                                     '-I./include',
-                                    # '-ID:/Code/grogue/3rdlibs/sol',
-                                    # '-ID:/Code/grogue/3rdlibs/lua/include',
-                                    # '-ID:/Code/3rdlibs/SDL2-2.0.22-VC/include',
-                                    # '-ID:/Code/3rdlibs/SDL2_ttf-2.20.0-VC/include',
-                                    # '-ID:/Code/3rdlibs/SDL2_mixer-2.6.2-VC/include',
-                                    # '-ID:/Code/3rdlibs/SDL2_image-2.6.0-VC/include',
                                     ])
     source_code = ''
     with open(tu.spelling) as f:

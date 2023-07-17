@@ -7,14 +7,14 @@ class Person {
 
 namespace inner {
 
-enum SimpleEnum {
+enum [[refl]] SimpleEnum {
     Value1 = 1,
     Value2,
     Value3,
 };
 
 
-enum class ClassSimpleEnum {
+enum [[refl, luabind]] ClassSimpleEnum {
     ClassValue1 = 1,
     ClassValue2,
     ClassValue3,
