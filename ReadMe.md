@@ -13,7 +13,7 @@ Grogue是一个Roguelite游戏，借鉴了饥荒，CDDA。正在开发中。
 
 ## 如何编译
 
-使用CMake进行编译，编译需要依赖库`SDL`,`SDL_ttf`,`SDL_image`,`SDL_mixer`
+使用CMake进行编译，编译需要依赖库`SDL`,`SDL_ttf`,`SDL_image`,`SDL_mixer`。需要安装Python3和llvm来进行头文件解析。
 
 如果你想要为项目贡献代码，编译前推荐安装`clang-format`和`CppCheck`，`clang-format`会帮你自动格式化，`CppCheck`会帮你做静态检查（仅在`Makefile`和`Ninja`工程中）
 
