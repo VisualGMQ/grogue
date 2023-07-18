@@ -4,12 +4,12 @@
 {{ INCLUDE_FILES }}
 
 #define DECL_CMDS_ADD_COMP(name, clazz) \
-void Add ## name (ecs::Entity entity, clazz & comp) { \
+void AddComponent(ecs::Entity entity, clazz & comp) { \
     cmds_.AddComponent<clazz>(entity, std::move(comp)); \
 }
 
 #define DECL_CMDS_DESTROY_COMP(name, clazz) \
-void Destroy ## name (ecs::Entity entity, clazz & comp) { \
+void DestroyComponent(ecs::Entity entity, clazz & comp) { \
     cmds_.DestroyComponent<clazz>(entity); \
 }
 

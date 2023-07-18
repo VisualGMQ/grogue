@@ -1,10 +1,9 @@
-require("defs")
 require("math")
 
 ---@param entity Entity
 ---@param cmds Commands
 ---@param res Resources
-function Startup(entity, cmds, res)
+function Script.Startup(entity, cmds, res)
 end
 
 ---@param querier Querier
@@ -33,7 +32,7 @@ end
 ---@param querier Querier
 ---@param res Resources
 ---@param events Events
-function Run(entity, cmds, querier, res, events)
+function Script.Run(entity, cmds, querier, res, events)
     ---@type Input
     local input = res:GetInput()
 
