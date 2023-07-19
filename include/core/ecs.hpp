@@ -6,9 +6,11 @@
 #include <unordered_map>
 #include <variant>
 #include <vector>
+#include <limits>
 
 #include "log.hpp"
 #include "sparse_sets.hpp"
+#include "sol/sol.hpp"
 
 #define assertm(msg, expr) assert(((void)msg, (expr)))
 
@@ -32,12 +34,73 @@ struct [[refl, luabind(comp)]] Node final {
 
 namespace ecs {
 
+struct ComponentSpawnHandler final {
+    friend class IndexGetter;
+
+    using AssignFunc = std::function<void(void*, void*)>;
+    using CreateFunc = std::function<void*(void)>;
+    using DestroyFunc = std::function<void(void *)>;
+
+    ComponentID index;
+    AssignFunc assign;
+    CreateFunc create;
+    DestroyFunc destroy;
+
+    template <typename T>
+    static const auto& GetSpawnInfo() {
+        return GetSpawnInfoByID(IndexGetter::Get<T>());
+    }
+
+    static const auto& GetSpawnInfoByID(ComponentID id) {
+        static ComponentSpawnHandler luaComponentHandler = {
+            std::numeric_limits<ComponentID>::max(),
+            [](void *src, void* dst) { *((sol::object*)dst) = std::move(*((sol::object*)src)); },
+            [](void) -> void * { return new sol::object; },
+            [](void *elem) { delete (sol::object*)elem; },
+        };
+
+        
+        if (id < infos.size()) {
+            return infos.at(id);
+        } else {
+            return luaComponentHandler;
+        }
+    }
+
+private:
+    inline static std::vector<ComponentSpawnHandler> infos;
+    
+    template <typename T>
+    static auto regist() {
+        ComponentSpawnHandler handler;
+        handler.index = IndexGetter::Get<T>();
+        handler.create = [](void) -> void * { return new T; };
+        handler.destroy = [](void *elem) { delete (T *)elem; };
+        handler.assign = [](void *src, void* dst) { *((T *)dst) = std::move(*((T*)src)); };
+        return handler;
+    }
+};
+
 class IndexGetter final {
 public:
     template <typename T>
     static uint32_t Get() {
         static uint32_t id = curIdx_++;
+        if (id >= ComponentSpawnHandler::infos.size()) {
+            ComponentSpawnHandler::infos.resize(id + 1);
+            if constexpr (std::is_default_constructible_v<T>) {
+                ComponentSpawnHandler::infos[id] = ComponentSpawnHandler::regist<T>();
+            }
+        }
         return id;
+    }
+
+    static uint32_t Get(ComponentID baseIdx) {
+        return curIdx_ + baseIdx;
+    }
+
+    static uint32_t GetCurIdx() {
+        return curIdx_;
     }
 
 private:
@@ -430,9 +493,24 @@ public:
         return entities;
     }
 
+    std::vector<Entity> QueryByID(ComponentID id) {
+        std::vector<Entity> entities;
+        for (auto& [entity, _] : world_.entities_) {
+            if (HasByID(entity, id)) {
+                entities.push_back(entity);
+            }
+        }
+        return entities;
+    }
+
     template <typename T>
     bool Has(ecs::Entity entity) const {
         return queryCondition<T>(entity);
+    }
+
+    bool HasByID(ecs::Entity entity, ComponentID id) const {
+        auto &componentContainer = world_.entities_[entity];
+        return componentContainer.find(id) != componentContainer.end();
     }
 
     template <typename T>
@@ -608,8 +686,8 @@ public:
 
         if constexpr (sizeof...(components) != 0) {
             doSpawn(info.components, std::forward<ComponentTypes>(components)...);
-            spawnEntities_.push_back(info);
         }
+        spawnEntities_.push_back(info);
         return info.entity;
     }
 
@@ -623,7 +701,7 @@ public:
             world_.entities_.emplace(info.entity, World::ComponentContainer{});
         auto &componentContainer = it.first->second;
         for (auto &componentInfo : info.components) {
-            componentContainer[componentInfo.index] =
+            componentContainer[componentInfo.id] =
                 doSpawnWithoutType(info.entity, componentInfo);
         }
 
@@ -640,11 +718,25 @@ public:
     }
 
     template <typename T>
-    Commands &DestroyComponent(Entity entity) {
-        auto idx = IndexGetter::Get<T>();
-        destroyComponents_.emplace_back(ComponentDestroyInfo{entity, idx});
+    void AddComponentByID(Entity entity, ComponentID id, T&& data) {
+        EntitySpawnInfo info;
+        info.entity = entity;
+        ComponentSpawnInfo spawnInfo;
+        spawnInfo.id = id;
+        spawnInfo.getComponent = [=, c = std::move(data)]() mutable { return &c; };
+        info.components.push_back(spawnInfo);
 
+        addComponents_.push_back(info);
+    }
+
+    template <typename T>
+    Commands &DestroyComponent(Entity entity) {
+        DestroyComponentByID(entity, IndexGetter::Get<T>());
         return *this;
+    }
+
+    void DestroyComponentByID(Entity entity, ComponentID id) {
+        destroyComponents_.emplace_back(ComponentDestroyInfo{entity, id});
     }
 
     Commands &DestroyEntity(Entity entity) {
@@ -701,7 +793,7 @@ public:
                                                World::ComponentContainer{});
             auto &componentContainer = it.first->second;
             for (auto &componentInfo : spawnInfo.components) {
-                componentContainer[componentInfo.index] =
+                componentContainer[componentInfo.id] =
                     doSpawnWithoutType(spawnInfo.entity, componentInfo);
             }
         }
@@ -713,7 +805,7 @@ public:
             }
             auto &componentContainer = it->second;
             for (auto &componentInfo : addInfo.components) {
-                componentContainer[componentInfo.index] =
+                componentContainer[componentInfo.id] =
                     doSpawnWithoutType(addInfo.entity, componentInfo);
             }
         }
@@ -736,13 +828,11 @@ private:
             : index(index), destroy(destroy) {}
     };
 
-    using AssignFunc = std::function<void(void *)>;
-
     struct ComponentSpawnInfo {
-        AssignFunc assign;
-        World::Pool::CreateFunc create;
-        World::Pool::DestroyFunc destroy;
-        ComponentID index;
+        using Getter = std::function<void*()>;
+
+        ComponentID id;        
+        Getter getComponent;
     };
 
     struct EntitySpawnInfo {
@@ -771,10 +861,8 @@ private:
     void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo, T &&component,
                  Remains &&...remains) {
         ComponentSpawnInfo info;
-        info.index = IndexGetter::Get<T>();
-        info.create = [](void) -> void * { return new T; };
-        info.destroy = [](void *elem) { delete (T *)elem; };
-        info.assign = [=, c = std::move(component)](void *elem) mutable { *((T *)elem) = std::move(c); };
+        info.id = IndexGetter::Get<T>();
+        info.getComponent = [=, c = std::move(component)]() mutable { return &c; };
         spawnInfo.push_back(info);
 
         if constexpr (sizeof...(Remains) != 0) {
@@ -783,14 +871,15 @@ private:
     }
 
     void *doSpawnWithoutType(Entity entity, ComponentSpawnInfo &info) {
-        if (auto it = world_.componentMap_.find(info.index);
+        const ComponentSpawnHandler& handler = ComponentSpawnHandler::GetSpawnInfoByID(info.id);
+        if (auto it = world_.componentMap_.find(info.id);
             it == world_.componentMap_.end()) {
             world_.componentMap_.insert_or_assign(
-                info.index, World::ComponentInfo(info.create, info.destroy));
+                info.id, World::ComponentInfo(handler.create, handler.destroy));
         }
-        World::ComponentInfo &componentInfo = world_.componentMap_[info.index];
+        World::ComponentInfo &componentInfo = world_.componentMap_[info.id];
         void *elem = componentInfo.pool.Create();
-        info.assign(elem);
+        handler.assign(info.getComponent(), elem);
         componentInfo.sparseSet.Add(entity);
 
         return elem;
