@@ -1,15 +1,20 @@
 require("math")
 
+local MyComponentID = 100
+
 ---@param entity Entity
 ---@param cmds Commands
 ---@param res Resources
-function Script.Startup(entity, cmds, res)
+function Startup(entity, cmds, res)
+    local entity = cmds:Spawn()
+    cmds:AddComponent(entity, MyComponentID, { name = "MyComponent" })
 end
 
 ---@param querier Querier
 ---@param res Resources
 local function ToggleBackpackUIPanel(querier, res)
-    local entities = querier:QueryBackpackUIPanel()
+
+    local entities = querier:Query(Component.BackpackUIPanel)
 
     if not entities:empty() then
         local window = res:GetWindow()
@@ -32,13 +37,19 @@ end
 ---@param querier Querier
 ---@param res Resources
 ---@param events Events
-function Script.Run(entity, cmds, querier, res, events)
+function Run(entity, cmds, querier, res, events)
+    local test_entities = querier:Query(MyComponentID)
+    for _, entity in pairs(test_entities) do
+        local comp = querier:GetSolObject(entity)
+        -- print(comp.name)
+    end
+
     ---@type Input
     local input = res:GetInput()
 
-    local entities = querier:QueryPlayer()
+    local entities = querier:Query(Component.Player)
     for _, entity in pairs(entities) do
-        if not querier:HasMonster(entity) then
+        if not querier:Has(entity, Component.Monster) then
             goto NEXT_LOOP
         end
         local monster = querier:GetMonster(entity)
@@ -47,7 +58,7 @@ function Script.Run(entity, cmds, querier, res, events)
         PlayerMove(input, monster, particle)
 
         if input:GetActionState("pickup"):IsPressed() and
-            querier:HasBackpack(entity) then
+            querier:Has(entity, Component.Backpack) then
            local backpack = querier:GetBackpack(entity) 
            PickupTileOneItem(backpack, cmds:Raw(), querier:Raw(), res:Raw(), events:Raw())
         end

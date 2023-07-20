@@ -3,16 +3,22 @@
 #include "core/ecs.hpp"
 {{ INCLUDE_FILES }}
 
-#define DECL_CMDS_ADD_COMP(name, clazz) \
-void AddComponent(ecs::Entity entity, clazz & comp) { \
-    cmds_.AddComponent<clazz>(entity, std::move(comp)); \
+/* NOTE: don't ask me why forward declare this. Remove this will make libclang can't parse sol::object.
+ If you add lib sol include path to libclang, it will cause other file parse problem*/
+namespace sol {
+	template <bool>
+	class basic_reference;
+	using reference = basic_reference<false>;
+	template <typename base_type>
+	class basic_object;
+	using object = basic_object<reference>;
 }
+using SolObject = sol::object;
 
-#define DECL_CMDS_DESTROY_COMP(name, clazz) \
-void DestroyComponent(ecs::Entity entity, clazz & comp) { \
-    cmds_.DestroyComponent<clazz>(entity); \
+#define DECL_CMDS_ADD_COMP(clazz) \
+void AddComponent(ecs::Entity entity, ::ecs::ComponentID id, clazz & comp) { \
+    cmds_.AddComponentByID(entity, id, std::move(comp)); \
 }
-
 
 class [[refl, luabind]] CommandsWrapper final {
 public:
@@ -29,15 +35,19 @@ public:
     auto& Raw() { return cmds_; }
     auto& Raw() const { return cmds_; }
 
+    void DestroyComponent(ecs::Entity entity, ::ecs::ComponentID id) {
+        cmds_.DestroyComponentByID(entity, id);
+    }
+
+    DECL_CMDS_ADD_COMP(SolObject)
+
     {{ DECL_ADD_COMP }}
-    {{ DECL_DESTROY_COMP }}
 
 private:
     ecs::Commands& cmds_;
 };
 
 #undef DECL_CMDS_ADD_COMP
-#undef DECL_CMDS_DESTROY_COMP
 
 
 #define DECL_RES_GET(name, clazz) \
@@ -60,20 +70,9 @@ private:
 
 #undef DECL_RES_GET
 
-
-#define DECL_QUERIER_QUERY(name, clazz) \
-std::vector<ecs::Entity> Query ## name () { \
-    return querier_.Query<clazz>(); \
-}
-
 #define DECL_QUERIER_GET(name, clazz) \
 auto& Get ## name (ecs::Entity entity) { \
     return querier_.Get<clazz>(entity); \
-}
-
-#define DECL_QUERIER_HAS(name, clazz) \
-bool Has ## name (ecs::Entity entity) { \
-    return querier_.Has<clazz>(entity); \
 }
 
 class [[refl, luabind]] QuerierWrapper final {
@@ -83,9 +82,17 @@ public:
     auto& Raw() { return querier_; }
     auto& Raw() const { return querier_; }
 
-    {{ DECL_QUERIER_QUERY }}
+    std::vector<ecs::Entity> Query(ecs::ComponentID id) {
+        return querier_.QueryByID(id);
+    }
+
+    bool Has(ecs::Entity entity, ecs::ComponentID id) {
+        return querier_.HasByID(entity, id);
+    }
+
+    DECL_QUERIER_GET(SolObject, SolObject)
+
     {{ DECL_QUERIER_GET }}
-    {{ DECL_QUERIER_HAS }}
 
 private:
     ecs::Querier& querier_;

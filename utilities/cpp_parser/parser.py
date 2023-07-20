@@ -77,7 +77,7 @@ def GenerateOneClassWrapperCode(classinfo: chp.Class, refl_attrs: LuabindAttrs) 
         wrapper_code.querier_query = "DECL_QUERIER_QUERY({}, {})".format(classinfo.name, classname_with_namespaces)
         wrapper_code.querier_get = "DECL_QUERIER_GET({}, {})".format(classinfo.name, classname_with_namespaces)
         wrapper_code.querier_has = "DECL_QUERIER_HAS({}, {})".format(classinfo.name, classname_with_namespaces)
-        wrapper_code.commands_add = "DECL_CMDS_ADD_COMP({}, {})".format(classinfo.name, classname_with_namespaces)
+        wrapper_code.commands_add = "DECL_CMDS_ADD_COMP({})".format(classname_with_namespaces)
         wrapper_code.commands_destroy = "DECL_CMDS_DESTROY_COMP({}, {})".format(classinfo.name, classname_with_namespaces)
     if refl_attrs.is_resources:
         wrapper_code.resource_get = "DECL_RES_GET({}, {})".format(classinfo.name, classname_with_namespaces)
@@ -272,6 +272,15 @@ def GenerateGlobalFunctionBindCode(code_info: list[chp.CodeInfo]) -> str:
                                                                      ), func_list)))
     return result
 
+def GenerateComponentEnumCode(code_info: list[chp.CodeInfo]) -> str:
+    result = ""
+    for info in code_info:
+        for clazz in info.classes:
+            attrs = ConvertLuabindAttr2ReflAttr(clazz.attributes, False)
+            if attrs.is_component:
+                result += '\t\t{{ "{}", ::ecs::IndexGetter::Get<{}>() }},\n'.format(clazz.name, '::'.join(clazz.namespaces) + '::' + clazz.name);
+    return result
+
 def tryCreateDir(dir: str):
     if not os.path.exists(dir):
         os.mkdir(dir)
@@ -360,9 +369,13 @@ if __name__ == '__main__':
 
 void BindLua(sol::state& lua) {{
 {}
+
+    lua.new_enum<::ecs::ComponentID>("Component", {{
+        {}
+    }});
 }}
 """
-
-    luabind_code = bind_code.format(all_include_file_str, luabind_code)
+    enum_code = GenerateComponentEnumCode(codeinfos);
+    luabind_code = bind_code.format(all_include_file_str, luabind_code, enum_code)
     with open(output_dir + "luabind.cpp", "w+") as f:
         f.write(luabind_code)
