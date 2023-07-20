@@ -69,14 +69,7 @@ private:
     inline static std::vector<ComponentSpawnHandler> infos;
     
     template <typename T>
-    static auto regist() {
-        ComponentSpawnHandler handler;
-        handler.index = IndexGetter::template Get<T>();
-        handler.create = [](void) -> void * { return new T; };
-        handler.destroy = [](void *elem) { delete (T *)elem; };
-        handler.assign = [](void *src, void* dst) { *((T *)dst) = std::move(*((T*)src)); };
-        return handler;
-    }
+    static auto regist();
 };
 
 class IndexGetter final {
@@ -106,8 +99,18 @@ private:
 };
 
 template <typename T>
-static const auto& ComponentSpawnHandler::GetSpawnInfo() {
+const auto& ComponentSpawnHandler::GetSpawnInfo() {
     return GetSpawnInfoByID(IndexGetter::template Get<T>());
+}
+
+template <typename T>
+auto ComponentSpawnHandler::regist() {
+    ComponentSpawnHandler handler;
+    handler.index = IndexGetter::template Get<T>();
+    handler.create = [](void) -> void * { return new T; };
+    handler.destroy = [](void *elem) { delete (T *)elem; };
+    handler.assign = [](void *src, void* dst) { *((T *)dst) = std::move(*((T*)src)); };
+    return handler;
 }
 
 template <typename T, typename = std::enable_if<std::is_integral_v<T>>>

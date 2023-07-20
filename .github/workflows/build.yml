@@ -52,7 +52,7 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: base-devel git gcc mingw-w64-${{matrix.arch}}-cmake mingw-w64-${{matrix.arch}}-gcc python3 python-pip llvm
+          install: base-devel git gcc mingw-w64-${{matrix.arch}}-cmake mingw-w64-${{matrix.arch}}-gcc python3 python3-pip llvm
 
       - name: Check out repository code
         uses: actions/checkout@v3

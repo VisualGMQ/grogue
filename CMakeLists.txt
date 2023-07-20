@@ -40,24 +40,24 @@ add_subdirectory(3rdlibs/expected)
 
 # find python to execute luabind parser
 find_program(PYTHON python3)
-if (${PYTHON} MATCHES PYTHON-NOTFOUND)
-    find_program(PYTHON python)
-    if (${PYTHON} MATCHES PYTHON-NOTFOUND)
+if (NOT PYTHON)
+    find_program(PYTHON python REQUIRED)
+    if (NOT PYTHON)
         message(FATAL_ERROR "you must install python 3.0 and pip 3.0")
     endif()
 endif()
 
-message("fount python3")
+message("fount python3: ${PYTHON}")
 
 find_program(PIP pip3)
-if (${PIP} MATCHES PIP-NOTFOUND)
-    find_program(PIP pip)
-    if (${PIP} MATCHES PIP-NOTFOUND)
+if (NOT PIP)
+    find_program(PIP pip REQUIRED)
+    if (NOT PIP)
         message(FATAL_ERROR "you must install python 3.0 and pip 3.0")
     endif()
 endif()
 
-message("fount pip3")
+message("fount pip3: ${PIP}")
 
 # detect compile
 IsMSVCBackend(is_msvc_backend)
@@ -65,12 +65,6 @@ IsMinGWBackend(is_mingw_backend)
 
 # run python parser to generate luabind codes
 file(GLOB_RECURSE CPP_INCLUDE_FILES ./include/*.hpp)
-
-# execute_process(
-#     COMMAND ${PIP} install -r ${CMAKE_SOURCE_DIR}/utilities/cpp_parser/requirements.txt
-#     COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/utilities/cpp_parser/parser.py "${CMAKE_BINARY_DIR}/gen_codes"
-#     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-# )
 
 set(WATCHED_FILE ${CPP_INCLUDE_FILES})
 set(GENERATED_FILE ${CMAKE_BINARY_DIR}/gen_codes/luabind.cpp)
