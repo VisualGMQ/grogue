@@ -36,7 +36,8 @@ class ECSWrapperCodes:
         self.querier_query = ""
         self.querier_get = ""
         self.querier_has = ""
-        self.resource_get = ""
+        self.querier_convenient_get = ""
+        self.resource_convenient_get = ""
 
 def GenerateCode(code_info: list[chp.CodeInfo]) -> tuple[dict[str, str], str]:
     refl_code_dict = GenerateReflCode(code_info)
@@ -58,29 +59,37 @@ def GenerateECSWrapperCode(code_info: list[chp.CodeInfo]) -> ECSWrapperCodes:
                     wrapper_codes.querier_query += "\n\t" + wrapper_code.querier_query
                     wrapper_codes.querier_get += "\n\t" + wrapper_code.querier_get
                     wrapper_codes.querier_has += "\n\t" + wrapper_code.querier_has
+                    wrapper_codes.querier_convenient_get += "\n\t" + wrapper_code.querier_convenient_get
                 if refl_attrs.is_resources:
-                    wrapper_codes.resource_get += "\n\t" + wrapper_code.resource_get
+                    wrapper_codes.resource_convenient_get += "\n\t" + wrapper_code.resource_convenient_get
+                    # wrapper_codes.resource_get += "\n\t" + wrapper_code.resource_get
 
     return wrapper_codes
 
 def GenerateOneClassWrapperCode(classinfo: chp.Class, refl_attrs: LuabindAttrs) -> ECSWrapperCodes | None:
     wrapper_code = ECSWrapperCodes()
 
-    classname_with_namespaces = ""
-    if len(classinfo.namespaces) > 0:
-        classname_with_namespaces = "::{}::{}".format('::'.join(classinfo.namespaces), classinfo.name)
-    else:
-        classname_with_namespaces = "::{}".format(classinfo.name)
+    classname_with_namespaces = '::'.join(classinfo.namespaces) + '::' + classinfo.name
+    bind_name = classinfo.name if refl_attrs.change_name is None else refl_attrs.change_name
     if refl_attrs.is_nobind:
         return None
     if refl_attrs.is_component:
-        wrapper_code.querier_query = "DECL_QUERIER_QUERY({}, {})".format(classinfo.name, classname_with_namespaces)
-        wrapper_code.querier_get = "DECL_QUERIER_GET({}, {})".format(classinfo.name, classname_with_namespaces)
-        wrapper_code.querier_has = "DECL_QUERIER_HAS({}, {})".format(classinfo.name, classname_with_namespaces)
+        wrapper_code.querier_query = "DECL_QUERIER_QUERY({}, {})".format(bind_name, classname_with_namespaces)
+        wrapper_code.querier_get = "DECL_QUERIER_GET({}, {})".format(bind_name, classname_with_namespaces)
+        wrapper_code.querier_has = "DECL_QUERIER_HAS({}, {})".format(bind_name, classname_with_namespaces)
         wrapper_code.commands_add = "DECL_CMDS_ADD_COMP({})".format(classname_with_namespaces)
-        wrapper_code.commands_destroy = "DECL_CMDS_DESTROY_COMP({}, {})".format(classinfo.name, classname_with_namespaces)
+        wrapper_code.commands_destroy = "DECL_CMDS_DESTROY_COMP({}, {})".format(bind_name, classname_with_namespaces)
+        wrapper_code.querier_convenient_get = '''
+        if (id == ::ecs::IndexGetter::template Get<{}>()) {{
+            return sol::make_object(lua, std::ref(querier_.Get<{}>(entity)));
+        }}
+        '''.format(classname_with_namespaces, classname_with_namespaces)
     if refl_attrs.is_resources:
-        wrapper_code.resource_get = "DECL_RES_GET({}, {})".format(classinfo.name, classname_with_namespaces)
+        wrapper_code.resource_convenient_get = '''
+        if (id == ::ecs::IndexGetter::template Get<{}>()) {{
+            return sol::make_object(lua, std::ref(res_.Get<{}>()));
+        }}
+        '''.format(classname_with_namespaces, classname_with_namespaces)
 
     return wrapper_code
 
@@ -278,7 +287,30 @@ def GenerateComponentEnumCode(code_info: list[chp.CodeInfo]) -> str:
         for clazz in info.classes:
             attrs = ConvertLuabindAttr2ReflAttr(clazz.attributes, False)
             if attrs.is_component:
-                result += '\t\t{{ "{}", ::ecs::IndexGetter::Get<{}>() }},\n'.format(clazz.name, '::'.join(clazz.namespaces) + '::' + clazz.name);
+                result += '\t\t{{ "{}", ::ecs::IndexGetter::template Get<{}>() }},\n'.format(clazz.name, '::'.join(clazz.namespaces) + '::' + (clazz.name if attrs.change_name is None else attrs.change_name));
+    return result
+
+def GenerateResourceEnumCode(code_info: list[chp.CodeInfo]) -> str:
+    result = ""
+    for info in code_info:
+        for clazz in info.classes:
+            attrs = ConvertLuabindAttr2ReflAttr(clazz.attributes, False)
+            if attrs.is_resources:
+                result += '\t\t{{ "{}", ::ecs::IndexGetter::template Get<{}>() }},\n'.format(clazz.name, '::'.join(clazz.namespaces) + '::' + (clazz.name if attrs.change_name is None else attrs.change_name));
+    return result
+
+def GenerateLuaECSWrapper(code_info: list[chp.CodeInfo]) -> str:
+    result = ""
+    for info in code_info:
+        for clazz in info.classes:
+            attrs = ConvertLuabindAttr2ReflAttr(clazz.attributes, False)
+            clazz_name = clazz.name if attrs.change_name is None else attrs.change_name
+            if attrs.is_component:
+                result += '''
+    if id == Component.{} then
+        return self:Get{}()
+    end
+                '''.format(clazz_name, clazz_name)
     return result
 
 def tryCreateDir(dir: str):
@@ -340,11 +372,12 @@ if __name__ == '__main__':
     with open(output_dir + "ecs_wrapper.hpp", "w+") as f:
         template_code = template_code.replace('{{ DECL_ADD_COMP }}', ecs_wrapper_code.commands_add) \
                                      .replace('{{ DECL_DESTROY_COMP }}', ecs_wrapper_code.commands_destroy) \
-                                     .replace('{{ DECL_RES }}', ecs_wrapper_code.resource_get) \
+                                     .replace('{{ DECL_RES }}', ecs_wrapper_code.resource_convenient_get) \
                                      .replace('{{ DECL_QUERIER_QUERY }}', ecs_wrapper_code.querier_query) \
                                      .replace('{{ DECL_QUERIER_GET }}', ecs_wrapper_code.querier_get) \
                                      .replace('{{ DECL_QUERIER_HAS }}', ecs_wrapper_code.querier_has) \
-                                     .replace('{{ INCLUDE_FILES }}', all_include_file_str)
+                                     .replace('{{ INCLUDE_FILES }}', all_include_file_str) \
+                                     .replace('{{ DECL_QUERIER_CONVENIENCE_GET }}', ecs_wrapper_code.querier_convenient_get)
         f.write(template_code)   
 
     # generate ecs wrapper code
@@ -373,9 +406,14 @@ void BindLua(sol::state& lua) {{
     lua.new_enum<::ecs::ComponentID>("Component", {{
         {}
     }});
+
+    lua.new_enum<::ecs::ComponentID>("Resource", {{
+        {}
+    }});
 }}
 """
     enum_code = GenerateComponentEnumCode(codeinfos);
-    luabind_code = bind_code.format(all_include_file_str, luabind_code, enum_code)
+    res_code = GenerateResourceEnumCode(codeinfos);
+    luabind_code = bind_code.format(all_include_file_str, luabind_code, enum_code, res_code)
     with open(output_dir + "luabind.cpp", "w+") as f:
         f.write(luabind_code)

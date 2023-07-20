@@ -33,7 +33,6 @@ TEST_CASE("example") {
 
     // you don't need to do this usually, because system has the querier as parameter
     Querier querier(world);
-    querier.QueryByID(id);
 
     auto entities = querier.Query<Name>();
     REQUIRE(entities.size() == 1);

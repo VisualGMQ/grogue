@@ -166,26 +166,3 @@ struct BackpackUIPanelUpdateParam {
     } type;
     int value;
 };
-
-// reflect
-
-/*
-ReflRegist(
-    refl::Class<Material>("Material")
-        .Member(&Material::opaque, "opaque")
-        .Member(&Material::solid, "solid")
-        .Member(&Material::lumen, "lumen")
-)
-
-ReflRegist(
-    refl::Class<MonsterProperty>("MonsterProperty")
-    .Member(&MonsterProperty::hp, "hp")
-    .Member(&MonsterProperty::mp, "mp")
-    .Member(&MonsterProperty::strength, "strength")
-    .Member(&MonsterProperty::intelligence, "intelligence")
-    .Member(&MonsterProperty::outsight, "outsight")
-    .Member(&MonsterProperty::constitution, "constitution")
-    .Member(&MonsterProperty::agility, "agility")
-    .Member(&MonsterProperty::nutrition, "nutrition")
-);
-*/

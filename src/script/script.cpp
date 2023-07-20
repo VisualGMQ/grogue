@@ -6,7 +6,7 @@ extern void BindLua(sol::state&);
 
 Script Script::Create(LuaManager& mgr, const std::string& filename) {
     auto lua = mgr.CreateSolitary();
-    // lua.lua.do_string("package.path = package.path .. \";./resources/script/defs.lua\"");
+    lua.lua.do_string("package.path = package.path .. \";./resources/script/ecs.lua\"");
     lua.lua.do_string("Script = {}");
     BindLua(lua.lua);
     lua.lua.do_file(filename);

@@ -39,6 +39,14 @@ public:
         cmds_.DestroyComponentByID(entity, id);
     }
 
+    void SetResource(::ecs::ComponentID id, sol::object& res) {
+        cmds_.SetLuaResourceByID(id, res);
+    }
+
+    void RemoveResource(::ecs::ComponentID id) {
+        cmds_.RemoveLuaResource(id);
+    }
+
     DECL_CMDS_ADD_COMP(SolObject)
 
     {{ DECL_ADD_COMP }}
@@ -62,7 +70,17 @@ public:
     auto& Raw() { return res_; }
     auto& Raw() const { return res_; }
 
-    {{ DECL_RES }}
+    bool Has(::ecs::ComponentID id) const {
+        return res_.Has(id);
+    }
+
+    sol::object Get(::ecs::ComponentID id, sol::this_state s) {
+        sol::state_view lua(s);
+
+        {{ DECL_RES }}
+
+        return sol::make_object(lua, res_.GetLuaRes(id));
+    }
 
 private:
     ecs::Resources& res_;
@@ -71,7 +89,7 @@ private:
 #undef DECL_RES_GET
 
 #define DECL_QUERIER_GET(name, clazz) \
-auto& Get ## name (ecs::Entity entity) { \
+clazz& Get ## name (ecs::Entity entity) { \
     return querier_.Get<clazz>(entity); \
 }
 
@@ -89,6 +107,18 @@ public:
     bool Has(ecs::Entity entity, ecs::ComponentID id) {
         return querier_.HasByID(entity, id);
     }
+
+    sol::object Get(ecs::Entity entity, ecs::ComponentID id, sol::this_state s) {
+        sol::state_view lua(s);
+
+        {{ DECL_QUERIER_CONVENIENCE_GET }}
+
+        return GetLuaComponent(entity, id);
+    }
+
+    sol::object& GetLuaComponent(::ecs::Entity entity, ::ecs::ComponentID id) {
+		return querier_.GetLuaComponent(entity, id);
+	}
 
     DECL_QUERIER_GET(SolObject, SolObject)
 

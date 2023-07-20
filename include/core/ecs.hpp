@@ -48,7 +48,7 @@ struct ComponentSpawnHandler final {
 
     template <typename T>
     static const auto& GetSpawnInfo() {
-        return GetSpawnInfoByID(IndexGetter::Get<T>());
+        return GetSpawnInfoByID(IndexGetter::template Get<T>());
     }
 
     static const auto& GetSpawnInfoByID(ComponentID id) {
@@ -73,7 +73,7 @@ private:
     template <typename T>
     static auto regist() {
         ComponentSpawnHandler handler;
-        handler.index = IndexGetter::Get<T>();
+        handler.index = IndexGetter::template Get<T>();
         handler.create = [](void) -> void * { return new T; };
         handler.destroy = [](void *elem) { delete (T *)elem; };
         handler.assign = [](void *src, void* dst) { *((T *)dst) = std::move(*((T*)src)); };
@@ -374,15 +374,22 @@ public:
 
     template <typename T>
     bool Has() const {
-        auto index = IndexGetter::Get<T>();
-        auto it = world_.resources_.find(index);
-        return it != world_.resources_.end() && it->second.resource;
+        return Has(IndexGetter::template Get<T>());
     }
 
     template <typename T>
     T &Get() {
-        auto index = IndexGetter::Get<T>();
+        auto index = IndexGetter::template Get<T>();
         return *((T *)world_.resources_.at(index).resource);
+    }
+
+    bool Has(ecs::ComponentID index) const {
+        auto it = world_.resources_.find(index);
+        return it != world_.resources_.end() && it->second.resource;
+    }
+
+    sol::object& GetLuaRes(ecs::ComponentID index) {
+        return *((sol::object*)world_.resources_.at(index).resource);
     }
 
 private:
@@ -515,8 +522,12 @@ public:
 
     template <typename T>
     T &Get(Entity entity) {
-        auto index = IndexGetter::Get<T>();
+        auto index = IndexGetter::template Get<T>();
         return *((T *)world_.entities_[entity][index]);
+    }
+
+    sol::object& GetLuaComponent(Entity entity, ComponentID id) {
+        return *((sol::object*)world_.entities_[entity][id]);
     }
 
     bool Alive(Entity entity) {
@@ -578,7 +589,7 @@ private:
 
     template <typename T>
     bool queryExists(Entity entity) const {
-        auto index = IndexGetter::Get<T>();
+        auto index = IndexGetter::template Get<T>();
         auto &componentContainer = world_.entities_[entity];
         return componentContainer.find(index) != componentContainer.end();
     }
@@ -731,7 +742,7 @@ public:
 
     template <typename T>
     Commands &DestroyComponent(Entity entity) {
-        DestroyComponentByID(entity, IndexGetter::Get<T>());
+        DestroyComponentByID(entity, IndexGetter::template Get<T>());
         return *this;
     }
 
@@ -747,7 +758,7 @@ public:
 
     template <typename T>
     Commands &SetResource(T &&resource) {
-        auto index = IndexGetter::Get<T>();
+        auto index = IndexGetter::template Get<T>();
         if (auto it = world_.resources_.find(index);
             it != world_.resources_.end()) {
             assertm("resource already exists", it->second.resource);
@@ -763,11 +774,34 @@ public:
         return *this;
     }
 
+    Commands &SetLuaResourceByID(ecs::ComponentID index, sol::object& resource) {
+        if (auto it = world_.resources_.find(index);
+            it != world_.resources_.end()) {
+            assertm("resource already exists", it->second.resource);
+            it->second.resource = new sol::object(std::move(resource));
+        } else {
+            auto newIt = world_.resources_.insert_or_assign(
+                index,
+                World::ResourceInfo([](void *elem) { delete (sol::object*)elem; }));
+            newIt.first->second.resource =
+                new sol::object(std::move(resource));
+        }
+
+        return *this;
+    }
+
     template <typename T>
     Commands &RemoveResource() {
-        auto index = IndexGetter::Get<T>();
+        auto index = IndexGetter::template Get<T>();
         destroyResources_.push_back(
             ResourceDestroyInfo(index, [](void *elem) { delete (T *)elem; }));
+
+        return *this;
+    }
+
+    Commands &RemoveLuaResource(ComponentID index) {
+        destroyResources_.push_back(
+            ResourceDestroyInfo(index, [](void *elem) { delete (sol::object*)elem; }));
 
         return *this;
     }
@@ -861,7 +895,7 @@ private:
     void doSpawn(std::vector<ComponentSpawnInfo> &spawnInfo, T &&component,
                  Remains &&...remains) {
         ComponentSpawnInfo info;
-        info.id = IndexGetter::Get<T>();
+        info.id = IndexGetter::template Get<T>();
         info.getComponent = [=, c = std::move(component)]() mutable { return &c; };
         spawnInfo.push_back(info);
 
