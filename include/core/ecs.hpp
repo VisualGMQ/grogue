@@ -47,9 +47,7 @@ struct ComponentSpawnHandler final {
     DestroyFunc destroy;
 
     template <typename T>
-    static const auto& GetSpawnInfo() {
-        return GetSpawnInfoByID(IndexGetter::template Get<T>());
-    }
+    static const auto& GetSpawnInfo();
 
     static const auto& GetSpawnInfoByID(ComponentID id) {
         static ComponentSpawnHandler luaComponentHandler = {
@@ -106,6 +104,11 @@ public:
 private:
     inline static uint32_t curIdx_ = 0;
 };
+
+template <typename T>
+static const auto& ComponentSpawnHandler::GetSpawnInfo() {
+    return GetSpawnInfoByID(IndexGetter::template Get<T>());
+}
 
 template <typename T, typename = std::enable_if<std::is_integral_v<T>>>
 struct IDGenerator final {
