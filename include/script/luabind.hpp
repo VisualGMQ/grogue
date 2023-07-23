@@ -160,14 +160,14 @@ void _bindOneField(sol::usertype<T>& usertype, const std::tuple<Fields...>& fiel
     if constexpr (attr != _AttrType::NoBind) {
         // detect convertable name
         std::string_view name = field.name;
+        auto operatorName = _getOperatorLuaName(name, 1 /*, params::size != 0*/);
+        if (operatorName.has_value()) {
+            name = operatorName.value();
+        }
         if constexpr (!refl::IsOverloadFunctions<type>::value) {
             if constexpr (std::is_member_function_pointer_v<typename type::pointerType>) {
                 using params = typename type::params;
                 if constexpr (!_HasRValueRefParam<params>::value) {
-                    auto operatorName = _getOperatorLuaName(name, params::size != 0);
-                    if (operatorName.has_value()) {
-                        name = operatorName.value();
-                    }
                 }
             }
         }

@@ -1,4 +1,5 @@
-Config = {
+local _M =
+{
     actions = {
         -- some special key definitions for keyboard
         left = 'A',
@@ -16,3 +17,5 @@ Config = {
     ui_font = "font/PoppkornRegular.ttf",
     ui_font_size = 16,
 }
+
+return _M

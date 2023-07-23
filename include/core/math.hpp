@@ -46,14 +46,14 @@ float Length(const Vector2& v);
 //! @brief convert radians to degress
 //! @param radians 
 //! @return  degrees
-inline float [[refl, luabind]] Rad2Deg(float radians) {
+inline float [[luabind]] Rad2Deg(float radians) {
     return radians * 180.0 / PI;
 }
 
 //! @brief covert degress to radians
 //! @param degree 
 //! @return  radians
-inline float [[refl, luabind]] Deg2Rad(float degree) {
+inline float [[luabind]] Deg2Rad(float degree) {
     return degree * PI / 180.0;
 }
 
@@ -155,32 +155,32 @@ inline std::ostream& operator<<(std::ostream& stream, const Vector3& v) {
     return stream;
 }
 
-inline Vector3 [[refl, luabind]] Cross(const Vector3& v1, const Vector3& v2) {
+inline Vector3 [[luabind]] Cross(const Vector3& v1, const Vector3& v2) {
     return Vector3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z,
                    v1.x * v2.y - v1.y * v2.x);
 }
 
-inline float [[refl, luabind]] Dot(const Vector3& v1, const Vector3& v2) {
+inline float [[luabind]] Dot(const Vector3& v1, const Vector3& v2) {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
-inline float [[refl, luabind]] Distance(const Vector3& v1, const Vector3& v2) {
+inline float [[luabind]] Distance(const Vector3& v1, const Vector3& v2) {
     float dx = v1.x - v2.x;
     float dy = v1.y - v2.y;
     float dz = v1.z - v2.z;
     return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-inline float [[refl, luabind]] LengthSquare(const Vector3& v) {
+inline float [[luabind]] LengthSquare(const Vector3& v) {
     return Dot(v, v);
 }
 
-inline float [[refl, luabind]] Length(const Vector3& v) {
+inline float [[luabind]] Length(const Vector3& v) {
     return std::sqrt(LengthSquare(v));
 }
 
 //! @brief return a normalized vector. Don't change origin vector
-inline Vector3 [[refl, luabind]] Normalize(const Vector3& v) {
+inline Vector3 [[luabind]] Normalize(const Vector3& v) {
     float a = 1.0f / Length(v);
     return v * a;
 }
@@ -289,7 +289,7 @@ public:
 };
 
 //! @brief return a normalized vector. Don't change origin vector
-inline Vector2 [[refl, luabind]] Normalize(const Vector2& v) {
+inline Vector2 [[luabind]] Normalize(const Vector2& v) {
     float len = Length(v);
     if (FloatEq(len, 0)) {
         return Vector2::Zero;
@@ -307,25 +307,25 @@ inline std::ostream& operator<<(std::ostream& stream, const Vector2& v) {
     return stream;
 }
 
-inline float [[refl, luabind]] Cross(const Vector2& v1, const Vector2& v2) {
+inline float [[luabind]] Cross(const Vector2& v1, const Vector2& v2) {
     return v1.x * v2.y - v1.y * v2.x;
 }
 
-inline float [[refl, luabind]] Dot(const Vector2& v1, const Vector2& v2) {
+inline float [[luabind]] Dot(const Vector2& v1, const Vector2& v2) {
     return v1.x * v2.x + v1.y * v2.y;
 }
 
-inline float [[refl, luabind]] Distance(const Vector2& v1, const Vector2& v2) {
+inline float [[luabind]] Distance(const Vector2& v1, const Vector2& v2) {
     float dx = v1.x - v2.x;
     float dy = v1.y - v2.y;
     return std::sqrt(dx * dx + dy * dy);
 }
 
-inline float [[refl, luabind]] LengthSqrd(const Vector2& v) {
+inline float [[luabind]] LengthSqrd(const Vector2& v) {
     return Dot(v, v);
 }
 
-inline float [[refl, luabind]] Length(const Vector2& v) {
+inline float [[luabind]] Length(const Vector2& v) {
     return std::sqrt(LengthSqrd(v));
 }
 
@@ -428,18 +428,18 @@ private:
 //! @param v src vector
 //! @param radians angle in radians, in clockwise
 //! @return rotated vector
-inline Vector2 [[refl, luabind]] Rotate(const Vector2& v, float radians) {
+inline Vector2 [[luabind]] Rotate(const Vector2& v, float radians) {
     float c = std::cos(radians);
     float s = std::sin(radians);
 
     return Vector2(v.x * c - v.y * s, v.x * s + v.y * c);
 }
 
-inline Vector2 [[refl, luabind]] Scale(const Vector2& v, const Vector2& scale) {
+inline Vector2 [[luabind]] Scale(const Vector2& v, const Vector2& scale) {
     return Vector2(v.x * scale.x, v.y * scale.y);
 }
 
-inline Vector2 [[refl, luabind]] Translate(const Vector2& v, const Vector2& offset) {
+inline Vector2 [[luabind]] Translate(const Vector2& v, const Vector2& offset) {
     return Vector2(v.x + offset.x, v.y + offset.y);
 }
 

@@ -197,7 +197,7 @@ def ExtractGlobalFunction(node: clang.cindex.Cursor, namespaces: list[str], sour
     attributes = ParseAttrsFromSourceCode(node)
 
     # special ruler for global functions:
-    if 'refl' not in attributes or 'norefl' in attributes:
+    if 'luabind' not in attributes:
         return None
 
     name = node.spelling

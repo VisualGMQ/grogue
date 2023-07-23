@@ -2,7 +2,7 @@
 
 Window::Window(const std::string& title, uint32_t w, uint32_t h) {
     window_ = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
-                               SDL_WINDOWPOS_CENTERED, w, h, /*SDL_WINDOW_SHOWN*/ SDL_WINDOW_HIDDEN);
+                               SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN);
     Assert(window_ != nullptr, "window create failed");
 }
 

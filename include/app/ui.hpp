@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/pch.hpp"
-#include "app/ui.hpp"
 #include "app/renderer.hpp"
 #include "app/scene.hpp"
 #include "app/input.hpp"
@@ -35,8 +34,8 @@ struct [[refl, luabind(comp)]] Text final {
     ColorBundle color;
     math::Vector2 offset;
 
-    static Text Create(std::shared_ptr<TextTexture>&& texture, const ColorBundle& color, const math::Vector2& offset) {
-        return Text{std::move(texture), color, offset};
+    static Text Create(std::shared_ptr<TextTexture> texture, const ColorBundle& color, const math::Vector2& offset) {
+        return Text{texture, color, offset};
     }
 };
 

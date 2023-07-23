@@ -373,9 +373,6 @@ if __name__ == '__main__':
         template_code = template_code.replace('{{ DECL_ADD_COMP }}', ecs_wrapper_code.commands_add) \
                                      .replace('{{ DECL_DESTROY_COMP }}', ecs_wrapper_code.commands_destroy) \
                                      .replace('{{ DECL_RES }}', ecs_wrapper_code.resource_convenient_get) \
-                                     .replace('{{ DECL_QUERIER_QUERY }}', ecs_wrapper_code.querier_query) \
-                                     .replace('{{ DECL_QUERIER_GET }}', ecs_wrapper_code.querier_get) \
-                                     .replace('{{ DECL_QUERIER_HAS }}', ecs_wrapper_code.querier_has) \
                                      .replace('{{ INCLUDE_FILES }}', all_include_file_str) \
                                      .replace('{{ DECL_QUERIER_CONVENIENCE_GET }}', ecs_wrapper_code.querier_convenient_get)
         f.write(template_code)   
@@ -403,13 +400,16 @@ if __name__ == '__main__':
 void BindLua(sol::state& lua) {{
 {}
 
-    lua.new_enum<::ecs::ComponentID>("Component", {{
+    lua.new_enum<::ecs::ComponentID>("ComponentEnum", {{
         {}
     }});
 
-    lua.new_enum<::ecs::ComponentID>("Resource", {{
+    lua.new_enum<::ecs::ComponentID>("ResourceEnum", {{
         {}
     }});
+
+    luabind::BindClass<::KeyButton>(lua, "KeyButton");
+    luabind::BindClass<::MouseButton>(lua, "MouseButton");
 }}
 """
     enum_code = GenerateComponentEnumCode(codeinfos);

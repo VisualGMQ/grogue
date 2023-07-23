@@ -4,6 +4,7 @@
 #include "core/math.hpp"
 #include "core/ecs.hpp"
 #include "app/fwd.hpp"
+#include "core/refl.hpp"
 
 // copied from SDL_SCANCODE
 enum [[refl, luabind]] Key {
@@ -258,6 +259,10 @@ enum [[refl, luabind]] Key {
     KEY_NUM = 512,
 };
 
+inline Key [[luabind]]  GetKeyFromName(std::string_view name) {
+    return static_cast<Key>(SDL_GetScancodeFromName(name.data()));
+}
+
 template <typename T>
 struct Button {
     T btn;
@@ -271,6 +276,16 @@ struct Button {
 };
 
 using KeyButton = Button<Key>;
+
+ReflClass(KeyButton) {
+    Constructors();
+    Fields(
+        Field("IsPressed", &KeyButton::IsPressed),
+        Field("IsPressing", &KeyButton::IsPressing),
+        Field("IsReleased", &KeyButton::IsReleased),
+        Field("IsReleasing", &KeyButton::IsReleasing)
+    );
+};
 
 class [[refl, luabind(res)]] Keyboard {
 public:
@@ -286,6 +301,16 @@ private:
 };
 
 using MouseButton = Button<uint8_t>;
+
+ReflClass(MouseButton) {
+    Constructors();
+    Fields(
+        Field("IsPressed", &MouseButton::IsPressed),
+        Field("IsPressing", &MouseButton::IsPressing),
+        Field("IsReleased", &MouseButton::IsReleased),
+        Field("IsReleasing", &MouseButton::IsReleasing)
+    );
+};
 
 class [[refl, luabind(res)]] Mouse {
 public:

@@ -1,4 +1,3 @@
-./include/core/ecs.hpp
 ./include/core/log.hpp
 ./include/core/assert.hpp
 ./include/core/singleton.hpp

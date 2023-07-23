@@ -45,9 +45,9 @@ private:
 
 class [[refl, luabind(res)]] ImageManager final : public ResourceManager<Image> {
 public:
-    ImageManager(Renderer&);
+    [[luanobind]] ImageManager(Renderer&);
     ImageHandle Load(const std::string& filename);
-    std::unique_ptr<Image> CreateSolitary(SDL_Texture*);
+    [[luanobind]] std::unique_ptr<Image> CreateSolitary(SDL_Texture*);
 
 private:
     Renderer* renderer_;

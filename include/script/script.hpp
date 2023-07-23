@@ -8,6 +8,7 @@ struct Script final {
     std::shared_ptr<LuaScript> lua;
     bool work = true;
     bool inited = false;
+    sol::table script;
 
     static Script Create(LuaManager& mgr, const std::string& filename);
 };

@@ -36,8 +36,8 @@ enum [[refl]] ShapeType {
 };
 
 struct [[refl, luabind]] Shape {
-    Shape(physic::ShapeType type): type_(type) {}
-    Shape(physic::ShapeType type, const math::Vector2& offset): type_(type), offset(offset) {}
+    [[luanobind]] Shape(physic::ShapeType type): type_(type) {}
+    [[luanobind]] Shape(physic::ShapeType type, const math::Vector2& offset): type_(type), offset(offset) {}
     virtual ~Shape() = default;
 
     math::Vector2 GetCenter() const { return center; }
@@ -132,7 +132,7 @@ struct [[refl, luabind(comp)]] CollideShape final {
 
 using ForceGenerator = std::function<void(Particle&, TimeType)>;
 
-class Grid final {
+class [[refl, luabind]] Grid final {
 public:
     Grid(int cellW, int cellH, int col, int row)
         : grid_(col, row), cellW_(cellW), cellH_(cellH), maxW_(cellW * col), maxH_(cellH * row)  {

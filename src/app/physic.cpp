@@ -185,6 +185,12 @@ void UpdatePos2Entity(ecs::Commands&, ecs::Querier querier, ecs::Resources,
         auto& particle = querier.Get<Particle>(entity);
         updateOnePos(entity, querier, particle.pos);
     }
+
+    entities = querier.Query<ecs::With<RigidBody, ecs::Option<Transform>, ecs::Option<NodeTransform>>>();
+    for (auto entity : entities) {
+        auto& rigidBody = querier.Get<RigidBody>(entity);
+        updateOnePos(entity, querier, rigidBody.particle.pos);
+    }
 }
 
 void UpdatePos2Particle(ecs::Commands&, ecs::Querier querier, ecs::Resources,

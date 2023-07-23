@@ -6,28 +6,30 @@ extern void BindLua(sol::state&);
 
 Script Script::Create(LuaManager& mgr, const std::string& filename) {
     auto lua = mgr.CreateSolitary();
-    lua.lua.do_string("package.path = package.path .. \";./resources/script/ecs.lua\"");
-    lua.lua.do_string("Script = {}");
+    lua.lua.do_string("package.path = package.path .. \";./resources/script/?.lua\"");
     BindLua(lua.lua);
-    lua.lua.do_file(filename);
-    return std::move(Script{std::make_shared<LuaScript>(std::move(lua))});
+    sol::protected_function_result result = lua.lua.do_file(filename);
+    Script script;
+    if (result.valid()) {
+        script.script = std::move(result.get<sol::table>(0));
+    } else {
+        sol::error err = result;
+        LOGE("[Lua Error]: ", err.what());
+        script.lua->lua.do_string("debug.traceback()");
+    }
+    script.lua = std::make_shared<LuaScript>(std::move(lua));
+    return std::move(script);
 }
 
 void runOneScript(ecs::Entity entity, ecs::Commands& cmds, Script& script, ecs::Resources res, ecs::Querier querier, ecs::Events& events) {
     if (script.work) {
-        sol::table scriptTable = script.lua->lua["Script"];
-        if (!scriptTable.valid()) {
-            LOGW("[LuaScript Error]: your script don't has Script table");
-            return;
-        }
-
         ::ResourcesWrapper luaRes(res);
         ::CommandsWrapper luaCmds(cmds);
         ::QuerierWrapper luaQuerier(querier);
         ::EventsWrapper luaEvents(events);
         if (!script.inited) {
             script.inited = true;
-            auto func = scriptTable["Startup"];
+            auto func = script.script["Startup"];
             if (func.valid()) {
                 sol::protected_function f = func;
                 sol::protected_function_result result = f(entity, std::ref(luaCmds), std::ref(luaRes));
@@ -38,7 +40,7 @@ void runOneScript(ecs::Entity entity, ecs::Commands& cmds, Script& script, ecs::
                 }
             }
         }
-        auto func = scriptTable["Run"];
+        auto func = script.script["Run"];
         if (func.get_type() == sol::type::function) {
             sol::protected_function f = func;
             sol::protected_function_result result = f(entity, std::ref(luaCmds), std::ref(luaQuerier), std::ref(luaRes), std::ref(luaEvents));

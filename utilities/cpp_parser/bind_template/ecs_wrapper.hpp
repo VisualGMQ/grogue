@@ -16,8 +16,8 @@ namespace sol {
 using SolObject = sol::object;
 
 #define DECL_CMDS_ADD_COMP(clazz) \
-void AddComponent(ecs::Entity entity, ::ecs::ComponentID id, clazz & comp) { \
-    cmds_.AddComponentByID(entity, id, std::move(comp)); \
+void AddCppComponent(ecs::Entity entity, clazz & comp) { \
+    cmds_.AddComponent<clazz>(entity, std::move(comp)); \
 }
 
 class [[refl, luabind]] CommandsWrapper final {
@@ -47,7 +47,9 @@ public:
         cmds_.RemoveLuaResource(id);
     }
 
-    DECL_CMDS_ADD_COMP(SolObject)
+    void AddLuaComponent(ecs::Entity entity, ::ecs::ComponentID id, SolObject& comp) {
+        cmds_.AddComponentByID(entity, id, std::move(comp));
+    }
 
     {{ DECL_ADD_COMP }}
 
@@ -57,11 +59,6 @@ private:
 
 #undef DECL_CMDS_ADD_COMP
 
-
-#define DECL_RES_GET(name, clazz) \
-clazz& Get ## name () { \
-    return res_.Get<clazz>(); \
-}
 
 class [[refl, luabind]] ResourcesWrapper final {
 public:
@@ -85,13 +82,6 @@ public:
 private:
     ecs::Resources& res_;
 };
-
-#undef DECL_RES_GET
-
-#define DECL_QUERIER_GET(name, clazz) \
-clazz& Get ## name (ecs::Entity entity) { \
-    return querier_.Get<clazz>(entity); \
-}
 
 class [[refl, luabind]] QuerierWrapper final {
 public:
@@ -120,17 +110,9 @@ public:
 		return querier_.GetLuaComponent(entity, id);
 	}
 
-    DECL_QUERIER_GET(SolObject, SolObject)
-
-    {{ DECL_QUERIER_GET }}
-
 private:
     ecs::Querier& querier_;
 };
-
-#undef DECL_QUERIER_QUERY
-#undef DECL_QUERIER_GET
-#undef DECL_QUERIER_HAS
 
 class [[refl, luabind]] EventsWrapper final {
 public:

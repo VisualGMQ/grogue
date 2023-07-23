@@ -9,6 +9,7 @@
 #include <limits>
 
 #include "log.hpp"
+#include "assert.hpp"
 #include "sparse_sets.hpp"
 #include "sol/sol.hpp"
 
@@ -52,7 +53,7 @@ struct ComponentSpawnHandler final {
     static const auto& GetSpawnInfoByID(ComponentID id) {
         static ComponentSpawnHandler luaComponentHandler = {
             std::numeric_limits<ComponentID>::max(),
-            [](void *src, void* dst) { *((sol::object*)dst) = std::move(*((sol::object*)src)); },
+            [](void *src, void* dst) { *((sol::object*)dst) = std::move(*((sol::object*)src)); LOGT("sol::object assignment"); },
             [](void) -> void * { return new sol::object; },
             [](void *elem) { delete (sol::object*)elem; },
         };
@@ -316,8 +317,8 @@ private:
 
         Pool(CreateFunc create, DestroyFunc destroy)
             : create(create), destroy(destroy) {
-            assertm("you must give a non-nullptr create func", create);
-            assertm("you must give a non-nullptr destroy func", create);
+            Assert(create, "you must give a non-nullptr create func");
+            Assert(destroy, "you must give a non-nullptr destroy func");
         }
 
         void *Create() {
